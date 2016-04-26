@@ -26,11 +26,11 @@ pkg watch, method (*ResumeMarker) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg watch, method (*ResumeMarker) MakeVDLTarget() vdl.Target
 pkg watch, method (*ResumeMarker) VDLRead(vdl.Decoder) error
 pkg watch, method (*ResumeMarkerTarget) FromBytes([]byte, *vdl.Type) error
-pkg watch, method (Change) VDLIsZero() (bool, error)
+pkg watch, method (Change) VDLIsZero() bool
 pkg watch, method (Change) VDLWrite(vdl.Encoder) error
-pkg watch, method (GlobRequest) VDLIsZero() (bool, error)
+pkg watch, method (GlobRequest) VDLIsZero() bool
 pkg watch, method (GlobRequest) VDLWrite(vdl.Encoder) error
-pkg watch, method (ResumeMarker) VDLIsZero() (bool, error)
+pkg watch, method (ResumeMarker) VDLIsZero() bool
 pkg watch, method (ResumeMarker) VDLWrite(vdl.Encoder) error
 pkg watch, type Change struct
 pkg watch, type Change struct, Continued bool

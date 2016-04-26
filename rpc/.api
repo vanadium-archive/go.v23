@@ -36,9 +36,9 @@ pkg rpc, method (ListenSpec) Copy() ListenSpec
 pkg rpc, method (ListenSpec) String() string
 pkg rpc, method (PublisherEntry) String() string
 pkg rpc, method (PublisherState) String() string
-pkg rpc, method (Request) VDLIsZero() (bool, error)
+pkg rpc, method (Request) VDLIsZero() bool
 pkg rpc, method (Request) VDLWrite(vdl.Encoder) error
-pkg rpc, method (Response) VDLIsZero() (bool, error)
+pkg rpc, method (Response) VDLIsZero() bool
 pkg rpc, method (Response) VDLWrite(vdl.Encoder) error
 pkg rpc, method (ServerState) String() string
 pkg rpc, type AddressChooser interface { ChooseAddresses }
@@ -137,7 +137,7 @@ pkg rpc, type PublisherEntry struct, Server string
 pkg rpc, type PublisherEntry struct, TTL time.Duration
 pkg rpc, type PublisherState int
 pkg rpc, type Request struct
-pkg rpc, type Request struct, Deadline time.Deadline
+pkg rpc, type Request struct, Deadline vdltime.Deadline
 pkg rpc, type Request struct, EndStreamArgs bool
 pkg rpc, type Request struct, GrantedBlessings security.Blessings
 pkg rpc, type Request struct, Language string

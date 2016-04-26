@@ -331,8 +331,8 @@ func (t *Type) AssignableFrom(f *Value) bool {
 }
 
 // VDLIsZero returns true if t is nil or AnyType.
-func (t *Type) VDLIsZero() (bool, error) {
-	return t == nil || t == AnyType, nil
+func (t *Type) VDLIsZero() bool {
+	return t == nil || t == AnyType
 }
 
 // VDLWrite uses enc to encode type t.

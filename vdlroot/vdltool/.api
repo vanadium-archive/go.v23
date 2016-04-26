@@ -2,7 +2,20 @@ pkg vdltool, const GenLanguageGo GenLanguage
 pkg vdltool, const GenLanguageJava GenLanguage
 pkg vdltool, const GenLanguageJavascript GenLanguage
 pkg vdltool, const GenLanguageSwift GenLanguage
+pkg vdltool, const GoKindArray GoKind
+pkg vdltool, const GoKindBool GoKind
+pkg vdltool, const GoKindMap GoKind
+pkg vdltool, const GoKindNumber GoKind
+pkg vdltool, const GoKindPointer GoKind
+pkg vdltool, const GoKindSlice GoKind
+pkg vdltool, const GoKindString GoKind
+pkg vdltool, const GoKindStruct GoKind
+pkg vdltool, const GoZeroModeCanonical GoZeroMode
+pkg vdltool, const GoZeroModeUnique GoZeroMode
+pkg vdltool, const GoZeroModeUnknown GoZeroMode
 pkg vdltool, func GenLanguageFromString(string) (GenLanguage, error)
+pkg vdltool, func GoKindFromString(string) (GoKind, error)
+pkg vdltool, func GoZeroModeFromString(string) (GoZeroMode, error)
 pkg vdltool, method (*Config) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*Config) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*Config) VDLRead(vdl.Decoder) error
@@ -32,6 +45,11 @@ pkg vdltool, method (*GoImportTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*GoImportTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vdltool, method (*GoImportTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*GoImportTarget) ZeroField(string) error
+pkg vdltool, method (*GoKind) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vdltool, method (*GoKind) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoKind) Set(string) error
+pkg vdltool, method (*GoKind) VDLRead(vdl.Decoder) error
+pkg vdltool, method (*GoKindTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vdltool, method (*GoType) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*GoType) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*GoType) VDLRead(vdl.Decoder) error
@@ -40,6 +58,19 @@ pkg vdltool, method (*GoTypeTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*GoTypeTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vdltool, method (*GoTypeTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*GoTypeTarget) ZeroField(string) error
+pkg vdltool, method (*GoZero) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vdltool, method (*GoZero) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoZero) VDLRead(vdl.Decoder) error
+pkg vdltool, method (*GoZeroMode) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vdltool, method (*GoZeroMode) MakeVDLTarget() vdl.Target
+pkg vdltool, method (*GoZeroMode) Set(string) error
+pkg vdltool, method (*GoZeroMode) VDLRead(vdl.Decoder) error
+pkg vdltool, method (*GoZeroModeTarget) FromEnumLabel(string, *vdl.Type) error
+pkg vdltool, method (*GoZeroTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vdltool, method (*GoZeroTarget) FinishFields(vdl.FieldsTarget) error
+pkg vdltool, method (*GoZeroTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vdltool, method (*GoZeroTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vdltool, method (*GoZeroTarget) ZeroField(string) error
 pkg vdltool, method (*JavaConfig) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vdltool, method (*JavaConfig) MakeVDLTarget() vdl.Target
 pkg vdltool, method (*JavaConfig) VDLRead(vdl.Decoder) error
@@ -64,22 +95,30 @@ pkg vdltool, method (*SwiftConfigTarget) FinishFields(vdl.FieldsTarget) error
 pkg vdltool, method (*SwiftConfigTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vdltool, method (*SwiftConfigTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vdltool, method (*SwiftConfigTarget) ZeroField(string) error
-pkg vdltool, method (Config) VDLIsZero() (bool, error)
+pkg vdltool, method (Config) VDLIsZero() bool
 pkg vdltool, method (Config) VDLWrite(vdl.Encoder) error
 pkg vdltool, method (GenLanguage) String() string
-pkg vdltool, method (GenLanguage) VDLIsZero() (bool, error)
+pkg vdltool, method (GenLanguage) VDLIsZero() bool
 pkg vdltool, method (GenLanguage) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (GoConfig) VDLIsZero() (bool, error)
+pkg vdltool, method (GoConfig) VDLIsZero() bool
 pkg vdltool, method (GoConfig) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (GoImport) VDLIsZero() (bool, error)
+pkg vdltool, method (GoImport) VDLIsZero() bool
 pkg vdltool, method (GoImport) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (GoType) VDLIsZero() (bool, error)
+pkg vdltool, method (GoKind) String() string
+pkg vdltool, method (GoKind) VDLIsZero() bool
+pkg vdltool, method (GoKind) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (GoType) VDLIsZero() bool
 pkg vdltool, method (GoType) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (JavaConfig) VDLIsZero() (bool, error)
+pkg vdltool, method (GoZero) VDLIsZero() bool
+pkg vdltool, method (GoZero) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (GoZeroMode) String() string
+pkg vdltool, method (GoZeroMode) VDLIsZero() bool
+pkg vdltool, method (GoZeroMode) VDLWrite(vdl.Encoder) error
+pkg vdltool, method (JavaConfig) VDLIsZero() bool
 pkg vdltool, method (JavaConfig) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (JavascriptConfig) VDLIsZero() (bool, error)
+pkg vdltool, method (JavascriptConfig) VDLIsZero() bool
 pkg vdltool, method (JavascriptConfig) VDLWrite(vdl.Encoder) error
-pkg vdltool, method (SwiftConfig) VDLIsZero() (bool, error)
+pkg vdltool, method (SwiftConfig) VDLIsZero() bool
 pkg vdltool, method (SwiftConfig) VDLWrite(vdl.Encoder) error
 pkg vdltool, type Config struct
 pkg vdltool, type Config struct, GenLanguages map[GenLanguage]struct{}
@@ -108,13 +147,30 @@ pkg vdltool, type GoImportTarget struct
 pkg vdltool, type GoImportTarget struct, Value *GoImport
 pkg vdltool, type GoImportTarget struct, embedded vdl.FieldsTargetBase
 pkg vdltool, type GoImportTarget struct, embedded vdl.TargetBase
+pkg vdltool, type GoKind int
+pkg vdltool, type GoKindTarget struct
+pkg vdltool, type GoKindTarget struct, Value *GoKind
+pkg vdltool, type GoKindTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GoType struct
 pkg vdltool, type GoType struct, Imports []GoImport
+pkg vdltool, type GoType struct, Kind GoKind
 pkg vdltool, type GoType struct, Type string
+pkg vdltool, type GoType struct, Zero GoZero
 pkg vdltool, type GoTypeTarget struct
 pkg vdltool, type GoTypeTarget struct, Value *GoType
 pkg vdltool, type GoTypeTarget struct, embedded vdl.FieldsTargetBase
 pkg vdltool, type GoTypeTarget struct, embedded vdl.TargetBase
+pkg vdltool, type GoZero struct
+pkg vdltool, type GoZero struct, IsZero string
+pkg vdltool, type GoZero struct, Mode GoZeroMode
+pkg vdltool, type GoZeroMode int
+pkg vdltool, type GoZeroModeTarget struct
+pkg vdltool, type GoZeroModeTarget struct, Value *GoZeroMode
+pkg vdltool, type GoZeroModeTarget struct, embedded vdl.TargetBase
+pkg vdltool, type GoZeroTarget struct
+pkg vdltool, type GoZeroTarget struct, Value *GoZero
+pkg vdltool, type GoZeroTarget struct, embedded vdl.FieldsTargetBase
+pkg vdltool, type GoZeroTarget struct, embedded vdl.TargetBase
 pkg vdltool, type JavaConfig struct
 pkg vdltool, type JavaConfig struct, WireToNativeTypes map[string]string
 pkg vdltool, type JavaConfig struct, WireTypeRenames map[string]string
@@ -134,3 +190,5 @@ pkg vdltool, type SwiftConfigTarget struct, Value *SwiftConfig
 pkg vdltool, type SwiftConfigTarget struct, embedded vdl.FieldsTargetBase
 pkg vdltool, type SwiftConfigTarget struct, embedded vdl.TargetBase
 pkg vdltool, var GenLanguageAll [...]GenLanguage
+pkg vdltool, var GoKindAll [...]GoKind
+pkg vdltool, var GoZeroModeAll [...]GoZeroMode

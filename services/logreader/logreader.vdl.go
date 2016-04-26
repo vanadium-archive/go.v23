@@ -138,8 +138,8 @@ func (t *LogEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x LogEntry) VDLIsZero() (bool, error) {
-	return x == LogEntry{}, nil
+func (x LogEntry) VDLIsZero() bool {
+	return x == LogEntry{}
 }
 
 func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
@@ -150,7 +150,7 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Position"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(x.Position); err != nil {
@@ -164,7 +164,7 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Line"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Line); err != nil {

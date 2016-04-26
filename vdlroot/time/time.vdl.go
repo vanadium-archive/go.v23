@@ -150,8 +150,8 @@ func (t *DurationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Duration) VDLIsZero() (bool, error) {
-	return x == Duration{}, nil
+func (x Duration) VDLIsZero() bool {
+	return x == Duration{}
 }
 
 func (x Duration) VDLWrite(enc vdl.Encoder) error {
@@ -162,7 +162,7 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Seconds"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(x.Seconds); err != nil {
@@ -176,7 +176,7 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Nanos"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
@@ -370,8 +370,8 @@ func (t *TimeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Time) VDLIsZero() (bool, error) {
-	return x == Time{}, nil
+func (x Time) VDLIsZero() bool {
+	return x == Time{}
 }
 
 func (x Time) VDLWrite(enc vdl.Encoder) error {
@@ -382,7 +382,7 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Seconds"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(x.Seconds); err != nil {
@@ -396,7 +396,7 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Nanos"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
@@ -486,6 +486,9 @@ type WireDeadline struct {
 	FromNow time.Duration
 	// NoDeadline indicates there is no deadline; the analogous sentry for the
 	// native Deadline is the zero Time.
+	//
+	// TODO(toddw): This should be HasDeadline, since the zero value should
+	// represent "there is no deadline" rather than "the deadline is 0".
 	NoDeadline bool
 }
 
@@ -589,13 +592,7 @@ func (t *WireDeadlineTarget) FinishField(_, _ vdl.Target) error {
 func (t *WireDeadlineTarget) ZeroField(name string) error {
 	switch name {
 	case "FromNow":
-		t.wireValue.FromNow = func() time.Duration {
-			var native time.Duration
-			if err := vdl.Convert(&native, Duration{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.wireValue.FromNow = time.Duration(0)
 		return nil
 	case "NoDeadline":
 		t.wireValue.NoDeadline = false
@@ -612,33 +609,23 @@ func (t *WireDeadlineTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x WireDeadline) VDLIsZero() (bool, error) {
-	var wireFromNow Duration
-	if err := DurationFromNative(&wireFromNow, x.FromNow); err != nil {
-		return false, err
-	}
-	if wireFromNow != (Duration{}) {
-		return false, nil
-	}
-	if x.NoDeadline {
-		return false, nil
-	}
-	return true, nil
+func (x WireDeadline) VDLIsZero() bool {
+	return x == WireDeadline{}
 }
 
 func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*WireDeadline)(nil)).Elem()); err != nil {
 		return err
 	}
-	var wireFromNow Duration
-	if err := DurationFromNative(&wireFromNow, x.FromNow); err != nil {
-		return err
-	}
-	if wireFromNow != (Duration{}) {
+	if x.FromNow != time.Duration(0) {
 		if err := enc.NextField("FromNow"); err != nil {
 			return err
 		}
-		if err := wireFromNow.VDLWrite(enc); err != nil {
+		var wire Duration
+		if err := DurationFromNative(&wire, x.FromNow); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -646,7 +633,7 @@ func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("NoDeadline"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.NoDeadline); err != nil {

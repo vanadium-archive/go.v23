@@ -13,7 +13,7 @@ import (
 	"time"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
-	time_2 "v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -155,18 +155,14 @@ func (t *SignedFileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x SignedFile) VDLIsZero() (bool, error) {
+func (x SignedFile) VDLIsZero() bool {
 	if x.File != "" {
-		return false, nil
+		return false
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Signature.VDLIsZero() {
+		return false
 	}
-	if !isZeroSignature {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
@@ -177,7 +173,7 @@ func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("File"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.File); err != nil {
@@ -187,11 +183,7 @@ func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroSignature {
+	if !x.Signature.VDLIsZero() {
 		if err := enc.NextField("Signature"); err != nil {
 			return err
 		}
@@ -345,8 +337,8 @@ func (t *PackagesTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Packages) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x Packages) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x Packages) VDLWrite(enc vdl.Encoder) error {
@@ -360,7 +352,7 @@ func (x Packages) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -683,12 +675,12 @@ func (m *Envelope) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue37 time_2.Duration
-	if err := time_2.DurationFromNative(&wireValue37, m.RestartTimeWindow); err != nil {
+	var wireValue37 vdltime.Duration
+	if err := vdltime.DurationFromNative(&wireValue37, m.RestartTimeWindow); err != nil {
 		return err
 	}
 
-	var40 := (wireValue37 == time_2.Duration{})
+	var40 := (wireValue37 == vdltime.Duration{})
 	if var40 {
 		if err := fieldsTarget1.ZeroField("RestartTimeWindow"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -727,7 +719,7 @@ type EnvelopeTarget struct {
 	envTarget               vdl.StringSliceTarget
 	packagesTarget          PackagesTarget
 	restartsTarget          vdl.Int32Target
-	restartTimeWindowTarget time_2.DurationTarget
+	restartTimeWindowTarget vdltime.DurationTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -792,13 +784,7 @@ func (t *EnvelopeTarget) ZeroField(name string) error {
 		t.Value.Binary = SignedFile{}
 		return nil
 	case "Publisher":
-		t.Value.Publisher = func() security.Blessings {
-			var native security.Blessings
-			if err := vdl.Convert(&native, security.WireBlessings{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.Publisher = security.Blessings{}
 		return nil
 	case "Env":
 		t.Value.Env = []string(nil)
@@ -810,13 +796,7 @@ func (t *EnvelopeTarget) ZeroField(name string) error {
 		t.Value.Restarts = int32(0)
 		return nil
 	case "RestartTimeWindow":
-		t.Value.RestartTimeWindow = func() time.Duration {
-			var native time.Duration
-			if err := vdl.Convert(&native, time_2.Duration{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.RestartTimeWindow = time.Duration(0)
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/services/application.Envelope", name)
@@ -827,48 +807,32 @@ func (t *EnvelopeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Envelope) VDLIsZero() (bool, error) {
+func (x Envelope) VDLIsZero() bool {
 	if x.Title != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Args) != 0 {
-		return false, nil
+		return false
 	}
-	isZeroBinary, err := x.Binary.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Binary.VDLIsZero() {
+		return false
 	}
-	if !isZeroBinary {
-		return false, nil
-	}
-	var wirePublisher security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wirePublisher, x.Publisher); err != nil {
-		return false, err
-	}
-	isZeroPublisher, err := wirePublisher.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroPublisher {
-		return false, nil
+	if !x.Publisher.IsZero() {
+		return false
 	}
 	if len(x.Env) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.Packages) != 0 {
-		return false, nil
+		return false
 	}
 	if x.Restarts != 0 {
-		return false, nil
+		return false
 	}
-	var wireRestartTimeWindow time_2.Duration
-	if err := time_2.DurationFromNative(&wireRestartTimeWindow, x.RestartTimeWindow); err != nil {
-		return false, err
+	if x.RestartTimeWindow != time.Duration(0) {
+		return false
 	}
-	if wireRestartTimeWindow != (time_2.Duration{}) {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x Envelope) VDLWrite(enc vdl.Encoder) error {
@@ -879,7 +843,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Title"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Title); err != nil {
@@ -897,11 +861,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroBinary, err := x.Binary.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroBinary {
+	if !x.Binary.VDLIsZero() {
 		if err := enc.NextField("Binary"); err != nil {
 			return err
 		}
@@ -909,19 +869,15 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wirePublisher security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wirePublisher, x.Publisher); err != nil {
-		return err
-	}
-	isZeroPublisher, err := wirePublisher.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroPublisher {
+	if !x.Publisher.IsZero() {
 		if err := enc.NextField("Publisher"); err != nil {
 			return err
 		}
-		if err := wirePublisher.VDLWrite(enc); err != nil {
+		var wire security.WireBlessings
+		if err := security.WireBlessingsFromNative(&wire, x.Publisher); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -945,7 +901,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Restarts"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Restarts)); err != nil {
@@ -955,15 +911,15 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wireRestartTimeWindow time_2.Duration
-	if err := time_2.DurationFromNative(&wireRestartTimeWindow, x.RestartTimeWindow); err != nil {
-		return err
-	}
-	if wireRestartTimeWindow != (time_2.Duration{}) {
+	if x.RestartTimeWindow != time.Duration(0) {
 		if err := enc.NextField("RestartTimeWindow"); err != nil {
 			return err
 		}
-		if err := wireRestartTimeWindow.VDLWrite(enc); err != nil {
+		var wire vdltime.Duration
+		if err := vdltime.DurationFromNative(&wire, x.RestartTimeWindow); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -984,7 +940,7 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x[i]); err != nil {
@@ -1064,11 +1020,11 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "RestartTimeWindow":
-			var wire time_2.Duration
+			var wire vdltime.Duration
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time_2.DurationToNative(wire, &x.RestartTimeWindow); err != nil {
+			if err := vdltime.DurationToNative(wire, &x.RestartTimeWindow); err != nil {
 				return err
 			}
 		default:

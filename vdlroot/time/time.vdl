@@ -90,5 +90,8 @@ type WireDeadline struct {
 	FromNow Duration
 	// NoDeadline indicates there is no deadline; the analogous sentry for the
 	// native Deadline is the zero Time.
+	//
+	// TODO(toddw): This should be HasDeadline, since the zero value should
+	// represent "there is no deadline" rather than "the deadline is 0".
 	NoDeadline bool
 }

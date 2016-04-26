@@ -66,9 +66,16 @@ func (d Discharge) Expiry() time.Time {
 }
 
 // Equivalent returns true if 'd' and 'discharge' can be used interchangeably,
-// i.e., any authorizations that are enabled by 'd' will be enabled by 'discharge' and vice versa.
+// i.e. any authorizations that are enabled by 'd' will be enabled by
+// 'discharge' and vice versa.
 func (d Discharge) Equivalent(discharge Discharge) bool {
 	return reflect.DeepEqual(d, discharge)
+}
+
+// VDLIsZero implements the vdl.IsZeroer interface, and returns true if d
+// represents an empty discharge.
+func (d Discharge) VDLIsZero() bool {
+	return d.wire == nil || d.wire.VDLIsZero()
 }
 
 func WireDischargeToNative(wire WireDischarge, native *Discharge) error {

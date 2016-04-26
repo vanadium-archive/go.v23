@@ -10,7 +10,7 @@ pkg appcycle, method (*TaskTarget) FinishFields(vdl.FieldsTarget) error
 pkg appcycle, method (*TaskTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg appcycle, method (*TaskTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg appcycle, method (*TaskTarget) ZeroField(string) error
-pkg appcycle, method (Task) VDLIsZero() (bool, error)
+pkg appcycle, method (Task) VDLIsZero() bool
 pkg appcycle, method (Task) VDLWrite(vdl.Encoder) error
 pkg appcycle, type AppCycleClientMethods interface { ForceStop, Stop }
 pkg appcycle, type AppCycleClientMethods interface, ForceStop(*context.T, ...rpc.CallOpt) error

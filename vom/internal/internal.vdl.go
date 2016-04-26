@@ -185,8 +185,8 @@ func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x AddressInfo) VDLIsZero() (bool, error) {
-	return x == AddressInfo{}, nil
+func (x AddressInfo) VDLIsZero() bool {
+	return x == AddressInfo{}
 }
 
 func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
@@ -197,7 +197,7 @@ func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Street"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Street); err != nil {
@@ -211,7 +211,7 @@ func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("City"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.City); err != nil {
@@ -225,7 +225,7 @@ func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("State"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.State); err != nil {
@@ -239,7 +239,7 @@ func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Zip"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Zip); err != nil {
@@ -411,8 +411,8 @@ func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x CreditAgency) VDLIsZero() (bool, error) {
-	return x == CreditAgencyEquifax, nil
+func (x CreditAgency) VDLIsZero() bool {
+	return x == CreditAgencyEquifax
 }
 
 func (x CreditAgency) VDLWrite(enc vdl.Encoder) error {
@@ -519,8 +519,8 @@ func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x ExperianRating) VDLIsZero() (bool, error) {
-	return x == ExperianRatingGood, nil
+func (x ExperianRating) VDLIsZero() bool {
+	return x == ExperianRatingGood
 }
 
 func (x ExperianRating) VDLWrite(enc vdl.Encoder) error {
@@ -631,8 +631,8 @@ func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x EquifaxCreditReport) VDLIsZero() (bool, error) {
-	return x == EquifaxCreditReport{}, nil
+func (x EquifaxCreditReport) VDLIsZero() bool {
+	return x == EquifaxCreditReport{}
 }
 
 func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
@@ -643,7 +643,7 @@ func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Rating"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+		if err := enc.StartValue(vdl.ByteType); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(uint64(x.Rating)); err != nil {
@@ -780,8 +780,8 @@ func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x ExperianCreditReport) VDLIsZero() (bool, error) {
-	return x == ExperianCreditReport{}, nil
+func (x ExperianCreditReport) VDLIsZero() bool {
+	return x == ExperianCreditReport{}
 }
 
 func (x ExperianCreditReport) VDLWrite(enc vdl.Encoder) error {
@@ -914,8 +914,8 @@ func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x TransUnionCreditReport) VDLIsZero() (bool, error) {
-	return x == TransUnionCreditReport{}, nil
+func (x TransUnionCreditReport) VDLIsZero() bool {
+	return x == TransUnionCreditReport{}
 }
 
 func (x TransUnionCreditReport) VDLWrite(enc vdl.Encoder) error {
@@ -926,7 +926,7 @@ func (x TransUnionCreditReport) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Rating"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int16)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int16Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Rating)); err != nil {
@@ -990,7 +990,7 @@ type (
 		// __VDLReflect describes the AgencyReport union type.
 		__VDLReflect(__AgencyReportReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// AgencyReportEquifaxReport represents field EquifaxReport of the AgencyReport union type.
@@ -1164,16 +1164,16 @@ func (t agencyReportTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Ta
 	return nil, fmt.Errorf("got %T, want *AgencyReport", union)
 }
 
-func (x AgencyReportEquifaxReport) VDLIsZero() (bool, error) {
-	return x.Value == EquifaxCreditReport{}, nil
+func (x AgencyReportEquifaxReport) VDLIsZero() bool {
+	return x.Value == EquifaxCreditReport{}
 }
 
-func (x AgencyReportExperianReport) VDLIsZero() (bool, error) {
-	return false, nil
+func (x AgencyReportExperianReport) VDLIsZero() bool {
+	return false
 }
 
-func (x AgencyReportTransUnionReport) VDLIsZero() (bool, error) {
-	return false, nil
+func (x AgencyReportTransUnionReport) VDLIsZero() bool {
+	return false
 }
 
 func (x AgencyReportEquifaxReport) VDLWrite(enc vdl.Encoder) error {
@@ -1391,21 +1391,14 @@ func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x CreditReport) VDLIsZero() (bool, error) {
+func (x CreditReport) VDLIsZero() bool {
 	if x.Agency != CreditAgencyEquifax {
-		return false, nil
+		return false
 	}
-	var isZeroReport bool
-	if x.Report != nil {
-		var err error
-		if isZeroReport, err = x.Report.VDLIsZero(); err != nil {
-			return false, err
-		}
+	if x.Report != nil && !x.Report.VDLIsZero() {
+		return false
 	}
-	if x.Report != nil && !isZeroReport {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x CreditReport) VDLWrite(enc vdl.Encoder) error {
@@ -1420,14 +1413,7 @@ func (x CreditReport) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var isZeroReport bool
-	if x.Report != nil {
-		var err error
-		if isZeroReport, err = x.Report.VDLIsZero(); err != nil {
-			return err
-		}
-	}
-	if x.Report != nil && !isZeroReport {
+	if x.Report != nil && !x.Report.VDLIsZero() {
 		if err := enc.NextField("Report"); err != nil {
 			return err
 		}
@@ -1677,27 +1663,23 @@ func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Customer) VDLIsZero() (bool, error) {
+func (x Customer) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if x.Id != 0 {
-		return false, nil
+		return false
 	}
 	if x.Active {
-		return false, nil
+		return false
 	}
 	if x.Address != (AddressInfo{}) {
-		return false, nil
+		return false
 	}
-	isZeroCredit, err := x.Credit.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Credit.VDLIsZero() {
+		return false
 	}
-	if !isZeroCredit {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x Customer) VDLWrite(enc vdl.Encoder) error {
@@ -1708,7 +1690,7 @@ func (x Customer) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -1722,7 +1704,7 @@ func (x Customer) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Id"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(x.Id); err != nil {
@@ -1736,7 +1718,7 @@ func (x Customer) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Active"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.Active); err != nil {
@@ -1754,11 +1736,7 @@ func (x Customer) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroCredit, err := x.Credit.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroCredit {
+	if !x.Credit.VDLIsZero() {
 		if err := enc.NextField("Credit"); err != nil {
 			return err
 		}

@@ -144,8 +144,8 @@ func (t *TaskTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Task) VDLIsZero() (bool, error) {
-	return x == Task{}, nil
+func (x Task) VDLIsZero() bool {
+	return x == Task{}
 }
 
 func (x Task) VDLWrite(enc vdl.Encoder) error {
@@ -156,7 +156,7 @@ func (x Task) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Progress"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Progress)); err != nil {
@@ -170,7 +170,7 @@ func (x Task) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Goal"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.Goal)); err != nil {

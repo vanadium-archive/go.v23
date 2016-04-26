@@ -13,7 +13,7 @@ import (
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/vdlconv"
-	time_2 "v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -41,12 +41,12 @@ func (m *Annotation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	var wireValue2 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue2, m.When); err != nil {
+	var wireValue2 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue2, m.When); err != nil {
 		return err
 	}
 
-	var5 := (wireValue2 == time_2.Time{})
+	var5 := (wireValue2 == vdltime.Time{})
 	if var5 {
 		if err := fieldsTarget1.ZeroField("When"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -97,7 +97,7 @@ func (m *Annotation) MakeVDLTarget() vdl.Target {
 
 type AnnotationTarget struct {
 	Value         *Annotation
-	whenTarget    time_2.TimeTarget
+	whenTarget    vdltime.TimeTarget
 	messageTarget vdl.StringTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -130,13 +130,7 @@ func (t *AnnotationTarget) FinishField(_, _ vdl.Target) error {
 func (t *AnnotationTarget) ZeroField(name string) error {
 	switch name {
 	case "When":
-		t.Value.When = func() time.Time {
-			var native time.Time
-			if err := vdl.Convert(&native, time_2.Time{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.When = time.Time{}
 		return nil
 	case "Message":
 		t.Value.Message = ""
@@ -150,33 +144,29 @@ func (t *AnnotationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Annotation) VDLIsZero() (bool, error) {
-	var wireWhen time_2.Time
-	if err := time_2.TimeFromNative(&wireWhen, x.When); err != nil {
-		return false, err
-	}
-	if wireWhen != (time_2.Time{}) {
-		return false, nil
+func (x Annotation) VDLIsZero() bool {
+	if !x.When.IsZero() {
+		return false
 	}
 	if x.Message != "" {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Annotation) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*Annotation)(nil)).Elem()); err != nil {
 		return err
 	}
-	var wireWhen time_2.Time
-	if err := time_2.TimeFromNative(&wireWhen, x.When); err != nil {
-		return err
-	}
-	if wireWhen != (time_2.Time{}) {
+	if !x.When.IsZero() {
 		if err := enc.NextField("When"); err != nil {
 			return err
 		}
-		if err := wireWhen.VDLWrite(enc); err != nil {
+		var wire vdltime.Time
+		if err := vdltime.TimeFromNative(&wire, x.When); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -184,7 +174,7 @@ func (x Annotation) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Message"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Message); err != nil {
@@ -217,11 +207,11 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "When":
-			var wire time_2.Time
+			var wire vdltime.Time
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time_2.TimeToNative(wire, &x.When); err != nil {
+			if err := vdltime.TimeToNative(wire, &x.When); err != nil {
 				return err
 			}
 		case "Message":
@@ -323,12 +313,12 @@ func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue11 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue11, m.Start); err != nil {
+	var wireValue11 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue11, m.Start); err != nil {
 		return err
 	}
 
-	var14 := (wireValue11 == time_2.Time{})
+	var14 := (wireValue11 == vdltime.Time{})
 	if var14 {
 		if err := fieldsTarget1.ZeroField("Start"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -348,12 +338,12 @@ func (m *SpanRecord) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue15 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue15, m.End); err != nil {
+	var wireValue15 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue15, m.End); err != nil {
 		return err
 	}
 
-	var18 := (wireValue15 == time_2.Time{})
+	var18 := (wireValue15 == vdltime.Time{})
 	if var18 {
 		if err := fieldsTarget1.ZeroField("End"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -428,8 +418,8 @@ type SpanRecordTarget struct {
 	idTarget          uniqueid.IdTarget
 	parentTarget      uniqueid.IdTarget
 	nameTarget        vdl.StringTarget
-	startTarget       time_2.TimeTarget
-	endTarget         time_2.TimeTarget
+	startTarget       vdltime.TimeTarget
+	endTarget         vdltime.TimeTarget
 	annotationsTarget __VDLTarget1_list
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -487,22 +477,10 @@ func (t *SpanRecordTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Start":
-		t.Value.Start = func() time.Time {
-			var native time.Time
-			if err := vdl.Convert(&native, time_2.Time{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.Start = time.Time{}
 		return nil
 	case "End":
-		t.Value.End = func() time.Time {
-			var native time.Time
-			if err := vdl.Convert(&native, time_2.Time{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.End = time.Time{}
 		return nil
 	case "Annotations":
 		t.Value.Annotations = []Annotation(nil)
@@ -549,34 +527,26 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x SpanRecord) VDLIsZero() (bool, error) {
+func (x SpanRecord) VDLIsZero() bool {
 	if x.Id != (uniqueid.Id{}) {
-		return false, nil
+		return false
 	}
 	if x.Parent != (uniqueid.Id{}) {
-		return false, nil
+		return false
 	}
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
-	var wireStart time_2.Time
-	if err := time_2.TimeFromNative(&wireStart, x.Start); err != nil {
-		return false, err
+	if !x.Start.IsZero() {
+		return false
 	}
-	if wireStart != (time_2.Time{}) {
-		return false, nil
-	}
-	var wireEnd time_2.Time
-	if err := time_2.TimeFromNative(&wireEnd, x.End); err != nil {
-		return false, err
-	}
-	if wireEnd != (time_2.Time{}) {
-		return false, nil
+	if !x.End.IsZero() {
+		return false
 	}
 	if len(x.Annotations) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
@@ -603,7 +573,7 @@ func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -613,27 +583,27 @@ func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wireStart time_2.Time
-	if err := time_2.TimeFromNative(&wireStart, x.Start); err != nil {
-		return err
-	}
-	if wireStart != (time_2.Time{}) {
+	if !x.Start.IsZero() {
 		if err := enc.NextField("Start"); err != nil {
 			return err
 		}
-		if err := wireStart.VDLWrite(enc); err != nil {
+		var wire vdltime.Time
+		if err := vdltime.TimeFromNative(&wire, x.Start); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	var wireEnd time_2.Time
-	if err := time_2.TimeFromNative(&wireEnd, x.End); err != nil {
-		return err
-	}
-	if wireEnd != (time_2.Time{}) {
+	if !x.End.IsZero() {
 		if err := enc.NextField("End"); err != nil {
 			return err
 		}
-		if err := wireEnd.VDLWrite(enc); err != nil {
+		var wire vdltime.Time
+		if err := vdltime.TimeFromNative(&wire, x.End); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -708,19 +678,19 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Start":
-			var wire time_2.Time
+			var wire vdltime.Time
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time_2.TimeToNative(wire, &x.Start); err != nil {
+			if err := vdltime.TimeToNative(wire, &x.Start); err != nil {
 				return err
 			}
 		case "End":
-			var wire time_2.Time
+			var wire vdltime.Time
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time_2.TimeToNative(wire, &x.End); err != nil {
+			if err := vdltime.TimeToNative(wire, &x.End); err != nil {
 				return err
 			}
 		case "Annotations":
@@ -930,14 +900,14 @@ func (t *__VDLTarget2_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x TraceRecord) VDLIsZero() (bool, error) {
+func (x TraceRecord) VDLIsZero() bool {
 	if x.Id != (uniqueid.Id{}) {
-		return false, nil
+		return false
 	}
 	if len(x.Spans) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x TraceRecord) VDLWrite(enc vdl.Encoder) error {
@@ -1101,8 +1071,8 @@ func (t *TraceFlagsTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
-func (x TraceFlags) VDLIsZero() (bool, error) {
-	return x == 0, nil
+func (x TraceFlags) VDLIsZero() bool {
+	return x == 0
 }
 
 func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
@@ -1299,8 +1269,8 @@ func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Request) VDLIsZero() (bool, error) {
-	return x == Request{}, nil
+func (x Request) VDLIsZero() bool {
+	return x == Request{}
 }
 
 func (x Request) VDLWrite(enc vdl.Encoder) error {
@@ -1335,7 +1305,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("LogLevel"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.LogLevel)); err != nil {
@@ -1524,18 +1494,14 @@ func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Response) VDLIsZero() (bool, error) {
+func (x Response) VDLIsZero() bool {
 	if x.Flags != 0 {
-		return false, nil
+		return false
 	}
-	isZeroTrace, err := x.Trace.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Trace.VDLIsZero() {
+		return false
 	}
-	if !isZeroTrace {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x Response) VDLWrite(enc vdl.Encoder) error {
@@ -1550,11 +1516,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroTrace, err := x.Trace.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroTrace {
+	if !x.Trace.VDLIsZero() {
 		if err := enc.NextField("Trace"); err != nil {
 			return err
 		}

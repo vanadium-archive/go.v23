@@ -116,8 +116,8 @@ func (t *WireRetryCodeTarget) FromEnumLabel(src string, tt *Type) error {
 	return nil
 }
 
-func (x WireRetryCode) VDLIsZero() (bool, error) {
-	return x == WireRetryCodeNoRetry, nil
+func (x WireRetryCode) VDLIsZero() bool {
+	return x == WireRetryCodeNoRetry
 }
 
 func (x WireRetryCode) VDLWrite(enc Encoder) error {
@@ -370,20 +370,20 @@ func (t *__VDLTarget1_list) FinishList(elem ListTarget) error {
 	return nil
 }
 
-func (x WireError) VDLIsZero() (bool, error) {
+func (x WireError) VDLIsZero() bool {
 	if x.Id != "" {
-		return false, nil
+		return false
 	}
 	if x.RetryCode != WireRetryCodeNoRetry {
-		return false, nil
+		return false
 	}
 	if x.Msg != "" {
-		return false, nil
+		return false
 	}
 	if len(x.ParamList) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x WireError) VDLWrite(enc Encoder) error {
@@ -394,7 +394,7 @@ func (x WireError) VDLWrite(enc Encoder) error {
 		if err := enc.NextField("Id"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Id); err != nil {
@@ -416,7 +416,7 @@ func (x WireError) VDLWrite(enc Encoder) error {
 		if err := enc.NextField("Msg"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Msg); err != nil {
@@ -451,25 +451,14 @@ func __VDLWriteAnon_list_1(enc Encoder, x []*Value) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(AnyType); err != nil {
-			return err
-		}
-		switch {
-		case x[i] == nil:
+		if x[i] == nil {
 			if err := enc.NilValue(AnyType); err != nil {
 				return err
 			}
-		case x[i].IsNil():
-			if err := enc.NilValue(x[i].Type()); err != nil {
-				return err
-			}
-		default:
+		} else {
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {

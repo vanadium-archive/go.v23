@@ -51,8 +51,8 @@ func (t *AdIdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
-func (x AdId) VDLIsZero() (bool, error) {
-	return x == AdId{}, nil
+func (x AdId) VDLIsZero() bool {
+	return x == AdId{}
 }
 
 func (x AdId) VDLWrite(enc vdl.Encoder) error {
@@ -160,8 +160,8 @@ func (t *AttributesTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Attributes) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x Attributes) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x Attributes) VDLWrite(enc vdl.Encoder) error {
@@ -175,7 +175,7 @@ func (x Attributes) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -184,7 +184,7 @@ func (x Attributes) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.FinishValue(); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(elem); err != nil {
@@ -337,8 +337,8 @@ func (t *AttachmentsTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Attachments) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x Attachments) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x Attachments) VDLWrite(enc vdl.Encoder) error {
@@ -352,7 +352,7 @@ func (x Attachments) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -682,23 +682,23 @@ func (t *AdvertisementTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Advertisement) VDLIsZero() (bool, error) {
+func (x Advertisement) VDLIsZero() bool {
 	if x.Id != (AdId{}) {
-		return false, nil
+		return false
 	}
 	if x.InterfaceName != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Addresses) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.Attributes) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.Attachments) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
@@ -717,7 +717,7 @@ func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("InterfaceName"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.InterfaceName); err != nil {
@@ -768,7 +768,7 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x[i]); err != nil {

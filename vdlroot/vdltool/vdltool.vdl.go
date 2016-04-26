@@ -117,8 +117,8 @@ func (t *GenLanguageTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x GenLanguage) VDLIsZero() (bool, error) {
-	return x == GenLanguageGo, nil
+func (x GenLanguage) VDLIsZero() bool {
+	return x == GenLanguageGo
 }
 
 func (x GenLanguage) VDLWrite(enc vdl.Encoder) error {
@@ -132,6 +132,163 @@ func (x GenLanguage) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *GenLanguage) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err := x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
+// GoKind describes the kind of Go type.
+type GoKind int
+
+const (
+	GoKindStruct GoKind = iota
+	GoKindBool
+	GoKindNumber
+	GoKindString
+	GoKindArray
+	GoKindSlice
+	GoKindMap
+	GoKindPointer
+)
+
+// GoKindAll holds all labels for GoKind.
+var GoKindAll = [...]GoKind{GoKindStruct, GoKindBool, GoKindNumber, GoKindString, GoKindArray, GoKindSlice, GoKindMap, GoKindPointer}
+
+// GoKindFromString creates a GoKind from a string label.
+func GoKindFromString(label string) (x GoKind, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *GoKind) Set(label string) error {
+	switch label {
+	case "Struct", "struct":
+		*x = GoKindStruct
+		return nil
+	case "Bool", "bool":
+		*x = GoKindBool
+		return nil
+	case "Number", "number":
+		*x = GoKindNumber
+		return nil
+	case "String", "string":
+		*x = GoKindString
+		return nil
+	case "Array", "array":
+		*x = GoKindArray
+		return nil
+	case "Slice", "slice":
+		*x = GoKindSlice
+		return nil
+	case "Map", "map":
+		*x = GoKindMap
+		return nil
+	case "Pointer", "pointer":
+		*x = GoKindPointer
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in vdltool.GoKind", label)
+}
+
+// String returns the string label of x.
+func (x GoKind) String() string {
+	switch x {
+	case GoKindStruct:
+		return "Struct"
+	case GoKindBool:
+		return "Bool"
+	case GoKindNumber:
+		return "Number"
+	case GoKindString:
+		return "String"
+	case GoKindArray:
+		return "Array"
+	case GoKindSlice:
+		return "Slice"
+	case GoKindMap:
+		return "Map"
+	case GoKindPointer:
+		return "Pointer"
+	}
+	return ""
+}
+
+func (GoKind) __VDLReflect(struct {
+	Name string `vdl:"vdltool.GoKind"`
+	Enum struct{ Struct, Bool, Number, String, Array, Slice, Map, Pointer string }
+}) {
+}
+
+func (m *GoKind) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GoKind) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type GoKindTarget struct {
+	Value *GoKind
+	vdl.TargetBase
+}
+
+func (t *GoKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*GoKind)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Struct":
+		*t.Value = 0
+	case "Bool":
+		*t.Value = 1
+	case "Number":
+		*t.Value = 2
+	case "String":
+		*t.Value = 3
+	case "Array":
+		*t.Value = 4
+	case "Slice":
+		*t.Value = 5
+	case "Map":
+		*t.Value = 6
+	case "Pointer":
+		*t.Value = 7
+	default:
+		return fmt.Errorf("label %s not in enum GoKind", src)
+	}
+
+	return nil
+}
+
+func (x GoKind) VDLIsZero() bool {
+	return x == GoKindStruct
+}
+
+func (x GoKind) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoKind)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *GoKind) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -259,8 +416,8 @@ func (t *GoImportTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GoImport) VDLIsZero() (bool, error) {
-	return x == GoImport{}, nil
+func (x GoImport) VDLIsZero() bool {
+	return x == GoImport{}
 }
 
 func (x GoImport) VDLWrite(enc vdl.Encoder) error {
@@ -271,7 +428,7 @@ func (x GoImport) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Path"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Path); err != nil {
@@ -285,7 +442,7 @@ func (x GoImport) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -347,16 +504,346 @@ func (x *GoImport) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+// GoZeroMode describes the relationship between the Go zero value of the native
+// type, and the VDL zero value.
+type GoZeroMode int
+
+const (
+	GoZeroModeUnknown GoZeroMode = iota
+	GoZeroModeCanonical
+	GoZeroModeUnique
+)
+
+// GoZeroModeAll holds all labels for GoZeroMode.
+var GoZeroModeAll = [...]GoZeroMode{GoZeroModeUnknown, GoZeroModeCanonical, GoZeroModeUnique}
+
+// GoZeroModeFromString creates a GoZeroMode from a string label.
+func GoZeroModeFromString(label string) (x GoZeroMode, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *GoZeroMode) Set(label string) error {
+	switch label {
+	case "Unknown", "unknown":
+		*x = GoZeroModeUnknown
+		return nil
+	case "Canonical", "canonical":
+		*x = GoZeroModeCanonical
+		return nil
+	case "Unique", "unique":
+		*x = GoZeroModeUnique
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in vdltool.GoZeroMode", label)
+}
+
+// String returns the string label of x.
+func (x GoZeroMode) String() string {
+	switch x {
+	case GoZeroModeUnknown:
+		return "Unknown"
+	case GoZeroModeCanonical:
+		return "Canonical"
+	case GoZeroModeUnique:
+		return "Unique"
+	}
+	return ""
+}
+
+func (GoZeroMode) __VDLReflect(struct {
+	Name string `vdl:"vdltool.GoZeroMode"`
+	Enum struct{ Unknown, Canonical, Unique string }
+}) {
+}
+
+func (m *GoZeroMode) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GoZeroMode) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type GoZeroModeTarget struct {
+	Value *GoZeroMode
+	vdl.TargetBase
+}
+
+func (t *GoZeroModeTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*GoZeroMode)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "Unknown":
+		*t.Value = 0
+	case "Canonical":
+		*t.Value = 1
+	case "Unique":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum GoZeroMode", src)
+	}
+
+	return nil
+}
+
+func (x GoZeroMode) VDLIsZero() bool {
+	return x == GoZeroModeUnknown
+}
+
+func (x GoZeroMode) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoZeroMode)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *GoZeroMode) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err := x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
+// GoZero describes Go zero value behavior.
+//
+// REQUIRED: Either Mode == Unique or IsZero is set.  We will not perform
+// native/wire conversions to check zero values.
+type GoZero struct {
+	Mode GoZeroMode
+	// IsZero specifies a field, method or function that returns true iff the
+	// native value represents the VDL zero value.
+	//
+	// If IsZero starts with a dot (.), it is assumed to be a field or method.
+	// The field type or method return type must be bool.  Generated code will
+	// apply the IsZero string verbatim to expressions of the native type.
+	//
+	// If IsZero doesn't start with a dot(.), it is assumed to be a function whose
+	// return type must be bool.  Generated code will call the function with all
+	// occurrences of XXX replaced with an expression of the native type.
+	//
+	// TODO(toddw): The function form of IsZero isn't implemented, and also needs
+	// another field to handle imports:
+	//    IsZeroImports []GoImport
+	IsZero string
+}
+
+func (GoZero) __VDLReflect(struct {
+	Name string `vdl:"vdltool.GoZero"`
+}) {
+}
+
+func (m *GoZero) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	var4 := (m.Mode == GoZeroModeUnknown)
+	if var4 {
+		if err := fieldsTarget1.ZeroField("Mode"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Mode")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+
+			if err := m.Mode.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
+		}
+	}
+	var7 := (m.IsZero == "")
+	if var7 {
+		if err := fieldsTarget1.ZeroField("IsZero"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("IsZero")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget6.FromString(string(m.IsZero), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
+		}
+	}
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GoZero) MakeVDLTarget() vdl.Target {
+	return nil
+}
+
+type GoZeroTarget struct {
+	Value *GoZero
+
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *GoZeroTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*GoZero)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *GoZeroTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "Mode":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Mode))
+		return nil, target, err
+	case "IsZero":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.IsZero))
+		return nil, target, err
+	default:
+		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoZero", name)
+	}
+}
+func (t *GoZeroTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *GoZeroTarget) ZeroField(name string) error {
+	switch name {
+	case "Mode":
+		t.Value.Mode = GoZeroModeUnknown
+		return nil
+	case "IsZero":
+		t.Value.IsZero = ""
+		return nil
+	default:
+		return fmt.Errorf("field %s not in struct vdltool.GoZero", name)
+	}
+}
+func (t *GoZeroTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+func (x GoZero) VDLIsZero() bool {
+	return x == GoZero{}
+}
+
+func (x GoZero) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*GoZero)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Mode != GoZeroModeUnknown {
+		if err := enc.NextField("Mode"); err != nil {
+			return err
+		}
+		if err := x.Mode.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.IsZero != "" {
+		if err := enc.NextField("IsZero"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.IsZero); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *GoZero) VDLRead(dec vdl.Decoder) error {
+	*x = GoZero{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Mode":
+			if err := x.Mode.VDLRead(dec); err != nil {
+				return err
+			}
+		case "IsZero":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.IsZero, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // GoType describes the Go type information associated with a VDL type.
 // See v.io/x/ref/lib/vdl/testdata/native for examples.
 type GoType struct {
-	// Type is the Go type to use in generated code, instead of the VDL type.  If
-	// the Go type requires additional imports, specify the type using the
+	// Kind is the kind of Type.
+	Kind GoKind
+	// Type is the Go type to use in generated code, instead of the VDL type.
+	//
+	// If the Go type requires additional imports, specify the type using the
 	// standard local package name here, and also specify the import package in
-	// Imports.
+	// Imports.  E.g. to specify the native type time.Duration:
+	//   Kind:    Number
+	//   Type:    "time.Duration",
+	//   Imports: {{Path: "time", Name: "time"}},
+	//   Zero:    {Mode: Unique}
 	Type string
-	// Imports are the Go imports to use in generated code, required by the Type.
+	// Imports are the Go imports required by the Type, used in generated code.
 	Imports []GoImport
+	// Zero specifies special behavior for zero value setting and checking.
+	Zero GoZero
 }
 
 func (GoType) __VDLReflect(struct {
@@ -369,18 +856,19 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	var4 := (m.Type == "")
+	var4 := (m.Kind == GoKindStruct)
 	if var4 {
-		if err := fieldsTarget1.ZeroField("Type"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("Kind"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Type")
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Kind")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget3.FromString(string(m.Type), tt.NonOptional().Field(0).Type); err != nil {
+
+			if err := m.Kind.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -388,42 +876,81 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var7 bool
-	if len(m.Imports) == 0 {
-		var7 = true
-	}
+	var7 := (m.Type == "")
 	if var7 {
+		if err := fieldsTarget1.ZeroField("Type"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Type")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget6.FromString(string(m.Type), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
+		}
+	}
+	var var10 bool
+	if len(m.Imports) == 0 {
+		var10 = true
+	}
+	if var10 {
 		if err := fieldsTarget1.ZeroField("Imports"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Imports")
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Imports")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Imports))
+			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(2).Type, len(m.Imports))
 			if err != nil {
 				return err
 			}
-			for i, elem10 := range m.Imports {
-				elemTarget9, err := listTarget8.StartElem(i)
+			for i, elem13 := range m.Imports {
+				elemTarget12, err := listTarget11.StartElem(i)
 				if err != nil {
 					return err
 				}
 
-				if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
+				if err := elem13.FillVDLTarget(elemTarget12, tt.NonOptional().Field(2).Type.Elem()); err != nil {
 					return err
 				}
-				if err := listTarget8.FinishElem(elemTarget9); err != nil {
+				if err := listTarget11.FinishElem(elemTarget12); err != nil {
 					return err
 				}
 			}
-			if err := fieldTarget6.FinishList(listTarget8); err != nil {
+			if err := fieldTarget9.FinishList(listTarget11); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+				return err
+			}
+		}
+	}
+	var16 := (m.Zero == GoZero{})
+	if var16 {
+		if err := fieldsTarget1.ZeroField("Zero"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Zero")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+
+			if err := m.Zero.FillVDLTarget(fieldTarget15, tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
 				return err
 			}
 		}
@@ -454,11 +981,17 @@ func (t *GoTypeTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 }
 func (t *GoTypeTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
+	case "Kind":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Kind))
+		return nil, target, err
 	case "Type":
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Type))
 		return nil, target, err
 	case "Imports":
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Imports))
+		return nil, target, err
+	case "Zero":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Zero))
 		return nil, target, err
 	default:
 		return nil, nil, fmt.Errorf("field %s not in struct vdltool.GoType", name)
@@ -469,11 +1002,17 @@ func (t *GoTypeTarget) FinishField(_, _ vdl.Target) error {
 }
 func (t *GoTypeTarget) ZeroField(name string) error {
 	switch name {
+	case "Kind":
+		t.Value.Kind = GoKindStruct
+		return nil
 	case "Type":
 		t.Value.Type = ""
 		return nil
 	case "Imports":
 		t.Value.Imports = []GoImport(nil)
+		return nil
+	case "Zero":
+		t.Value.Zero = GoZero{}
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct vdltool.GoType", name)
@@ -484,25 +1023,39 @@ func (t *GoTypeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GoType) VDLIsZero() (bool, error) {
+func (x GoType) VDLIsZero() bool {
+	if x.Kind != GoKindStruct {
+		return false
+	}
 	if x.Type != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Imports) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	if x.Zero != (GoZero{}) {
+		return false
+	}
+	return true
 }
 
 func (x GoType) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*GoType)(nil)).Elem()); err != nil {
 		return err
 	}
+	if x.Kind != GoKindStruct {
+		if err := enc.NextField("Kind"); err != nil {
+			return err
+		}
+		if err := x.Kind.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
 	if x.Type != "" {
 		if err := enc.NextField("Type"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Type); err != nil {
@@ -517,6 +1070,14 @@ func (x GoType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.Imports); err != nil {
+			return err
+		}
+	}
+	if x.Zero != (GoZero{}) {
+		if err := enc.NextField("Zero"); err != nil {
+			return err
+		}
+		if err := x.Zero.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -563,6 +1124,10 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 		switch f {
 		case "":
 			return dec.FinishValue()
+		case "Kind":
+			if err := x.Kind.VDLRead(dec); err != nil {
+				return err
+			}
 		case "Type":
 			if err := dec.StartValue(); err != nil {
 				return err
@@ -576,6 +1141,10 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 			}
 		case "Imports":
 			if err := __VDLReadAnon_list_1(dec, &x.Imports); err != nil {
+				return err
+			}
+		case "Zero":
+			if err := x.Zero.VDLRead(dec); err != nil {
 				return err
 			}
 		default:
@@ -747,11 +1316,11 @@ func (t *GoConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GoConfig) VDLIsZero() (bool, error) {
+func (x GoConfig) VDLIsZero() bool {
 	if len(x.WireToNativeTypes) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x GoConfig) VDLWrite(enc vdl.Encoder) error {
@@ -783,7 +1352,7 @@ func __VDLWriteAnon_map_2(enc vdl.Encoder, x map[string]GoType) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -1069,14 +1638,14 @@ func (t *JavaConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x JavaConfig) VDLIsZero() (bool, error) {
+func (x JavaConfig) VDLIsZero() bool {
 	if len(x.WireToNativeTypes) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.WireTypeRenames) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x JavaConfig) VDLWrite(enc vdl.Encoder) error {
@@ -1116,7 +1685,7 @@ func __VDLWriteAnon_map_3(enc vdl.Encoder, x map[string]string) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -1125,7 +1694,7 @@ func __VDLWriteAnon_map_3(enc vdl.Encoder, x map[string]string) error {
 		if err := enc.FinishValue(); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(elem); err != nil {
@@ -1282,8 +1851,8 @@ func (t *JavascriptConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x JavascriptConfig) VDLIsZero() (bool, error) {
-	return x == JavascriptConfig{}, nil
+func (x JavascriptConfig) VDLIsZero() bool {
+	return x == JavascriptConfig{}
 }
 
 func (x JavascriptConfig) VDLWrite(enc vdl.Encoder) error {
@@ -1467,11 +2036,11 @@ func (t *SwiftConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x SwiftConfig) VDLIsZero() (bool, error) {
+func (x SwiftConfig) VDLIsZero() bool {
 	if len(x.WireToNativeTypes) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x SwiftConfig) VDLWrite(enc vdl.Encoder) error {
@@ -1759,35 +2328,23 @@ func (t *ConfigTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Config) VDLIsZero() (bool, error) {
+func (x Config) VDLIsZero() bool {
 	if len(x.GenLanguages) != 0 {
-		return false, nil
+		return false
 	}
-	isZeroGo, err := x.Go.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Go.VDLIsZero() {
+		return false
 	}
-	if !isZeroGo {
-		return false, nil
-	}
-	isZeroJava, err := x.Java.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroJava {
-		return false, nil
+	if !x.Java.VDLIsZero() {
+		return false
 	}
 	if x.Javascript != (JavascriptConfig{}) {
-		return false, nil
+		return false
 	}
-	isZeroSwift, err := x.Swift.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Swift.VDLIsZero() {
+		return false
 	}
-	if !isZeroSwift {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x Config) VDLWrite(enc vdl.Encoder) error {
@@ -1802,11 +2359,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroGo, err := x.Go.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroGo {
+	if !x.Go.VDLIsZero() {
 		if err := enc.NextField("Go"); err != nil {
 			return err
 		}
@@ -1814,11 +2367,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroJava, err := x.Java.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroJava {
+	if !x.Java.VDLIsZero() {
 		if err := enc.NextField("Java"); err != nil {
 			return err
 		}
@@ -1834,11 +2383,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroSwift, err := x.Swift.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroSwift {
+	if !x.Swift.VDLIsZero() {
 		if err := enc.NextField("Swift"); err != nil {
 			return err
 		}
@@ -1972,7 +2517,10 @@ func __VDLInit() struct{} {
 
 	// Register types.
 	vdl.Register((*GenLanguage)(nil))
+	vdl.Register((*GoKind)(nil))
 	vdl.Register((*GoImport)(nil))
+	vdl.Register((*GoZeroMode)(nil))
+	vdl.Register((*GoZero)(nil))
 	vdl.Register((*GoType)(nil))
 	vdl.Register((*GoConfig)(nil))
 	vdl.Register((*JavaConfig)(nil))

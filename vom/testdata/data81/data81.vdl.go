@@ -1758,7 +1758,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(bool)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*bool)(nil))),
+		Value:      vdl.ValueOf(vdl.BoolType),
 		TypeString: "typeobject",
 		Hex:        "811c010100",
 		HexVersion: "81",
@@ -1766,7 +1766,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(uint16)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*uint16)(nil))),
+		Value:      vdl.ValueOf(vdl.Uint16Type),
 		TypeString: "typeobject",
 		Hex:        "811c010400",
 		HexVersion: "81",
@@ -1774,7 +1774,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(uint32)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*uint32)(nil))),
+		Value:      vdl.ValueOf(vdl.Uint32Type),
 		TypeString: "typeobject",
 		Hex:        "811c010500",
 		HexVersion: "81",
@@ -1782,7 +1782,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(uint64)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*uint64)(nil))),
+		Value:      vdl.ValueOf(vdl.Uint64Type),
 		TypeString: "typeobject",
 		Hex:        "811c010600",
 		HexVersion: "81",
@@ -1790,7 +1790,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int16)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int16)(nil))),
+		Value:      vdl.ValueOf(vdl.Int16Type),
 		TypeString: "typeobject",
 		Hex:        "811c010700",
 		HexVersion: "81",
@@ -1798,7 +1798,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int32)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int32)(nil))),
+		Value:      vdl.ValueOf(vdl.Int32Type),
 		TypeString: "typeobject",
 		Hex:        "811c010800",
 		HexVersion: "81",
@@ -1806,7 +1806,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int64)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int64)(nil))),
+		Value:      vdl.ValueOf(vdl.Int64Type),
 		TypeString: "typeobject",
 		Hex:        "811c010900",
 		HexVersion: "81",
@@ -1814,7 +1814,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int16)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int16)(nil))),
+		Value:      vdl.ValueOf(vdl.Int16Type),
 		TypeString: "typeobject",
 		Hex:        "811c010700",
 		HexVersion: "81",
@@ -1822,7 +1822,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int32)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int32)(nil))),
+		Value:      vdl.ValueOf(vdl.Int32Type),
 		TypeString: "typeobject",
 		Hex:        "811c010800",
 		HexVersion: "81",
@@ -1830,7 +1830,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int64)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int64)(nil))),
+		Value:      vdl.ValueOf(vdl.Int64Type),
 		TypeString: "typeobject",
 		Hex:        "811c010900",
 		HexVersion: "81",
@@ -1838,7 +1838,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(float32)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*float32)(nil))),
+		Value:      vdl.ValueOf(vdl.Float32Type),
 		TypeString: "typeobject",
 		Hex:        "811c010a00",
 		HexVersion: "81",
@@ -1846,7 +1846,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(float64)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*float64)(nil))),
+		Value:      vdl.ValueOf(vdl.Float64Type),
 		TypeString: "typeobject",
 		Hex:        "811c010b00",
 		HexVersion: "81",
@@ -2027,7 +2027,7 @@ var Tests = []types.TestCase{
 		Name: "[]typeobject{typeobject(any), typeobject(bool)}",
 		Value: vdl.ValueOf([]*vdl.Type{
 			vdl.AnyType,
-			vdl.TypeOf((*bool)(nil)),
+			vdl.BoolType,
 		}),
 		TypeString: "[]typeobject",
 		Hex:        "81510403010ee152020f0103020001",
@@ -2562,7 +2562,7 @@ var Tests = []types.TestCase{
 	{
 		Name: "types.StructAny{Any: typeobject(bool)}",
 		Value: vdl.ValueOf(types.StructAny{
-			Any: vdl.ValueOf(vdl.TypeOf((*bool)(nil))),
+			Any: vdl.ValueOf(vdl.BoolType),
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.StructAny struct{Any any}",
 		Hex:        "815133060025762e696f2f7632332f766f6d2f74657374646174612f74797065732e537472756374416e7901010003416e79010fe1e152020e0101010500000001e1",
@@ -2940,7 +2940,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(bool)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*bool)(nil))),
+		Value:      vdl.ValueOf(vdl.BoolType),
 		TypeString: "typeobject",
 		Hex:        "811c010100",
 		HexVersion: "81",
@@ -2997,7 +2997,7 @@ var Tests = []types.TestCase{
 				A: true,
 			},
 			NUnion:     types.NUnionA{true},
-			TypeObject: vdl.TypeOf((*bool)(nil)),
+			TypeObject: vdl.BoolType,
 		}),
 		TypeString: "v.io/v23/vom/testdata/types.StructManyTypes struct{Bool bool;AByte byte;Int16 int16;Int32 int32;Int64 int64;Uint16 uint16;Uint32 uint32;Uint64 uint64;String string;Bytes []byte;Float32 float32;Float64 float64;FoodEnum v.io/v23/vom/testdata/types.FoodEnum enum{Bean;Brie;Cherry};NEnum v.io/v23/vom/testdata/types.NEnum enum{A;B;C};NListUint64 v.io/v23/vom/testdata/types.NListUint64 []uint64;NByteArray v.io/v23/vom/testdata/types.NByteArray [4]byte;NArray2Uint64 v.io/v23/vom/testdata/types.NArray2Uint64 [2]uint64;NSetUint64 v.io/v23/vom/testdata/types.NSetUint64 set[uint64];NMapUint64String v.io/v23/vom/testdata/types.NMapUint64String map[uint64]string;NStruct v.io/v23/vom/testdata/types.NStruct struct{A bool;B string;C int64};NUnion v.io/v23/vom/testdata/types.NUnion union{A bool;B string;C int64};TypeObject typeobject}",
 		Hex:        "81533b010024762e696f2f7632332f766f6d2f74657374646174612f74797065732e466f6f64456e756d0103044265616e044272696506436865727279e1552d010021762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e456e756d0103014101420143e1572d030027762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4c69737455696e7436340106e1592e020026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e42797465417272617901020204e15b31020029762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e41727261793255696e74363401060202e15d2c040026762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53657455696e7436340106e15f3405002c762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e4d617055696e743634537472696e6701060203e1613b060023762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e53747275637401030001410101e10001420103e10001430109e1e1633a070022762e696f2f7632332f766f6d2f74657374646174612f74797065732e4e556e696f6e01030001410101e10001420103e10001430109e1e151fe014206002b762e696f2f7632332f766f6d2f74657374646174612f74797065732e5374727563744d616e79547970657301160004426f6f6c0101e1000541427974650102e10005496e7431360107e10005496e7433320108e10005496e7436340109e1000655696e7431360104e1000655696e7433320105e1000655696e7436340106e10006537472696e670103e1000542797465730127e10007466c6f61743332010ae10007466c6f61743634010be10008466f6f64456e756d012ae100054e456e756d012be1000b4e4c69737455696e743634012ce1000a4e427974654172726179012de1000d4e41727261793255696e743634012ee1000a4e53657455696e743634012fe100104e4d617055696e743634537472696e670130e100074e5374727563740131e100064e556e696f6e0132e1000a547970654f626a656374010ee1e15201013f000101010202030204020501060107010801410901410afef03f0bfef03f0c020e01010f0041626364100000011101011201010141130001e11400011500e1",
@@ -3110,7 +3110,7 @@ var Tests = []types.TestCase{
 	},
 	{
 		Name:       "typeobject(int8)",
-		Value:      vdl.ValueOf(vdl.TypeOf((*int8)(nil))),
+		Value:      vdl.ValueOf(vdl.Int8Type),
 		TypeString: "typeobject",
 		Hex:        "811c011000",
 		HexVersion: "81",
@@ -3149,7 +3149,7 @@ var Tests = []types.TestCase{
 // types from different CompatibleTypeSets are incompatible.
 var CompatTests = map[string][]*vdl.Type{
 	"bool": {
-		vdl.TypeOf((*bool)(nil)),
+		vdl.BoolType,
 		vdl.TypeOf((*types.NBool)(nil)),
 		vdl.TypeOf((*types.MBool)(nil)),
 	},
@@ -3173,14 +3173,14 @@ var CompatTests = map[string][]*vdl.Type{
 		vdl.TypeOf((*types.NListUint64)(nil)),
 	},
 	"number": {
-		vdl.TypeOf((*uint16)(nil)),
-		vdl.TypeOf((*uint32)(nil)),
-		vdl.TypeOf((*uint64)(nil)),
-		vdl.TypeOf((*int16)(nil)),
-		vdl.TypeOf((*int32)(nil)),
-		vdl.TypeOf((*int64)(nil)),
-		vdl.TypeOf((*float32)(nil)),
-		vdl.TypeOf((*float64)(nil)),
+		vdl.Uint16Type,
+		vdl.Uint32Type,
+		vdl.Uint64Type,
+		vdl.Int16Type,
+		vdl.Int32Type,
+		vdl.Int64Type,
+		vdl.Float32Type,
+		vdl.Float64Type,
 		vdl.TypeOf((*types.NUint16)(nil)),
 		vdl.TypeOf((*types.NUint32)(nil)),
 		vdl.TypeOf((*types.NUint64)(nil)),
@@ -3197,7 +3197,7 @@ var CompatTests = map[string][]*vdl.Type{
 		vdl.TypeOf((*types.Array4String)(nil)),
 	},
 	"string/[]byte/enum": {
-		vdl.TypeOf((*string)(nil)),
+		vdl.StringType,
 		vdl.TypeOf((*types.NString)(nil)),
 		vdl.TypeOf((*[]byte)(nil)),
 		vdl.TypeOf((*types.NByteSlice)(nil)),
@@ -3276,7 +3276,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 	"bool": {
 		{
 			Name:        "bool",
-			PrimaryType: vdl.TypeOf((*bool)(nil)),
+			PrimaryType: vdl.BoolType,
 			Values: []*vdl.Value{
 				vdl.ValueOf(true),
 				vdl.ValueOf(types.NBool(true)),
@@ -3287,7 +3287,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 	"number": {
 		{
 			Name:        "byte",
-			PrimaryType: vdl.TypeOf((*byte)(nil)),
+			PrimaryType: vdl.ByteType,
 			Values: []*vdl.Value{
 				vdl.ValueOf(byte(3)),
 				vdl.ValueOf(uint16(3)),
@@ -3298,7 +3298,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 		},
 		{
 			Name:        "uint16",
-			PrimaryType: vdl.TypeOf((*uint16)(nil)),
+			PrimaryType: vdl.Uint16Type,
 			Values: []*vdl.Value{
 				vdl.ValueOf(uint16(256)),
 				vdl.ValueOf(int32(256)),
@@ -3308,7 +3308,7 @@ var ConvertTests = map[string][]types.ConvertGroup{
 		},
 		{
 			Name:        "int32",
-			PrimaryType: vdl.TypeOf((*int32)(nil)),
+			PrimaryType: vdl.Int32Type,
 			Values: []*vdl.Value{
 				vdl.ValueOf(int32(-5)),
 				vdl.ValueOf(float64(-5)),
@@ -3317,14 +3317,14 @@ var ConvertTests = map[string][]types.ConvertGroup{
 		},
 		{
 			Name:        "float64",
-			PrimaryType: vdl.TypeOf((*float64)(nil)),
+			PrimaryType: vdl.Float64Type,
 			Values: []*vdl.Value{
 				vdl.ValueOf(float64(3.3)),
 			},
 		},
 		{
 			Name:        "int64",
-			PrimaryType: vdl.TypeOf((*int64)(nil)),
+			PrimaryType: vdl.Int64Type,
 			Values: []*vdl.Value{
 				vdl.ValueOf(int64(-9223372036854775808)),
 			},

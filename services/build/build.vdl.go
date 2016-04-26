@@ -112,8 +112,8 @@ func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Architecture) VDLIsZero() (bool, error) {
-	return x == ArchitectureAmd64, nil
+func (x Architecture) VDLIsZero() bool {
+	return x == ArchitectureAmd64
 }
 
 func (x Architecture) VDLWrite(enc vdl.Encoder) error {
@@ -229,8 +229,8 @@ func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Format) VDLIsZero() (bool, error) {
-	return x == FormatElf, nil
+func (x Format) VDLIsZero() bool {
+	return x == FormatElf
 }
 
 func (x Format) VDLWrite(enc vdl.Encoder) error {
@@ -354,8 +354,8 @@ func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x OperatingSystem) VDLIsZero() (bool, error) {
-	return x == OperatingSystemDarwin, nil
+func (x OperatingSystem) VDLIsZero() bool {
+	return x == OperatingSystemDarwin
 }
 
 func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
@@ -499,14 +499,14 @@ func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x File) VDLIsZero() (bool, error) {
+func (x File) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Contents) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x File) VDLWrite(enc vdl.Encoder) error {
@@ -517,7 +517,7 @@ func (x File) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {

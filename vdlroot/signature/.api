@@ -40,13 +40,13 @@ pkg signature, method (*MethodTarget) FinishFields(vdl.FieldsTarget) error
 pkg signature, method (*MethodTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg signature, method (*MethodTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg signature, method (*MethodTarget) ZeroField(string) error
-pkg signature, method (Arg) VDLIsZero() (bool, error)
+pkg signature, method (Arg) VDLIsZero() bool
 pkg signature, method (Arg) VDLWrite(vdl.Encoder) error
-pkg signature, method (Embed) VDLIsZero() (bool, error)
+pkg signature, method (Embed) VDLIsZero() bool
 pkg signature, method (Embed) VDLWrite(vdl.Encoder) error
-pkg signature, method (Interface) VDLIsZero() (bool, error)
+pkg signature, method (Interface) VDLIsZero() bool
 pkg signature, method (Interface) VDLWrite(vdl.Encoder) error
-pkg signature, method (Method) VDLIsZero() (bool, error)
+pkg signature, method (Method) VDLIsZero() bool
 pkg signature, method (Method) VDLWrite(vdl.Encoder) error
 pkg signature, method (SortableMethods) Len() int
 pkg signature, method (SortableMethods) Less(int, int) bool

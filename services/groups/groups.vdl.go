@@ -64,8 +64,8 @@ func (t *BlessingPatternChunkTarget) FromString(src string, tt *vdl.Type) error 
 	return nil
 }
 
-func (x BlessingPatternChunk) VDLIsZero() (bool, error) {
-	return x == "", nil
+func (x BlessingPatternChunk) VDLIsZero() bool {
+	return x == ""
 }
 
 func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
@@ -146,8 +146,8 @@ func (t *GetRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GetRequest) VDLIsZero() (bool, error) {
-	return x == GetRequest{}, nil
+func (x GetRequest) VDLIsZero() bool {
+	return x == GetRequest{}
 }
 
 func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
@@ -324,11 +324,11 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-func (x GetResponse) VDLIsZero() (bool, error) {
+func (x GetResponse) VDLIsZero() bool {
 	if len(x.Entries) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
@@ -515,8 +515,8 @@ func (t *ApproximationTypeTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	return nil
 }
 
-func (x ApproximationType) VDLIsZero() (bool, error) {
-	return x == ApproximationTypeUnder, nil
+func (x ApproximationType) VDLIsZero() bool {
+	return x == ApproximationTypeUnder
 }
 
 func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
@@ -657,8 +657,8 @@ func (t *ApproximationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Approximation) VDLIsZero() (bool, error) {
-	return x == Approximation{}, nil
+func (x Approximation) VDLIsZero() bool {
+	return x == Approximation{}
 }
 
 func (x Approximation) VDLWrite(enc vdl.Encoder) error {
@@ -669,7 +669,7 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Reason"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Reason); err != nil {
@@ -683,7 +683,7 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Details"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Details); err != nil {

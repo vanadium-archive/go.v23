@@ -71,19 +71,19 @@ pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, 
 pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg syncbase, method (*ValueTarget) ZeroField(string) error
 pkg syncbase, method (*WatchChange) Value(interface{}) error
-pkg syncbase, method (Conflict) VDLIsZero() (bool, error)
+pkg syncbase, method (Conflict) VDLIsZero() bool
 pkg syncbase, method (Conflict) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (ConflictRow) VDLIsZero() (bool, error)
+pkg syncbase, method (ConflictRow) VDLIsZero() bool
 pkg syncbase, method (ConflictRow) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (ConflictRowSet) VDLIsZero() (bool, error)
+pkg syncbase, method (ConflictRowSet) VDLIsZero() bool
 pkg syncbase, method (ConflictRowSet) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (ConflictScanSet) VDLIsZero() (bool, error)
+pkg syncbase, method (ConflictScanSet) VDLIsZero() bool
 pkg syncbase, method (ConflictScanSet) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (Resolution) VDLIsZero() (bool, error)
+pkg syncbase, method (Resolution) VDLIsZero() bool
 pkg syncbase, method (Resolution) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (ResolvedRow) VDLIsZero() (bool, error)
+pkg syncbase, method (ResolvedRow) VDLIsZero() bool
 pkg syncbase, method (ResolvedRow) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (Value) VDLIsZero() (bool, error)
+pkg syncbase, method (Value) VDLIsZero() bool
 pkg syncbase, method (Value) VDLWrite(vdl.Encoder) error
 pkg syncbase, type BatchDatabase interface { Abort, Collection, CollectionForId, Commit, Exec, FullName, GetResumeMarker, Id, ListCollections }
 pkg syncbase, type BatchDatabase interface, Abort(*context.T) error

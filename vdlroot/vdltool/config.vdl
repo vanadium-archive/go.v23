@@ -59,13 +59,35 @@ type GoConfig struct {
 // GoType describes the Go type information associated with a VDL type.
 // See v.io/x/ref/lib/vdl/testdata/native for examples.
 type GoType struct {
-	// Type is the Go type to use in generated code, instead of the VDL type.  If
-	// the Go type requires additional imports, specify the type using the
+	// Kind is the kind of Type.
+	Kind GoKind
+	// Type is the Go type to use in generated code, instead of the VDL type.
+	//
+	// If the Go type requires additional imports, specify the type using the
 	// standard local package name here, and also specify the import package in
-	// Imports.
+	// Imports.  E.g. to specify the native type time.Duration:
+	//   Kind:    Number
+	//   Type:    "time.Duration",
+	//   Imports: {{Path: "time", Name: "time"}},
+	//   Zero:    {Mode: Unique}
 	Type string
-	// Imports are the Go imports to use in generated code, required by the Type.
+	// Imports are the Go imports required by the Type, used in generated code.
 	Imports []GoImport
+	// Zero specifies special behavior for zero value setting and checking.
+	Zero GoZero
+}
+
+// GoKind describes the kind of Go type.
+type GoKind enum {
+	Struct
+	Bool
+	Number
+	String
+	Array
+	Slice
+	Map
+	Pointer
+	// TODO(toddw): Support native interfaces?
 }
 
 // GoImport describes Go import information.
@@ -76,6 +98,60 @@ type GoImport struct {
 	// it is typically just the basename of Path, but may be set to something
 	// different if the imported package doesn't follow Go conventions.
 	Name string
+}
+
+// GoZero describes Go zero value behavior.
+//
+// REQUIRED: Either Mode == Unique or IsZero is set.  We will not perform
+// native/wire conversions to check zero values.
+type GoZero struct {
+	Mode GoZeroMode
+	// IsZero specifies a field, method or function that returns true iff the
+	// native value represents the VDL zero value.
+	//
+	// If IsZero starts with a dot (.), it is assumed to be a field or method.
+	// The field type or method return type must be bool.  Generated code will
+	// apply the IsZero string verbatim to expressions of the native type.
+	//
+	// If IsZero doesn't start with a dot(.), it is assumed to be a function whose
+	// return type must be bool.  Generated code will call the function with all
+	// occurrences of XXX replaced with an expression of the native type.
+	//
+	// TODO(toddw): The function form of IsZero isn't implemented, and also needs
+	// another field to handle imports:
+	//    IsZeroImports []GoImport
+	IsZero string
+	// TODO(toddw): Add a SetZero field, which is like IsZero, but returns an
+	// expression that sets the zero value.  It also needs a []GoImport field to
+	// handle imports.
+}
+
+// GoZeroMode describes the relationship between the Go zero value of the native
+// type, and the VDL zero value.
+type GoZeroMode enum {
+	// Unknown specifies that the Go zero value does not represent the VDL zero
+	// value.  This is the default.
+	//
+	// In this mode we generate slow code to perform native/wire conversions for
+	// setting zero values.  To check zero values we require that the IsZero
+	// field, method or function is set.
+	Unknown
+	// Canonical specifies that the Go zero value of the native type is the
+	// canonical representation of the VDL zero value, but is not the only zero
+	// value representation.  E.g. the zero value of native time.Time is the
+	// canonical representation of zero, but isn't the only zero since zeros also
+	// exist for different locations.
+	//
+	// In this mode we generate fast code for setting zero values.  To check zero
+	// values we require that the IsZero field, method or function is set.
+	Canonical
+	// Unique specifies that the Go zero value of the native type is the only
+	// representation of the VDL zero value.  E.g. the zero value of time.Duration
+	// (which has base type int64) is the only representation of zero.
+	//
+	// In this mode we generate fast code for both setting and checking zero
+	// values.
+	Unique
 }
 
 // JavaConfig specifies java specific configuration.

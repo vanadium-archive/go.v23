@@ -66,8 +66,8 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Tag) VDLIsZero() (bool, error) {
-	return x == "", nil
+func (x Tag) VDLIsZero() bool {
+	return x == ""
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {

@@ -11,7 +11,7 @@ pkg logreader, method (*LogEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget
 pkg logreader, method (*LogEntryTarget) ZeroField(string) error
 pkg logreader, method (*LogFileReadLogServerCallStub) Init(rpc.StreamServerCall)
 pkg logreader, method (*LogFileReadLogServerCallStub) SendStream() interface {  Send(item LogEntry) error;}
-pkg logreader, method (LogEntry) VDLIsZero() (bool, error)
+pkg logreader, method (LogEntry) VDLIsZero() bool
 pkg logreader, method (LogEntry) VDLWrite(vdl.Encoder) error
 pkg logreader, type LogEntry struct
 pkg logreader, type LogEntry struct, Line string

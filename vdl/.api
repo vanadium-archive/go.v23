@@ -321,7 +321,7 @@ pkg vdl, method (*Type) NonOptional() *Type
 pkg vdl, method (*Type) NumEnumLabel() int
 pkg vdl, method (*Type) NumField() int
 pkg vdl, method (*Type) String() string
-pkg vdl, method (*Type) VDLIsZero() (bool, error)
+pkg vdl, method (*Type) VDLIsZero() bool
 pkg vdl, method (*Type) VDLWrite(Encoder) error
 pkg vdl, method (*Type) Walk(WalkMode, func(*Type) bool) bool
 pkg vdl, method (*TypeBuilder) Array() PendingArray
@@ -449,7 +449,7 @@ pkg vdl, method (*Value) TypeObject() *Type
 pkg vdl, method (*Value) Uint() uint64
 pkg vdl, method (*Value) UnionField() (int, *Value)
 pkg vdl, method (*Value) VDLEqual(interface{}) bool
-pkg vdl, method (*Value) VDLIsZero() (bool, error)
+pkg vdl, method (*Value) VDLIsZero() bool
 pkg vdl, method (*Value) VDLRead(Decoder) error
 pkg vdl, method (*Value) VDLWrite(Encoder) error
 pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
@@ -500,10 +500,10 @@ pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (Kind) BitLen() int
 pkg vdl, method (Kind) String() string
-pkg vdl, method (WireError) VDLIsZero() (bool, error)
+pkg vdl, method (WireError) VDLIsZero() bool
 pkg vdl, method (WireError) VDLWrite(Encoder) error
 pkg vdl, method (WireRetryCode) String() string
-pkg vdl, method (WireRetryCode) VDLIsZero() (bool, error)
+pkg vdl, method (WireRetryCode) VDLIsZero() bool
 pkg vdl, method (WireRetryCode) VDLWrite(Encoder) error
 pkg vdl, type BoolTarget struct
 pkg vdl, type BoolTarget struct, Value *bool
@@ -579,7 +579,7 @@ pkg vdl, type Int8Target struct
 pkg vdl, type Int8Target struct, Value *int8
 pkg vdl, type Int8Target struct, embedded TargetBase
 pkg vdl, type IsZeroer interface { VDLIsZero }
-pkg vdl, type IsZeroer interface, VDLIsZero() (bool, error)
+pkg vdl, type IsZeroer interface, VDLIsZero() bool
 pkg vdl, type Kind int
 pkg vdl, type ListTarget interface { FinishElem, StartElem }
 pkg vdl, type ListTarget interface, FinishElem(Target) error

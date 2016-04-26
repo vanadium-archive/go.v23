@@ -107,8 +107,8 @@ func (t *ControlKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x ControlKind) VDLIsZero() (bool, error) {
-	return x == ControlKindNil, nil
+func (x ControlKind) VDLIsZero() bool {
+	return x == ControlKindNil
 }
 
 func (x ControlKind) VDLWrite(enc vdl.Encoder) error {
@@ -150,7 +150,7 @@ type (
 		// __VDLReflect describes the Primitive union type.
 		__VDLReflect(__PrimitiveReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// PrimitivePBool represents field PBool of the Primitive union type.
@@ -478,32 +478,32 @@ func (t primitiveTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Targe
 	return nil, fmt.Errorf("got %T, want *Primitive", union)
 }
 
-func (x PrimitivePBool) VDLIsZero() (bool, error) {
-	return !x.Value, nil
+func (x PrimitivePBool) VDLIsZero() bool {
+	return !x.Value
 }
 
-func (x PrimitivePByte) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePByte) VDLIsZero() bool {
+	return false
 }
 
-func (x PrimitivePUint) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePUint) VDLIsZero() bool {
+	return false
 }
 
-func (x PrimitivePInt) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePInt) VDLIsZero() bool {
+	return false
 }
 
-func (x PrimitivePFloat) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePFloat) VDLIsZero() bool {
+	return false
 }
 
-func (x PrimitivePString) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePString) VDLIsZero() bool {
+	return false
 }
 
-func (x PrimitivePControl) VDLIsZero() (bool, error) {
-	return false, nil
+func (x PrimitivePControl) VDLIsZero() bool {
+	return false
 }
 
 func (x PrimitivePBool) VDLWrite(enc vdl.Encoder) error {
@@ -513,7 +513,7 @@ func (x PrimitivePBool) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PBool"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+	if err := enc.StartValue(vdl.BoolType); err != nil {
 		return err
 	}
 	if err := enc.EncodeBool(x.Value); err != nil {
@@ -535,7 +535,7 @@ func (x PrimitivePByte) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PByte"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*byte)(nil))); err != nil {
+	if err := enc.StartValue(vdl.ByteType); err != nil {
 		return err
 	}
 	if err := enc.EncodeUint(uint64(x.Value)); err != nil {
@@ -557,7 +557,7 @@ func (x PrimitivePUint) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PUint"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+	if err := enc.StartValue(vdl.Uint64Type); err != nil {
 		return err
 	}
 	if err := enc.EncodeUint(x.Value); err != nil {
@@ -579,7 +579,7 @@ func (x PrimitivePInt) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PInt"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+	if err := enc.StartValue(vdl.Int64Type); err != nil {
 		return err
 	}
 	if err := enc.EncodeInt(x.Value); err != nil {
@@ -601,7 +601,7 @@ func (x PrimitivePFloat) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PFloat"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+	if err := enc.StartValue(vdl.Float64Type); err != nil {
 		return err
 	}
 	if err := enc.EncodeFloat(x.Value); err != nil {
@@ -623,7 +623,7 @@ func (x PrimitivePString) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("PString"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+	if err := enc.StartValue(vdl.StringType); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.Value); err != nil {
@@ -950,8 +950,8 @@ func (t *DumpKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x DumpKind) VDLIsZero() (bool, error) {
-	return x == DumpKindVersion, nil
+func (x DumpKind) VDLIsZero() bool {
+	return x == DumpKindVersion
 }
 
 func (x DumpKind) VDLWrite(enc vdl.Encoder) error {
@@ -1163,27 +1163,20 @@ func (t *DumpAtomTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x DumpAtom) VDLIsZero() (bool, error) {
+func (x DumpAtom) VDLIsZero() bool {
 	if x.Kind != DumpKindVersion {
-		return false, nil
+		return false
 	}
 	if len(x.Bytes) != 0 {
-		return false, nil
+		return false
 	}
-	var isZeroData bool
-	if x.Data != nil {
-		var err error
-		if isZeroData, err = x.Data.VDLIsZero(); err != nil {
-			return false, err
-		}
-	}
-	if x.Data != nil && !isZeroData {
-		return false, nil
+	if x.Data != nil && !x.Data.VDLIsZero() {
+		return false
 	}
 	if x.Debug != "" {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x DumpAtom) VDLWrite(enc vdl.Encoder) error {
@@ -1212,14 +1205,7 @@ func (x DumpAtom) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var isZeroData bool
-	if x.Data != nil {
-		var err error
-		if isZeroData, err = x.Data.VDLIsZero(); err != nil {
-			return err
-		}
-	}
-	if x.Data != nil && !isZeroData {
+	if x.Data != nil && !x.Data.VDLIsZero() {
 		if err := enc.NextField("Data"); err != nil {
 			return err
 		}
@@ -1231,7 +1217,7 @@ func (x DumpAtom) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Debug"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Debug); err != nil {
@@ -1353,8 +1339,8 @@ func (t *TypeIdTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
-func (x TypeId) VDLIsZero() (bool, error) {
-	return x == 0, nil
+func (x TypeId) VDLIsZero() bool {
+	return x == 0
 }
 
 func (x TypeId) VDLWrite(enc vdl.Encoder) error {
@@ -1493,8 +1479,8 @@ func (t *wireNamedTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireNamed) VDLIsZero() (bool, error) {
-	return x == wireNamed{}, nil
+func (x wireNamed) VDLIsZero() bool {
+	return x == wireNamed{}
 }
 
 func (x wireNamed) VDLWrite(enc vdl.Encoder) error {
@@ -1505,7 +1491,7 @@ func (x wireNamed) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -1701,14 +1687,14 @@ func (t *wireEnumTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireEnum) VDLIsZero() (bool, error) {
+func (x wireEnum) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Labels) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x wireEnum) VDLWrite(enc vdl.Encoder) error {
@@ -1719,7 +1705,7 @@ func (x wireEnum) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -1754,7 +1740,7 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x[i]); err != nil {
@@ -1986,8 +1972,8 @@ func (t *wireArrayTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireArray) VDLIsZero() (bool, error) {
-	return x == wireArray{}, nil
+func (x wireArray) VDLIsZero() bool {
+	return x == wireArray{}
 }
 
 func (x wireArray) VDLWrite(enc vdl.Encoder) error {
@@ -1998,7 +1984,7 @@ func (x wireArray) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -2020,7 +2006,7 @@ func (x wireArray) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Len"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(x.Len); err != nil {
@@ -2200,8 +2186,8 @@ func (t *wireListTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireList) VDLIsZero() (bool, error) {
-	return x == wireList{}, nil
+func (x wireList) VDLIsZero() bool {
+	return x == wireList{}
 }
 
 func (x wireList) VDLWrite(enc vdl.Encoder) error {
@@ -2212,7 +2198,7 @@ func (x wireList) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -2389,8 +2375,8 @@ func (t *wireSetTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireSet) VDLIsZero() (bool, error) {
-	return x == wireSet{}, nil
+func (x wireSet) VDLIsZero() bool {
+	return x == wireSet{}
 }
 
 func (x wireSet) VDLWrite(enc vdl.Encoder) error {
@@ -2401,7 +2387,7 @@ func (x wireSet) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -2607,8 +2593,8 @@ func (t *wireMapTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireMap) VDLIsZero() (bool, error) {
-	return x == wireMap{}, nil
+func (x wireMap) VDLIsZero() bool {
+	return x == wireMap{}
 }
 
 func (x wireMap) VDLWrite(enc vdl.Encoder) error {
@@ -2619,7 +2605,7 @@ func (x wireMap) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -2808,8 +2794,8 @@ func (t *wireFieldTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireField) VDLIsZero() (bool, error) {
-	return x == wireField{}, nil
+func (x wireField) VDLIsZero() bool {
+	return x == wireField{}
 }
 
 func (x wireField) VDLWrite(enc vdl.Encoder) error {
@@ -2820,7 +2806,7 @@ func (x wireField) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -3050,14 +3036,14 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x wireStruct) VDLIsZero() (bool, error) {
+func (x wireStruct) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Fields) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x wireStruct) VDLWrite(enc vdl.Encoder) error {
@@ -3068,7 +3054,7 @@ func (x wireStruct) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -3314,14 +3300,14 @@ func (t *wireUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireUnion) VDLIsZero() (bool, error) {
+func (x wireUnion) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Fields) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x wireUnion) VDLWrite(enc vdl.Encoder) error {
@@ -3332,7 +3318,7 @@ func (x wireUnion) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -3509,8 +3495,8 @@ func (t *wireOptionalTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x wireOptional) VDLIsZero() (bool, error) {
-	return x == wireOptional{}, nil
+func (x wireOptional) VDLIsZero() bool {
+	return x == wireOptional{}
 }
 
 func (x wireOptional) VDLWrite(enc vdl.Encoder) error {
@@ -3521,7 +3507,7 @@ func (x wireOptional) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -3602,7 +3588,7 @@ type (
 		// __VDLReflect describes the wireType union type.
 		__VDLReflect(__wireTypeReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// wireTypeNamedT represents field NamedT of the wireType union type.
@@ -4018,40 +4004,40 @@ func (t wireTypeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target
 	return nil, fmt.Errorf("got %T, want *wireType", union)
 }
 
-func (x wireTypeNamedT) VDLIsZero() (bool, error) {
-	return x.Value == wireNamed{}, nil
+func (x wireTypeNamedT) VDLIsZero() bool {
+	return x.Value == wireNamed{}
 }
 
-func (x wireTypeEnumT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeEnumT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeArrayT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeArrayT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeListT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeListT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeSetT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeSetT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeMapT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeMapT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeStructT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeStructT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeUnionT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeUnionT) VDLIsZero() bool {
+	return false
 }
 
-func (x wireTypeOptionalT) VDLIsZero() (bool, error) {
-	return false, nil
+func (x wireTypeOptionalT) VDLIsZero() bool {
+	return false
 }
 
 func (x wireTypeNamedT) VDLWrite(enc vdl.Encoder) error {

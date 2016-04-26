@@ -16,9 +16,9 @@ pkg binary, method (*PartInfoTarget) FinishFields(vdl.FieldsTarget) error
 pkg binary, method (*PartInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg binary, method (*PartInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg binary, method (*PartInfoTarget) ZeroField(string) error
-pkg binary, method (Description) VDLIsZero() (bool, error)
+pkg binary, method (Description) VDLIsZero() bool
 pkg binary, method (Description) VDLWrite(vdl.Encoder) error
-pkg binary, method (PartInfo) VDLIsZero() (bool, error)
+pkg binary, method (PartInfo) VDLIsZero() bool
 pkg binary, method (PartInfo) VDLWrite(vdl.Encoder) error
 pkg binary, type Description struct
 pkg binary, type Description struct, Name string

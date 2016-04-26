@@ -160,8 +160,8 @@ func (t *EmbedTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Embed) VDLIsZero() (bool, error) {
-	return x == Embed{}, nil
+func (x Embed) VDLIsZero() bool {
+	return x == Embed{}
 }
 
 func (x Embed) VDLWrite(enc vdl.Encoder) error {
@@ -172,7 +172,7 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -186,7 +186,7 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("PkgPath"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.PkgPath); err != nil {
@@ -200,7 +200,7 @@ func (x Embed) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Doc"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Doc); err != nil {
@@ -418,17 +418,17 @@ func (t *ArgTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Arg) VDLIsZero() (bool, error) {
+func (x Arg) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if x.Doc != "" {
-		return false, nil
+		return false
 	}
 	if x.Type != nil && x.Type != vdl.AnyType {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Arg) VDLWrite(enc vdl.Encoder) error {
@@ -439,7 +439,7 @@ func (x Arg) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -453,7 +453,7 @@ func (x Arg) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Doc"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Doc); err != nil {
@@ -950,29 +950,29 @@ func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x Method) VDLIsZero() (bool, error) {
+func (x Method) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if x.Doc != "" {
-		return false, nil
+		return false
 	}
 	if len(x.InArgs) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.OutArgs) != 0 {
-		return false, nil
+		return false
 	}
 	if x.InStream != nil {
-		return false, nil
+		return false
 	}
 	if x.OutStream != nil {
-		return false, nil
+		return false
 	}
 	if len(x.Tags) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Method) VDLWrite(enc vdl.Encoder) error {
@@ -983,7 +983,7 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -997,7 +997,7 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Doc"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Doc); err != nil {
@@ -1027,11 +1027,14 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("InStream"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.InStream.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -1039,11 +1042,14 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("OutStream"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**Arg)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.OutStream.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -1093,25 +1099,14 @@ func __VDLWriteAnon_list_2(enc vdl.Encoder, x []*vdl.Value) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.AnyType); err != nil {
-			return err
-		}
-		switch {
-		case x[i] == nil:
+		if x[i] == nil {
 			if err := enc.NilValue(vdl.AnyType); err != nil {
 				return err
 			}
-		case x[i].IsNil():
-			if err := enc.NilValue(x[i].Type()); err != nil {
-				return err
-			}
-		default:
+		} else {
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -1578,23 +1573,23 @@ func (t *__VDLTarget5_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x Interface) VDLIsZero() (bool, error) {
+func (x Interface) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if x.PkgPath != "" {
-		return false, nil
+		return false
 	}
 	if x.Doc != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Embeds) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.Methods) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Interface) VDLWrite(enc vdl.Encoder) error {
@@ -1605,7 +1600,7 @@ func (x Interface) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -1619,7 +1614,7 @@ func (x Interface) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("PkgPath"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.PkgPath); err != nil {
@@ -1633,7 +1628,7 @@ func (x Interface) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Doc"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Doc); err != nil {

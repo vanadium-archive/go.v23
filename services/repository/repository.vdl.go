@@ -141,8 +141,8 @@ func (t *MediaInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x MediaInfo) VDLIsZero() (bool, error) {
-	return x == MediaInfo{}, nil
+func (x MediaInfo) VDLIsZero() bool {
+	return x == MediaInfo{}
 }
 
 func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
@@ -153,7 +153,7 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Type"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Type); err != nil {
@@ -167,7 +167,7 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Encoding"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Encoding); err != nil {

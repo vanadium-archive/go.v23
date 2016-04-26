@@ -134,8 +134,8 @@ func (rb *RawBytes) Decoder() vdl.Decoder {
 	return xd
 }
 
-func (rb *RawBytes) VDLIsZero() (bool, error) {
-	return rb == nil || (rb.Type == vdl.AnyType && rb.IsNil()), nil
+func (rb *RawBytes) VDLIsZero() bool {
+	return rb == nil || (rb.Type == vdl.AnyType && rb.IsNil())
 }
 
 func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {

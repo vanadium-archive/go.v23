@@ -58,17 +58,17 @@ pkg vtrace, method (*TraceRecordTarget) FinishFields(vdl.FieldsTarget) error
 pkg vtrace, method (*TraceRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
 pkg vtrace, method (*TraceRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg vtrace, method (*TraceRecordTarget) ZeroField(string) error
-pkg vtrace, method (Annotation) VDLIsZero() (bool, error)
+pkg vtrace, method (Annotation) VDLIsZero() bool
 pkg vtrace, method (Annotation) VDLWrite(vdl.Encoder) error
-pkg vtrace, method (Request) VDLIsZero() (bool, error)
+pkg vtrace, method (Request) VDLIsZero() bool
 pkg vtrace, method (Request) VDLWrite(vdl.Encoder) error
-pkg vtrace, method (Response) VDLIsZero() (bool, error)
+pkg vtrace, method (Response) VDLIsZero() bool
 pkg vtrace, method (Response) VDLWrite(vdl.Encoder) error
-pkg vtrace, method (SpanRecord) VDLIsZero() (bool, error)
+pkg vtrace, method (SpanRecord) VDLIsZero() bool
 pkg vtrace, method (SpanRecord) VDLWrite(vdl.Encoder) error
-pkg vtrace, method (TraceFlags) VDLIsZero() (bool, error)
+pkg vtrace, method (TraceFlags) VDLIsZero() bool
 pkg vtrace, method (TraceFlags) VDLWrite(vdl.Encoder) error
-pkg vtrace, method (TraceRecord) VDLIsZero() (bool, error)
+pkg vtrace, method (TraceRecord) VDLIsZero() bool
 pkg vtrace, method (TraceRecord) VDLWrite(vdl.Encoder) error
 pkg vtrace, type Annotation struct
 pkg vtrace, type Annotation struct, Message string

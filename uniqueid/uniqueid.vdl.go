@@ -51,8 +51,8 @@ func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Id) VDLIsZero() (bool, error) {
-	return x == Id{}, nil
+func (x Id) VDLIsZero() bool {
+	return x == Id{}
 }
 
 func (x Id) VDLWrite(enc vdl.Encoder) error {

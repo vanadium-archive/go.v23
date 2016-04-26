@@ -380,8 +380,8 @@ func EqualValue(a, b *Value) bool {
 // represents any(nil).
 //
 // TODO(toddw): Describe the subtle difference with IsZero().
-func (v *Value) VDLIsZero() (bool, error) {
-	return v == nil || (v.t == AnyType && v.IsZero()), nil
+func (v *Value) VDLIsZero() bool {
+	return v == nil || (v.t == AnyType && v.IsZero())
 }
 
 // IsZero returns true iff v is the zero value for its type.

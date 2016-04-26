@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/vdlconv"
-	"v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
 )
 
@@ -75,8 +75,8 @@ func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
 	return nil
 }
 
-func (x MountFlag) VDLIsZero() (bool, error) {
-	return x == 0, nil
+func (x MountFlag) VDLIsZero() bool {
+	return x == 0
 }
 
 func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
@@ -106,7 +106,7 @@ type MountedServer struct {
 	// Server is the OA that's mounted.
 	Server string
 	// Deadline before the mount entry expires.
-	Deadline time.Deadline
+	Deadline vdltime.Deadline
 }
 
 func (MountedServer) __VDLReflect(struct {
@@ -138,12 +138,12 @@ func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue5 time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireValue5, m.Deadline); err != nil {
+	var wireValue5 vdltime.WireDeadline
+	if err := vdltime.WireDeadlineFromNative(&wireValue5, m.Deadline); err != nil {
 		return err
 	}
 
-	var8 := (wireValue5 == time.WireDeadline{})
+	var8 := (wireValue5 == vdltime.WireDeadline{})
 	if var8 {
 		if err := fieldsTarget1.ZeroField("Deadline"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -176,7 +176,7 @@ func (m *MountedServer) MakeVDLTarget() vdl.Target {
 type MountedServerTarget struct {
 	Value          *MountedServer
 	serverTarget   vdl.StringTarget
-	deadlineTarget time.WireDeadlineTarget
+	deadlineTarget vdltime.WireDeadlineTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -211,13 +211,7 @@ func (t *MountedServerTarget) ZeroField(name string) error {
 		t.Value.Server = ""
 		return nil
 	case "Deadline":
-		t.Value.Deadline = func() time.Deadline {
-			var native time.Deadline
-			if err := vdl.Convert(&native, time.WireDeadline{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.Deadline = vdltime.Deadline{}
 		return nil
 	default:
 		return fmt.Errorf("field %s not in struct v.io/v23/naming.MountedServer", name)
@@ -228,22 +222,14 @@ func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x MountedServer) VDLIsZero() (bool, error) {
+func (x MountedServer) VDLIsZero() bool {
 	if x.Server != "" {
-		return false, nil
+		return false
 	}
-	var wireDeadline time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireDeadline, x.Deadline); err != nil {
-		return false, err
+	if !x.Deadline.Time.IsZero() {
+		return false
 	}
-	isZeroDeadline, err := wireDeadline.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroDeadline {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
@@ -254,7 +240,7 @@ func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Server"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Server); err != nil {
@@ -264,19 +250,15 @@ func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wireDeadline time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireDeadline, x.Deadline); err != nil {
-		return err
-	}
-	isZeroDeadline, err := wireDeadline.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroDeadline {
+	if !x.Deadline.Time.IsZero() {
 		if err := enc.NextField("Deadline"); err != nil {
 			return err
 		}
-		if err := wireDeadline.VDLWrite(enc); err != nil {
+		var wire vdltime.WireDeadline
+		if err := vdltime.WireDeadlineFromNative(&wire, x.Deadline); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -314,11 +296,11 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Deadline":
-			var wire time.WireDeadline
+			var wire vdltime.WireDeadline
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time.WireDeadlineToNative(wire, &x.Deadline); err != nil {
+			if err := vdltime.WireDeadlineToNative(wire, &x.Deadline); err != nil {
 				return err
 			}
 		default:
@@ -556,20 +538,20 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x MountEntry) VDLIsZero() (bool, error) {
+func (x MountEntry) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Servers) != 0 {
-		return false, nil
+		return false
 	}
 	if x.ServesMountTable {
-		return false, nil
+		return false
 	}
 	if x.IsLeaf {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
@@ -580,7 +562,7 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -602,7 +584,7 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ServesMountTable"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.ServesMountTable); err != nil {
@@ -616,7 +598,7 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("IsLeaf"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.IsLeaf); err != nil {
@@ -864,8 +846,8 @@ func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GlobError) VDLIsZero() (bool, error) {
-	return x == GlobError{}, nil
+func (x GlobError) VDLIsZero() bool {
+	return x == GlobError{}
 }
 
 func (x GlobError) VDLWrite(enc vdl.Encoder) error {
@@ -876,7 +858,7 @@ func (x GlobError) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -953,7 +935,7 @@ type (
 		// __VDLReflect describes the GlobReply union type.
 		__VDLReflect(__GlobReplyReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// GlobReplyEntry represents field Entry of the GlobReply union type.
@@ -1087,16 +1069,12 @@ func (t globReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Targe
 	return nil, fmt.Errorf("got %T, want *GlobReply", union)
 }
 
-func (x GlobReplyEntry) VDLIsZero() (bool, error) {
-	isZero, err := x.Value.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	return isZero, nil
+func (x GlobReplyEntry) VDLIsZero() bool {
+	return x.Value.VDLIsZero()
 }
 
-func (x GlobReplyError) VDLIsZero() (bool, error) {
-	return false, nil
+func (x GlobReplyError) VDLIsZero() bool {
+	return false
 }
 
 func (x GlobReplyEntry) VDLWrite(enc vdl.Encoder) error {
@@ -1183,7 +1161,7 @@ type (
 		// __VDLReflect describes the GlobChildrenReply union type.
 		__VDLReflect(__GlobChildrenReplyReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// GlobChildrenReplyName represents field Name of the GlobChildrenReply union type.
@@ -1316,12 +1294,12 @@ func (t globChildrenReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (v
 	return nil, fmt.Errorf("got %T, want *GlobChildrenReply", union)
 }
 
-func (x GlobChildrenReplyName) VDLIsZero() (bool, error) {
-	return x.Value == "", nil
+func (x GlobChildrenReplyName) VDLIsZero() bool {
+	return x.Value == ""
 }
 
-func (x GlobChildrenReplyError) VDLIsZero() (bool, error) {
-	return false, nil
+func (x GlobChildrenReplyError) VDLIsZero() bool {
+	return false
 }
 
 func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
@@ -1331,7 +1309,7 @@ func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("Name"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+	if err := enc.StartValue(vdl.StringType); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.Value); err != nil {

@@ -134,8 +134,8 @@ func (t *Complex64Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Complex64) VDLIsZero() (bool, error) {
-	return x == Complex64{}, nil
+func (x Complex64) VDLIsZero() bool {
+	return x == Complex64{}
 }
 
 func (x Complex64) VDLWrite(enc vdl.Encoder) error {
@@ -146,7 +146,7 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Real"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Float32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeFloat(float64(x.Real)); err != nil {
@@ -160,7 +160,7 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Imag"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*float32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Float32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeFloat(float64(x.Imag)); err != nil {
@@ -341,8 +341,8 @@ func (t *Complex128Target) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Complex128) VDLIsZero() (bool, error) {
-	return x == Complex128{}, nil
+func (x Complex128) VDLIsZero() bool {
+	return x == Complex128{}
 }
 
 func (x Complex128) VDLWrite(enc vdl.Encoder) error {
@@ -353,7 +353,7 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Real"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Float64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeFloat(x.Real); err != nil {
@@ -367,7 +367,7 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Imag"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*float64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Float64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeFloat(x.Imag); err != nil {

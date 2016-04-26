@@ -115,8 +115,8 @@ func (t *ConfigTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Config) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x Config) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x Config) VDLWrite(enc vdl.Encoder) error {
@@ -130,7 +130,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -139,7 +139,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.FinishValue(); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(elem); err != nil {
@@ -289,8 +289,8 @@ func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error 
 	return nil
 }
 
-func (x InstallationState) VDLIsZero() (bool, error) {
-	return x == InstallationStateActive, nil
+func (x InstallationState) VDLIsZero() bool {
+	return x == InstallationStateActive
 }
 
 func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
@@ -431,8 +431,8 @@ func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x InstanceState) VDLIsZero() (bool, error) {
-	return x == InstanceStateLaunching, nil
+func (x InstanceState) VDLIsZero() bool {
+	return x == InstanceStateLaunching
 }
 
 func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
@@ -574,8 +574,8 @@ func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x InstanceStatus) VDLIsZero() (bool, error) {
-	return x == InstanceStatus{}, nil
+func (x InstanceStatus) VDLIsZero() bool {
+	return x == InstanceStatus{}
 }
 
 func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
@@ -594,7 +594,7 @@ func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Version"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Version); err != nil {
@@ -764,8 +764,8 @@ func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x InstallationStatus) VDLIsZero() (bool, error) {
-	return x == InstallationStatus{}, nil
+func (x InstallationStatus) VDLIsZero() bool {
+	return x == InstallationStatus{}
 }
 
 func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
@@ -784,7 +784,7 @@ func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Version"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Version); err != nil {
@@ -954,8 +954,8 @@ func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x DeviceStatus) VDLIsZero() (bool, error) {
-	return x == DeviceStatus{}, nil
+func (x DeviceStatus) VDLIsZero() bool {
+	return x == DeviceStatus{}
 }
 
 func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
@@ -974,7 +974,7 @@ func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Version"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Version); err != nil {
@@ -1043,7 +1043,7 @@ type (
 		// __VDLReflect describes the Status union type.
 		__VDLReflect(__StatusReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// StatusInstance represents field Instance of the Status union type.
@@ -1217,16 +1217,16 @@ func (t statusTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, 
 	return nil, fmt.Errorf("got %T, want *Status", union)
 }
 
-func (x StatusInstance) VDLIsZero() (bool, error) {
-	return x.Value == InstanceStatus{}, nil
+func (x StatusInstance) VDLIsZero() bool {
+	return x.Value == InstanceStatus{}
 }
 
-func (x StatusInstallation) VDLIsZero() (bool, error) {
-	return false, nil
+func (x StatusInstallation) VDLIsZero() bool {
+	return false
 }
 
-func (x StatusDevice) VDLIsZero() (bool, error) {
-	return false, nil
+func (x StatusDevice) VDLIsZero() bool {
+	return false
 }
 
 func (x StatusInstance) VDLWrite(enc vdl.Encoder) error {
@@ -1337,7 +1337,7 @@ type (
 		// __VDLReflect describes the BlessServerMessage union type.
 		__VDLReflect(__BlessServerMessageReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// BlessServerMessageInstancePublicKey represents field InstancePublicKey of the BlessServerMessage union type.
@@ -1434,8 +1434,8 @@ func (t blessServerMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (
 	return nil, fmt.Errorf("got %T, want *BlessServerMessage", union)
 }
 
-func (x BlessServerMessageInstancePublicKey) VDLIsZero() (bool, error) {
-	return len(x.Value) == 0, nil
+func (x BlessServerMessageInstancePublicKey) VDLIsZero() bool {
+	return len(x.Value) == 0
 }
 
 func (x BlessServerMessageInstancePublicKey) VDLWrite(enc vdl.Encoder) error {
@@ -1514,7 +1514,7 @@ type (
 		// __VDLReflect describes the BlessClientMessage union type.
 		__VDLReflect(__BlessClientMessageReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// BlessClientMessageAppBlessings represents field AppBlessings of the BlessClientMessage union type.
@@ -1588,13 +1588,7 @@ func (t *BlessClientMessageTarget) StartField(name string) (key, field vdl.Targe
 	t.fieldName = name
 	switch name {
 	case "AppBlessings":
-		val := func() security.Blessings {
-			var native security.Blessings
-			if err := vdl.Convert(&native, security.WireBlessings{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		val := security.Blessings{}
 		return nil, &security.WireBlessingsTarget{Value: &val}, nil
 	default:
 		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.BlessClientMessage", name)
@@ -1621,16 +1615,8 @@ func (t blessClientMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (
 	return nil, fmt.Errorf("got %T, want *BlessClientMessage", union)
 }
 
-func (x BlessClientMessageAppBlessings) VDLIsZero() (bool, error) {
-	var wire security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wire, x.Value); err != nil {
-		return false, err
-	}
-	isZero, err := wire.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	return isZero, nil
+func (x BlessClientMessageAppBlessings) VDLIsZero() bool {
+	return x.Value.IsZero()
 }
 
 func (x BlessClientMessageAppBlessings) VDLWrite(enc vdl.Encoder) error {
@@ -1837,11 +1823,11 @@ func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
 	return nil
 }
 
-func (x Description) VDLIsZero() (bool, error) {
+func (x Description) VDLIsZero() bool {
 	if len(x.Profiles) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Description) VDLWrite(enc vdl.Encoder) error {
@@ -1873,7 +1859,7 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[string]struct{}) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -2070,8 +2056,8 @@ func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Association) VDLIsZero() (bool, error) {
-	return x == Association{}, nil
+func (x Association) VDLIsZero() bool {
+	return x == Association{}
 }
 
 func (x Association) VDLWrite(enc vdl.Encoder) error {
@@ -2082,7 +2068,7 @@ func (x Association) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("IdentityName"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.IdentityName); err != nil {
@@ -2096,7 +2082,7 @@ func (x Association) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("AccountName"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.AccountName); err != nil {

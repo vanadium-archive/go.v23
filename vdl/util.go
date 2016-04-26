@@ -69,7 +69,7 @@ func rtBytes(rv reflect.Value) []byte {
 // VDLIsZero returns true iff the receiver that implements this method is the
 // VDL zero value.
 type IsZeroer interface {
-	VDLIsZero() (bool, error)
+	VDLIsZero() bool
 }
 
 type stringer interface {
@@ -197,11 +197,11 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 	// Call VDLIsZero if it exists.  This handles the vdl.Value/vom.RawBytes
 	// cases, as well generated code and user-implemented VDLIsZero methods.
 	if rt.Implements(rtIsZeroer) {
-		return rv.Interface().(IsZeroer).VDLIsZero()
+		return rv.Interface().(IsZeroer).VDLIsZero(), nil
 	}
 	if reflect.PtrTo(rt).Implements(rtIsZeroer) {
 		if rv.CanAddr() {
-			return rv.Addr().Interface().(IsZeroer).VDLIsZero()
+			return rv.Addr().Interface().(IsZeroer).VDLIsZero(), nil
 		}
 		// Handle the harder case where *T implements IsZeroer, but we can't take
 		// the address of rv to turn it into *T.  Create a new *T value and fill it
@@ -209,7 +209,7 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		// to storing rv in a temporary variable, so that we can take the address.
 		rvPtr := reflect.New(rt)
 		rvPtr.Elem().Set(rv)
-		return rvPtr.Interface().(IsZeroer).VDLIsZero()
+		return rvPtr.Interface().(IsZeroer).VDLIsZero(), nil
 	}
 	// Handle native types, by converting and checking the wire value for zero.
 	if ni := nativeInfoFromNative(rt); ni != nil {

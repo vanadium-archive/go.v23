@@ -12,7 +12,7 @@ import (
 	"v.io/v23/security"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
-	"v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
 	"v.io/v23/vtrace"
 )
@@ -47,7 +47,7 @@ type Request struct {
 	EndStreamArgs bool
 	// Deadline after which the request should be cancelled.  This is a hint to
 	// the server, to avoid wasted work.
-	Deadline time.Deadline
+	Deadline vdltime.Deadline
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
 	GrantedBlessings security.Blessings
@@ -146,12 +146,12 @@ func (m *Request) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue14 time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireValue14, m.Deadline); err != nil {
+	var wireValue14 vdltime.WireDeadline
+	if err := vdltime.WireDeadlineFromNative(&wireValue14, m.Deadline); err != nil {
 		return err
 	}
 
-	var17 := (wireValue14 == time.WireDeadline{})
+	var17 := (wireValue14 == vdltime.WireDeadline{})
 	if var17 {
 		if err := fieldsTarget1.ZeroField("Deadline"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -256,7 +256,7 @@ type RequestTarget struct {
 	methodTarget           vdl.StringTarget
 	numPosArgsTarget       vdl.Uint64Target
 	endStreamArgsTarget    vdl.BoolTarget
-	deadlineTarget         time.WireDeadlineTarget
+	deadlineTarget         vdltime.WireDeadlineTarget
 	grantedBlessingsTarget security.WireBlessingsTarget
 	traceRequestTarget     vtrace.RequestTarget
 	languageTarget         vdl.StringTarget
@@ -327,22 +327,10 @@ func (t *RequestTarget) ZeroField(name string) error {
 		t.Value.EndStreamArgs = false
 		return nil
 	case "Deadline":
-		t.Value.Deadline = func() time.Deadline {
-			var native time.Deadline
-			if err := vdl.Convert(&native, time.WireDeadline{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.Deadline = vdltime.Deadline{}
 		return nil
 	case "GrantedBlessings":
-		t.Value.GrantedBlessings = func() security.Blessings {
-			var native security.Blessings
-			if err := vdl.Convert(&native, security.WireBlessings{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.GrantedBlessings = security.Blessings{}
 		return nil
 	case "TraceRequest":
 		t.Value.TraceRequest = vtrace.Request{}
@@ -359,48 +347,32 @@ func (t *RequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Request) VDLIsZero() (bool, error) {
+func (x Request) VDLIsZero() bool {
 	if x.Suffix != "" {
-		return false, nil
+		return false
 	}
 	if x.Method != "" {
-		return false, nil
+		return false
 	}
 	if x.NumPosArgs != 0 {
-		return false, nil
+		return false
 	}
 	if x.EndStreamArgs {
-		return false, nil
+		return false
 	}
-	var wireDeadline time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireDeadline, x.Deadline); err != nil {
-		return false, err
+	if !x.Deadline.Time.IsZero() {
+		return false
 	}
-	isZeroDeadline, err := wireDeadline.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroDeadline {
-		return false, nil
-	}
-	var wireGrantedBlessings security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wireGrantedBlessings, x.GrantedBlessings); err != nil {
-		return false, err
-	}
-	isZeroGrantedBlessings, err := wireGrantedBlessings.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroGrantedBlessings {
-		return false, nil
+	if !x.GrantedBlessings.IsZero() {
+		return false
 	}
 	if x.TraceRequest != (vtrace.Request{}) {
-		return false, nil
+		return false
 	}
 	if x.Language != "" {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Request) VDLWrite(enc vdl.Encoder) error {
@@ -411,7 +383,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Suffix"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Suffix); err != nil {
@@ -425,7 +397,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Method"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Method); err != nil {
@@ -439,7 +411,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("NumPosArgs"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(x.NumPosArgs); err != nil {
@@ -453,7 +425,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("EndStreamArgs"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.EndStreamArgs); err != nil {
@@ -463,35 +435,27 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wireDeadline time.WireDeadline
-	if err := time.WireDeadlineFromNative(&wireDeadline, x.Deadline); err != nil {
-		return err
-	}
-	isZeroDeadline, err := wireDeadline.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroDeadline {
+	if !x.Deadline.Time.IsZero() {
 		if err := enc.NextField("Deadline"); err != nil {
 			return err
 		}
-		if err := wireDeadline.VDLWrite(enc); err != nil {
+		var wire vdltime.WireDeadline
+		if err := vdltime.WireDeadlineFromNative(&wire, x.Deadline); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	var wireGrantedBlessings security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wireGrantedBlessings, x.GrantedBlessings); err != nil {
-		return err
-	}
-	isZeroGrantedBlessings, err := wireGrantedBlessings.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroGrantedBlessings {
+	if !x.GrantedBlessings.IsZero() {
 		if err := enc.NextField("GrantedBlessings"); err != nil {
 			return err
 		}
-		if err := wireGrantedBlessings.VDLWrite(enc); err != nil {
+		var wire security.WireBlessings
+		if err := security.WireBlessingsFromNative(&wire, x.GrantedBlessings); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -507,7 +471,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Language"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Language); err != nil {
@@ -584,11 +548,11 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Deadline":
-			var wire time.WireDeadline
+			var wire vdltime.WireDeadline
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time.WireDeadlineToNative(wire, &x.Deadline); err != nil {
+			if err := vdltime.WireDeadlineToNative(wire, &x.Deadline); err != nil {
 				return err
 			}
 		case "GrantedBlessings":
@@ -850,27 +814,23 @@ func (t *ResponseTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Response) VDLIsZero() (bool, error) {
+func (x Response) VDLIsZero() bool {
 	if x.Error != nil {
-		return false, nil
+		return false
 	}
 	if x.EndStreamResults {
-		return false, nil
+		return false
 	}
 	if x.NumPosResults != 0 {
-		return false, nil
+		return false
 	}
-	isZeroTraceResponse, err := x.TraceResponse.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroTraceResponse {
-		return false, nil
+	if !x.TraceResponse.VDLIsZero() {
+		return false
 	}
 	if x.AckBlessings {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Response) VDLWrite(enc vdl.Encoder) error {
@@ -889,7 +849,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("EndStreamResults"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.EndStreamResults); err != nil {
@@ -903,7 +863,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("NumPosResults"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(x.NumPosResults); err != nil {
@@ -913,11 +873,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroTraceResponse, err := x.TraceResponse.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroTraceResponse {
+	if !x.TraceResponse.VDLIsZero() {
 		if err := enc.NextField("TraceResponse"); err != nil {
 			return err
 		}
@@ -929,7 +885,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("AckBlessings"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.AckBlessings); err != nil {

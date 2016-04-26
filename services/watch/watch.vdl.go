@@ -195,8 +195,8 @@ func (t *ResumeMarkerTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
-func (x ResumeMarker) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x ResumeMarker) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
@@ -343,14 +343,14 @@ func (t *GlobRequestTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x GlobRequest) VDLIsZero() (bool, error) {
+func (x GlobRequest) VDLIsZero() bool {
 	if x.Pattern != "" {
-		return false, nil
+		return false
 	}
 	if len(x.ResumeMarker) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
@@ -361,7 +361,7 @@ func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Pattern"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Pattern); err != nil {
@@ -637,30 +637,23 @@ func (t *ChangeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Change) VDLIsZero() (bool, error) {
+func (x Change) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if x.State != 0 {
-		return false, nil
+		return false
 	}
-	var isZeroValue bool
-	if x.Value != nil {
-		var err error
-		if isZeroValue, err = x.Value.VDLIsZero(); err != nil {
-			return false, err
-		}
-	}
-	if x.Value != nil && !isZeroValue {
-		return false, nil
+	if x.Value != nil && !x.Value.VDLIsZero() {
+		return false
 	}
 	if len(x.ResumeMarker) != 0 {
-		return false, nil
+		return false
 	}
 	if x.Continued {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Change) VDLWrite(enc vdl.Encoder) error {
@@ -671,7 +664,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -685,7 +678,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("State"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int32)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(int64(x.State)); err != nil {
@@ -695,31 +688,11 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var isZeroValue bool
-	if x.Value != nil {
-		var err error
-		if isZeroValue, err = x.Value.VDLIsZero(); err != nil {
-			return err
-		}
-	}
-	if x.Value != nil && !isZeroValue {
+	if x.Value != nil && !x.Value.VDLIsZero() {
 		if err := enc.NextField("Value"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.AnyType); err != nil {
-			return err
-		}
-		switch {
-		case x.Value.IsNil():
-			if err := enc.NilValue(x.Value.Type); err != nil {
-				return err
-			}
-		default:
-			if err := x.Value.VDLWrite(enc); err != nil {
-				return err
-			}
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -735,7 +708,7 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Continued"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.Continued); err != nil {

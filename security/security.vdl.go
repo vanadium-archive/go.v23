@@ -15,7 +15,7 @@ import (
 	"v.io/v23/i18n"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
-	time_2 "v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
 	"v.io/v23/vom"
 )
@@ -58,8 +58,8 @@ func (t *nonceTarget) FromBytes(src []byte, tt *vdl.Type) error {
 	return nil
 }
 
-func (x nonce) VDLIsZero() (bool, error) {
-	return x == nonce{}, nil
+func (x nonce) VDLIsZero() bool {
+	return x == nonce{}
 }
 
 func (x nonce) VDLWrite(enc vdl.Encoder) error {
@@ -208,14 +208,14 @@ func (t *CaveatTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Caveat) VDLIsZero() (bool, error) {
+func (x Caveat) VDLIsZero() bool {
 	if x.Id != (uniqueid.Id{}) {
-		return false, nil
+		return false
 	}
 	if len(x.ParamVom) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Caveat) VDLWrite(enc vdl.Encoder) error {
@@ -433,8 +433,8 @@ func (t *ThirdPartyRequirementsTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x ThirdPartyRequirements) VDLIsZero() (bool, error) {
-	return x == ThirdPartyRequirements{}, nil
+func (x ThirdPartyRequirements) VDLIsZero() bool {
+	return x == ThirdPartyRequirements{}
 }
 
 func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
@@ -445,7 +445,7 @@ func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ReportServer"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.ReportServer); err != nil {
@@ -459,7 +459,7 @@ func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ReportMethod"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.ReportMethod); err != nil {
@@ -473,7 +473,7 @@ func (x ThirdPartyRequirements) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ReportArguments"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(x.ReportArguments); err != nil {
@@ -824,23 +824,23 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x publicKeyThirdPartyCaveatParam) VDLIsZero() (bool, error) {
+func (x publicKeyThirdPartyCaveatParam) VDLIsZero() bool {
 	if x.Nonce != (nonce{}) {
-		return false, nil
+		return false
 	}
 	if len(x.Caveats) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.DischargerKey) != 0 {
-		return false, nil
+		return false
 	}
 	if x.DischargerLocation != "" {
-		return false, nil
+		return false
 	}
 	if x.DischargerRequirements != (ThirdPartyRequirements{}) {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x publicKeyThirdPartyCaveatParam) VDLWrite(enc vdl.Encoder) error {
@@ -881,7 +881,7 @@ func (x publicKeyThirdPartyCaveatParam) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("DischargerLocation"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.DischargerLocation); err != nil {
@@ -1045,8 +1045,8 @@ func (t *HashTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Hash) VDLIsZero() (bool, error) {
-	return x == "", nil
+func (x Hash) VDLIsZero() bool {
+	return x == ""
 }
 
 func (x Hash) VDLWrite(enc vdl.Encoder) error {
@@ -1258,20 +1258,20 @@ func (t *SignatureTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Signature) VDLIsZero() (bool, error) {
+func (x Signature) VDLIsZero() bool {
 	if len(x.Purpose) != 0 {
-		return false, nil
+		return false
 	}
 	if x.Hash != "" {
-		return false, nil
+		return false
 	}
 	if len(x.R) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.S) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Signature) VDLWrite(enc vdl.Encoder) error {
@@ -1579,21 +1579,17 @@ func (t *PublicKeyDischargeTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x PublicKeyDischarge) VDLIsZero() (bool, error) {
+func (x PublicKeyDischarge) VDLIsZero() bool {
 	if x.ThirdPartyCaveatId != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Caveats) != 0 {
-		return false, nil
+		return false
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Signature.VDLIsZero() {
+		return false
 	}
-	if !isZeroSignature {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x PublicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
@@ -1604,7 +1600,7 @@ func (x PublicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ThirdPartyCaveatId"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.ThirdPartyCaveatId); err != nil {
@@ -1622,11 +1618,7 @@ func (x PublicKeyDischarge) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroSignature {
+	if !x.Signature.VDLIsZero() {
 		if err := enc.NextField("Signature"); err != nil {
 			return err
 		}
@@ -1729,8 +1721,8 @@ func (t *BlessingPatternTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x BlessingPattern) VDLIsZero() (bool, error) {
-	return x == "", nil
+func (x BlessingPattern) VDLIsZero() bool {
+	return x == ""
 }
 
 func (x BlessingPattern) VDLWrite(enc vdl.Encoder) error {
@@ -2012,17 +2004,17 @@ func (t *__VDLTarget3_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x DischargeImpetus) VDLIsZero() (bool, error) {
+func (x DischargeImpetus) VDLIsZero() bool {
 	if len(x.Server) != 0 {
-		return false, nil
+		return false
 	}
 	if x.Method != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Arguments) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x DischargeImpetus) VDLWrite(enc vdl.Encoder) error {
@@ -2041,7 +2033,7 @@ func (x DischargeImpetus) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Method"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Method); err != nil {
@@ -2097,25 +2089,14 @@ func __VDLWriteAnon_list_3(enc vdl.Encoder, x []*vom.RawBytes) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.AnyType); err != nil {
-			return err
-		}
-		switch {
-		case x[i] == nil:
+		if x[i] == nil {
 			if err := enc.NilValue(vdl.AnyType); err != nil {
 				return err
 			}
-		case x[i].IsNil():
-			if err := enc.NilValue(x[i].Type); err != nil {
-				return err
-			}
-		default:
+		} else {
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -2441,24 +2422,20 @@ func (t *CertificateTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Certificate) VDLIsZero() (bool, error) {
+func (x Certificate) VDLIsZero() bool {
 	if x.Extension != "" {
-		return false, nil
+		return false
 	}
 	if len(x.PublicKey) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.Caveats) != 0 {
-		return false, nil
+		return false
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.Signature.VDLIsZero() {
+		return false
 	}
-	if !isZeroSignature {
-		return false, nil
-	}
-	return true, nil
+	return true
 }
 
 func (x Certificate) VDLWrite(enc vdl.Encoder) error {
@@ -2469,7 +2446,7 @@ func (x Certificate) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Extension"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Extension); err != nil {
@@ -2501,11 +2478,7 @@ func (x Certificate) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroSignature, err := x.Signature.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroSignature {
+	if !x.Signature.VDLIsZero() {
 		if err := enc.NextField("Signature"); err != nil {
 			return err
 		}
@@ -2695,14 +2668,14 @@ func (t *CaveatDescriptorTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x CaveatDescriptor) VDLIsZero() (bool, error) {
+func (x CaveatDescriptor) VDLIsZero() bool {
 	if x.Id != (uniqueid.Id{}) {
-		return false, nil
+		return false
 	}
 	if x.ParamType != nil && x.ParamType != vdl.AnyType {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x CaveatDescriptor) VDLWrite(enc vdl.Encoder) error {
@@ -2974,11 +2947,11 @@ func (t *__VDLTarget5_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x WireBlessings) VDLIsZero() (bool, error) {
+func (x WireBlessings) VDLIsZero() bool {
 	if len(x.CertificateChains) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x WireBlessings) VDLWrite(enc vdl.Encoder) error {
@@ -3140,7 +3113,7 @@ type (
 		// __VDLReflect describes the WireDischarge union type.
 		__VDLReflect(__WireDischargeReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
-		VDLIsZero() (bool, error)
+		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
 	// WireDischargePublicKey represents field PublicKey of the WireDischarge union type.
@@ -3238,12 +3211,8 @@ func (t wireDischargeTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.T
 	return nil, fmt.Errorf("got %T, want *Discharge", union)
 }
 
-func (x WireDischargePublicKey) VDLIsZero() (bool, error) {
-	isZero, err := x.Value.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	return isZero, nil
+func (x WireDischargePublicKey) VDLIsZero() bool {
+	return x.Value.VDLIsZero()
 }
 
 func (x WireDischargePublicKey) VDLWrite(enc vdl.Encoder) error {
@@ -3413,8 +3382,8 @@ func (t *RejectedBlessingTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x RejectedBlessing) VDLIsZero() (bool, error) {
-	return x == RejectedBlessing{}, nil
+func (x RejectedBlessing) VDLIsZero() bool {
+	return x == RejectedBlessing{}
 }
 
 func (x RejectedBlessing) VDLWrite(enc vdl.Encoder) error {
@@ -3425,7 +3394,7 @@ func (x RejectedBlessing) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Blessing"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Blessing); err != nil {
@@ -3501,7 +3470,7 @@ var (
 
 // ConstCaveat represents a caveat that either always validates or never validates.
 var ConstCaveat = CaveatDescriptor{
-	ParamType: vdl.TypeOf((*bool)(nil)),
+	ParamType: vdl.BoolType,
 }
 
 // ExpiryCaveat represents a caveat that validates iff the current time is no later
@@ -3525,7 +3494,7 @@ var ExpiryCaveat = CaveatDescriptor{
 		128,
 		0,
 	},
-	ParamType: vdl.TypeOf((*time_2.Time)(nil)).Elem(),
+	ParamType: vdl.TypeOf((*vdltime.Time)(nil)).Elem(),
 }
 
 // MethodCaveat represents a caveat that validates iff the method being

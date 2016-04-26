@@ -7,7 +7,7 @@ pkg uniqueid, method (*Id) VDLRead(vdl.Decoder) error
 pkg uniqueid, method (*IdTarget) FromBytes([]byte, *vdl.Type) error
 pkg uniqueid, method (*RandomGenerator) NewID() (Id, error)
 pkg uniqueid, method (Id) String() string
-pkg uniqueid, method (Id) VDLIsZero() (bool, error)
+pkg uniqueid, method (Id) VDLIsZero() bool
 pkg uniqueid, method (Id) VDLWrite(vdl.Encoder) error
 pkg uniqueid, type Id [16]byte
 pkg uniqueid, type IdTarget struct

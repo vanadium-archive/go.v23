@@ -322,14 +322,14 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x AccessList) VDLIsZero() (bool, error) {
+func (x AccessList) VDLIsZero() bool {
 	if len(x.In) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.NotIn) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x AccessList) VDLWrite(enc vdl.Encoder) error {
@@ -390,7 +390,7 @@ func __VDLWriteAnon_list_2(enc vdl.Encoder, x []string) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x[i]); err != nil {
@@ -592,8 +592,8 @@ func (t *PermissionsTarget) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Permissions) VDLIsZero() (bool, error) {
-	return len(x) == 0, nil
+func (x Permissions) VDLIsZero() bool {
+	return len(x) == 0
 }
 
 func (x Permissions) VDLWrite(enc vdl.Encoder) error {
@@ -607,7 +607,7 @@ func (x Permissions) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -709,8 +709,8 @@ func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (x Tag) VDLIsZero() (bool, error) {
-	return x == "", nil
+func (x Tag) VDLIsZero() bool {
+	return x == ""
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {

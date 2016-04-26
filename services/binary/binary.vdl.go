@@ -217,14 +217,14 @@ func (t *__VDLTarget1_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Description) VDLIsZero() (bool, error) {
+func (x Description) VDLIsZero() bool {
 	if x.Name != "" {
-		return false, nil
+		return false
 	}
 	if len(x.Profiles) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Description) VDLWrite(enc vdl.Encoder) error {
@@ -235,7 +235,7 @@ func (x Description) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Name"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Name); err != nil {
@@ -270,7 +270,7 @@ func __VDLWriteAnon_map_1(enc vdl.Encoder, x map[string]bool) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -279,7 +279,7 @@ func __VDLWriteAnon_map_1(enc vdl.Encoder, x map[string]bool) error {
 		if err := enc.FinishValue(); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*bool)(nil))); err != nil {
+		if err := enc.StartValue(vdl.BoolType); err != nil {
 			return err
 		}
 		if err := enc.EncodeBool(elem); err != nil {
@@ -501,8 +501,8 @@ func (t *PartInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x PartInfo) VDLIsZero() (bool, error) {
-	return x == PartInfo{}, nil
+func (x PartInfo) VDLIsZero() bool {
+	return x == PartInfo{}
 }
 
 func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
@@ -513,7 +513,7 @@ func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Checksum"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Checksum); err != nil {
@@ -527,7 +527,7 @@ func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Size"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*int64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeInt(x.Size); err != nil {

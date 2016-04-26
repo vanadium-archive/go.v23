@@ -13,7 +13,7 @@ import (
 	"time"
 	"v.io/v23/services/syncbase"
 	"v.io/v23/vdl"
-	time_2 "v.io/v23/vdlroot/time"
+	vdltime "v.io/v23/vdlroot/time"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -89,12 +89,12 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var wireValue8 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue8, m.WriteTs); err != nil {
+	var wireValue8 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue8, m.WriteTs); err != nil {
 		return err
 	}
 
-	var11 := (wireValue8 == time_2.Time{})
+	var11 := (wireValue8 == vdltime.Time{})
 	if var11 {
 		if err := fieldsTarget1.ZeroField("WriteTs"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -148,7 +148,7 @@ type ValueTarget struct {
 	Value           *Value
 	stateTarget     syncbase.ValueStateTarget
 	valTarget       vdl.BytesTarget
-	writeTsTarget   time_2.TimeTarget
+	writeTsTarget   vdltime.TimeTarget
 	selectionTarget syncbase.ValueSelectionTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -195,13 +195,7 @@ func (t *ValueTarget) ZeroField(name string) error {
 		t.Value.Val = []byte(nil)
 		return nil
 	case "WriteTs":
-		t.Value.WriteTs = func() time.Time {
-			var native time.Time
-			if err := vdl.Convert(&native, time_2.Time{}); err != nil {
-				panic(err)
-			}
-			return native
-		}()
+		t.Value.WriteTs = time.Time{}
 		return nil
 	case "Selection":
 		t.Value.Selection = syncbase.ValueSelectionLocal
@@ -215,24 +209,20 @@ func (t *ValueTarget) FinishFields(_ vdl.FieldsTarget) error {
 	return nil
 }
 
-func (x Value) VDLIsZero() (bool, error) {
+func (x Value) VDLIsZero() bool {
 	if x.State != syncbase.ValueStateExists {
-		return false, nil
+		return false
 	}
 	if len(x.Val) != 0 {
-		return false, nil
+		return false
 	}
-	var wireWriteTs time_2.Time
-	if err := time_2.TimeFromNative(&wireWriteTs, x.WriteTs); err != nil {
-		return false, err
-	}
-	if wireWriteTs != (time_2.Time{}) {
-		return false, nil
+	if !x.WriteTs.IsZero() {
+		return false
 	}
 	if x.Selection != syncbase.ValueSelectionLocal {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Value) VDLWrite(enc vdl.Encoder) error {
@@ -261,15 +251,15 @@ func (x Value) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	var wireWriteTs time_2.Time
-	if err := time_2.TimeFromNative(&wireWriteTs, x.WriteTs); err != nil {
-		return err
-	}
-	if wireWriteTs != (time_2.Time{}) {
+	if !x.WriteTs.IsZero() {
 		if err := enc.NextField("WriteTs"); err != nil {
 			return err
 		}
-		if err := wireWriteTs.VDLWrite(enc); err != nil {
+		var wire vdltime.Time
+		if err := vdltime.TimeFromNative(&wire, x.WriteTs); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -318,11 +308,11 @@ func (x *Value) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "WriteTs":
-			var wire time_2.Time
+			var wire vdltime.Time
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
-			if err := time_2.TimeToNative(wire, &x.WriteTs); err != nil {
+			if err := vdltime.TimeToNative(wire, &x.WriteTs); err != nil {
 				return err
 			}
 		case "Selection":
@@ -390,12 +380,12 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		var9 = true
 	}
 	var7 = var7 && var9
-	var wireValue10 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue10, m.LocalValue.WriteTs); err != nil {
+	var wireValue10 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue10, m.LocalValue.WriteTs); err != nil {
 		return fmt.Errorf("error converting m.LocalValue.WriteTs to wiretype")
 	}
 
-	var11 := (wireValue10 == time_2.Time{})
+	var11 := (wireValue10 == vdltime.Time{})
 	var7 = var7 && var11
 	var12 := (m.LocalValue.Selection == syncbase.ValueSelectionLocal)
 	var7 = var7 && var12
@@ -426,12 +416,12 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		var17 = true
 	}
 	var15 = var15 && var17
-	var wireValue18 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue18, m.RemoteValue.WriteTs); err != nil {
+	var wireValue18 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue18, m.RemoteValue.WriteTs); err != nil {
 		return fmt.Errorf("error converting m.RemoteValue.WriteTs to wiretype")
 	}
 
-	var19 := (wireValue18 == time_2.Time{})
+	var19 := (wireValue18 == vdltime.Time{})
 	var15 = var15 && var19
 	var20 := (m.RemoteValue.Selection == syncbase.ValueSelectionLocal)
 	var15 = var15 && var20
@@ -462,12 +452,12 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		var25 = true
 	}
 	var23 = var23 && var25
-	var wireValue26 time_2.Time
-	if err := time_2.TimeFromNative(&wireValue26, m.AncestorValue.WriteTs); err != nil {
+	var wireValue26 vdltime.Time
+	if err := vdltime.TimeFromNative(&wireValue26, m.AncestorValue.WriteTs); err != nil {
 		return fmt.Errorf("error converting m.AncestorValue.WriteTs to wiretype")
 	}
 
-	var27 := (wireValue26 == time_2.Time{})
+	var27 := (wireValue26 == vdltime.Time{})
 	var23 = var23 && var27
 	var28 := (m.AncestorValue.Selection == syncbase.ValueSelectionLocal)
 	var23 = var23 && var28
@@ -645,35 +635,23 @@ func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x ConflictRow) VDLIsZero() (bool, error) {
+func (x ConflictRow) VDLIsZero() bool {
 	if x.Key != "" {
-		return false, nil
+		return false
 	}
-	isZeroLocalValue, err := x.LocalValue.VDLIsZero()
-	if err != nil {
-		return false, err
+	if !x.LocalValue.VDLIsZero() {
+		return false
 	}
-	if !isZeroLocalValue {
-		return false, nil
+	if !x.RemoteValue.VDLIsZero() {
+		return false
 	}
-	isZeroRemoteValue, err := x.RemoteValue.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroRemoteValue {
-		return false, nil
-	}
-	isZeroAncestorValue, err := x.AncestorValue.VDLIsZero()
-	if err != nil {
-		return false, err
-	}
-	if !isZeroAncestorValue {
-		return false, nil
+	if !x.AncestorValue.VDLIsZero() {
+		return false
 	}
 	if len(x.BatchIds) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x ConflictRow) VDLWrite(enc vdl.Encoder) error {
@@ -684,7 +662,7 @@ func (x ConflictRow) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Key"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Key); err != nil {
@@ -694,11 +672,7 @@ func (x ConflictRow) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroLocalValue, err := x.LocalValue.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroLocalValue {
+	if !x.LocalValue.VDLIsZero() {
 		if err := enc.NextField("LocalValue"); err != nil {
 			return err
 		}
@@ -706,11 +680,7 @@ func (x ConflictRow) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroRemoteValue, err := x.RemoteValue.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroRemoteValue {
+	if !x.RemoteValue.VDLIsZero() {
 		if err := enc.NextField("RemoteValue"); err != nil {
 			return err
 		}
@@ -718,11 +688,7 @@ func (x ConflictRow) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	isZeroAncestorValue, err := x.AncestorValue.VDLIsZero()
-	if err != nil {
-		return err
-	}
-	if !isZeroAncestorValue {
+	if !x.AncestorValue.VDLIsZero() {
 		if err := enc.NextField("AncestorValue"); err != nil {
 			return err
 		}
@@ -755,7 +721,7 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []uint64) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(x[i]); err != nil {
@@ -1166,14 +1132,14 @@ func (t *__VDLTarget4_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x ConflictRowSet) VDLIsZero() (bool, error) {
+func (x ConflictRowSet) VDLIsZero() bool {
 	if len(x.ByKey) != 0 {
-		return false, nil
+		return false
 	}
 	if len(x.ByBatch) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x ConflictRowSet) VDLWrite(enc vdl.Encoder) error {
@@ -1213,7 +1179,7 @@ func __VDLWriteAnon_map_2(enc vdl.Encoder, x map[string]ConflictRow) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
@@ -1243,7 +1209,7 @@ func __VDLWriteAnon_map_3(enc vdl.Encoder, x map[uint64][]ConflictRow) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(key); err != nil {
@@ -1640,11 +1606,11 @@ func (t *__VDLTarget6_list) FinishList(elem vdl.ListTarget) error {
 	return nil
 }
 
-func (x ConflictScanSet) VDLIsZero() (bool, error) {
+func (x ConflictScanSet) VDLIsZero() bool {
 	if len(x.ByBatch) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x ConflictScanSet) VDLWrite(enc vdl.Encoder) error {
@@ -1676,7 +1642,7 @@ func __VDLWriteAnon_map_5(enc vdl.Encoder, x map[uint64][]syncbase.ScanOp) error
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(key); err != nil {
@@ -2131,20 +2097,20 @@ func (t *__VDLTarget9_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Conflict) VDLIsZero() (bool, error) {
+func (x Conflict) VDLIsZero() bool {
 	if x.ReadSet != nil {
-		return false, nil
+		return false
 	}
 	if x.WriteSet != nil {
-		return false, nil
+		return false
 	}
 	if x.ScanSet != nil {
-		return false, nil
+		return false
 	}
 	if len(x.Batches) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Conflict) VDLWrite(enc vdl.Encoder) error {
@@ -2155,11 +2121,14 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ReadSet"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**ConflictRowSet)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*ConflictRowSet)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.ReadSet.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -2167,11 +2136,14 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("WriteSet"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**ConflictRowSet)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*ConflictRowSet)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.WriteSet.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -2179,11 +2151,14 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ScanSet"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**ConflictScanSet)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*ConflictScanSet)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.ScanSet.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -2212,7 +2187,7 @@ func __VDLWriteAnon_map_7(enc vdl.Encoder, x map[uint64]syncbase.BatchInfo) erro
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*uint64)(nil))); err != nil {
+		if err := enc.StartValue(vdl.Uint64Type); err != nil {
 			return err
 		}
 		if err := enc.EncodeUint(key); err != nil {
@@ -2507,8 +2482,8 @@ func (t *__VDLTarget10_optional) FromNil(tt *vdl.Type) error {
 	return nil
 }
 
-func (x ResolvedRow) VDLIsZero() (bool, error) {
-	return x == ResolvedRow{}, nil
+func (x ResolvedRow) VDLIsZero() bool {
+	return x == ResolvedRow{}
 }
 
 func (x ResolvedRow) VDLWrite(enc vdl.Encoder) error {
@@ -2519,7 +2494,7 @@ func (x ResolvedRow) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Key"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(x.Key); err != nil {
@@ -2533,11 +2508,14 @@ func (x ResolvedRow) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Result"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((**Value)(nil))); err != nil {
+		enc.SetNextStartValueIsOptional()
+		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
 			return err
 		}
-		enc.SetNextStartValueIsOptional()
 		if err := x.Result.VDLWrite(enc); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
 			return err
 		}
 	}
@@ -2760,11 +2738,11 @@ func (t *__VDLTarget11_map) FinishMap(elem vdl.MapTarget) error {
 	return nil
 }
 
-func (x Resolution) VDLIsZero() (bool, error) {
+func (x Resolution) VDLIsZero() bool {
 	if len(x.ResultSet) != 0 {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (x Resolution) VDLWrite(enc vdl.Encoder) error {
@@ -2796,7 +2774,7 @@ func __VDLWriteAnon_map_8(enc vdl.Encoder, x map[string]ResolvedRow) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*string)(nil))); err != nil {
+		if err := enc.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(key); err != nil {
