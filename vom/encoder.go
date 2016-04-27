@@ -27,6 +27,7 @@ var (
 	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
 	errUnusedTypeIds           = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
 	errUnusedAnys              = verror.Register(pkgPath+".errUnusedAnys", verror.NoRetry, "{1:}{2:} vom: some anys unused during encode {:_}")
+	errDeprecatedVersionUsed   = verror.Register(pkgPath+".errDeprecatedVersionUsed", verror.NoRetry, "{1:}{2:} vom: deprecated version used")
 )
 
 const (
@@ -163,6 +164,9 @@ func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEnc
 // Encode(nil) is a special case that encodes the zero value of the any type.
 // See the discussion of zero values in the Value documentation.
 func (e *Encoder) Encode(v interface{}) error {
+	if e.enc.version == Version80 {
+		return verror.New(errDeprecatedVersionUsed, nil)
+	}
 	if !e.enc.sentVersionByte {
 		if _, err := e.enc.writer.Write([]byte{byte(e.enc.version)}); err != nil {
 			return err

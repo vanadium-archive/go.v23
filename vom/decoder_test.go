@@ -16,13 +16,12 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
 	"v.io/v23/vom/testdata/types"
 )
 
 func TestDecoder(t *testing.T) {
-	for _, test := range append(data80.Tests, data81.Tests...) {
+	for _, test := range data81.Tests {
 		// Decode hex patterns into binary data.
 		binversion, err := binFromHexPat(test.HexVersion)
 		if err != nil {
@@ -429,7 +428,7 @@ func TestReceiveTypeStreamError(t *testing.T) {
 // in a deadlock.
 func TestFuzzTypeDecodeDeadlock(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader("\x80\x30"))
+	d := NewDecoder(strings.NewReader("\x81\x30"))
 	// Before the fix, this line caused a deadlock and panic.
 	d.Decode(&v)
 	return
@@ -439,7 +438,7 @@ func TestFuzzTypeDecodeDeadlock(t *testing.T) {
 // panic over in package vdl.
 func TestFuzzVdlPanic(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader("\x80S*\x00\x00$000000000000000000000000000000000000\x01*\xe1U(\x05\x00 00000000000000000000000000000000\x01*\x02+\xe1"))
+	d := NewDecoder(strings.NewReader("\x81S*\x00\x00$000000000000000000000000000000000000\x01*\xe1U(\x05\x00 00000000000000000000000000000000\x01*\x02+\xe1"))
 	// Before this fix this line caused a panic.
 	d.Decode(&v)
 	return
@@ -501,7 +500,7 @@ func TestFuzzDecodeOverflow(t *testing.T) {
 func TestFuzzTypeDecodeHang(t *testing.T) {
 	var v interface{}
 	d := NewDecoder(strings.NewReader(
-		"\x80W&\x03\x00 v.io/v23/vom/t" +
+		"\x81W&\x03\x00 v.io/v23/vom/t" +
 			"estdata/types.Rec4\x01)" +
 			"\xe1U&\x03\x00 v.io/v23/vom/t" +
 			"estdata/types.Rec3\x01," +
@@ -514,7 +513,7 @@ func TestFuzzTypeDecodeHang(t *testing.T) {
 	// Before the fix, this line caused a hang. With the fix, it should
 	// give an error.
 	err := d.Decode(&v)
-	if err != io.EOF {
+	if err == nil {
 		t.Fatal("unexpected success")
 	}
 }
