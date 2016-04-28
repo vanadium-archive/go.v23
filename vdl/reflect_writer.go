@@ -157,7 +157,13 @@ func writeNonNilValue(enc Encoder, rv reflect.Value, tt *Type) error {
 	// regular lists, since we can't easily convert []MyByte to []byte.
 	switch {
 	case tt.Kind() == Array && tt.Elem() == ByteType:
-		bytes := rv.Slice(0, tt.Len()).Interface().([]byte)
+		var bytes []byte
+		if rv.CanAddr() {
+			bytes = rv.Slice(0, tt.Len()).Interface().([]byte)
+		} else {
+			bytes = make([]byte, tt.Len())
+			reflect.Copy(reflect.ValueOf(bytes), rv)
+		}
 		return enc.EncodeBytes(bytes)
 	case tt.Kind() == List && tt.Elem() == ByteType:
 		bytes := rv.Convert(rtByteList).Interface().([]byte)

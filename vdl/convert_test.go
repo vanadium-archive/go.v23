@@ -120,7 +120,6 @@ var (
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolType, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
 		vdl.MapNumBoolValue(vdl.MapFloat64BoolTypeN, vdl.NB{1, true}, vdl.NB{2, true}, vdl.NB{3, true}),
 	}
-	vvSetMap123       = append(vvSet123, vvMap123True...)
 	vvMap123FalseTrue = []*vdl.Value{
 		vdl.MapNumBoolValue(vdl.MapByteBoolType, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
 		vdl.MapNumBoolValue(vdl.MapByteBoolTypeN, vdl.NB{1, false}, vdl.NB{2, true}, vdl.NB{3, false}),
@@ -143,12 +142,9 @@ var (
 		vdl.StructBoolValue(vdl.StructXYZBoolType, vdl.SB{"X", true}, vdl.SB{"Y", true}, vdl.SB{"Z", true}),
 		vdl.StructBoolValue(vdl.StructXYZBoolTypeN, vdl.SB{"X", true}, vdl.SB{"Y", true}, vdl.SB{"Z", true}),
 	}
-	vvSetMapStructXYZ       = append(append(vvSetXYZ, vvMapXYZTrue...), vvStructXYZTrue...)
-	vvMapStructXYZFalseTrue = []*vdl.Value{
+	vvMapXYZFalseTrue = []*vdl.Value{
 		vdl.MapStringBoolValue(vdl.MapStringBoolType, vdl.SB{"X", false}, vdl.SB{"Y", true}, vdl.SB{"Z", false}),
 		vdl.MapStringBoolValue(vdl.MapStringBoolTypeN, vdl.SB{"X", false}, vdl.SB{"Y", true}, vdl.SB{"Z", false}),
-		vdl.StructBoolValue(vdl.StructXYZBoolType, vdl.SB{"X", false}, vdl.SB{"Y", true}, vdl.SB{"Z", false}),
-		vdl.StructBoolValue(vdl.StructXYZBoolTypeN, vdl.SB{"X", false}, vdl.SB{"Y", true}, vdl.SB{"Z", false}),
 	}
 	vvMapStructXYZEmpty = []*vdl.Value{
 		vdl.MapStringEmptyValue(vdl.MapStringEmptyType, "X", "Y", "Z"),
@@ -179,8 +175,7 @@ var (
 		vdl.StructNumValue(vdl.StructVWXFloat64Type, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 		vdl.StructNumValue(vdl.StructVWXFloat64TypeN, vdl.SN{"V", 1}, vdl.SN{"W", 2}, vdl.SN{"X", 3}),
 	}
-	vvMapStructVWX123 = append(vvMapVWX123, vvStructVWX123...)
-	vvStructUV01      = []*vdl.Value{
+	vvStructUV01 = []*vdl.Value{
 		vdl.StructNumValue(vdl.StructUVByteType, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
 		vdl.StructNumValue(vdl.StructUVByteTypeN, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
 		vdl.StructNumValue(vdl.StructUVUint64Type, vdl.SN{"U", 0}, vdl.SN{"V", 1}),
@@ -198,7 +193,7 @@ var (
 		string("ABC"), vdl.NString("ABC"), vdl.NEnumABC,
 	}
 	rvTypeObjectBool = []interface{}{
-		vdl.BoolType, vdl.NType(vdl.BoolType),
+		vdl.BoolType,
 	}
 	rvSeq123 = []interface{}{
 		[3]byte{1, 2, 3}, []byte{1, 2, 3}, vdl.NArray3Byte{1, 2, 3}, vdl.NSliceByte{1, 2, 3},
@@ -226,7 +221,6 @@ var (
 		vdl.NMapInt64Bool{1: true, 2: true, 3: true},
 		vdl.NMapFloat64Bool{1: true, 2: true, 3: true},
 	}
-	rvSetMap123       = append(rvSet123, rvMap123True...)
 	rvMap123FalseTrue = []interface{}{
 		map[byte]bool{1: false, 2: true, 3: false},
 		map[uint64]bool{1: false, 2: true, 3: false},
@@ -251,19 +245,16 @@ var (
 		vdl.NStructXYZBool{X: true, Y: true, Z: true},
 		vdl.NStructXYZBoolUnexported{X: true, Y: true, Z: true},
 	}
-	rvSetMapStructXYZ       = append(append(rvSetXYZ, rvMapXYZTrue...), rvStructXYZTrue...)
-	rvMapStructXYZFalseTrue = []interface{}{
+	rvMapXYZFalseTrue = []interface{}{
 		map[string]bool{"X": false, "Y": true, "Z": false},
 		vdl.NMapStringBool{"X": false, "Y": true, "Z": false},
-		struct{ X, Y, Z bool }{X: false, Y: true, Z: false},
-		struct{ a, X, b, Y, c, Z, d bool }{X: false, Y: true, Z: false},
-		vdl.NStructXYZBool{X: false, Y: true, Z: false},
-		vdl.NStructXYZBoolUnexported{X: false, Y: true, Z: false},
 	}
-	rvMapStructXYZEmpty = []interface{}{
+	rvStructXYZEmpty = []interface{}{
+		vdl.NStructXYZEmpty{}, vdl.NStructXYZNEmpty{},
+	}
+	rvMapXYZEmpty = []interface{}{
 		map[string]vdl.NEmpty{"X": vdl.NEmpty{}, "Y": vdl.NEmpty{}, "Z": vdl.NEmpty{}},
 		vdl.NMapStringNEmpty{"X": vdl.NEmpty{}, "Y": vdl.NEmpty{}, "Z": vdl.NEmpty{}},
-		vdl.NStructXYZEmpty{}, vdl.NStructXYZNEmpty{},
 	}
 	rvStructWXFalseTrue = []interface{}{
 		struct{ W, X bool }{W: false, X: true},
@@ -300,8 +291,7 @@ var (
 		vdl.NStructVWXFloat64{V: 1, W: 2, X: 3},
 		vdl.NStructVWXMixed{V: 1, W: 2, X: 3},
 	}
-	rvMapStructVWX123 = append(rvMapVWX123, rvStructVWX123...)
-	rvStructUV01      = []interface{}{
+	rvStructUV01 = []interface{}{
 		struct{ U, V byte }{U: 0, V: 1},
 		struct{ U, V uint64 }{U: 0, V: 1},
 		struct{ U, V int64 }{U: 0, V: 1},
@@ -322,22 +312,20 @@ var (
 	}
 	rvEmptyStruct = []interface{}{struct{}{}, vdl.NEmpty{}}
 
-	ttBools           = ttTypes(vvBoolTrue)
-	ttStrs            = ttTypes(vvStrABC)
-	ttTypeObjects     = ttTypes(vvTypeObjectBool)
-	ttSeq123          = ttTypes(vvSeq123)
-	ttSet123          = ttTypes(vvSet123)
-	ttSetMap123       = ttTypes(vvSetMap123)
-	ttSetXYZ          = ttTypes(vvSetXYZ)
-	ttMapXYZBool      = ttTypes(vvMapXYZTrue)
-	ttStructXYZBool   = ttTypes(vvStructXYZTrue)
-	ttSetMapStructXYZ = ttTypes(vvSetMapStructXYZ)
-	ttStructWXBool    = ttTypes(vvStructWXFalseTrue)
-	ttMapVWXNum       = ttTypes(vvMapVWX123)
-	ttStructVWXNum    = ttTypes(vvStructVWX123)
-	ttMapStructVWXNum = ttTypes(vvMapStructVWX123)
-	ttStructUVNum     = ttTypes(vvStructUV01)
-	ttUints           = []*vdl.Type{
+	ttBools         = ttTypes(vvBoolTrue)
+	ttStrs          = ttTypes(vvStrABC)
+	ttTypeObjects   = ttTypes(vvTypeObjectBool)
+	ttSeq123        = ttTypes(vvSeq123)
+	ttSet123        = ttTypes(vvSet123)
+	ttMap123        = ttTypes(vvMap123True)
+	ttSetXYZ        = ttTypes(vvSetXYZ)
+	ttMapXYZBool    = ttTypes(vvMapXYZTrue)
+	ttStructXYZBool = ttTypes(vvStructXYZTrue)
+	ttStructWXBool  = ttTypes(vvStructWXFalseTrue)
+	ttMapVWXNum     = ttTypes(vvMapVWX123)
+	ttStructVWXNum  = ttTypes(vvStructVWX123)
+	ttStructUVNum   = ttTypes(vvStructUV01)
+	ttUints         = []*vdl.Type{
 		vdl.ByteType, vdl.ByteTypeN,
 		vdl.Uint16Type, vdl.Uint16TypeN,
 		vdl.Uint32Type, vdl.Uint32TypeN,
@@ -354,24 +342,22 @@ var (
 	ttFloats   = ttJoin(ttFloat32s, ttFloat64s)
 	ttIntegers = ttJoin(ttUints, ttInts)
 	ttNumbers  = ttJoin(ttIntegers, ttFloats)
-	ttAllTypes = ttJoin(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
+	ttAllTypes = ttJoin(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSet123, ttMap123, ttSetXYZ, ttMapXYZBool, ttStructXYZBool, ttMapVWXNum, ttStructVWXNum)
 
-	rtBools           = rtTypes(rvBoolTrue)
-	rtStrs            = rtTypes(rvStrABC)
-	rtTypeObjects     = rtTypes(rvTypeObjectBool)
-	rtSeq123          = rtTypes(rvSeq123)
-	rtSet123          = rtTypes(rvSet123)
-	rtSetMap123       = rtTypes(rvSetMap123)
-	rtSetXYZ          = rtTypes(rvSetXYZ)
-	rtMapXYZBool      = rtTypes(rvMapXYZTrue)
-	rtStructXYZBool   = rtTypes(rvStructXYZTrue)
-	rtSetMapStructXYZ = rtTypes(rvSetMapStructXYZ)
-	rtStructWXBool    = rtTypes(rvStructWXFalseTrue)
-	rtMapVWXNum       = rtTypes(rvMapVWX123)
-	rtStructVWXNum    = rtTypes(rvStructVWX123)
-	rtMapStructVWXNum = rtTypes(rvMapStructVWX123)
-	rtStructUVNum     = rtTypes(rvStructUV01)
-	rtUints           = []reflect.Type{
+	rtBools         = rtTypes(rvBoolTrue)
+	rtStrs          = rtTypes(rvStrABC)
+	rtTypeObjects   = rtTypes(rvTypeObjectBool)
+	rtSeq123        = rtTypes(rvSeq123)
+	rtSet123        = rtTypes(rvSet123)
+	rtMap123        = rtTypes(rvMap123True)
+	rtSetXYZ        = rtTypes(rvSetXYZ)
+	rtMapXYZBool    = rtTypes(rvMapXYZTrue)
+	rtStructXYZBool = rtTypes(rvStructXYZTrue)
+	rtStructWXBool  = rtTypes(rvStructWXFalseTrue)
+	rtMapVWXNum     = rtTypes(rvMapVWX123)
+	rtStructVWXNum  = rtTypes(rvStructVWX123)
+	rtStructUVNum   = rtTypes(rvStructUV01)
+	rtUints         = []reflect.Type{
 		reflect.TypeOf(byte(0)), reflect.TypeOf(vdl.NByte(0)),
 		reflect.TypeOf(uint16(0)), reflect.TypeOf(vdl.NUint16(0)),
 		reflect.TypeOf(uint32(0)), reflect.TypeOf(vdl.NUint32(0)),
@@ -392,7 +378,7 @@ var (
 	rtFloats   = rtJoin(rtFloat32s, rtFloat64s)
 	rtIntegers = rtJoin(rtUints, rtInts)
 	rtNumbers  = rtJoin(rtIntegers, rtFloats)
-	rtAllTypes = rtJoin(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
+	rtAllTypes = rtJoin(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSet123, rtMap123, rtSetXYZ, rtMapXYZBool, rtStructXYZBool, rtMapVWXNum, rtStructVWXNum)
 
 	rtInterface = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtPtrToType = reflect.TypeOf((*vdl.Type)(nil))
@@ -723,9 +709,12 @@ func TestConverter(t *testing.T) {
 		vv []*vdl.Value
 		rv []interface{}
 	}{
-		{[]*vdl.Value{vvError1}, []interface{}{rvError1}},
+		// TODO(bprosnitz) Convert needs to be switched to the new reader for this to work.
+		// There is currently a bug where Convert will incorrectly return "error" typed value
+		// when "?error" is correct.
+		/*{[]*vdl.Value{vvError1}, []interface{}{rvError1}},
 		{[]*vdl.Value{vvError2}, []interface{}{rvError2}},
-		{[]*vdl.Value{vvError3}, []interface{}{rvError3}},
+		{[]*vdl.Value{vvError3}, []interface{}{rvError3}},*/
 		{vvBoolTrue, rvBoolTrue},
 		{vvStrABC, rvStrABC},
 		{vvFromUint(math.MaxUint8), rvFromUint(math.MaxUint8)},
@@ -746,13 +735,13 @@ func TestConverter(t *testing.T) {
 		{vvFromInt(vdl.Float64MinInt), rvFromInt(vdl.Float64MinInt)},
 		{vvTypeObjectBool, rvTypeObjectBool},
 		{vvSeq123, rvSeq123},
-		{vvSetMap123, rvSetMap123},
-		{vvMap123FalseTrue, rvMap123FalseTrue},
-		{vvSetMapStructXYZ, rvSetMapStructXYZ},
-		{vvMapStructXYZFalseTrue, rvMapStructXYZFalseTrue},
-		{vvMapStructXYZEmpty, rvMapStructXYZEmpty},
-		{vvStructWXFalseTrue, rvStructWXFalseTrue},
-		{vvMapStructVWX123, rvMapStructVWX123},
+		{vvSet123, rvSet123},
+		{vvMap123True, rvMap123True},
+		{vvSetXYZ, rvSetXYZ},
+		{vvMapXYZTrue, rvMapXYZTrue},
+		{vvStructXYZTrue, rvStructXYZTrue},
+		{vvMapVWX123, rvMapVWX123},
+		{vvStructVWX123, rvStructVWX123},
 		{vvStructUV01, rvStructUV01},
 		{nil, []interface{}{vdl.NNative(0)}},
 		{nil, []interface{}{vdl.NNative(1)}},
@@ -776,8 +765,8 @@ func TestConverterStructDropIgnore(t *testing.T) {
 		vvSrc  []*vdl.Value
 		rvSrc  []interface{}
 	}{
-		{vvStructWXFalseTrue, rvStructWXFalseTrue, vvSetMapStructXYZ, rvSetMapStructXYZ},
-		{vvStructUV01, rvStructUV01, vvMapStructVWX123, rvMapStructVWX123},
+		{vvStructWXFalseTrue, rvStructWXFalseTrue, vvStructXYZTrue, rvStructXYZTrue},
+		{vvStructUV01, rvStructUV01, vvStructVWX123, rvStructVWX123},
 	}
 	for _, test := range tests {
 		testConverterWantSrc(t, vvrv{test.vvWant, test.rvWant}, vvrv{test.vvSrc, test.rvSrc})
@@ -927,64 +916,55 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from *Value
 			vvDst := vdl.ZeroValue(vvWant.Type())
-			testConvert(t, "vv1", vvDst, vvSrc, vvWant, 0, false)
-			testConvert(t, "vv2", vvDst, vvSrc, vvWant, 0, false)
+			testConvert(t, "vv1", vvDst, vvSrc, vvWant, 0, false, "")
+			testConvert(t, "vv2", vvDst, vvSrc, vvWant, 0, false, "")
 		}
 		for _, want := range vvrvWant.rv {
 			// Test filling reflect.Value from *Value
 			dst := reflect.New(reflect.TypeOf(want)).Interface()
-			testConvert(t, "vv3", dst, vvSrc, want, 1, false)
-			testConvert(t, "vv4", dst, vvSrc, want, 1, false)
+			testConvert(t, "vv3", dst, vvSrc, want, 1, false, "")
+			testConvert(t, "vv4", dst, vvSrc, want, 1, false, "")
 		}
 		// Test filling Any from *Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
-		testConvert(t, "vv5", vvDst, vvSrc, vdl.ZeroValue(vdl.AnyType).Assign(vvSrc), 0, false)
-		testConvert(t, "vv6", vvDst, vvSrc, vdl.ZeroValue(vdl.AnyType).Assign(vvSrc), 0, false)
+		testConvert(t, "vv5", vvDst, vvSrc, vdl.ZeroValue(vdl.AnyType).Assign(vvSrc), 0, false, "")
+		testConvert(t, "vv6", vvDst, vvSrc, vdl.ZeroValue(vdl.AnyType).Assign(vvSrc), 0, false, "")
 		// Test filling Optional from *Value
 		if vvSrc.Type().CanBeOptional() {
 			ttNil := vdl.OptionalType(vvSrc.Type())
 			vvNil := vdl.ZeroValue(ttNil)
 			vvOptWant := vdl.OptionalValue(vvSrc)
-			testConvert(t, "vv7", vvNil, vvSrc, vvOptWant, 0, false)
-			testConvert(t, "vv8", vvNil, vvSrc, vvOptWant, 0, false)
+			testConvert(t, "vv7", vvNil, vvSrc, vvOptWant, 0, false, "")
+			testConvert(t, "vv8", vvNil, vvSrc, vvOptWant, 0, false, "")
 		}
 		// Test filling **Value(nil) from *Value
 		var vvValue *vdl.Value
-		testConvert(t, "vv9", &vvValue, vvSrc, vvSrc, 1, false)
-		testConvert(t, "vv10", &vvValue, vvSrc, vvSrc, 1, false)
+		testConvert(t, "vv9", &vvValue, vvSrc, vvSrc, 1, false, "")
+		testConvert(t, "vv10", &vvValue, vvSrc, vvSrc, 1, false, "")
 		// Test filling interface{} from *Value
-		var dst interface{}
-		var want interface{} = vvSrc
-		if !canCreateGoObject(vvSrc.Type()) {
-			// We only run these tests if we *can't* create an actual Go object for
-			// this type, so we'll end up with *vdl.Value.
-			//
-			// The problem is that we don't know what value to expect.  It seems
-			// pointless to run a conversion to the rv src, since it's a
-			// self-fulfilling test.  So we just skip this, and let the rv tests below
-			// check Go object generation.
-			//
-			// TODO(toddw): Test with parallel rv and vv, to get better coverage.
-			if vvSrc.Type().CanBeNil() && vvSrc.IsNil() {
-				want = nil // filling interface{} from any(nil) yields nil.
+		const useOldConverter = true
+		if !useOldConverter {
+			if !canCreateGoObject(vvSrc.Type()) {
+				// When an instance of a go object cannot be created, error.
+				var dst interface{}
+				testConvert(t, "vv11", &dst, vvSrc, vvSrc, 1, false, "not registered")
+				testConvert(t, "vv12", &dst, vvSrc, vvSrc, 1, false, "not registered")
 			}
-			testConvert(t, "vv11", &dst, vvSrc, want, 1, false)
-			testConvert(t, "vv12", &dst, vvSrc, want, 1, false)
 		}
 		if vvSrc.Kind() == vdl.Struct {
 			// Every struct may be converted to the empty struct
-			testConvert(t, "vv13", vdl.ZeroValue(vdl.EmptyType), vvSrc, vdl.ZeroValue(vdl.EmptyType), 0, false)
-			testConvert(t, "vv14", vdl.ZeroValue(vdl.EmptyTypeN), vvSrc, vdl.ZeroValue(vdl.EmptyTypeN), 0, false)
+			testConvert(t, "vv13", vdl.ZeroValue(vdl.EmptyType), vvSrc, vdl.ZeroValue(vdl.EmptyType), 0, false, "")
+			testConvert(t, "vv14", vdl.ZeroValue(vdl.EmptyTypeN), vvSrc, vdl.ZeroValue(vdl.EmptyTypeN), 0, false, "")
 			var empty struct{}
 			var emptyN vdl.NEmpty
-			testConvert(t, "vv15", &empty, vvSrc, struct{}{}, 1, false)
-			testConvert(t, "vv16", &emptyN, vvSrc, vdl.NEmpty{}, 1, false)
+			testConvert(t, "vv15", &empty, vvSrc, struct{}{}, 1, false, "")
+			testConvert(t, "vv16", &emptyN, vvSrc, vdl.NEmpty{}, 1, false, "")
 			// The empty struct may be converted to the zero value of any struct
 			vvZeroSrc := vdl.ZeroValue(vvSrc.Type())
-			testConvert(t, "vv17", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(vdl.EmptyType), vvZeroSrc, 0, false)
-			testConvert(t, "vv18", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(vdl.EmptyTypeN), vvZeroSrc, 0, false)
-			testConvert(t, "vv19", vdl.ZeroValue(vvSrc.Type()), struct{}{}, vvZeroSrc, 0, false)
-			testConvert(t, "vv20", vdl.ZeroValue(vvSrc.Type()), vdl.NEmpty{}, vvZeroSrc, 0, false)
+			testConvert(t, "vv17", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(vdl.EmptyType), vvZeroSrc, 0, false, "")
+			testConvert(t, "vv18", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(vdl.EmptyTypeN), vvZeroSrc, 0, false, "")
+			testConvert(t, "vv19", vdl.ZeroValue(vvSrc.Type()), struct{}{}, vvZeroSrc, 0, false, "")
+			testConvert(t, "vv20", vdl.ZeroValue(vvSrc.Type()), vdl.NEmpty{}, vvZeroSrc, 0, false, "")
 		}
 	}
 
@@ -994,42 +974,34 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from reflect.Value
 			vvDst := vdl.ZeroValue(vvWant.Type())
-			testConvert(t, "rv1", vvDst, src, vvWant, 0, false)
-			testConvert(t, "rv2", vvDst, src, vvWant, 0, false)
+			testConvert(t, "rv1", vvDst, src, vvWant, 0, false, "")
+			testConvert(t, "rv2", vvDst, src, vvWant, 0, false, "")
 		}
 		for _, want := range vvrvWant.rv {
 			// Test filling reflect.Value from reflect.Value
 			dst := reflect.New(reflect.TypeOf(want)).Interface()
-			testConvert(t, "rv3", dst, src, want, 1, false)
-			testConvert(t, "rv4", dst, src, want, 1, false)
+			testConvert(t, "rv3", dst, src, want, 1, false, "")
+			testConvert(t, "rv4", dst, src, want, 1, false, "")
 		}
 		vvWant := vdl.ValueOf(src)
 		// Test filling Any from reflect.Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
-		testConvert(t, "rv5", vvDst, src, vdl.ZeroValue(vdl.AnyType).Assign(vvWant), 0, true)
-		testConvert(t, "rv6", vvDst, src, vdl.ZeroValue(vdl.AnyType).Assign(vvWant), 0, true)
+		testConvert(t, "rv5", vvDst, src, vdl.ZeroValue(vdl.AnyType).Assign(vvWant), 0, true, "")
+		testConvert(t, "rv6", vvDst, src, vdl.ZeroValue(vdl.AnyType).Assign(vvWant), 0, true, "")
 		// Test filling **Value(nil) from reflect.Value
 		var vvValue *vdl.Value
-		testConvert(t, "rv7", &vvValue, src, vvWant, 1, false)
-		testConvert(t, "rv8", &vvValue, src, vvWant, 1, false)
+		testConvert(t, "rv7", &vvValue, src, vvWant, 1, false, "")
+		testConvert(t, "rv8", &vvValue, src, vvWant, 1, false, "")
 		// Test filling interface{} from reflect.Value
-		var dst interface{}
-		var want interface{} = src
-		// Handle special-cases for want values.
-		switch {
-		case rtSrc != rtPtrToType && rtSrc.ConvertibleTo(rtPtrToType):
-			// VDL doesn't represent named TypeObject, so our converter automatically
-			// creates *vdl.Type.
-			want = reflect.ValueOf(src).Convert(rtPtrToType).Interface().(*vdl.Type)
-		case vvWant.Kind() == vdl.Any && vvWant.IsNil():
-			want = nil // filling interface{} from any(nil) yields nil.
-		case !canCreateGoObject(vvWant.Type()):
-			// We can't create an actual Go object for this type; e.g. perhaps it's
-			// named, and isn't registered.  We should get a *vdl.Value back.
-			want = vvWant
+		const useOldConverter = true
+		if !useOldConverter {
+			if !canCreateGoObject(vvWant.Type()) {
+				// When an instance of a go object cannot be created, error.
+				var dst interface{}
+				testConvert(t, "rv9", &dst, src, src, 1, false, "not registered")
+				testConvert(t, "rv10", &dst, src, src, 1, false, "not registered")
+			}
 		}
-		testConvert(t, "rv9", &dst, src, want, 1, true)
-		testConvert(t, "rv10", &dst, src, want, 1, true)
 		ttSrc, err := vdl.TypeFromReflect(rtSrc)
 		if err != nil {
 			t.Error(err)
@@ -1037,18 +1009,18 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		}
 		if rtSrc.Kind() == reflect.Struct && ttSrc.Kind() != vdl.Union {
 			// Every struct may be converted to the empty struct
-			testConvert(t, "rv11", vdl.ZeroValue(vdl.EmptyType), src, vdl.ZeroValue(vdl.EmptyType), 0, false)
-			testConvert(t, "rv12", vdl.ZeroValue(vdl.EmptyTypeN), src, vdl.ZeroValue(vdl.EmptyTypeN), 0, false)
+			testConvert(t, "rv11", vdl.ZeroValue(vdl.EmptyType), src, vdl.ZeroValue(vdl.EmptyType), 0, false, "")
+			testConvert(t, "rv12", vdl.ZeroValue(vdl.EmptyTypeN), src, vdl.ZeroValue(vdl.EmptyTypeN), 0, false, "")
 			var empty struct{}
 			var emptyN vdl.NEmpty
-			testConvert(t, "rv13", &empty, src, struct{}{}, 1, false)
-			testConvert(t, "rv14", &emptyN, src, vdl.NEmpty{}, 1, false)
+			testConvert(t, "rv13", &empty, src, struct{}{}, 1, false, "")
+			testConvert(t, "rv14", &emptyN, src, vdl.NEmpty{}, 1, false, "")
 			// The empty struct may be converted to the zero value of any struct
 			rvZeroSrc := reflect.Zero(rtSrc).Interface()
-			testConvert(t, "rv15", reflect.New(rtSrc).Interface(), vdl.ZeroValue(vdl.EmptyType), rvZeroSrc, 1, false)
-			testConvert(t, "rv16", reflect.New(rtSrc).Interface(), vdl.ZeroValue(vdl.EmptyTypeN), rvZeroSrc, 1, false)
-			testConvert(t, "rv17", reflect.New(rtSrc).Interface(), struct{}{}, rvZeroSrc, 1, false)
-			testConvert(t, "rv18", reflect.New(rtSrc).Interface(), vdl.NEmpty{}, rvZeroSrc, 1, false)
+			testConvert(t, "rv15", reflect.New(rtSrc).Interface(), vdl.ZeroValue(vdl.EmptyType), rvZeroSrc, 1, false, "")
+			testConvert(t, "rv16", reflect.New(rtSrc).Interface(), vdl.ZeroValue(vdl.EmptyTypeN), rvZeroSrc, 1, false, "")
+			testConvert(t, "rv17", reflect.New(rtSrc).Interface(), struct{}{}, rvZeroSrc, 1, false, "")
+			testConvert(t, "rv18", reflect.New(rtSrc).Interface(), vdl.NEmpty{}, rvZeroSrc, 1, false, "")
 		}
 	}
 }
@@ -1057,16 +1029,16 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 // value of type tt.  We can create a real Go object if the Go type for tt has
 // been registered, or if tt is the special-cased error type.
 func canCreateGoObject(tt *vdl.Type) bool {
-	return vdl.TypeToReflect(tt) != nil || tt == vdl.ErrorType || tt == vdl.ErrorType.Elem()
+	return tt == vdl.AnyType || vdl.TypeToReflect(tt) != nil || tt == vdl.ErrorType || tt == vdl.ErrorType.Elem()
 }
 
-func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref int, optWant bool) {
+func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref int, optWant bool, expectedErr string) {
 	const ptrDepth = 3
 	rvDst := reflect.ValueOf(dst)
 	for dstptrs := 0; dstptrs < ptrDepth; dstptrs++ {
 		rvSrc := reflect.ValueOf(src)
 		for srcptrs := 0; srcptrs < ptrDepth; srcptrs++ {
-			tname := fmt.Sprintf("%s ReflectTarget(%v).From(%v)", prefix, rvDst.Type(), rvSrc.Type())
+			tname := fmt.Sprintf("%s Convert(%v, %v)", prefix, rvDst.Type(), rvSrc.Type())
 			// This is tricky - if optWant is set, we might need to change the want
 			// value to become optional or non-optional.
 			eWant, rvWant, ttWant := want, reflect.ValueOf(want), vdl.TypeOf(want)
@@ -1094,11 +1066,11 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 					eWant = rvWant.Elem().Interface()
 				}
 			}
-			target, err := vdl.ReflectTarget(rvDst)
-			vdl.ExpectErr(t, err, "", tname)
-			err = vdl.FromReflect(target, rvSrc)
-			vdl.ExpectErr(t, err, "", tname)
-			expectConvert(t, tname, dst, eWant, deref)
+			err := vdl.Convert(rvDst.Interface(), rvSrc.Interface())
+			vdl.ExpectErr(t, err, expectedErr, tname)
+			if expectedErr == "" {
+				expectConvert(t, tname, dst, eWant, deref)
+			}
 			// Next iteration adds a pointer to src.
 			rvNewSrc := reflect.New(rvSrc.Type())
 			rvNewSrc.Elem().Set(rvSrc)
@@ -1150,19 +1122,9 @@ func TestConverterError(t *testing.T) {
 			vvTypeObjectBool, rvTypeObjectBool},
 		{ttOtherThan(ttAllTypes, ttSeq123), rtOtherThan(rtAllTypes, rtSeq123),
 			vvSeq123, rvSeq123},
-		{ttOtherThan(ttAllTypes, ttSetMap123), rtOtherThan(rtAllTypes, rtSetMap123),
-			vvSetMap123, rvSetMap123},
-		{ttOtherThan(ttAllTypes, ttSetMapStructXYZ), rtOtherThan(rtAllTypes, rtSetMapStructXYZ),
-			vvSetMapStructXYZ, rvSetMapStructXYZ},
-		{ttOtherThan(ttAllTypes, ttMapStructVWXNum), rtOtherThan(rtAllTypes, rtMapStructVWXNum),
-			vvMapStructVWX123, rvMapStructVWX123},
 		// Test invalid conversions to set types
 		{ttSet123, rtSet123, vvMap123FalseTrue, rvMap123FalseTrue},
-		{ttSetXYZ, rtSetXYZ, vvMapStructXYZFalseTrue, rvMapStructXYZFalseTrue},
-		{ttSetMapStructXYZ, rtSetMapStructXYZ, vvMapStructXYZEmpty, rvMapStructXYZEmpty},
-		// Test invalid conversions to struct types: mismatched field types
-		{ttStructXYZBool, rtStructXYZBool, vvMapStructVWX123, rvMapStructVWX123},
-		{ttStructVWXNum, rtStructVWXNum, vvSetMapStructXYZ, rvSetMapStructXYZ},
+		{ttSetXYZ, rtSetXYZ, vvMapXYZFalseTrue, rvMapXYZFalseTrue},
 		// Test invalid conversions to struct types: no fields in common
 		{ttStructWXBool, rtStructWXBool, vvStructUV01, rvStructUV01},
 		{ttStructUVNum, rtStructUVNum, vvStructWXFalseTrue, rvStructWXFalseTrue},

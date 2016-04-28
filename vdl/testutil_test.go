@@ -71,7 +71,6 @@ func ExpectMismatchedKind(t *testing.T, f func()) {
 type (
 	// Scalars
 	NInterface interface{}
-	NType      *Type
 	NBool      bool
 	NByte      byte
 	NUint16    uint16

@@ -131,11 +131,16 @@ type FieldsTarget interface {
 // Convert converts from src to dst - it is a helper for calling
 // ReflectTarget(reflect.ValueOf(dst)).FromReflect(reflect.ValueOf(src)).
 func Convert(dst, src interface{}) error {
-	target, err := ReflectTarget(reflect.ValueOf(dst))
-	if err != nil {
-		return err
+	// TODO(bprosnitz) Flip useOldConvert=false to enable the new convert.
+	const useOldConvert = true
+	if useOldConvert {
+		target, err := ReflectTarget(reflect.ValueOf(dst))
+		if err != nil {
+			return err
+		}
+		return FromReflect(target, reflect.ValueOf(src))
 	}
-	return FromReflect(target, reflect.ValueOf(src))
+	return convertPipe(dst, src)
 }
 
 // ValueOf returns the value corresponding to v.  It's a helper for calling
@@ -150,15 +155,21 @@ func ValueOf(v interface{}) *Value {
 
 // ValueFromReflect returns the value corresponding to rv.
 func ValueFromReflect(rv reflect.Value) (*Value, error) {
+	const useOldConvert = true
+	if useOldConvert {
+		var result *Value
+		target, err := ReflectTarget(reflect.ValueOf(&result))
+		if err != nil {
+			return nil, err
+		}
+		if err := FromReflect(target, rv); err != nil {
+			return nil, err
+		}
+		return result, nil
+	}
 	var result *Value
-	target, err := ReflectTarget(reflect.ValueOf(&result))
-	if err != nil {
-		return nil, err
-	}
-	if err := FromReflect(target, rv); err != nil {
-		return nil, err
-	}
-	return result, nil
+	err := convertPipe(&result, rv.Interface())
+	return result, err
 }
 
 // FromReflect converts from rv to the target, by walking through rv and calling

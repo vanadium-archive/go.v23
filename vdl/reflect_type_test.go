@@ -140,7 +140,6 @@ var rtNonKeyTests = []rtTest{
 	// Named scalars (we cannot detect the error type if it is named)
 	{reflect.TypeOf((*NInterface)(nil)), AnyType},
 	{reflect.TypeOf((*NInterface)(nil)).Elem(), AnyType},
-	{reflect.TypeOf(NType(nil)), TypeObjectType},
 	// Unnamed arrays
 	{reflect.TypeOf([3]interface{}{}), ArrayType(3, AnyType)},
 	{reflect.TypeOf([3]error{}), ArrayType(3, ErrorType)},

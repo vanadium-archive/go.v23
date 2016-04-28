@@ -262,7 +262,7 @@ func readNonNilError(dec Decoder, rv reflect.Value) error {
 	if err := ni.ToNative(reflect.ValueOf(wire), rvNativePtr); err != nil {
 		return err
 	}
-	rv.Set(rvNativePtr)
+	rv.Set(rvNativePtr.Elem())
 	// Note that dec.FinishValue has already been called by wire.VDLRead.
 	return nil
 }
