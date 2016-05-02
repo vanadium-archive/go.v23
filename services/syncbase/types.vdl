@@ -60,7 +60,7 @@ type BatchHandle string
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string
-	Value []byte
+	Value any
 }
 
 // CollectionRow encapsulates a collection id and row key or row prefix.
@@ -259,7 +259,7 @@ type Value struct {
 	State ValueState
 
 	// VOM encoded bytes for a row's value or nil if the row was deleted.
-	Bytes []byte
+	Bytes any
 
 	// Write timestamp for this value
 	WriteTs time.Time

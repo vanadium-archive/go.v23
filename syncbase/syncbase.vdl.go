@@ -14,6 +14,7 @@ import (
 	"v.io/v23/services/syncbase"
 	"v.io/v23/vdl"
 	vdltime "v.io/v23/vdlroot/time"
+	"v.io/v23/vom"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -28,7 +29,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 // WriteTs is the write timestamp for this value.
 type Value struct {
 	State   syncbase.ValueState
-	Val     []byte
+	Val     *vom.RawBytes
 	WriteTs time.Time
 	// TODO(jlodhia): Since field Selection cannot be package private in VDL,
 	// review the ConflictResolution API to see if we should keep this field
@@ -66,10 +67,7 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var7 bool
-	if len(m.Val) == 0 {
-		var7 = true
-	}
+	var7 := m.Val == nil || (m.Val.Type.Kind() == vdl.Any && m.Val.IsNil())
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Val"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -81,7 +79,7 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := fieldTarget6.FromBytes([]byte(m.Val), tt.NonOptional().Field(1).Type); err != nil {
+			if err := m.Val.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -145,9 +143,9 @@ func (m *Value) MakeVDLTarget() vdl.Target {
 }
 
 type ValueTarget struct {
-	Value           *Value
-	stateTarget     syncbase.ValueStateTarget
-	valTarget       vdl.BytesTarget
+	Value       *Value
+	stateTarget syncbase.ValueStateTarget
+
 	writeTsTarget   vdltime.TimeTarget
 	selectionTarget syncbase.ValueSelectionTarget
 	vdl.TargetBase
@@ -168,8 +166,7 @@ func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.stateTarget, error(nil)
 		return nil, target, err
 	case "Val":
-		t.valTarget.Value = &t.Value.Val
-		target, err := &t.valTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Val))
 		return nil, target, err
 	case "WriteTs":
 		t.writeTsTarget.Value = &t.Value.WriteTs
@@ -192,7 +189,7 @@ func (t *ValueTarget) ZeroField(name string) error {
 		t.Value.State = syncbase.ValueStateExists
 		return nil
 	case "Val":
-		t.Value.Val = []byte(nil)
+		t.Value.Val = vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType))
 		return nil
 	case "WriteTs":
 		t.Value.WriteTs = time.Time{}
@@ -213,7 +210,7 @@ func (x Value) VDLIsZero() bool {
 	if x.State != syncbase.ValueStateExists {
 		return false
 	}
-	if len(x.Val) != 0 {
+	if x.Val != nil && !x.Val.VDLIsZero() {
 		return false
 	}
 	if !x.WriteTs.IsZero() {
@@ -237,17 +234,11 @@ func (x Value) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if len(x.Val) != 0 {
+	if x.Val != nil && !x.Val.VDLIsZero() {
 		if err := enc.NextField("Val"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeBytes(x.Val); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.Val.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -278,7 +269,9 @@ func (x Value) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Value) VDLRead(dec vdl.Decoder) error {
-	*x = Value{}
+	*x = Value{
+		Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -298,13 +291,7 @@ func (x *Value) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Val":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &x.Val); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
+			if err := x.Val.VDLRead(dec); err != nil {
 				return err
 			}
 		case "WriteTs":
@@ -372,23 +359,9 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := true
-	var8 := (m.LocalValue.State == syncbase.ValueStateExists)
-	var7 = var7 && var8
-	var var9 bool
-	if len(m.LocalValue.Val) == 0 {
-		var9 = true
-	}
-	var7 = var7 && var9
-	var wireValue10 vdltime.Time
-	if err := vdltime.TimeFromNative(&wireValue10, m.LocalValue.WriteTs); err != nil {
-		return fmt.Errorf("error converting m.LocalValue.WriteTs to wiretype")
-	}
-
-	var11 := (wireValue10 == vdltime.Time{})
-	var7 = var7 && var11
-	var12 := (m.LocalValue.Selection == syncbase.ValueSelectionLocal)
-	var7 = var7 && var12
+	var7 := (m.LocalValue == Value{
+		Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	})
 	if var7 {
 		if err := fieldsTarget1.ZeroField("LocalValue"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -408,113 +381,85 @@ func (m *ConflictRow) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var15 := true
-	var16 := (m.RemoteValue.State == syncbase.ValueStateExists)
-	var15 = var15 && var16
-	var var17 bool
-	if len(m.RemoteValue.Val) == 0 {
-		var17 = true
-	}
-	var15 = var15 && var17
-	var wireValue18 vdltime.Time
-	if err := vdltime.TimeFromNative(&wireValue18, m.RemoteValue.WriteTs); err != nil {
-		return fmt.Errorf("error converting m.RemoteValue.WriteTs to wiretype")
-	}
-
-	var19 := (wireValue18 == vdltime.Time{})
-	var15 = var15 && var19
-	var20 := (m.RemoteValue.Selection == syncbase.ValueSelectionLocal)
-	var15 = var15 && var20
-	if var15 {
+	var10 := (m.RemoteValue == Value{
+		Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	})
+	if var10 {
 		if err := fieldsTarget1.ZeroField("RemoteValue"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget13, fieldTarget14, err := fieldsTarget1.StartField("RemoteValue")
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("RemoteValue")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			if err := m.RemoteValue.FillVDLTarget(fieldTarget14, tt.NonOptional().Field(2).Type); err != nil {
+			if err := m.RemoteValue.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget13, fieldTarget14); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
 				return err
 			}
 		}
 	}
-	var23 := true
-	var24 := (m.AncestorValue.State == syncbase.ValueStateExists)
-	var23 = var23 && var24
-	var var25 bool
-	if len(m.AncestorValue.Val) == 0 {
-		var25 = true
-	}
-	var23 = var23 && var25
-	var wireValue26 vdltime.Time
-	if err := vdltime.TimeFromNative(&wireValue26, m.AncestorValue.WriteTs); err != nil {
-		return fmt.Errorf("error converting m.AncestorValue.WriteTs to wiretype")
-	}
-
-	var27 := (wireValue26 == vdltime.Time{})
-	var23 = var23 && var27
-	var28 := (m.AncestorValue.Selection == syncbase.ValueSelectionLocal)
-	var23 = var23 && var28
-	if var23 {
+	var13 := (m.AncestorValue == Value{
+		Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	})
+	if var13 {
 		if err := fieldsTarget1.ZeroField("AncestorValue"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget21, fieldTarget22, err := fieldsTarget1.StartField("AncestorValue")
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("AncestorValue")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			if err := m.AncestorValue.FillVDLTarget(fieldTarget22, tt.NonOptional().Field(3).Type); err != nil {
+			if err := m.AncestorValue.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget21, fieldTarget22); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 				return err
 			}
 		}
 	}
-	var var31 bool
+	var var16 bool
 	if len(m.BatchIds) == 0 {
-		var31 = true
+		var16 = true
 	}
-	if var31 {
+	if var16 {
 		if err := fieldsTarget1.ZeroField("BatchIds"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget29, fieldTarget30, err := fieldsTarget1.StartField("BatchIds")
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("BatchIds")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			listTarget32, err := fieldTarget30.StartList(tt.NonOptional().Field(4).Type, len(m.BatchIds))
+			listTarget17, err := fieldTarget15.StartList(tt.NonOptional().Field(4).Type, len(m.BatchIds))
 			if err != nil {
 				return err
 			}
-			for i, elem34 := range m.BatchIds {
-				elemTarget33, err := listTarget32.StartElem(i)
+			for i, elem19 := range m.BatchIds {
+				elemTarget18, err := listTarget17.StartElem(i)
 				if err != nil {
 					return err
 				}
-				if err := elemTarget33.FromUint(uint64(elem34), tt.NonOptional().Field(4).Type.Elem()); err != nil {
+				if err := elemTarget18.FromUint(uint64(elem19), tt.NonOptional().Field(4).Type.Elem()); err != nil {
 					return err
 				}
-				if err := listTarget32.FinishElem(elemTarget33); err != nil {
+				if err := listTarget17.FinishElem(elemTarget18); err != nil {
 					return err
 				}
 			}
-			if err := fieldTarget30.FinishList(listTarget32); err != nil {
+			if err := fieldTarget15.FinishList(listTarget17); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget29, fieldTarget30); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
 				return err
 			}
 		}
@@ -582,13 +527,19 @@ func (t *ConflictRowTarget) ZeroField(name string) error {
 		t.Value.Key = ""
 		return nil
 	case "LocalValue":
-		t.Value.LocalValue = Value{}
+		t.Value.LocalValue = Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		}
 		return nil
 	case "RemoteValue":
-		t.Value.RemoteValue = Value{}
+		t.Value.RemoteValue = Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		}
 		return nil
 	case "AncestorValue":
-		t.Value.AncestorValue = Value{}
+		t.Value.AncestorValue = Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		}
 		return nil
 	case "BatchIds":
 		t.Value.BatchIds = []uint64(nil)
@@ -738,7 +689,17 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []uint64) error {
 }
 
 func (x *ConflictRow) VDLRead(dec vdl.Decoder) error {
-	*x = ConflictRow{}
+	*x = ConflictRow{
+		LocalValue: Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		},
+		RemoteValue: Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		},
+		AncestorValue: Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		},
+	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -2464,7 +2425,9 @@ type __VDLTarget10_optional struct {
 func (t *__VDLTarget10_optional) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
 	if *t.Value == nil {
-		*t.Value = &Value{}
+		*t.Value = &Value{
+			Val: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		}
 	}
 	t.elemTarget.Value = *t.Value
 	target, err := &t.elemTarget, error(nil)

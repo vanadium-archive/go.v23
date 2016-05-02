@@ -791,7 +791,7 @@ pkg syncbase, type IdTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type IdTarget struct, embedded vdl.TargetBase
 pkg syncbase, type KeyValue struct
 pkg syncbase, type KeyValue struct, Key string
-pkg syncbase, type KeyValue struct, Value []byte
+pkg syncbase, type KeyValue struct, Value *vom.RawBytes
 pkg syncbase, type KeyValueTarget struct
 pkg syncbase, type KeyValueTarget struct, Value *KeyValue
 pkg syncbase, type KeyValueTarget struct, embedded vdl.FieldsTargetBase
@@ -829,12 +829,12 @@ pkg syncbase, type ResolverTypeTarget struct, embedded vdl.TargetBase
 pkg syncbase, type RowClientMethods interface { Delete, Exists, Get, Put }
 pkg syncbase, type RowClientMethods interface, Delete(*context.T, BatchHandle, ...rpc.CallOpt) error
 pkg syncbase, type RowClientMethods interface, Exists(*context.T, BatchHandle, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type RowClientMethods interface, Get(*context.T, BatchHandle, ...rpc.CallOpt) ([]byte, error)
-pkg syncbase, type RowClientMethods interface, Put(*context.T, BatchHandle, []byte, ...rpc.CallOpt) error
+pkg syncbase, type RowClientMethods interface, Get(*context.T, BatchHandle, ...rpc.CallOpt) (*vom.RawBytes, error)
+pkg syncbase, type RowClientMethods interface, Put(*context.T, BatchHandle, *vom.RawBytes, ...rpc.CallOpt) error
 pkg syncbase, type RowClientStub interface, Delete(*context.T, BatchHandle, ...rpc.CallOpt) error
 pkg syncbase, type RowClientStub interface, Exists(*context.T, BatchHandle, ...rpc.CallOpt) (bool, error)
-pkg syncbase, type RowClientStub interface, Get(*context.T, BatchHandle, ...rpc.CallOpt) ([]byte, error)
-pkg syncbase, type RowClientStub interface, Put(*context.T, BatchHandle, []byte, ...rpc.CallOpt) error
+pkg syncbase, type RowClientStub interface, Get(*context.T, BatchHandle, ...rpc.CallOpt) (*vom.RawBytes, error)
+pkg syncbase, type RowClientStub interface, Put(*context.T, BatchHandle, *vom.RawBytes, ...rpc.CallOpt) error
 pkg syncbase, type RowClientStub interface, unexported methods
 pkg syncbase, type RowInfo struct
 pkg syncbase, type RowInfo struct, BatchIds []uint64
@@ -855,8 +855,8 @@ pkg syncbase, type RowOpTarget struct, embedded vdl.TargetBase
 pkg syncbase, type RowServerMethods interface { Delete, Exists, Get, Put }
 pkg syncbase, type RowServerMethods interface, Delete(*context.T, rpc.ServerCall, BatchHandle) error
 pkg syncbase, type RowServerMethods interface, Exists(*context.T, rpc.ServerCall, BatchHandle) (bool, error)
-pkg syncbase, type RowServerMethods interface, Get(*context.T, rpc.ServerCall, BatchHandle) ([]byte, error)
-pkg syncbase, type RowServerMethods interface, Put(*context.T, rpc.ServerCall, BatchHandle, []byte) error
+pkg syncbase, type RowServerMethods interface, Get(*context.T, rpc.ServerCall, BatchHandle) (*vom.RawBytes, error)
+pkg syncbase, type RowServerMethods interface, Put(*context.T, rpc.ServerCall, BatchHandle, *vom.RawBytes) error
 pkg syncbase, type RowServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type RowServerStub interface, unexported methods
 pkg syncbase, type RowServerStubMethods RowServerMethods
@@ -956,7 +956,7 @@ pkg syncbase, type SyncgroupSpecTarget struct, Value *SyncgroupSpec
 pkg syncbase, type SyncgroupSpecTarget struct, embedded vdl.FieldsTargetBase
 pkg syncbase, type SyncgroupSpecTarget struct, embedded vdl.TargetBase
 pkg syncbase, type Value struct
-pkg syncbase, type Value struct, Bytes []byte
+pkg syncbase, type Value struct, Bytes *vom.RawBytes
 pkg syncbase, type Value struct, State ValueState
 pkg syncbase, type Value struct, WriteTs time.Time
 pkg syncbase, type ValueSelection int

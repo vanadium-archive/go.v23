@@ -94,7 +94,7 @@ type ResolvedRow struct {
 // WriteTs is the write timestamp for this value.
 type Value struct {
 	State     wire.ValueState
-	Val       []byte
+	Val       any
 	WriteTs   time.Time
 	// TODO(jlodhia): Since field Selection cannot be package private in VDL,
 	// review the ConflictResolution API to see if we should keep this field

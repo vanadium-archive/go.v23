@@ -262,7 +262,7 @@ pkg syncbase, type Syncgroup interface, SetSpec(*context.T, wire.SyncgroupSpec, 
 pkg syncbase, type Value struct
 pkg syncbase, type Value struct, Selection syncbase.ValueSelection
 pkg syncbase, type Value struct, State syncbase.ValueState
-pkg syncbase, type Value struct, Val []byte
+pkg syncbase, type Value struct, Val *vom.RawBytes
 pkg syncbase, type Value struct, WriteTs time.Time
 pkg syncbase, type ValueTarget struct
 pkg syncbase, type ValueTarget struct, Value *Value

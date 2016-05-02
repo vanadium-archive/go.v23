@@ -536,7 +536,7 @@ func listDeleteConflictsWithTaskAdd(t *testing.T) ([]wire.ConflictInfo, map[stri
 	return []wire.ConflictInfo{b1, b2, c0, c1, c2}, respMap
 }
 
-func makeResolution(key string, result []byte, selection wire.ValueSelection) wire.ResolutionInfo {
+func makeResolution(key string, result *vom.RawBytes, selection wire.ValueSelection) wire.ResolutionInfo {
 	r := wire.ResolutionInfo{}
 	r.Key = key
 	if result != nil {
@@ -597,17 +597,26 @@ func compareResult(t *testing.T, expected wire.ResolutionInfo, actual wire.Resol
 			t.Errorf("Key: %s", expected.Key)
 			t.Error("Result found nil")
 		}
-		if bytes.Compare(actual.Result.Bytes, expected.Result.Bytes) != 0 {
+		var err error
+		var actualBytes []byte
+		var expectedBytes []byte
+		if actualBytes, err = vom.Encode(actual.Result.Bytes); err != nil {
+			t.Errorf("Key: %s:   encoding error on actual.Result.Bytes", expected.Key)
+		}
+		if expectedBytes, err = vom.Encode(expected.Result.Bytes); err != nil {
+			t.Errorf("Key: %s:   encoding error on expected.Result.Bytes", expected.Key)
+		}
+		if bytes.Compare(actualBytes, expectedBytes) != 0 {
 			t.Errorf("Key: %s", expected.Key)
 			t.Error("Result bytes do not match")
 			list := &List{}
-			vom.Decode(actual.Result.Bytes, list)
+			actual.Result.Bytes.ToValue(list)
 			t.Errorf("Actual list: %#v", list)
 		}
 	}
 }
 
-func encode(value interface{}) []byte {
-	v, _ := vom.Encode(value)
+func encode(value interface{}) *vom.RawBytes {
+	v, _ := vom.RawBytesFromValue(value)
 	return v
 }

@@ -163,9 +163,6 @@ type Collection interface {
 
 // Row represents a single row in a Collection.
 // All access checks are performed against the Collection ACL.
-// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
-// and Scan. If there's a way to avoid encoding/decoding on the server side, we
-// can use vdl.Value everywhere without sacrificing performance.
 type Row interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
@@ -177,10 +174,10 @@ type Row interface {
 	Exists(bh BatchHandle) (bool | error) {access.Read}
 
 	// Get returns the value for this Row.
-	Get(bh BatchHandle) ([]byte | error) {access.Read}
+	Get(bh BatchHandle) (any | error) {access.Read}
 
 	// Put writes the given value for this Row.
-	Put(bh BatchHandle, value []byte) error {access.Write}
+	Put(bh BatchHandle, value any) error {access.Write}
 
 	// Delete deletes this Row.
 	Delete(bh BatchHandle) error {access.Write}

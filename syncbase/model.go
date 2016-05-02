@@ -616,7 +616,7 @@ type ConflictResolver interface {
 // Get takes a reference to an instance of a type that is expected to be
 // represented by Value.
 func (v *Value) Get(value interface{}) error {
-	return vom.Decode(v.Val, value)
+	return v.Val.ToValue(value)
 }
 
 // NewValue creates a new Value to be added to Resolution.
@@ -624,12 +624,12 @@ func NewValue(ctx *context.T, data interface{}) (*Value, error) {
 	if data == nil {
 		return nil, verror.New(verror.ErrBadArg, ctx, "data cannot be nil")
 	}
-	bytes, err := vom.Encode(data)
+	rawBytes, err := vom.RawBytesFromValue(data)
 	if err != nil {
 		return nil, err
 	}
 	return &Value{
-		Val:       bytes,
+		Val:       rawBytes,
 		WriteTs:   time.Now(), // ignored by syncbase
 		Selection: wire.ValueSelectionOther,
 	}, nil

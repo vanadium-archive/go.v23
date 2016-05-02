@@ -50,20 +50,20 @@ func (r *row) Exists(ctx *context.T) (bool, error) {
 
 // Get implements Row.Get.
 func (r *row) Get(ctx *context.T, value interface{}) error {
-	bytes, err := r.c.Get(ctx, r.bh)
+	rawBytes, err := r.c.Get(ctx, r.bh)
 	if err != nil {
 		return err
 	}
-	return vom.Decode(bytes, value)
+	return rawBytes.ToValue(value)
 }
 
 // Put implements Row.Put.
 func (r *row) Put(ctx *context.T, value interface{}) error {
-	bytes, err := vom.Encode(value)
+	rawBytes, err := vom.RawBytesFromValue(value)
 	if err != nil {
 		return err
 	}
-	return r.c.Put(ctx, r.bh, bytes)
+	return r.c.Put(ctx, r.bh, rawBytes)
 }
 
 // Delete implements Row.Delete.

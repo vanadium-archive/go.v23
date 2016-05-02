@@ -10,7 +10,6 @@ import (
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 )
 
 type scanStream struct {
@@ -74,7 +73,7 @@ func (s *scanStream) Value(value interface{}) error {
 	if s.curr == nil {
 		panic("nothing staged")
 	}
-	return vom.Decode(s.curr.Value, value)
+	return s.curr.Value.ToValue(value)
 }
 
 // Err implements the Stream interface.

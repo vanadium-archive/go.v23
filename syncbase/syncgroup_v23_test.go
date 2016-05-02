@@ -93,7 +93,6 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	ok(t, runSetupAppA(client0Ctx, "sync0"))
 	ok(t, runCreateSyncgroup(client0Ctx, "sync0", sgName, "c:foo,c:bar", "", "root:s0", "root:s1"))
 	ok(t, runPopulateData(client0Ctx, "sync0", "foo", 0))
-	ok(t, runPopulateNonVomData(client0Ctx, "sync0", "bar", 0))
 
 	ok(t, runSetupAppA(client1Ctx, "sync1"))
 	beforeSyncMarker, err := getResumeMarker(client1Ctx, "sync1")
@@ -101,7 +100,6 @@ func TestV23SyncbasedGetDeltas(t *testing.T) {
 	ok(t, runJoinSyncgroup(client1Ctx, "sync1", sgName))
 	ok(t, runVerifySyncgroupData(client1Ctx, "sync1", "foo", 0, 10, false))
 	ok(t, runVerifySyncgroupDataWithWatch(client1Ctx, "sync1", "foo", 10, false, beforeSyncMarker))
-	ok(t, runVerifySyncgroupNonVomData(client1Ctx, "sync1", "bar", 0, 10))
 }
 
 // TestV23SyncbasedGetDeltasWithDel tests the sending of deltas between two
@@ -681,24 +679,6 @@ func runPopulateData(ctx *context.T, serviceName, keyPrefix string, start uint64
 	return nil
 }
 
-func runPopulateNonVomData(ctx *context.T, serviceName, keyPrefix string, start uint64) error {
-	d := dbHandle(serviceName)
-
-	// Do Puts.
-	c := d.CollectionForId(testCollection)
-
-	for i := start; i < start+10; i++ {
-		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := c.Row(key)
-		rc := wire.RowClient(r.FullName())
-		val := []byte("nonvomtestkey" + key)
-		if err := rc.Put(ctx, "", val); err != nil {
-			return fmt.Errorf("rc.Put() failed: %v\n", err)
-		}
-	}
-	return nil
-}
-
 func runUpdateData(ctx *context.T, serviceName string, start uint64) error {
 	d := dbHandle(serviceName)
 
@@ -854,42 +834,6 @@ func runVerifySyncgroupDataWithWatch(ctx *context.T, serviceName, keyPrefix stri
 		}
 		if got, want := result, fmt.Sprintf("testkey%s%d", keyPrefix, i); got != want {
 			return fmt.Errorf("unexpected watch value: got %q, want %q", got, want)
-		}
-	}
-	return nil
-}
-
-func runVerifySyncgroupNonVomData(ctx *context.T, serviceName, keyPrefix string, start, count uint64) error {
-	d := dbHandle(serviceName)
-
-	// Wait for a bit (up to 4 sec) until the last key appears.
-	c := d.CollectionForId(testCollection)
-
-	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
-
-	r := c.Row(lastKey)
-	rc := wire.RowClient(r.FullName())
-	for i := 0; i < 8; i++ {
-		time.Sleep(500 * time.Millisecond)
-		if _, err := rc.Get(ctx, ""); err == nil {
-			break
-		}
-	}
-
-	// Verify that all keys and values made it correctly.
-	for i := start; i < start+count; i++ {
-		key := fmt.Sprintf("%s%d", keyPrefix, i)
-		r := c.Row(key)
-		rc := wire.RowClient(r.FullName())
-		var got string
-		val, err := rc.Get(ctx, "")
-		if err != nil {
-			return fmt.Errorf("rc.Get() failed: %v\n", err)
-		}
-		got = string(val)
-		want := "nonvomtestkey" + key
-		if got != want {
-			return fmt.Errorf("unexpected value: got %q, want %q\n", got, want)
 		}
 	}
 	return nil

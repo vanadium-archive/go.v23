@@ -900,7 +900,7 @@ func (x *BatchHandle) VDLRead(dec vdl.Decoder) error {
 // KeyValue is a key-value pair.
 type KeyValue struct {
 	Key   string
-	Value []byte
+	Value *vom.RawBytes
 }
 
 func (KeyValue) __VDLReflect(struct {
@@ -932,10 +932,7 @@ func (m *KeyValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var7 bool
-	if len(m.Value) == 0 {
-		var7 = true
-	}
+	var7 := m.Value == nil || (m.Value.Type.Kind() == vdl.Any && m.Value.IsNil())
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Value"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -947,7 +944,7 @@ func (m *KeyValue) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := fieldTarget6.FromBytes([]byte(m.Value), tt.NonOptional().Field(1).Type); err != nil {
+			if err := m.Value.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -966,9 +963,9 @@ func (m *KeyValue) MakeVDLTarget() vdl.Target {
 }
 
 type KeyValueTarget struct {
-	Value       *KeyValue
-	keyTarget   vdl.StringTarget
-	valueTarget vdl.BytesTarget
+	Value     *KeyValue
+	keyTarget vdl.StringTarget
+
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -987,8 +984,7 @@ func (t *KeyValueTarget) StartField(name string) (key, field vdl.Target, _ error
 		target, err := &t.keyTarget, error(nil)
 		return nil, target, err
 	case "Value":
-		t.valueTarget.Value = &t.Value.Value
-		target, err := &t.valueTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Value))
 		return nil, target, err
 	default:
 		return nil, nil, vdl.ErrFieldNoExist
@@ -1003,7 +999,7 @@ func (t *KeyValueTarget) ZeroField(name string) error {
 		t.Value.Key = ""
 		return nil
 	case "Value":
-		t.Value.Value = []byte(nil)
+		t.Value.Value = vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType))
 		return nil
 	default:
 		return vdl.ErrFieldNoExist
@@ -1018,7 +1014,7 @@ func (x KeyValue) VDLIsZero() bool {
 	if x.Key != "" {
 		return false
 	}
-	if len(x.Value) != 0 {
+	if x.Value != nil && !x.Value.VDLIsZero() {
 		return false
 	}
 	return true
@@ -1042,17 +1038,11 @@ func (x KeyValue) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if len(x.Value) != 0 {
+	if x.Value != nil && !x.Value.VDLIsZero() {
 		if err := enc.NextField("Value"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeBytes(x.Value); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -1063,7 +1053,9 @@ func (x KeyValue) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
-	*x = KeyValue{}
+	*x = KeyValue{
+		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -1090,13 +1082,7 @@ func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Value":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &x.Value); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
+			if err := x.Value.VDLRead(dec); err != nil {
 				return err
 			}
 		default:
@@ -2653,7 +2639,7 @@ type Value struct {
 	// not and if it is empty then why.
 	State ValueState
 	// VOM encoded bytes for a row's value or nil if the row was deleted.
-	Bytes []byte
+	Bytes *vom.RawBytes
 	// Write timestamp for this value
 	WriteTs time.Time
 }
@@ -2688,10 +2674,7 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var7 bool
-	if len(m.Bytes) == 0 {
-		var7 = true
-	}
+	var7 := m.Bytes == nil || (m.Bytes.Type.Kind() == vdl.Any && m.Bytes.IsNil())
 	if var7 {
 		if err := fieldsTarget1.ZeroField("Bytes"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
@@ -2703,7 +2686,7 @@ func (m *Value) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			if err := fieldTarget6.FromBytes([]byte(m.Bytes), tt.NonOptional().Field(1).Type); err != nil {
+			if err := m.Bytes.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -2747,9 +2730,9 @@ func (m *Value) MakeVDLTarget() vdl.Target {
 }
 
 type ValueTarget struct {
-	Value         *Value
-	stateTarget   ValueStateTarget
-	bytesTarget   vdl.BytesTarget
+	Value       *Value
+	stateTarget ValueStateTarget
+
 	writeTsTarget vdltime.TimeTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
@@ -2769,8 +2752,7 @@ func (t *ValueTarget) StartField(name string) (key, field vdl.Target, _ error) {
 		target, err := &t.stateTarget, error(nil)
 		return nil, target, err
 	case "Bytes":
-		t.bytesTarget.Value = &t.Value.Bytes
-		target, err := &t.bytesTarget, error(nil)
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Bytes))
 		return nil, target, err
 	case "WriteTs":
 		t.writeTsTarget.Value = &t.Value.WriteTs
@@ -2789,7 +2771,7 @@ func (t *ValueTarget) ZeroField(name string) error {
 		t.Value.State = ValueStateExists
 		return nil
 	case "Bytes":
-		t.Value.Bytes = []byte(nil)
+		t.Value.Bytes = vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType))
 		return nil
 	case "WriteTs":
 		t.Value.WriteTs = time.Time{}
@@ -2807,7 +2789,7 @@ func (x Value) VDLIsZero() bool {
 	if x.State != ValueStateExists {
 		return false
 	}
-	if len(x.Bytes) != 0 {
+	if x.Bytes != nil && !x.Bytes.VDLIsZero() {
 		return false
 	}
 	if !x.WriteTs.IsZero() {
@@ -2828,17 +2810,11 @@ func (x Value) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if len(x.Bytes) != 0 {
+	if x.Bytes != nil && !x.Bytes.VDLIsZero() {
 		if err := enc.NextField("Bytes"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
-			return err
-		}
-		if err := enc.EncodeBytes(x.Bytes); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := x.Bytes.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -2861,7 +2837,9 @@ func (x Value) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Value) VDLRead(dec vdl.Decoder) error {
-	*x = Value{}
+	*x = Value{
+		Bytes: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -2881,13 +2859,7 @@ func (x *Value) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Bytes":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &x.Bytes); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
+			if err := x.Bytes.VDLRead(dec); err != nil {
 				return err
 			}
 		case "WriteTs":
@@ -3096,7 +3068,9 @@ type __VDLTarget2_optional struct {
 func (t *__VDLTarget2_optional) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
 	if *t.Value == nil {
-		*t.Value = &Value{}
+		*t.Value = &Value{
+			Bytes: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
+		}
 	}
 	t.elemTarget.Value = *t.Value
 	target, err := &t.elemTarget, error(nil)
@@ -3813,15 +3787,7 @@ func (m *RowInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	var var4 bool
 	if field, ok := m.Op.(OperationRead); ok {
 
-		var5 := true
-		var6 := (field.Value.Key == "")
-		var5 = var5 && var6
-		var7 := (field.Value.LocalValue == (*Value)(nil))
-		var5 = var5 && var7
-		var8 := (field.Value.RemoteValue == (*Value)(nil))
-		var5 = var5 && var8
-		var9 := (field.Value.AncestorValue == (*Value)(nil))
-		var5 = var5 && var9
+		var5 := (field.Value == RowOp{})
 		var4 = var5
 	}
 	if var4 {
@@ -3835,11 +3801,11 @@ func (m *RowInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 				return err
 			}
 
-			unionValue10 := m.Op
-			if unionValue10 == nil {
-				unionValue10 = OperationRead{}
+			unionValue6 := m.Op
+			if unionValue6 == nil {
+				unionValue6 = OperationRead{}
 			}
-			if err := unionValue10.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+			if err := unionValue6.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -3847,41 +3813,41 @@ func (m *RowInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var13 bool
+	var var9 bool
 	if len(m.BatchIds) == 0 {
-		var13 = true
+		var9 = true
 	}
-	if var13 {
+	if var9 {
 		if err := fieldsTarget1.ZeroField("BatchIds"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("BatchIds")
+		keyTarget7, fieldTarget8, err := fieldsTarget1.StartField("BatchIds")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			listTarget14, err := fieldTarget12.StartList(tt.NonOptional().Field(1).Type, len(m.BatchIds))
+			listTarget10, err := fieldTarget8.StartList(tt.NonOptional().Field(1).Type, len(m.BatchIds))
 			if err != nil {
 				return err
 			}
-			for i, elem16 := range m.BatchIds {
-				elemTarget15, err := listTarget14.StartElem(i)
+			for i, elem12 := range m.BatchIds {
+				elemTarget11, err := listTarget10.StartElem(i)
 				if err != nil {
 					return err
 				}
-				if err := elemTarget15.FromUint(uint64(elem16), tt.NonOptional().Field(1).Type.Elem()); err != nil {
+				if err := elemTarget11.FromUint(uint64(elem12), tt.NonOptional().Field(1).Type.Elem()); err != nil {
 					return err
 				}
-				if err := listTarget14.FinishElem(elemTarget15); err != nil {
+				if err := listTarget10.FinishElem(elemTarget11); err != nil {
 					return err
 				}
 			}
-			if err := fieldTarget12.FinishList(listTarget14); err != nil {
+			if err := fieldTarget8.FinishList(listTarget10); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget7, fieldTarget8); err != nil {
 				return err
 			}
 		}
@@ -9630,9 +9596,6 @@ func (s implCollectionScanServerCallSend) Send(item KeyValue) error {
 //
 // Row represents a single row in a Collection.
 // All access checks are performed against the Collection ACL.
-// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
-// and Scan. If there's a way to avoid encoding/decoding on the server side, we
-// can use vdl.Value everywhere without sacrificing performance.
 type RowClientMethods interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
@@ -9643,9 +9606,9 @@ type RowClientMethods interface {
 	// do not exist.
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
-	Get(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]byte, error)
+	Get(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (*vom.RawBytes, error)
 	// Put writes the given value for this Row.
-	Put(_ *context.T, bh BatchHandle, value []byte, _ ...rpc.CallOpt) error
+	Put(_ *context.T, bh BatchHandle, value *vom.RawBytes, _ ...rpc.CallOpt) error
 	// Delete deletes this Row.
 	Delete(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 }
@@ -9670,12 +9633,12 @@ func (c implRowClientStub) Exists(ctx *context.T, i0 BatchHandle, opts ...rpc.Ca
 	return
 }
 
-func (c implRowClientStub) Get(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 []byte, err error) {
+func (c implRowClientStub) Get(ctx *context.T, i0 BatchHandle, opts ...rpc.CallOpt) (o0 *vom.RawBytes, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Get", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implRowClientStub) Put(ctx *context.T, i0 BatchHandle, i1 []byte, opts ...rpc.CallOpt) (err error) {
+func (c implRowClientStub) Put(ctx *context.T, i0 BatchHandle, i1 *vom.RawBytes, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Put", []interface{}{i0, i1}, nil, opts...)
 	return
 }
@@ -9690,9 +9653,6 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 BatchHandle, opts ...rpc.Ca
 //
 // Row represents a single row in a Collection.
 // All access checks are performed against the Collection ACL.
-// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,
-// and Scan. If there's a way to avoid encoding/decoding on the server side, we
-// can use vdl.Value everywhere without sacrificing performance.
 type RowServerMethods interface {
 	// Exists returns true only if this Row exists. Insufficient permissions
 	// cause Exists to return false instead of an error.
@@ -9703,9 +9663,9 @@ type RowServerMethods interface {
 	// do not exist.
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// Get returns the value for this Row.
-	Get(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]byte, error)
+	Get(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (*vom.RawBytes, error)
 	// Put writes the given value for this Row.
-	Put(_ *context.T, _ rpc.ServerCall, bh BatchHandle, value []byte) error
+	Put(_ *context.T, _ rpc.ServerCall, bh BatchHandle, value *vom.RawBytes) error
 	// Delete deletes this Row.
 	Delete(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 }
@@ -9749,11 +9709,11 @@ func (s implRowServerStub) Exists(ctx *context.T, call rpc.ServerCall, i0 BatchH
 	return s.impl.Exists(ctx, call, i0)
 }
 
-func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) ([]byte, error) {
+func (s implRowServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 BatchHandle) (*vom.RawBytes, error) {
 	return s.impl.Get(ctx, call, i0)
 }
 
-func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 []byte) error {
+func (s implRowServerStub) Put(ctx *context.T, call rpc.ServerCall, i0 BatchHandle, i1 *vom.RawBytes) error {
 	return s.impl.Put(ctx, call, i0, i1)
 }
 
@@ -9776,7 +9736,7 @@ var RowDesc rpc.InterfaceDesc = descRow
 var descRow = rpc.InterfaceDesc{
 	Name:    "Row",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Row represents a single row in a Collection.\n// All access checks are performed against the Collection ACL.\n// NOTE(sadovsky): Currently we send []byte values over the wire for Get, Put,\n// and Scan. If there's a way to avoid encoding/decoding on the server side, we\n// can use vdl.Value everywhere without sacrificing performance.",
+	Doc:     "// Row represents a single row in a Collection.\n// All access checks are performed against the Collection ACL.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
@@ -9796,7 +9756,7 @@ var descRow = rpc.InterfaceDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // []byte
+				{"", ``}, // *vom.RawBytes
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -9805,7 +9765,7 @@ var descRow = rpc.InterfaceDesc{
 			Doc:  "// Put writes the given value for this Row.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
-				{"value", ``}, // []byte
+				{"value", ``}, // *vom.RawBytes
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
