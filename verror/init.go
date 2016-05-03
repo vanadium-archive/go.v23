@@ -17,6 +17,14 @@ func init() {
 	vdl.RegisterNative(WireToNative, WireFromNative)
 }
 
+// FromWire is a convenience for generated code to convert wire errors into
+// native errors.
+func FromWire(wire vdl.WireError) error {
+	var native E
+	WireToNative(wire, &native)
+	return native
+}
+
 // WireToNative converts from vdl.WireError to verror.E, which
 // implements the standard go error interface.
 func WireToNative(wire vdl.WireError, native *E) error {

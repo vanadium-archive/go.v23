@@ -134,7 +134,7 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 		return true
 	}
 	// Handle simple scalar
-	if ax, bx := ttIsNumber(a), ttIsNumber(b); ax || bx {
+	if ax, bx := a.Kind().IsNumber(), b.Kind().IsNumber(); ax || bx {
 		return ax && bx
 	}
 	if ax, bx := a.Kind() == Bool, b.Kind() == Bool; ax || bx {
@@ -197,14 +197,6 @@ func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 	default:
 		panic(fmt.Errorf("vdl: compat unhandled types %q %q", a, b))
 	}
-}
-
-func ttIsNumber(tt *Type) bool {
-	switch tt.Kind() {
-	case Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
-		return true
-	}
-	return false
 }
 
 func ttIsStringEnum(tt *Type) bool {

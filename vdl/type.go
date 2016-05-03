@@ -93,6 +93,15 @@ func (k Kind) String() string {
 	panic(fmt.Errorf("vdl: unhandled kind: %d", k))
 }
 
+// IsNumber returns true iff the kind is a number.
+func (k Kind) IsNumber() bool {
+	switch k {
+	case Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
+		return true
+	}
+	return false
+}
+
 // BitLen returns the number of bits in the representation of the kind;
 // e.g. Int32 returns 32.  Returns -1 for non-number kinds.
 func (k Kind) BitLen() int {
@@ -169,8 +178,23 @@ func (t *Type) Kind() Kind { return t.kind }
 // Name returns the name of type t.  Empty names are allowed.
 func (t *Type) Name() string { return t.name }
 
-// String returns a human-readable description of type t.
+// String returns a human-readable description of type t.  Do not rely on the
+// output format; it may change without notice.  See Unique for a format that is
+// guaranteed never to change.
 func (t *Type) String() string {
+	return t.Unique()
+}
+
+// Unique returns a unique representation of type t.  Two types A and B are
+// guaranteed to return the same unique string iff A is equal to B.  The format
+// is guaranteed to never change.
+//
+// A typical use case is to hash the unique representation to produce
+// globally-unique type ids.
+//
+// TODO(toddw): Make sure we're comfortable with the format we produce; if it
+// needs to change, it needs to happen soon.
+func (t *Type) Unique() string {
 	if t.unique != "" {
 		return t.unique
 	}
@@ -470,4 +494,43 @@ func typeWalk(mode WalkMode, t *Type, fn func(*Type) bool, seen map[*Type]bool) 
 		}
 	}
 	return true
+}
+
+// IsPartOfCycle returns true iff t is part of a cycle.  Note that t is not
+// considered to be part of a cycle if it merely contains another type that is
+// part of a cycle; the type graph must cycle back through t to return true.
+func (t *Type) IsPartOfCycle() bool {
+	return partOfCycle(t, make(map[*Type]bool))
+}
+
+func partOfCycle(t *Type, inCycle map[*Type]bool) bool {
+	if c, ok := inCycle[t]; ok {
+		return c
+	}
+	inCycle[t] = true
+	switch t.kind {
+	case Optional, Array, List:
+		if partOfCycle(t.elem, inCycle) {
+			return true
+		}
+	case Set:
+		if partOfCycle(t.key, inCycle) {
+			return true
+		}
+	case Map:
+		if partOfCycle(t.key, inCycle) {
+			return true
+		}
+		if partOfCycle(t.elem, inCycle) {
+			return true
+		}
+	case Struct, Union:
+		for _, x := range t.fields {
+			if partOfCycle(x.Type, inCycle) {
+				return true
+			}
+		}
+	}
+	inCycle[t] = false
+	return false
 }

@@ -1,0 +1,22 @@
+// Copyright 2016 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package vdltest
+
+// Entry represents a test entry, which contains a target and source value.
+// Each test tries to convert the source value to the type of the target value.
+// This conversion will either pass or fail; AllPass returns passing entries,
+// while AllFail returns failing entries.
+//
+// An entry may either be canonical or not.  For a given canonical entry C,
+// C.Target==C.Source always holds, and in addition, C.Source is the canonical
+// representation of the value.
+type Entry struct {
+	IsCanonical bool
+	Label       string // Label describes the entry, e.g. Full, Random...
+	TargetLabel string // TargetLabel describes the Target value
+	Target      any    // Target value for conversion test
+	SourceLabel string // SourceLabel describes the Source value
+	Source      any    // Source value for conversion test
+}

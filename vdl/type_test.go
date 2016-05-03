@@ -185,6 +185,9 @@ func testSingleton(t *testing.T, k Kind, ty *Type, s string) {
 	if got, want := ty.String(), s; got != want {
 		t.Errorf(`%s got string %q, want %q`, k, got, want)
 	}
+	if got, want := ty.Unique(), s; got != want {
+		t.Errorf(`%s got unique %q, want %q`, k, got, want)
+	}
 	if !ty.ContainsKind(WalkAll, k) {
 		t.Errorf(`%s !ContainsKind(WalkAll, %v)`, k, k)
 	}
@@ -245,6 +248,9 @@ func TestEnumTypes(t *testing.T) {
 		if got, want := x.String(), test.str; got != want {
 			t.Errorf(`Enum %s got string %q, want %q`, test.name, got, want)
 		}
+		if got, want := x.Unique(), test.str; got != want {
+			t.Errorf(`Enum %s got unique %q, want %q`, test.name, got, want)
+		}
 		if got, want := x.NumEnumLabel(), len(test.labels); got != want {
 			t.Errorf(`Enum %s got num labels %d, want %d`, test.name, got, want)
 		}
@@ -278,8 +284,12 @@ func TestArrayTypes(t *testing.T) {
 		if got, want := x.Name(), ""; got != want {
 			t.Errorf(`Array %s got name %q, want %q`, test.k, got, want)
 		}
-		if got, want := x.String(), fmt.Sprintf("[%d]%s", len, test.s); got != want {
+		unique := fmt.Sprintf("[%d]%s", len, test.s)
+		if got, want := x.String(), unique; got != want {
 			t.Errorf(`Array %s got string %q, want %q`, test.k, got, want)
+		}
+		if got, want := x.Unique(), unique; got != want {
+			t.Errorf(`Array %s got unique %q, want %q`, test.k, got, want)
 		}
 		if got, want := x.Len(), len; got != want {
 			t.Errorf(`Array %s got len %v, want %v`, test.k, got, want)
@@ -308,8 +318,12 @@ func TestListTypes(t *testing.T) {
 		if got, want := x.Name(), ""; got != want {
 			t.Errorf(`List %s got name %q, want %q`, test.k, got, want)
 		}
-		if got, want := x.String(), "[]"+test.s; got != want {
+		unique := "[]" + test.s
+		if got, want := x.String(), unique; got != want {
 			t.Errorf(`List %s got string %q, want %q`, test.k, got, want)
+		}
+		if got, want := x.Unique(), unique; got != want {
+			t.Errorf(`List %s got unique %q, want %q`, test.k, got, want)
 		}
 		if got, want := x.Elem(), test.t; got != want {
 			t.Errorf(`List %s got elem %q, want %q`, test.k, got, want)
@@ -344,8 +358,12 @@ func TestSetTypes(t *testing.T) {
 		if got, want := x.Name(), ""; got != want {
 			t.Errorf(`Set %s got name %q, want %q`, key.k, got, want)
 		}
-		if got, want := x.String(), "set["+key.s+"]"; got != want {
+		unique := "set[" + key.s + "]"
+		if got, want := x.String(), unique; got != want {
 			t.Errorf(`Set %s got string %q, want %q`, key.k, got, want)
+		}
+		if got, want := x.Unique(), unique; got != want {
+			t.Errorf(`Set %s got unique %q, want %q`, key.k, got, want)
 		}
 		if got, want := x.Key(), key.t; got != want {
 			t.Errorf(`Set %s got key %q, want %q`, key.k, got, want)
@@ -381,8 +399,12 @@ func TestMapTypes(t *testing.T) {
 			if got, want := x.Name(), ""; got != want {
 				t.Errorf(`Map[%s]%s got name %q, want %q`, key.k, elem.k, got, want)
 			}
-			if got, want := x.String(), fmt.Sprintf("map[%s]%s", key.s, elem.s); got != want {
-				t.Errorf(`Map[%s]%s got name %q, want %q`, key.k, elem.k, got, want)
+			unique := fmt.Sprintf("map[%s]%s", key.s, elem.s)
+			if got, want := x.String(), unique; got != want {
+				t.Errorf(`Map[%s]%s got string %q, want %q`, key.k, elem.k, got, want)
+			}
+			if got, want := x.Unique(), unique; got != want {
+				t.Errorf(`Map[%s]%s got unique %q, want %q`, key.k, elem.k, got, want)
 			}
 			if got, want := x.Key(), key.t; got != want {
 				t.Errorf(`Map[%s]%s got key %q, want %q`, key.k, elem.k, got, want)
@@ -470,6 +492,9 @@ func TestStructTypes(t *testing.T) {
 		if got, want := x.String(), test.str; got != want {
 			t.Errorf(`Struct %s got string %q, want %q`, test.name, got, want)
 		}
+		if got, want := x.Unique(), test.str; got != want {
+			t.Errorf(`Struct %s got unique %q, want %q`, test.name, got, want)
+		}
 		if got, want := x.NumField(), len(test.fields); got != want {
 			t.Errorf(`Struct %s got num fields %d, want %d`, test.name, got, want)
 		}
@@ -544,6 +569,9 @@ func TestUnionTypes(t *testing.T) {
 		if got, want := x.String(), test.str; got != want {
 			t.Errorf(`Union %s got string %q, want %q`, test.name, got, want)
 		}
+		if got, want := x.Unique(), test.str; got != want {
+			t.Errorf(`Union %s got unique %q, want %q`, test.name, got, want)
+		}
 		if got, want := x.NumField(), len(test.fields); got != want {
 			t.Errorf(`Union %s got num fields %d, want %d`, test.name, got, want)
 		}
@@ -613,8 +641,12 @@ func TestNamedTypes(t *testing.T) {
 		if got, want := x.Name(), name; got != want {
 			t.Errorf(`Named %s got name %q, want %q`, test.k, got, want)
 		}
-		if got, want := x.String(), name+" "+test.s; got != want {
+		unique := name + " " + test.s
+		if got, want := x.String(), unique; got != want {
 			t.Errorf(`Named %s got string %q, want %q`, test.k, got, want)
+		}
+		if got, want := x.Unique(), unique; got != want {
+			t.Errorf(`Named %s got unique %q, want %q`, test.k, got, want)
 		}
 	}
 	// Try a chain of named types:
@@ -660,17 +692,33 @@ func TestNamedTypes(t *testing.T) {
 	if got, want := bD.Name(), "D"; got != want {
 		t.Errorf(`Named chain got name %q, want %q`, got, want)
 	}
-	if got, want := bA.String(), "A struct{X []C struct{X []C}}"; got != want {
-		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	uniqueA := "A struct{X []C struct{X []C}}"
+	if got, want := bA.String(), uniqueA; got != want {
+		t.Errorf(`Named chain got string %q, want %q`, got, want)
 	}
-	if got, want := bB.String(), "B struct{X []C struct{X []C}}"; got != want {
-		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	if got, want := bA.Unique(), uniqueA; got != want {
+		t.Errorf(`Named chain got unique %q, want %q`, got, want)
 	}
-	if got, want := bC.String(), "C struct{X []C}"; got != want {
-		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	uniqueB := "B struct{X []C struct{X []C}}"
+	if got, want := bB.String(), uniqueB; got != want {
+		t.Errorf(`Named chain got string %q, want %q`, got, want)
 	}
-	if got, want := bD.String(), "D struct{X []C struct{X []C}}"; got != want {
-		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	if got, want := bB.Unique(), uniqueB; got != want {
+		t.Errorf(`Named chain got unique %q, want %q`, got, want)
+	}
+	uniqueC := "C struct{X []C}"
+	if got, want := bC.String(), uniqueC; got != want {
+		t.Errorf(`Named chain got string %q, want %q`, got, want)
+	}
+	if got, want := bC.Unique(), uniqueC; got != want {
+		t.Errorf(`Named chain got unique %q, want %q`, got, want)
+	}
+	uniqueD := "D struct{X []C struct{X []C}}"
+	if got, want := bD.String(), uniqueD; got != want {
+		t.Errorf(`Named chain got string %q, want %q`, got, want)
+	}
+	if got, want := bD.Unique(), uniqueD; got != want {
+		t.Errorf(`Named chain got unique %q, want %q`, got, want)
 	}
 	if got, want := bA.NumField(), 1; got != want {
 		t.Errorf(`Named chain got NumField %q, want %q`, got, want)
@@ -822,8 +870,12 @@ func TestSelfRecursiveType(t *testing.T) {
 	if got, want := n.Name(), "Node"; got != want {
 		t.Errorf(`node Name got %q, want %q`, got, want)
 	}
-	if got, want := n.String(), "Node struct{Val string;Children []Node}"; got != want {
+	uniqueN := "Node struct{Val string;Children []Node}"
+	if got, want := n.String(), uniqueN; got != want {
 		t.Errorf(`node String got %q, want %q`, got, want)
+	}
+	if got, want := n.Unique(), uniqueN; got != want {
+		t.Errorf(`node Unique got %q, want %q`, got, want)
 	}
 	if got, want := n.NumField(), 2; got != want {
 		t.Errorf(`node NumField got %q, want %q`, got, want)
@@ -853,8 +905,12 @@ func TestSelfRecursiveType(t *testing.T) {
 	if got, want := c.Name(), ""; got != want {
 		t.Errorf(`children Name got %q, want %q`, got, want)
 	}
-	if got, want := c.String(), "[]Node struct{Val string;Children []Node}"; got != want {
+	uniqueC := "[]Node struct{Val string;Children []Node}"
+	if got, want := c.String(), uniqueC; got != want {
 		t.Errorf(`children String got %q, want %q`, got, want)
+	}
+	if got, want := c.Unique(), uniqueC; got != want {
+		t.Errorf(`children Unique got %q, want %q`, got, want)
 	}
 	if got, want := c.Elem(), n; got != want {
 		t.Errorf(`children Elem got %q, want %q`, got, want)
@@ -932,8 +988,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := d.Name(), "D"; got != want {
 		t.Errorf(`D Name got %q, want %q`, got, want)
 	}
-	if got, want := d.String(), "D struct{X int32;B B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C};C C}"; got != want {
+	uniqueD := "D struct{X int32;B B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C};C C}"
+	if got, want := d.String(), uniqueD; got != want {
 		t.Errorf(`D String got %q, want %q`, got, want)
+	}
+	if got, want := d.Unique(), uniqueD; got != want {
+		t.Errorf(`D Unique got %q, want %q`, got, want)
 	}
 	if got, want := d.NumField(), 3; got != want {
 		t.Errorf(`D NumField got %q, want %q`, got, want)
@@ -969,8 +1029,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := a.Name(), "A"; got != want {
 		t.Errorf(`A Name got %q, want %q`, got, want)
 	}
-	if got, want := a.String(), "A struct{X int32;B B struct{Y int32;A ?A;C C struct{Z string}};C C}"; got != want {
+	uniqueA := "A struct{X int32;B B struct{Y int32;A ?A;C C struct{Z string}};C C}"
+	if got, want := a.String(), uniqueA; got != want {
 		t.Errorf(`A String got %q, want %q`, got, want)
+	}
+	if got, want := a.Unique(), uniqueA; got != want {
+		t.Errorf(`A Unique got %q, want %q`, got, want)
 	}
 	if got, want := a.NumField(), 3; got != want {
 		t.Errorf(`A NumField got %q, want %q`, got, want)
@@ -1006,8 +1070,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Name(), "B"; got != want {
 		t.Errorf(`B Name got %q, want %q`, got, want)
 	}
-	if got, want := b.String(), "B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C}"; got != want {
+	uniqueB := "B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C}"
+	if got, want := b.String(), uniqueB; got != want {
 		t.Errorf(`B String got %q, want %q`, got, want)
+	}
+	if got, want := b.Unique(), uniqueB; got != want {
+		t.Errorf(`B Unique got %q, want %q`, got, want)
 	}
 	if got, want := b.NumField(), 3; got != want {
 		t.Errorf(`B NumField got %q, want %q`, got, want)
@@ -1043,8 +1111,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := c.Name(), "C"; got != want {
 		t.Errorf(`C Name got %q, want %q`, got, want)
 	}
-	if got, want := c.String(), "C struct{Z string}"; got != want {
+	uniqueC := "C struct{Z string}"
+	if got, want := c.String(), uniqueC; got != want {
 		t.Errorf(`C String got %q, want %q`, got, want)
+	}
+	if got, want := c.Unique(), uniqueC; got != want {
+		t.Errorf(`C Unique got %q, want %q`, got, want)
 	}
 	if got, want := c.NumField(), 1; got != want {
 		t.Errorf(`C NumField got %q, want %q`, got, want)

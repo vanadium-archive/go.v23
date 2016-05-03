@@ -12,6 +12,7 @@ pkg verror, func ErrorID(error) ID
 pkg verror, func ExplicitAddSubErrs(error, i18n.LangID, string, string, ...SubErr) error
 pkg verror, func ExplicitConvert(IDAction, i18n.LangID, string, string, error) error
 pkg verror, func ExplicitNew(IDAction, i18n.LangID, string, string, ...interface{}) error
+pkg verror, func FromWire(vdl.WireError) error
 pkg verror, func New(IDAction, *context.T, ...interface{}) error
 pkg verror, func NewErrAborted(*context.T) error
 pkg verror, func NewErrBadArg(*context.T) error

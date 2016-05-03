@@ -7,6 +7,7 @@ package vdl
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 var (
@@ -247,7 +248,9 @@ func (d *valueDecoder) DecodeInt(bitlen int) (int64, error) {
 	case Byte, Uint16, Uint32, Uint64:
 		x := top.Value.Uint()
 		ix := int64(x)
-		if shift := 64 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
+		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
+		// numbers should be shifted by 33 rather than 32.
+		if shift := 65 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
 		}
 		return ix, nil
@@ -301,7 +304,11 @@ func (d *valueDecoder) DecodeFloat(bitlen int) (float64, error) {
 		}
 		return float64(x), nil
 	case Float32, Float64:
-		return top.Value.Float(), nil
+		x := top.Value.Float()
+		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
+			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+		}
+		return x, nil
 	default:
 		return 0, fmt.Errorf("vdl: type mismatch, got %v, want float%d", top.Value.Type(), bitlen)
 	}

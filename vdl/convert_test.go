@@ -77,7 +77,7 @@ var (
 	}
 	vvStrABC = []*vdl.Value{
 		vdl.StringValue(nil, "ABC"), vdl.StringValue(vdl.StringTypeN, "ABC"),
-		vdl.EnumValue(vdl.EnumTypeN, "ABC"),
+		vdl.EnumValue(vdl.EnumTypeN, 3),
 	}
 	vvTypeObjectBool = []*vdl.Value{
 		vdl.TypeObjectValue(vdl.BoolType),

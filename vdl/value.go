@@ -248,9 +248,9 @@ func BytesValue(tt *Type, x []byte) *Value {
 
 // EnumValue is a convenience to create an Enum value.
 // Requires that tt is of the Enum kind.
-func EnumValue(tt *Type, x string) *Value {
+func EnumValue(tt *Type, index int) *Value {
 	v := ZeroValue(tt)
-	v.AssignEnumLabel(x)
+	v.AssignEnumIndex(index)
 	return v
 }
 
@@ -581,6 +581,14 @@ func (v *Value) UnionField() (int, *Value) {
 func (v *Value) Elem() *Value {
 	v.t.checkKind("Elem", Any, Optional)
 	return v.rep.(*Value)
+}
+
+// NonOptional returns v.Elem() if v is non-nil Optional, otherwise returns v.
+func (v *Value) NonOptional() *Value {
+	if v.t.kind == Optional && !v.IsNil() {
+		return v.Elem()
+	}
+	return v
 }
 
 // Assign the value v to x.  If x is nil, v is set to its zero value.  Panics if

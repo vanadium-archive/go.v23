@@ -31,11 +31,12 @@ pkg vdl, func ArrayType(int, *Type) *Type
 pkg vdl, func BoolValue(*Type, bool) *Value
 pkg vdl, func BytesValue(*Type, []byte) *Value
 pkg vdl, func Compatible(*Type, *Type) bool
+pkg vdl, func Compatible2(*Type, *Type) bool
 pkg vdl, func Convert(interface{}, interface{}) error
 pkg vdl, func CopyValue(*Value) *Value
 pkg vdl, func DeepEqual(interface{}, interface{}) bool
 pkg vdl, func EnumType(...string) *Type
-pkg vdl, func EnumValue(*Type, string) *Value
+pkg vdl, func EnumValue(*Type, int) *Value
 pkg vdl, func EqualValue(*Value, *Value) bool
 pkg vdl, func FloatValue(*Type, float64) *Value
 pkg vdl, func FromReflect(Target, reflect.Value) error
@@ -313,6 +314,7 @@ pkg vdl, method (*Type) EnumLabel(int) string
 pkg vdl, method (*Type) Field(int) Field
 pkg vdl, method (*Type) FieldByName(string) (Field, int)
 pkg vdl, method (*Type) IsBytes() bool
+pkg vdl, method (*Type) IsPartOfCycle() bool
 pkg vdl, method (*Type) Key() *Type
 pkg vdl, method (*Type) Kind() Kind
 pkg vdl, method (*Type) Len() int
@@ -321,6 +323,7 @@ pkg vdl, method (*Type) NonOptional() *Type
 pkg vdl, method (*Type) NumEnumLabel() int
 pkg vdl, method (*Type) NumField() int
 pkg vdl, method (*Type) String() string
+pkg vdl, method (*Type) Unique() string
 pkg vdl, method (*Type) VDLIsZero() bool
 pkg vdl, method (*Type) VDLWrite(Encoder) error
 pkg vdl, method (*Type) Walk(WalkMode, func(*Type) bool) bool
@@ -440,6 +443,7 @@ pkg vdl, method (*Value) Keys() []*Value
 pkg vdl, method (*Value) Kind() Kind
 pkg vdl, method (*Value) Len() int
 pkg vdl, method (*Value) MapIndex(*Value) *Value
+pkg vdl, method (*Value) NonOptional() *Value
 pkg vdl, method (*Value) RawString() string
 pkg vdl, method (*Value) String() string
 pkg vdl, method (*Value) StructField(int) *Value
@@ -499,6 +503,7 @@ pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
 pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (Kind) BitLen() int
+pkg vdl, method (Kind) IsNumber() bool
 pkg vdl, method (Kind) String() string
 pkg vdl, method (WireError) VDLIsZero() bool
 pkg vdl, method (WireError) VDLWrite(Encoder) error

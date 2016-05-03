@@ -7,6 +7,7 @@ package vdl
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sync"
 )
 
@@ -511,7 +512,7 @@ func (e *pipeEncoder) EncodeUint(v uint64) error {
 }
 
 func (d *pipeDecoder) DecodeUint(bitlen int) (uint64, error) {
-	const errFmt = "vom: %v conversion to uint%d loses precision: %v"
+	const errFmt = "vdl: %v conversion to uint%d loses precision: %v"
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
@@ -541,7 +542,7 @@ func (d *pipeDecoder) DecodeUint(bitlen int) (uint64, error) {
 		}
 		return ux, d.Enc.Err
 	}
-	return 0, d.Close(fmt.Errorf("vom: number not set"))
+	return 0, d.Close(fmt.Errorf("vdl: number not set"))
 }
 
 func (e *pipeEncoder) EncodeInt(v int64) error {
@@ -554,7 +555,7 @@ func (e *pipeEncoder) EncodeInt(v int64) error {
 }
 
 func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
-	const errFmt = "vom: %v conversion to int%d loses precision: %v"
+	const errFmt = "vdl: %v conversion to int%d loses precision: %v"
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
@@ -566,7 +567,9 @@ func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
 		ix := int64(x)
-		if shift := 64 - uint(bitlen); ix < 0 || x != (x<<shift)>>shift {
+		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
+		// numbers should be shifted by 33 rather than 32.
+		if shift := 65 - uint(bitlen); ix < 0 || x != (x<<shift)>>shift {
 			return 0, d.Close(fmt.Errorf(errFmt, "uint", bitlen, x))
 		}
 		return ix, d.Enc.Err
@@ -584,7 +587,7 @@ func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
 		}
 		return ix, d.Enc.Err
 	}
-	return 0, d.Close(fmt.Errorf("vom: number not set"))
+	return 0, d.Close(fmt.Errorf("vdl: number not set"))
 }
 
 func (e *pipeEncoder) EncodeFloat(v float64) error {
@@ -597,7 +600,7 @@ func (e *pipeEncoder) EncodeFloat(v float64) error {
 }
 
 func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
-	const errFmt = "vom: %v conversion to float%d loses precision: %v"
+	const errFmt = "vdl: %v conversion to float%d loses precision: %v"
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
@@ -631,9 +634,13 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 		}
 		return float64(x), d.Enc.Err
 	case numberFloat:
-		return d.Enc.ArgFloat, d.Enc.Err
+		x := d.Enc.ArgFloat
+		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
+			return 0, d.Close(fmt.Errorf(errFmt, "float", bitlen, x))
+		}
+		return x, d.Enc.Err
 	}
-	return 0, fmt.Errorf("vom: number not set")
+	return 0, fmt.Errorf("vdl: number not set")
 }
 
 func (e *pipeEncoder) EncodeBytes(v []byte) error {

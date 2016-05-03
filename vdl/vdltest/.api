@@ -1,0 +1,1480 @@
+pkg vdltest, const GenFull GenMode
+pkg vdltest, const GenNegMax GenMode
+pkg vdltest, const GenNegMin GenMode
+pkg vdltest, const GenPosMax GenMode
+pkg vdltest, const GenPosMin GenMode
+pkg vdltest, const GenRandom GenMode
+pkg vdltest, const VEnumAbcA VEnumAbc
+pkg vdltest, const VEnumAbcB VEnumAbc
+pkg vdltest, const VEnumAbcC VEnumAbc
+pkg vdltest, const VEnumBcdB VEnumBcd
+pkg vdltest, const VEnumBcdC VEnumBcd
+pkg vdltest, const VEnumBcdD VEnumBcd
+pkg vdltest, func AllFail() []Entry
+pkg vdltest, func AllFailFunc(func(Entry) bool) []Entry
+pkg vdltest, func AllPass() []Entry
+pkg vdltest, func AllPassFunc(func(Entry) bool) []Entry
+pkg vdltest, func MimicValue(*vdl.Type, *vdl.Value) *vdl.Value
+pkg vdltest, func NewEntryGenerator([]*vdl.Type) *EntryGenerator
+pkg vdltest, func NewTypeGenerator() *TypeGenerator
+pkg vdltest, func NewValueGenerator([]*vdl.Type) *ValueGenerator
+pkg vdltest, func PrintEntryStats(io.Writer, ...EntryValue) error
+pkg vdltest, func PrintTypeStats(io.Writer, ...*vdl.Type) error
+pkg vdltest, func VDLReadVUnionDepth1(vdl.Decoder, *VUnionDepth1) error
+pkg vdltest, func VDLReadVUnionDepth2(vdl.Decoder, *VUnionDepth2) error
+pkg vdltest, func VEnumAbcFromString(string) (VEnumAbc, error)
+pkg vdltest, func VEnumBcdFromString(string) (VEnumBcd, error)
+pkg vdltest, method (*Entry) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*EntryGenerator) GenAllFail() []EntryValue
+pkg vdltest, method (*EntryGenerator) GenAllPass() []EntryValue
+pkg vdltest, method (*EntryGenerator) GenFail(*vdl.Type) []EntryValue
+pkg vdltest, method (*EntryGenerator) GenPass(*vdl.Type) []EntryValue
+pkg vdltest, method (*EntryGenerator) RandSeed(int64)
+pkg vdltest, method (*TypeGenerator) Gen(int) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenArray(int, ...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenList(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenMap(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenOptional(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenSet(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenStruct(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) GenUnion(...*vdl.Type) []*vdl.Type
+pkg vdltest, method (*TypeGenerator) Name(*vdl.Type) string
+pkg vdltest, method (*TypeGenerator) RandSeed(int64)
+pkg vdltest, method (*VArray3_Any) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Byte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Error) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Int32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Int8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_List_VStructEmpty) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_OptVStructDepth1) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Set_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_String) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_TypeObject) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Uint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Uint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_Uint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_Byte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_Uint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_VUint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VArray3_VUint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VEnumAbc) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VInt8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VList_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VList_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VList_VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_Float64_Float64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_Int8_Int8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_String_OptVStructEmpty) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_VFloat64_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_VInt64_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_VInt8_VInt8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VMap_VString_VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VStructDepth1) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VUint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VUint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VArray3_VUint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VByte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VEnumAbc) Set(string) error
+pkg vdltest, method (*VEnumAbc) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VEnumBcd) Set(string) error
+pkg vdltest, method (*VEnumBcd) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VFloat32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VInt32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VInt8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Byte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Error) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Int16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Map_Int64_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Map_Uint64_Uint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Map_VByte_VByte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_OptVStructEmpty) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_Uint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VArray3_TypeObject) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VArray3_VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VArray3_VInt8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VList_Error) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VMap_VInt64_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VMap_VString_VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VSet_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VSet_VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VList_VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_Float32_Float32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_Float64_Float64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_Int8_Int8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_Map_VEnumBcd_VEnumBcd) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_OptVStructEmpty) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_Set_VEnumBcd) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_TypeObject) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_VList_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_VMap_VByte_VByte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_String_VSet_VFloat32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VArray3_String_VArray3_String) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VArray3_VEnumAbc_VArray3_VEnumAbc) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VArray3_VFloat64_VArray3_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VArray3_VUint32_VArray3_VUint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VByte_VByte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VFloat64_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VInt64_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VInt8_VInt8) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VString_VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMap_VUint16_VUint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_Float64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_Int16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_Uint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_Byte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_Int64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_String) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_Uint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_Uint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VUint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VUint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VArray3_VUint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VEnumAbc) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VFloat32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VFloat64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VInt16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VInt64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSet_VUint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VStructDepth1) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VStructDepth2) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VStructEmpty) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VUint16) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VUint32) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VUint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*ValueGenerator) Gen(*vdl.Type, GenMode) *vdl.Value
+pkg vdltest, method (*ValueGenerator) RandSeed(int64)
+pkg vdltest, method (Entry) Name() string
+pkg vdltest, method (Entry) VDLIsZero() bool
+pkg vdltest, method (Entry) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (EntryValue) IsCanonical() bool
+pkg vdltest, method (GenMode) String() string
+pkg vdltest, method (VArray3_Any) VDLIsZero() bool
+pkg vdltest, method (VArray3_Any) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Byte) VDLIsZero() bool
+pkg vdltest, method (VArray3_Byte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Error) VDLIsZero() bool
+pkg vdltest, method (VArray3_Error) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Int32) VDLIsZero() bool
+pkg vdltest, method (VArray3_Int32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Int64) VDLIsZero() bool
+pkg vdltest, method (VArray3_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Int8) VDLIsZero() bool
+pkg vdltest, method (VArray3_Int8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_List_VStructEmpty) VDLIsZero() bool
+pkg vdltest, method (VArray3_List_VStructEmpty) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_OptVStructDepth1) VDLIsZero() bool
+pkg vdltest, method (VArray3_OptVStructDepth1) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Set_VInt64) VDLIsZero() bool
+pkg vdltest, method (VArray3_Set_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_String) VDLIsZero() bool
+pkg vdltest, method (VArray3_String) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_TypeObject) VDLIsZero() bool
+pkg vdltest, method (VArray3_TypeObject) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Uint16) VDLIsZero() bool
+pkg vdltest, method (VArray3_Uint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Uint32) VDLIsZero() bool
+pkg vdltest, method (VArray3_Uint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_Uint64) VDLIsZero() bool
+pkg vdltest, method (VArray3_Uint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_Byte) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_Byte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_Int64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_Uint32) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_Uint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_VBool) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_VUint32) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_VUint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VArray3_VUint64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VArray3_VUint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VBool) VDLIsZero() bool
+pkg vdltest, method (VArray3_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VEnumAbc) VDLIsZero() bool
+pkg vdltest, method (VArray3_VEnumAbc) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VInt16) VDLIsZero() bool
+pkg vdltest, method (VArray3_VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VInt64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VInt8) VDLIsZero() bool
+pkg vdltest, method (VArray3_VInt8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VList_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VList_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VList_VInt64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VList_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VList_VString) VDLIsZero() bool
+pkg vdltest, method (VArray3_VList_VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_Float64_Float64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_Float64_Float64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_Int8_Int8) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_Int8_Int8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_String_OptVStructEmpty) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_String_OptVStructEmpty) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_VFloat64_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_VFloat64_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_VInt64_VInt64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_VInt64_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_VInt8_VInt8) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_VInt8_VInt8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VMap_VString_VString) VDLIsZero() bool
+pkg vdltest, method (VArray3_VMap_VString_VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VStructDepth1) VDLIsZero() bool
+pkg vdltest, method (VArray3_VStructDepth1) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VUint16) VDLIsZero() bool
+pkg vdltest, method (VArray3_VUint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VUint32) VDLIsZero() bool
+pkg vdltest, method (VArray3_VUint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VArray3_VUint64) VDLIsZero() bool
+pkg vdltest, method (VArray3_VUint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VBool) VDLIsZero() bool
+pkg vdltest, method (VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VByte) VDLIsZero() bool
+pkg vdltest, method (VByte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VEnumAbc) String() string
+pkg vdltest, method (VEnumAbc) VDLIsZero() bool
+pkg vdltest, method (VEnumAbc) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VEnumBcd) String() string
+pkg vdltest, method (VEnumBcd) VDLIsZero() bool
+pkg vdltest, method (VEnumBcd) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VFloat32) VDLIsZero() bool
+pkg vdltest, method (VFloat32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VFloat64) VDLIsZero() bool
+pkg vdltest, method (VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VInt16) VDLIsZero() bool
+pkg vdltest, method (VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VInt32) VDLIsZero() bool
+pkg vdltest, method (VInt32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VInt64) VDLIsZero() bool
+pkg vdltest, method (VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VInt8) VDLIsZero() bool
+pkg vdltest, method (VInt8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Byte) VDLIsZero() bool
+pkg vdltest, method (VList_Byte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Error) VDLIsZero() bool
+pkg vdltest, method (VList_Error) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Int16) VDLIsZero() bool
+pkg vdltest, method (VList_Int16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Int64) VDLIsZero() bool
+pkg vdltest, method (VList_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Map_Int64_Int64) VDLIsZero() bool
+pkg vdltest, method (VList_Map_Int64_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Map_Uint64_Uint64) VDLIsZero() bool
+pkg vdltest, method (VList_Map_Uint64_Uint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Map_VByte_VByte) VDLIsZero() bool
+pkg vdltest, method (VList_Map_VByte_VByte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_OptVStructEmpty) VDLIsZero() bool
+pkg vdltest, method (VList_OptVStructEmpty) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_Uint16) VDLIsZero() bool
+pkg vdltest, method (VList_Uint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VArray3_TypeObject) VDLIsZero() bool
+pkg vdltest, method (VList_VArray3_TypeObject) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VArray3_VInt16) VDLIsZero() bool
+pkg vdltest, method (VList_VArray3_VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VArray3_VInt8) VDLIsZero() bool
+pkg vdltest, method (VList_VArray3_VInt8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VBool) VDLIsZero() bool
+pkg vdltest, method (VList_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VList_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VInt64) VDLIsZero() bool
+pkg vdltest, method (VList_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VList_Error) VDLIsZero() bool
+pkg vdltest, method (VList_VList_Error) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VMap_VInt64_VInt64) VDLIsZero() bool
+pkg vdltest, method (VList_VMap_VInt64_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VMap_VString_VString) VDLIsZero() bool
+pkg vdltest, method (VList_VMap_VString_VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VSet_VBool) VDLIsZero() bool
+pkg vdltest, method (VList_VSet_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VSet_VInt16) VDLIsZero() bool
+pkg vdltest, method (VList_VSet_VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VList_VString) VDLIsZero() bool
+pkg vdltest, method (VList_VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_Float32_Float32) VDLIsZero() bool
+pkg vdltest, method (VMap_Float32_Float32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_Float64_Float64) VDLIsZero() bool
+pkg vdltest, method (VMap_Float64_Float64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_Int8_Int8) VDLIsZero() bool
+pkg vdltest, method (VMap_Int8_Int8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_Map_VEnumBcd_VEnumBcd) VDLIsZero() bool
+pkg vdltest, method (VMap_String_Map_VEnumBcd_VEnumBcd) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_OptVStructEmpty) VDLIsZero() bool
+pkg vdltest, method (VMap_String_OptVStructEmpty) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_Set_VEnumBcd) VDLIsZero() bool
+pkg vdltest, method (VMap_String_Set_VEnumBcd) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_TypeObject) VDLIsZero() bool
+pkg vdltest, method (VMap_String_TypeObject) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_VList_VInt64) VDLIsZero() bool
+pkg vdltest, method (VMap_String_VList_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_VMap_VByte_VByte) VDLIsZero() bool
+pkg vdltest, method (VMap_String_VMap_VByte_VByte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_String_VSet_VFloat32) VDLIsZero() bool
+pkg vdltest, method (VMap_String_VSet_VFloat32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VArray3_String_VArray3_String) VDLIsZero() bool
+pkg vdltest, method (VMap_VArray3_String_VArray3_String) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VArray3_VEnumAbc_VArray3_VEnumAbc) VDLIsZero() bool
+pkg vdltest, method (VMap_VArray3_VEnumAbc_VArray3_VEnumAbc) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VArray3_VFloat64_VArray3_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VMap_VArray3_VFloat64_VArray3_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VArray3_VUint32_VArray3_VUint32) VDLIsZero() bool
+pkg vdltest, method (VMap_VArray3_VUint32_VArray3_VUint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VByte_VByte) VDLIsZero() bool
+pkg vdltest, method (VMap_VByte_VByte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VFloat64_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VMap_VFloat64_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VInt64_VInt64) VDLIsZero() bool
+pkg vdltest, method (VMap_VInt64_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VInt8_VInt8) VDLIsZero() bool
+pkg vdltest, method (VMap_VInt8_VInt8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VString_VString) VDLIsZero() bool
+pkg vdltest, method (VMap_VString_VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMap_VUint16_VUint16) VDLIsZero() bool
+pkg vdltest, method (VMap_VUint16_VUint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_Float64) VDLIsZero() bool
+pkg vdltest, method (VSet_Float64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_Int16) VDLIsZero() bool
+pkg vdltest, method (VSet_Int16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_Int64) VDLIsZero() bool
+pkg vdltest, method (VSet_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_Uint32) VDLIsZero() bool
+pkg vdltest, method (VSet_Uint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_Byte) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_Byte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_Int64) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_Int64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_String) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_String) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_Uint16) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_Uint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_Uint64) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_Uint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VBool) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VInt16) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VInt64) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VUint16) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VUint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VUint32) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VUint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VArray3_VUint64) VDLIsZero() bool
+pkg vdltest, method (VSet_VArray3_VUint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VBool) VDLIsZero() bool
+pkg vdltest, method (VSet_VBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VEnumAbc) VDLIsZero() bool
+pkg vdltest, method (VSet_VEnumAbc) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VFloat32) VDLIsZero() bool
+pkg vdltest, method (VSet_VFloat32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VFloat64) VDLIsZero() bool
+pkg vdltest, method (VSet_VFloat64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VInt16) VDLIsZero() bool
+pkg vdltest, method (VSet_VInt16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VInt64) VDLIsZero() bool
+pkg vdltest, method (VSet_VInt64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VSet_VUint16) VDLIsZero() bool
+pkg vdltest, method (VSet_VUint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VString) VDLIsZero() bool
+pkg vdltest, method (VString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VStructDepth1) VDLIsZero() bool
+pkg vdltest, method (VStructDepth1) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VStructDepth2) VDLIsZero() bool
+pkg vdltest, method (VStructDepth2) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VStructEmpty) VDLIsZero() bool
+pkg vdltest, method (VStructEmpty) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUint16) VDLIsZero() bool
+pkg vdltest, method (VUint16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUint32) VDLIsZero() bool
+pkg vdltest, method (VUint32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUint64) VDLIsZero() bool
+pkg vdltest, method (VUint64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F0) Index() int
+pkg vdltest, method (VUnionDepth1F0) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F0) Name() string
+pkg vdltest, method (VUnionDepth1F0) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F0) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F1) Index() int
+pkg vdltest, method (VUnionDepth1F1) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F1) Name() string
+pkg vdltest, method (VUnionDepth1F1) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F1) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F10) Index() int
+pkg vdltest, method (VUnionDepth1F10) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F10) Name() string
+pkg vdltest, method (VUnionDepth1F10) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F10) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F11) Index() int
+pkg vdltest, method (VUnionDepth1F11) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F11) Name() string
+pkg vdltest, method (VUnionDepth1F11) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F11) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F12) Index() int
+pkg vdltest, method (VUnionDepth1F12) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F12) Name() string
+pkg vdltest, method (VUnionDepth1F12) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F12) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F13) Index() int
+pkg vdltest, method (VUnionDepth1F13) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F13) Name() string
+pkg vdltest, method (VUnionDepth1F13) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F13) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F14) Index() int
+pkg vdltest, method (VUnionDepth1F14) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F14) Name() string
+pkg vdltest, method (VUnionDepth1F14) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F14) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F15) Index() int
+pkg vdltest, method (VUnionDepth1F15) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F15) Name() string
+pkg vdltest, method (VUnionDepth1F15) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F15) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F16) Index() int
+pkg vdltest, method (VUnionDepth1F16) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F16) Name() string
+pkg vdltest, method (VUnionDepth1F16) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F17) Index() int
+pkg vdltest, method (VUnionDepth1F17) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F17) Name() string
+pkg vdltest, method (VUnionDepth1F17) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F17) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F18) Index() int
+pkg vdltest, method (VUnionDepth1F18) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F18) Name() string
+pkg vdltest, method (VUnionDepth1F18) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F18) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F19) Index() int
+pkg vdltest, method (VUnionDepth1F19) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F19) Name() string
+pkg vdltest, method (VUnionDepth1F19) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F19) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F2) Index() int
+pkg vdltest, method (VUnionDepth1F2) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F2) Name() string
+pkg vdltest, method (VUnionDepth1F2) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F2) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F20) Index() int
+pkg vdltest, method (VUnionDepth1F20) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F20) Name() string
+pkg vdltest, method (VUnionDepth1F20) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F20) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F21) Index() int
+pkg vdltest, method (VUnionDepth1F21) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F21) Name() string
+pkg vdltest, method (VUnionDepth1F21) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F21) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F22) Index() int
+pkg vdltest, method (VUnionDepth1F22) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F22) Name() string
+pkg vdltest, method (VUnionDepth1F22) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F22) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F23) Index() int
+pkg vdltest, method (VUnionDepth1F23) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F23) Name() string
+pkg vdltest, method (VUnionDepth1F23) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F23) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F24) Index() int
+pkg vdltest, method (VUnionDepth1F24) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F24) Name() string
+pkg vdltest, method (VUnionDepth1F24) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F24) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F25) Index() int
+pkg vdltest, method (VUnionDepth1F25) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F25) Name() string
+pkg vdltest, method (VUnionDepth1F25) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F25) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F26) Index() int
+pkg vdltest, method (VUnionDepth1F26) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F26) Name() string
+pkg vdltest, method (VUnionDepth1F26) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F26) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F27) Index() int
+pkg vdltest, method (VUnionDepth1F27) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F27) Name() string
+pkg vdltest, method (VUnionDepth1F27) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F27) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F28) Index() int
+pkg vdltest, method (VUnionDepth1F28) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F28) Name() string
+pkg vdltest, method (VUnionDepth1F28) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F28) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F29) Index() int
+pkg vdltest, method (VUnionDepth1F29) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F29) Name() string
+pkg vdltest, method (VUnionDepth1F29) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F29) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F3) Index() int
+pkg vdltest, method (VUnionDepth1F3) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F3) Name() string
+pkg vdltest, method (VUnionDepth1F3) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F3) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F30) Index() int
+pkg vdltest, method (VUnionDepth1F30) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F30) Name() string
+pkg vdltest, method (VUnionDepth1F30) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F30) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F4) Index() int
+pkg vdltest, method (VUnionDepth1F4) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F4) Name() string
+pkg vdltest, method (VUnionDepth1F4) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F4) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F5) Index() int
+pkg vdltest, method (VUnionDepth1F5) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F5) Name() string
+pkg vdltest, method (VUnionDepth1F5) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F5) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F6) Index() int
+pkg vdltest, method (VUnionDepth1F6) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F6) Name() string
+pkg vdltest, method (VUnionDepth1F6) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F6) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F7) Index() int
+pkg vdltest, method (VUnionDepth1F7) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F7) Name() string
+pkg vdltest, method (VUnionDepth1F7) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F7) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F8) Index() int
+pkg vdltest, method (VUnionDepth1F8) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F8) Name() string
+pkg vdltest, method (VUnionDepth1F8) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth1F9) Index() int
+pkg vdltest, method (VUnionDepth1F9) Interface() interface{}
+pkg vdltest, method (VUnionDepth1F9) Name() string
+pkg vdltest, method (VUnionDepth1F9) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth1F9) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F0) Index() int
+pkg vdltest, method (VUnionDepth2F0) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F0) Name() string
+pkg vdltest, method (VUnionDepth2F0) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F0) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F1) Index() int
+pkg vdltest, method (VUnionDepth2F1) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F1) Name() string
+pkg vdltest, method (VUnionDepth2F1) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F1) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F10) Index() int
+pkg vdltest, method (VUnionDepth2F10) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F10) Name() string
+pkg vdltest, method (VUnionDepth2F10) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F10) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F11) Index() int
+pkg vdltest, method (VUnionDepth2F11) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F11) Name() string
+pkg vdltest, method (VUnionDepth2F11) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F11) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F12) Index() int
+pkg vdltest, method (VUnionDepth2F12) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F12) Name() string
+pkg vdltest, method (VUnionDepth2F12) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F12) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F13) Index() int
+pkg vdltest, method (VUnionDepth2F13) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F13) Name() string
+pkg vdltest, method (VUnionDepth2F13) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F13) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F14) Index() int
+pkg vdltest, method (VUnionDepth2F14) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F14) Name() string
+pkg vdltest, method (VUnionDepth2F14) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F14) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F15) Index() int
+pkg vdltest, method (VUnionDepth2F15) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F15) Name() string
+pkg vdltest, method (VUnionDepth2F15) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F15) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F16) Index() int
+pkg vdltest, method (VUnionDepth2F16) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F16) Name() string
+pkg vdltest, method (VUnionDepth2F16) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F16) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F17) Index() int
+pkg vdltest, method (VUnionDepth2F17) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F17) Name() string
+pkg vdltest, method (VUnionDepth2F17) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F17) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F18) Index() int
+pkg vdltest, method (VUnionDepth2F18) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F18) Name() string
+pkg vdltest, method (VUnionDepth2F18) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F18) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F19) Index() int
+pkg vdltest, method (VUnionDepth2F19) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F19) Name() string
+pkg vdltest, method (VUnionDepth2F19) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F19) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F2) Index() int
+pkg vdltest, method (VUnionDepth2F2) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F2) Name() string
+pkg vdltest, method (VUnionDepth2F2) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F2) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F20) Index() int
+pkg vdltest, method (VUnionDepth2F20) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F20) Name() string
+pkg vdltest, method (VUnionDepth2F20) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F20) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F21) Index() int
+pkg vdltest, method (VUnionDepth2F21) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F21) Name() string
+pkg vdltest, method (VUnionDepth2F21) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F21) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F22) Index() int
+pkg vdltest, method (VUnionDepth2F22) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F22) Name() string
+pkg vdltest, method (VUnionDepth2F22) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F22) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F23) Index() int
+pkg vdltest, method (VUnionDepth2F23) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F23) Name() string
+pkg vdltest, method (VUnionDepth2F23) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F23) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F24) Index() int
+pkg vdltest, method (VUnionDepth2F24) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F24) Name() string
+pkg vdltest, method (VUnionDepth2F24) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F24) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F25) Index() int
+pkg vdltest, method (VUnionDepth2F25) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F25) Name() string
+pkg vdltest, method (VUnionDepth2F25) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F25) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F26) Index() int
+pkg vdltest, method (VUnionDepth2F26) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F26) Name() string
+pkg vdltest, method (VUnionDepth2F26) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F26) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F27) Index() int
+pkg vdltest, method (VUnionDepth2F27) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F27) Name() string
+pkg vdltest, method (VUnionDepth2F27) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F27) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F28) Index() int
+pkg vdltest, method (VUnionDepth2F28) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F28) Name() string
+pkg vdltest, method (VUnionDepth2F28) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F28) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F29) Index() int
+pkg vdltest, method (VUnionDepth2F29) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F29) Name() string
+pkg vdltest, method (VUnionDepth2F29) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F29) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F3) Index() int
+pkg vdltest, method (VUnionDepth2F3) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F3) Name() string
+pkg vdltest, method (VUnionDepth2F3) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F3) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F30) Index() int
+pkg vdltest, method (VUnionDepth2F30) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F30) Name() string
+pkg vdltest, method (VUnionDepth2F30) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F30) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F31) Index() int
+pkg vdltest, method (VUnionDepth2F31) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F31) Name() string
+pkg vdltest, method (VUnionDepth2F31) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F31) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F32) Index() int
+pkg vdltest, method (VUnionDepth2F32) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F32) Name() string
+pkg vdltest, method (VUnionDepth2F32) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F32) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F33) Index() int
+pkg vdltest, method (VUnionDepth2F33) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F33) Name() string
+pkg vdltest, method (VUnionDepth2F33) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F33) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F34) Index() int
+pkg vdltest, method (VUnionDepth2F34) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F34) Name() string
+pkg vdltest, method (VUnionDepth2F34) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F34) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F35) Index() int
+pkg vdltest, method (VUnionDepth2F35) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F35) Name() string
+pkg vdltest, method (VUnionDepth2F35) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F35) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F36) Index() int
+pkg vdltest, method (VUnionDepth2F36) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F36) Name() string
+pkg vdltest, method (VUnionDepth2F36) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F36) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F37) Index() int
+pkg vdltest, method (VUnionDepth2F37) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F37) Name() string
+pkg vdltest, method (VUnionDepth2F37) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F37) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F38) Index() int
+pkg vdltest, method (VUnionDepth2F38) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F38) Name() string
+pkg vdltest, method (VUnionDepth2F38) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F38) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F39) Index() int
+pkg vdltest, method (VUnionDepth2F39) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F39) Name() string
+pkg vdltest, method (VUnionDepth2F39) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F39) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F4) Index() int
+pkg vdltest, method (VUnionDepth2F4) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F4) Name() string
+pkg vdltest, method (VUnionDepth2F4) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F4) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F40) Index() int
+pkg vdltest, method (VUnionDepth2F40) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F40) Name() string
+pkg vdltest, method (VUnionDepth2F40) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F40) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F41) Index() int
+pkg vdltest, method (VUnionDepth2F41) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F41) Name() string
+pkg vdltest, method (VUnionDepth2F41) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F41) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F42) Index() int
+pkg vdltest, method (VUnionDepth2F42) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F42) Name() string
+pkg vdltest, method (VUnionDepth2F42) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F42) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F43) Index() int
+pkg vdltest, method (VUnionDepth2F43) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F43) Name() string
+pkg vdltest, method (VUnionDepth2F43) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F43) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F44) Index() int
+pkg vdltest, method (VUnionDepth2F44) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F44) Name() string
+pkg vdltest, method (VUnionDepth2F44) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F44) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F45) Index() int
+pkg vdltest, method (VUnionDepth2F45) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F45) Name() string
+pkg vdltest, method (VUnionDepth2F45) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F45) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F46) Index() int
+pkg vdltest, method (VUnionDepth2F46) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F46) Name() string
+pkg vdltest, method (VUnionDepth2F46) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F46) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F47) Index() int
+pkg vdltest, method (VUnionDepth2F47) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F47) Name() string
+pkg vdltest, method (VUnionDepth2F47) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F47) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F48) Index() int
+pkg vdltest, method (VUnionDepth2F48) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F48) Name() string
+pkg vdltest, method (VUnionDepth2F48) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F48) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F49) Index() int
+pkg vdltest, method (VUnionDepth2F49) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F49) Name() string
+pkg vdltest, method (VUnionDepth2F49) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F49) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F5) Index() int
+pkg vdltest, method (VUnionDepth2F5) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F5) Name() string
+pkg vdltest, method (VUnionDepth2F5) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F5) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F50) Index() int
+pkg vdltest, method (VUnionDepth2F50) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F50) Name() string
+pkg vdltest, method (VUnionDepth2F50) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F50) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F51) Index() int
+pkg vdltest, method (VUnionDepth2F51) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F51) Name() string
+pkg vdltest, method (VUnionDepth2F51) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F51) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F52) Index() int
+pkg vdltest, method (VUnionDepth2F52) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F52) Name() string
+pkg vdltest, method (VUnionDepth2F52) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F52) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F53) Index() int
+pkg vdltest, method (VUnionDepth2F53) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F53) Name() string
+pkg vdltest, method (VUnionDepth2F53) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F53) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F54) Index() int
+pkg vdltest, method (VUnionDepth2F54) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F54) Name() string
+pkg vdltest, method (VUnionDepth2F54) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F54) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F55) Index() int
+pkg vdltest, method (VUnionDepth2F55) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F55) Name() string
+pkg vdltest, method (VUnionDepth2F55) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F55) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F56) Index() int
+pkg vdltest, method (VUnionDepth2F56) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F56) Name() string
+pkg vdltest, method (VUnionDepth2F56) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F56) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F57) Index() int
+pkg vdltest, method (VUnionDepth2F57) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F57) Name() string
+pkg vdltest, method (VUnionDepth2F57) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F57) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F58) Index() int
+pkg vdltest, method (VUnionDepth2F58) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F58) Name() string
+pkg vdltest, method (VUnionDepth2F58) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F58) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F59) Index() int
+pkg vdltest, method (VUnionDepth2F59) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F59) Name() string
+pkg vdltest, method (VUnionDepth2F59) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F59) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F6) Index() int
+pkg vdltest, method (VUnionDepth2F6) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F6) Name() string
+pkg vdltest, method (VUnionDepth2F6) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F6) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F60) Index() int
+pkg vdltest, method (VUnionDepth2F60) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F60) Name() string
+pkg vdltest, method (VUnionDepth2F60) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F60) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F61) Index() int
+pkg vdltest, method (VUnionDepth2F61) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F61) Name() string
+pkg vdltest, method (VUnionDepth2F61) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F61) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F62) Index() int
+pkg vdltest, method (VUnionDepth2F62) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F62) Name() string
+pkg vdltest, method (VUnionDepth2F62) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F62) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F63) Index() int
+pkg vdltest, method (VUnionDepth2F63) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F63) Name() string
+pkg vdltest, method (VUnionDepth2F63) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F63) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F64) Index() int
+pkg vdltest, method (VUnionDepth2F64) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F64) Name() string
+pkg vdltest, method (VUnionDepth2F64) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F64) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F65) Index() int
+pkg vdltest, method (VUnionDepth2F65) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F65) Name() string
+pkg vdltest, method (VUnionDepth2F65) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F65) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F66) Index() int
+pkg vdltest, method (VUnionDepth2F66) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F66) Name() string
+pkg vdltest, method (VUnionDepth2F66) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F66) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F67) Index() int
+pkg vdltest, method (VUnionDepth2F67) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F67) Name() string
+pkg vdltest, method (VUnionDepth2F67) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F67) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F68) Index() int
+pkg vdltest, method (VUnionDepth2F68) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F68) Name() string
+pkg vdltest, method (VUnionDepth2F68) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F68) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F69) Index() int
+pkg vdltest, method (VUnionDepth2F69) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F69) Name() string
+pkg vdltest, method (VUnionDepth2F69) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F69) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F7) Index() int
+pkg vdltest, method (VUnionDepth2F7) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F7) Name() string
+pkg vdltest, method (VUnionDepth2F7) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F7) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F70) Index() int
+pkg vdltest, method (VUnionDepth2F70) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F70) Name() string
+pkg vdltest, method (VUnionDepth2F70) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F70) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F71) Index() int
+pkg vdltest, method (VUnionDepth2F71) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F71) Name() string
+pkg vdltest, method (VUnionDepth2F71) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F71) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F72) Index() int
+pkg vdltest, method (VUnionDepth2F72) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F72) Name() string
+pkg vdltest, method (VUnionDepth2F72) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F72) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F73) Index() int
+pkg vdltest, method (VUnionDepth2F73) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F73) Name() string
+pkg vdltest, method (VUnionDepth2F73) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F73) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F74) Index() int
+pkg vdltest, method (VUnionDepth2F74) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F74) Name() string
+pkg vdltest, method (VUnionDepth2F74) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F74) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F75) Index() int
+pkg vdltest, method (VUnionDepth2F75) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F75) Name() string
+pkg vdltest, method (VUnionDepth2F75) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F75) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F76) Index() int
+pkg vdltest, method (VUnionDepth2F76) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F76) Name() string
+pkg vdltest, method (VUnionDepth2F76) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F76) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F77) Index() int
+pkg vdltest, method (VUnionDepth2F77) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F77) Name() string
+pkg vdltest, method (VUnionDepth2F77) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F77) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F78) Index() int
+pkg vdltest, method (VUnionDepth2F78) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F78) Name() string
+pkg vdltest, method (VUnionDepth2F78) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F78) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F79) Index() int
+pkg vdltest, method (VUnionDepth2F79) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F79) Name() string
+pkg vdltest, method (VUnionDepth2F79) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F79) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F8) Index() int
+pkg vdltest, method (VUnionDepth2F8) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F8) Name() string
+pkg vdltest, method (VUnionDepth2F8) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F8) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F80) Index() int
+pkg vdltest, method (VUnionDepth2F80) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F80) Name() string
+pkg vdltest, method (VUnionDepth2F80) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F80) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F81) Index() int
+pkg vdltest, method (VUnionDepth2F81) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F81) Name() string
+pkg vdltest, method (VUnionDepth2F81) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F81) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F82) Index() int
+pkg vdltest, method (VUnionDepth2F82) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F82) Name() string
+pkg vdltest, method (VUnionDepth2F82) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F82) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VUnionDepth2F9) Index() int
+pkg vdltest, method (VUnionDepth2F9) Interface() interface{}
+pkg vdltest, method (VUnionDepth2F9) Name() string
+pkg vdltest, method (VUnionDepth2F9) VDLIsZero() bool
+pkg vdltest, method (VUnionDepth2F9) VDLWrite(vdl.Encoder) error
+pkg vdltest, type Entry struct
+pkg vdltest, type Entry struct, IsCanonical bool
+pkg vdltest, type Entry struct, Label string
+pkg vdltest, type Entry struct, Source interface{}
+pkg vdltest, type Entry struct, SourceLabel string
+pkg vdltest, type Entry struct, Target interface{}
+pkg vdltest, type Entry struct, TargetLabel string
+pkg vdltest, type EntryGenerator struct
+pkg vdltest, type EntryValue struct
+pkg vdltest, type EntryValue struct, Label string
+pkg vdltest, type EntryValue struct, Source *vdl.Value
+pkg vdltest, type EntryValue struct, Target *vdl.Value
+pkg vdltest, type GenMode int
+pkg vdltest, type TypeGenerator struct
+pkg vdltest, type TypeGenerator struct, AllFieldsSuffix string
+pkg vdltest, type TypeGenerator struct, MaxPerKind int
+pkg vdltest, type TypeGenerator struct, Prefix string
+pkg vdltest, type VArray3_Any [3]interface{}
+pkg vdltest, type VArray3_Byte [3]byte
+pkg vdltest, type VArray3_Error [3]error
+pkg vdltest, type VArray3_Int32 [3]int32
+pkg vdltest, type VArray3_Int64 [3]int64
+pkg vdltest, type VArray3_Int8 [3]int8
+pkg vdltest, type VArray3_List_VStructEmpty [3][]VStructEmpty
+pkg vdltest, type VArray3_OptVStructDepth1 [3]*VStructDepth1
+pkg vdltest, type VArray3_Set_VInt64 [3]map[VInt64]struct{}
+pkg vdltest, type VArray3_String [3]string
+pkg vdltest, type VArray3_TypeObject [3]*vdl.Type
+pkg vdltest, type VArray3_Uint16 [3]uint16
+pkg vdltest, type VArray3_Uint32 [3]uint32
+pkg vdltest, type VArray3_Uint64 [3]uint64
+pkg vdltest, type VArray3_VArray3_Byte [3]VArray3_Byte
+pkg vdltest, type VArray3_VArray3_Int64 [3]VArray3_Int64
+pkg vdltest, type VArray3_VArray3_Uint32 [3]VArray3_Uint32
+pkg vdltest, type VArray3_VArray3_VBool [3]VArray3_VBool
+pkg vdltest, type VArray3_VArray3_VUint32 [3]VArray3_VUint32
+pkg vdltest, type VArray3_VArray3_VUint64 [3]VArray3_VUint64
+pkg vdltest, type VArray3_VBool [3]VBool
+pkg vdltest, type VArray3_VEnumAbc [3]VEnumAbc
+pkg vdltest, type VArray3_VFloat64 [3]VFloat64
+pkg vdltest, type VArray3_VInt16 [3]VInt16
+pkg vdltest, type VArray3_VInt64 [3]VInt64
+pkg vdltest, type VArray3_VInt8 [3]VInt8
+pkg vdltest, type VArray3_VList_VFloat64 [3]VList_VFloat64
+pkg vdltest, type VArray3_VList_VInt64 [3]VList_VInt64
+pkg vdltest, type VArray3_VList_VString [3]VList_VString
+pkg vdltest, type VArray3_VMap_Float64_Float64 [3]VMap_Float64_Float64
+pkg vdltest, type VArray3_VMap_Int8_Int8 [3]VMap_Int8_Int8
+pkg vdltest, type VArray3_VMap_String_OptVStructEmpty [3]VMap_String_OptVStructEmpty
+pkg vdltest, type VArray3_VMap_VFloat64_VFloat64 [3]VMap_VFloat64_VFloat64
+pkg vdltest, type VArray3_VMap_VInt64_VInt64 [3]VMap_VInt64_VInt64
+pkg vdltest, type VArray3_VMap_VInt8_VInt8 [3]VMap_VInt8_VInt8
+pkg vdltest, type VArray3_VMap_VString_VString [3]VMap_VString_VString
+pkg vdltest, type VArray3_VStructDepth1 [3]VStructDepth1
+pkg vdltest, type VArray3_VUint16 [3]VUint16
+pkg vdltest, type VArray3_VUint32 [3]VUint32
+pkg vdltest, type VArray3_VUint64 [3]VUint64
+pkg vdltest, type VBool bool
+pkg vdltest, type VByte byte
+pkg vdltest, type VEnumAbc int
+pkg vdltest, type VEnumBcd int
+pkg vdltest, type VFloat32 float32
+pkg vdltest, type VFloat64 float64
+pkg vdltest, type VInt16 int16
+pkg vdltest, type VInt32 int32
+pkg vdltest, type VInt64 int64
+pkg vdltest, type VInt8 int8
+pkg vdltest, type VList_Byte []byte
+pkg vdltest, type VList_Error []error
+pkg vdltest, type VList_Int16 []int16
+pkg vdltest, type VList_Int64 []int64
+pkg vdltest, type VList_Map_Int64_Int64 []map[int64]int64
+pkg vdltest, type VList_Map_Uint64_Uint64 []map[uint64]uint64
+pkg vdltest, type VList_Map_VByte_VByte []map[VByte]VByte
+pkg vdltest, type VList_OptVStructEmpty []*VStructEmpty
+pkg vdltest, type VList_Uint16 []uint16
+pkg vdltest, type VList_VArray3_TypeObject []VArray3_TypeObject
+pkg vdltest, type VList_VArray3_VInt16 []VArray3_VInt16
+pkg vdltest, type VList_VArray3_VInt8 []VArray3_VInt8
+pkg vdltest, type VList_VBool []VBool
+pkg vdltest, type VList_VFloat64 []VFloat64
+pkg vdltest, type VList_VInt64 []VInt64
+pkg vdltest, type VList_VList_Error []VList_Error
+pkg vdltest, type VList_VMap_VInt64_VInt64 []VMap_VInt64_VInt64
+pkg vdltest, type VList_VMap_VString_VString []VMap_VString_VString
+pkg vdltest, type VList_VSet_VBool []VSet_VBool
+pkg vdltest, type VList_VSet_VInt16 []VSet_VInt16
+pkg vdltest, type VList_VString []VString
+pkg vdltest, type VMap_Float32_Float32 map[float32]float32
+pkg vdltest, type VMap_Float64_Float64 map[float64]float64
+pkg vdltest, type VMap_Int8_Int8 map[int8]int8
+pkg vdltest, type VMap_String_Map_VEnumBcd_VEnumBcd map[string]map[VEnumBcd]VEnumBcd
+pkg vdltest, type VMap_String_OptVStructEmpty map[string]*VStructEmpty
+pkg vdltest, type VMap_String_Set_VEnumBcd map[string]map[VEnumBcd]struct{}
+pkg vdltest, type VMap_String_TypeObject map[string]*vdl.Type
+pkg vdltest, type VMap_String_VList_VInt64 map[string]VList_VInt64
+pkg vdltest, type VMap_String_VMap_VByte_VByte map[string]VMap_VByte_VByte
+pkg vdltest, type VMap_String_VSet_VFloat32 map[string]VSet_VFloat32
+pkg vdltest, type VMap_VArray3_String_VArray3_String map[VArray3_String]VArray3_String
+pkg vdltest, type VMap_VArray3_VEnumAbc_VArray3_VEnumAbc map[VArray3_VEnumAbc]VArray3_VEnumAbc
+pkg vdltest, type VMap_VArray3_VFloat64_VArray3_VFloat64 map[VArray3_VFloat64]VArray3_VFloat64
+pkg vdltest, type VMap_VArray3_VUint32_VArray3_VUint32 map[VArray3_VUint32]VArray3_VUint32
+pkg vdltest, type VMap_VByte_VByte map[VByte]VByte
+pkg vdltest, type VMap_VFloat64_VFloat64 map[VFloat64]VFloat64
+pkg vdltest, type VMap_VInt64_VInt64 map[VInt64]VInt64
+pkg vdltest, type VMap_VInt8_VInt8 map[VInt8]VInt8
+pkg vdltest, type VMap_VString_VString map[VString]VString
+pkg vdltest, type VMap_VUint16_VUint16 map[VUint16]VUint16
+pkg vdltest, type VSet_Float64 map[float64]struct{}
+pkg vdltest, type VSet_Int16 map[int16]struct{}
+pkg vdltest, type VSet_Int64 map[int64]struct{}
+pkg vdltest, type VSet_Uint32 map[uint32]struct{}
+pkg vdltest, type VSet_VArray3_Byte map[VArray3_Byte]struct{}
+pkg vdltest, type VSet_VArray3_Int64 map[VArray3_Int64]struct{}
+pkg vdltest, type VSet_VArray3_String map[VArray3_String]struct{}
+pkg vdltest, type VSet_VArray3_Uint16 map[VArray3_Uint16]struct{}
+pkg vdltest, type VSet_VArray3_Uint64 map[VArray3_Uint64]struct{}
+pkg vdltest, type VSet_VArray3_VBool map[VArray3_VBool]struct{}
+pkg vdltest, type VSet_VArray3_VInt16 map[VArray3_VInt16]struct{}
+pkg vdltest, type VSet_VArray3_VInt64 map[VArray3_VInt64]struct{}
+pkg vdltest, type VSet_VArray3_VUint16 map[VArray3_VUint16]struct{}
+pkg vdltest, type VSet_VArray3_VUint32 map[VArray3_VUint32]struct{}
+pkg vdltest, type VSet_VArray3_VUint64 map[VArray3_VUint64]struct{}
+pkg vdltest, type VSet_VBool map[VBool]struct{}
+pkg vdltest, type VSet_VEnumAbc map[VEnumAbc]struct{}
+pkg vdltest, type VSet_VFloat32 map[VFloat32]struct{}
+pkg vdltest, type VSet_VFloat64 map[VFloat64]struct{}
+pkg vdltest, type VSet_VInt16 map[VInt16]struct{}
+pkg vdltest, type VSet_VInt64 map[VInt64]struct{}
+pkg vdltest, type VSet_VUint16 map[VUint16]struct{}
+pkg vdltest, type VString string
+pkg vdltest, type VStructDepth1 struct
+pkg vdltest, type VStructDepth1 struct, F0 interface{}
+pkg vdltest, type VStructDepth1 struct, F1 bool
+pkg vdltest, type VStructDepth1 struct, F10 int64
+pkg vdltest, type VStructDepth1 struct, F11 float32
+pkg vdltest, type VStructDepth1 struct, F12 float64
+pkg vdltest, type VStructDepth1 struct, F13 *vdl.Type
+pkg vdltest, type VStructDepth1 struct, F14 VBool
+pkg vdltest, type VStructDepth1 struct, F15 VString
+pkg vdltest, type VStructDepth1 struct, F16 VByte
+pkg vdltest, type VStructDepth1 struct, F17 VUint16
+pkg vdltest, type VStructDepth1 struct, F18 VUint32
+pkg vdltest, type VStructDepth1 struct, F19 VUint64
+pkg vdltest, type VStructDepth1 struct, F2 string
+pkg vdltest, type VStructDepth1 struct, F20 VInt8
+pkg vdltest, type VStructDepth1 struct, F21 VInt16
+pkg vdltest, type VStructDepth1 struct, F22 VInt32
+pkg vdltest, type VStructDepth1 struct, F23 VInt64
+pkg vdltest, type VStructDepth1 struct, F24 VFloat32
+pkg vdltest, type VStructDepth1 struct, F25 VFloat64
+pkg vdltest, type VStructDepth1 struct, F26 VEnumAbc
+pkg vdltest, type VStructDepth1 struct, F27 VEnumBcd
+pkg vdltest, type VStructDepth1 struct, F28 VStructEmpty
+pkg vdltest, type VStructDepth1 struct, F29 error
+pkg vdltest, type VStructDepth1 struct, F3 byte
+pkg vdltest, type VStructDepth1 struct, F30 *VStructEmpty
+pkg vdltest, type VStructDepth1 struct, F4 uint16
+pkg vdltest, type VStructDepth1 struct, F5 uint32
+pkg vdltest, type VStructDepth1 struct, F6 uint64
+pkg vdltest, type VStructDepth1 struct, F7 int8
+pkg vdltest, type VStructDepth1 struct, F8 int16
+pkg vdltest, type VStructDepth1 struct, F9 int32
+pkg vdltest, type VStructDepth2 struct
+pkg vdltest, type VStructDepth2 struct, F0 VArray3_VInt16
+pkg vdltest, type VStructDepth2 struct, F1 VArray3_Uint16
+pkg vdltest, type VStructDepth2 struct, F10 VArray3_VInt64
+pkg vdltest, type VStructDepth2 struct, F11 VArray3_VUint32
+pkg vdltest, type VStructDepth2 struct, F12 VArray3_Int32
+pkg vdltest, type VStructDepth2 struct, F13 VArray3_VBool
+pkg vdltest, type VStructDepth2 struct, F14 VArray3_Uint64
+pkg vdltest, type VStructDepth2 struct, F15 VArray3_Error
+pkg vdltest, type VStructDepth2 struct, F16 VArray3_VEnumAbc
+pkg vdltest, type VStructDepth2 struct, F17 VArray3_VInt8
+pkg vdltest, type VStructDepth2 struct, F18 VArray3_VUint16
+pkg vdltest, type VStructDepth2 struct, F19 VArray3_Byte
+pkg vdltest, type VStructDepth2 struct, F2 VArray3_String
+pkg vdltest, type VStructDepth2 struct, F20 VList_OptVStructEmpty
+pkg vdltest, type VStructDepth2 struct, F21 []VInt32
+pkg vdltest, type VStructDepth2 struct, F22 []VFloat64
+pkg vdltest, type VStructDepth2 struct, F23 VList_Int16
+pkg vdltest, type VStructDepth2 struct, F24 []byte
+pkg vdltest, type VStructDepth2 struct, F25 VList_VFloat64
+pkg vdltest, type VStructDepth2 struct, F26 []int64
+pkg vdltest, type VStructDepth2 struct, F27 VList_VBool
+pkg vdltest, type VStructDepth2 struct, F28 VList_Int64
+pkg vdltest, type VStructDepth2 struct, F29 VList_Error
+pkg vdltest, type VStructDepth2 struct, F3 VArray3_TypeObject
+pkg vdltest, type VStructDepth2 struct, F30 []float32
+pkg vdltest, type VStructDepth2 struct, F31 []error
+pkg vdltest, type VStructDepth2 struct, F32 VList_VString
+pkg vdltest, type VStructDepth2 struct, F33 []VStructEmpty
+pkg vdltest, type VStructDepth2 struct, F34 VList_VInt64
+pkg vdltest, type VStructDepth2 struct, F35 []int8
+pkg vdltest, type VStructDepth2 struct, F36 []VInt64
+pkg vdltest, type VStructDepth2 struct, F37 VList_Uint16
+pkg vdltest, type VStructDepth2 struct, F38 VList_Byte
+pkg vdltest, type VStructDepth2 struct, F39 []VEnumBcd
+pkg vdltest, type VStructDepth2 struct, F4 VArray3_Int64
+pkg vdltest, type VStructDepth2 struct, F40 VSet_VInt64
+pkg vdltest, type VStructDepth2 struct, F41 VSet_Int64
+pkg vdltest, type VStructDepth2 struct, F42 VSet_Uint32
+pkg vdltest, type VStructDepth2 struct, F43 map[VEnumBcd]struct{}
+pkg vdltest, type VStructDepth2 struct, F44 map[float32]struct{}
+pkg vdltest, type VStructDepth2 struct, F45 VSet_VBool
+pkg vdltest, type VStructDepth2 struct, F46 VSet_Float64
+pkg vdltest, type VStructDepth2 struct, F47 VSet_VFloat64
+pkg vdltest, type VStructDepth2 struct, F48 VSet_VEnumAbc
+pkg vdltest, type VStructDepth2 struct, F49 map[byte]struct{}
+pkg vdltest, type VStructDepth2 struct, F5 VArray3_Any
+pkg vdltest, type VStructDepth2 struct, F50 map[VInt64]struct{}
+pkg vdltest, type VStructDepth2 struct, F51 VSet_Int16
+pkg vdltest, type VStructDepth2 struct, F52 VSet_VFloat32
+pkg vdltest, type VStructDepth2 struct, F53 VSet_VInt16
+pkg vdltest, type VStructDepth2 struct, F54 map[VUint16]struct{}
+pkg vdltest, type VStructDepth2 struct, F55 map[int32]struct{}
+pkg vdltest, type VStructDepth2 struct, F56 map[bool]struct{}
+pkg vdltest, type VStructDepth2 struct, F57 map[VUint32]struct{}
+pkg vdltest, type VStructDepth2 struct, F58 map[int64]struct{}
+pkg vdltest, type VStructDepth2 struct, F59 VSet_VUint16
+pkg vdltest, type VStructDepth2 struct, F6 VArray3_VUint64
+pkg vdltest, type VStructDepth2 struct, F60 VMap_VByte_VByte
+pkg vdltest, type VStructDepth2 struct, F61 map[int32]int32
+pkg vdltest, type VStructDepth2 struct, F62 VMap_VString_VString
+pkg vdltest, type VStructDepth2 struct, F63 VMap_String_OptVStructEmpty
+pkg vdltest, type VStructDepth2 struct, F64 map[int16]int16
+pkg vdltest, type VStructDepth2 struct, F65 map[int64]int64
+pkg vdltest, type VStructDepth2 struct, F66 VMap_Float32_Float32
+pkg vdltest, type VStructDepth2 struct, F67 VMap_VInt64_VInt64
+pkg vdltest, type VStructDepth2 struct, F68 VMap_VInt8_VInt8
+pkg vdltest, type VStructDepth2 struct, F69 VMap_Float64_Float64
+pkg vdltest, type VStructDepth2 struct, F7 VArray3_VFloat64
+pkg vdltest, type VStructDepth2 struct, F70 VMap_VUint16_VUint16
+pkg vdltest, type VStructDepth2 struct, F71 map[uint64]uint64
+pkg vdltest, type VStructDepth2 struct, F72 map[VEnumBcd]VEnumBcd
+pkg vdltest, type VStructDepth2 struct, F73 map[VByte]VByte
+pkg vdltest, type VStructDepth2 struct, F74 map[bool]bool
+pkg vdltest, type VStructDepth2 struct, F75 map[VInt8]VInt8
+pkg vdltest, type VStructDepth2 struct, F76 VMap_VFloat64_VFloat64
+pkg vdltest, type VStructDepth2 struct, F77 VMap_String_TypeObject
+pkg vdltest, type VStructDepth2 struct, F78 VMap_Int8_Int8
+pkg vdltest, type VStructDepth2 struct, F79 map[float64]float64
+pkg vdltest, type VStructDepth2 struct, F8 VArray3_Int8
+pkg vdltest, type VStructDepth2 struct, F80 VStructDepth1
+pkg vdltest, type VStructDepth2 struct, F81 VUnionDepth1
+pkg vdltest, type VStructDepth2 struct, F82 *VStructDepth1
+pkg vdltest, type VStructDepth2 struct, F9 VArray3_Uint32
+pkg vdltest, type VStructEmpty struct
+pkg vdltest, type VUint16 uint16
+pkg vdltest, type VUint32 uint32
+pkg vdltest, type VUint64 uint64
+pkg vdltest, type VUnionDepth1 interface, Index() int
+pkg vdltest, type VUnionDepth1 interface, Interface() interface{}
+pkg vdltest, type VUnionDepth1 interface, Name() string
+pkg vdltest, type VUnionDepth1 interface, VDLIsZero() bool
+pkg vdltest, type VUnionDepth1 interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VUnionDepth1 interface, unexported methods
+pkg vdltest, type VUnionDepth1F0 struct
+pkg vdltest, type VUnionDepth1F0 struct, Value interface{}
+pkg vdltest, type VUnionDepth1F1 struct
+pkg vdltest, type VUnionDepth1F1 struct, Value bool
+pkg vdltest, type VUnionDepth1F10 struct
+pkg vdltest, type VUnionDepth1F10 struct, Value int64
+pkg vdltest, type VUnionDepth1F11 struct
+pkg vdltest, type VUnionDepth1F11 struct, Value float32
+pkg vdltest, type VUnionDepth1F12 struct
+pkg vdltest, type VUnionDepth1F12 struct, Value float64
+pkg vdltest, type VUnionDepth1F13 struct
+pkg vdltest, type VUnionDepth1F13 struct, Value *vdl.Type
+pkg vdltest, type VUnionDepth1F14 struct
+pkg vdltest, type VUnionDepth1F14 struct, Value VBool
+pkg vdltest, type VUnionDepth1F15 struct
+pkg vdltest, type VUnionDepth1F15 struct, Value VString
+pkg vdltest, type VUnionDepth1F16 struct
+pkg vdltest, type VUnionDepth1F16 struct, Value VByte
+pkg vdltest, type VUnionDepth1F17 struct
+pkg vdltest, type VUnionDepth1F17 struct, Value VUint16
+pkg vdltest, type VUnionDepth1F18 struct
+pkg vdltest, type VUnionDepth1F18 struct, Value VUint32
+pkg vdltest, type VUnionDepth1F19 struct
+pkg vdltest, type VUnionDepth1F19 struct, Value VUint64
+pkg vdltest, type VUnionDepth1F2 struct
+pkg vdltest, type VUnionDepth1F2 struct, Value string
+pkg vdltest, type VUnionDepth1F20 struct
+pkg vdltest, type VUnionDepth1F20 struct, Value VInt8
+pkg vdltest, type VUnionDepth1F21 struct
+pkg vdltest, type VUnionDepth1F21 struct, Value VInt16
+pkg vdltest, type VUnionDepth1F22 struct
+pkg vdltest, type VUnionDepth1F22 struct, Value VInt32
+pkg vdltest, type VUnionDepth1F23 struct
+pkg vdltest, type VUnionDepth1F23 struct, Value VInt64
+pkg vdltest, type VUnionDepth1F24 struct
+pkg vdltest, type VUnionDepth1F24 struct, Value VFloat32
+pkg vdltest, type VUnionDepth1F25 struct
+pkg vdltest, type VUnionDepth1F25 struct, Value VFloat64
+pkg vdltest, type VUnionDepth1F26 struct
+pkg vdltest, type VUnionDepth1F26 struct, Value VEnumAbc
+pkg vdltest, type VUnionDepth1F27 struct
+pkg vdltest, type VUnionDepth1F27 struct, Value VEnumBcd
+pkg vdltest, type VUnionDepth1F28 struct
+pkg vdltest, type VUnionDepth1F28 struct, Value VStructEmpty
+pkg vdltest, type VUnionDepth1F29 struct
+pkg vdltest, type VUnionDepth1F29 struct, Value error
+pkg vdltest, type VUnionDepth1F3 struct
+pkg vdltest, type VUnionDepth1F3 struct, Value byte
+pkg vdltest, type VUnionDepth1F30 struct
+pkg vdltest, type VUnionDepth1F30 struct, Value *VStructEmpty
+pkg vdltest, type VUnionDepth1F4 struct
+pkg vdltest, type VUnionDepth1F4 struct, Value uint16
+pkg vdltest, type VUnionDepth1F5 struct
+pkg vdltest, type VUnionDepth1F5 struct, Value uint32
+pkg vdltest, type VUnionDepth1F6 struct
+pkg vdltest, type VUnionDepth1F6 struct, Value uint64
+pkg vdltest, type VUnionDepth1F7 struct
+pkg vdltest, type VUnionDepth1F7 struct, Value int8
+pkg vdltest, type VUnionDepth1F8 struct
+pkg vdltest, type VUnionDepth1F8 struct, Value int16
+pkg vdltest, type VUnionDepth1F9 struct
+pkg vdltest, type VUnionDepth1F9 struct, Value int32
+pkg vdltest, type VUnionDepth2 interface, Index() int
+pkg vdltest, type VUnionDepth2 interface, Interface() interface{}
+pkg vdltest, type VUnionDepth2 interface, Name() string
+pkg vdltest, type VUnionDepth2 interface, VDLIsZero() bool
+pkg vdltest, type VUnionDepth2 interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VUnionDepth2 interface, unexported methods
+pkg vdltest, type VUnionDepth2F0 struct
+pkg vdltest, type VUnionDepth2F0 struct, Value VArray3_VInt16
+pkg vdltest, type VUnionDepth2F1 struct
+pkg vdltest, type VUnionDepth2F1 struct, Value VArray3_Uint16
+pkg vdltest, type VUnionDepth2F10 struct
+pkg vdltest, type VUnionDepth2F10 struct, Value VArray3_VInt64
+pkg vdltest, type VUnionDepth2F11 struct
+pkg vdltest, type VUnionDepth2F11 struct, Value VArray3_VUint32
+pkg vdltest, type VUnionDepth2F12 struct
+pkg vdltest, type VUnionDepth2F12 struct, Value VArray3_Int32
+pkg vdltest, type VUnionDepth2F13 struct
+pkg vdltest, type VUnionDepth2F13 struct, Value VArray3_VBool
+pkg vdltest, type VUnionDepth2F14 struct
+pkg vdltest, type VUnionDepth2F14 struct, Value VArray3_Uint64
+pkg vdltest, type VUnionDepth2F15 struct
+pkg vdltest, type VUnionDepth2F15 struct, Value VArray3_Error
+pkg vdltest, type VUnionDepth2F16 struct
+pkg vdltest, type VUnionDepth2F16 struct, Value VArray3_VEnumAbc
+pkg vdltest, type VUnionDepth2F17 struct
+pkg vdltest, type VUnionDepth2F17 struct, Value VArray3_VInt8
+pkg vdltest, type VUnionDepth2F18 struct
+pkg vdltest, type VUnionDepth2F18 struct, Value VArray3_VUint16
+pkg vdltest, type VUnionDepth2F19 struct
+pkg vdltest, type VUnionDepth2F19 struct, Value VArray3_Byte
+pkg vdltest, type VUnionDepth2F2 struct
+pkg vdltest, type VUnionDepth2F2 struct, Value VArray3_String
+pkg vdltest, type VUnionDepth2F20 struct
+pkg vdltest, type VUnionDepth2F20 struct, Value VList_OptVStructEmpty
+pkg vdltest, type VUnionDepth2F21 struct
+pkg vdltest, type VUnionDepth2F21 struct, Value []VInt32
+pkg vdltest, type VUnionDepth2F22 struct
+pkg vdltest, type VUnionDepth2F22 struct, Value []VFloat64
+pkg vdltest, type VUnionDepth2F23 struct
+pkg vdltest, type VUnionDepth2F23 struct, Value VList_Int16
+pkg vdltest, type VUnionDepth2F24 struct
+pkg vdltest, type VUnionDepth2F24 struct, Value []byte
+pkg vdltest, type VUnionDepth2F25 struct
+pkg vdltest, type VUnionDepth2F25 struct, Value VList_VFloat64
+pkg vdltest, type VUnionDepth2F26 struct
+pkg vdltest, type VUnionDepth2F26 struct, Value []int64
+pkg vdltest, type VUnionDepth2F27 struct
+pkg vdltest, type VUnionDepth2F27 struct, Value VList_VBool
+pkg vdltest, type VUnionDepth2F28 struct
+pkg vdltest, type VUnionDepth2F28 struct, Value VList_Int64
+pkg vdltest, type VUnionDepth2F29 struct
+pkg vdltest, type VUnionDepth2F29 struct, Value VList_Error
+pkg vdltest, type VUnionDepth2F3 struct
+pkg vdltest, type VUnionDepth2F3 struct, Value VArray3_TypeObject
+pkg vdltest, type VUnionDepth2F30 struct
+pkg vdltest, type VUnionDepth2F30 struct, Value []float32
+pkg vdltest, type VUnionDepth2F31 struct
+pkg vdltest, type VUnionDepth2F31 struct, Value []error
+pkg vdltest, type VUnionDepth2F32 struct
+pkg vdltest, type VUnionDepth2F32 struct, Value VList_VString
+pkg vdltest, type VUnionDepth2F33 struct
+pkg vdltest, type VUnionDepth2F33 struct, Value []VStructEmpty
+pkg vdltest, type VUnionDepth2F34 struct
+pkg vdltest, type VUnionDepth2F34 struct, Value VList_VInt64
+pkg vdltest, type VUnionDepth2F35 struct
+pkg vdltest, type VUnionDepth2F35 struct, Value []int8
+pkg vdltest, type VUnionDepth2F36 struct
+pkg vdltest, type VUnionDepth2F36 struct, Value []VInt64
+pkg vdltest, type VUnionDepth2F37 struct
+pkg vdltest, type VUnionDepth2F37 struct, Value VList_Uint16
+pkg vdltest, type VUnionDepth2F38 struct
+pkg vdltest, type VUnionDepth2F38 struct, Value VList_Byte
+pkg vdltest, type VUnionDepth2F39 struct
+pkg vdltest, type VUnionDepth2F39 struct, Value []VEnumBcd
+pkg vdltest, type VUnionDepth2F4 struct
+pkg vdltest, type VUnionDepth2F4 struct, Value VArray3_Int64
+pkg vdltest, type VUnionDepth2F40 struct
+pkg vdltest, type VUnionDepth2F40 struct, Value VSet_VInt64
+pkg vdltest, type VUnionDepth2F41 struct
+pkg vdltest, type VUnionDepth2F41 struct, Value VSet_Int64
+pkg vdltest, type VUnionDepth2F42 struct
+pkg vdltest, type VUnionDepth2F42 struct, Value VSet_Uint32
+pkg vdltest, type VUnionDepth2F43 struct
+pkg vdltest, type VUnionDepth2F43 struct, Value map[VEnumBcd]struct{}
+pkg vdltest, type VUnionDepth2F44 struct
+pkg vdltest, type VUnionDepth2F44 struct, Value map[float32]struct{}
+pkg vdltest, type VUnionDepth2F45 struct
+pkg vdltest, type VUnionDepth2F45 struct, Value VSet_VBool
+pkg vdltest, type VUnionDepth2F46 struct
+pkg vdltest, type VUnionDepth2F46 struct, Value VSet_Float64
+pkg vdltest, type VUnionDepth2F47 struct
+pkg vdltest, type VUnionDepth2F47 struct, Value VSet_VFloat64
+pkg vdltest, type VUnionDepth2F48 struct
+pkg vdltest, type VUnionDepth2F48 struct, Value VSet_VEnumAbc
+pkg vdltest, type VUnionDepth2F49 struct
+pkg vdltest, type VUnionDepth2F49 struct, Value map[byte]struct{}
+pkg vdltest, type VUnionDepth2F5 struct
+pkg vdltest, type VUnionDepth2F5 struct, Value VArray3_Any
+pkg vdltest, type VUnionDepth2F50 struct
+pkg vdltest, type VUnionDepth2F50 struct, Value map[VInt64]struct{}
+pkg vdltest, type VUnionDepth2F51 struct
+pkg vdltest, type VUnionDepth2F51 struct, Value VSet_Int16
+pkg vdltest, type VUnionDepth2F52 struct
+pkg vdltest, type VUnionDepth2F52 struct, Value VSet_VFloat32
+pkg vdltest, type VUnionDepth2F53 struct
+pkg vdltest, type VUnionDepth2F53 struct, Value VSet_VInt16
+pkg vdltest, type VUnionDepth2F54 struct
+pkg vdltest, type VUnionDepth2F54 struct, Value map[VUint16]struct{}
+pkg vdltest, type VUnionDepth2F55 struct
+pkg vdltest, type VUnionDepth2F55 struct, Value map[int32]struct{}
+pkg vdltest, type VUnionDepth2F56 struct
+pkg vdltest, type VUnionDepth2F56 struct, Value map[bool]struct{}
+pkg vdltest, type VUnionDepth2F57 struct
+pkg vdltest, type VUnionDepth2F57 struct, Value map[VUint32]struct{}
+pkg vdltest, type VUnionDepth2F58 struct
+pkg vdltest, type VUnionDepth2F58 struct, Value map[int64]struct{}
+pkg vdltest, type VUnionDepth2F59 struct
+pkg vdltest, type VUnionDepth2F59 struct, Value VSet_VUint16
+pkg vdltest, type VUnionDepth2F6 struct
+pkg vdltest, type VUnionDepth2F6 struct, Value VArray3_VUint64
+pkg vdltest, type VUnionDepth2F60 struct
+pkg vdltest, type VUnionDepth2F60 struct, Value VMap_VByte_VByte
+pkg vdltest, type VUnionDepth2F61 struct
+pkg vdltest, type VUnionDepth2F61 struct, Value map[int32]int32
+pkg vdltest, type VUnionDepth2F62 struct
+pkg vdltest, type VUnionDepth2F62 struct, Value VMap_VString_VString
+pkg vdltest, type VUnionDepth2F63 struct
+pkg vdltest, type VUnionDepth2F63 struct, Value VMap_String_OptVStructEmpty
+pkg vdltest, type VUnionDepth2F64 struct
+pkg vdltest, type VUnionDepth2F64 struct, Value map[int16]int16
+pkg vdltest, type VUnionDepth2F65 struct
+pkg vdltest, type VUnionDepth2F65 struct, Value map[int64]int64
+pkg vdltest, type VUnionDepth2F66 struct
+pkg vdltest, type VUnionDepth2F66 struct, Value VMap_Float32_Float32
+pkg vdltest, type VUnionDepth2F67 struct
+pkg vdltest, type VUnionDepth2F67 struct, Value VMap_VInt64_VInt64
+pkg vdltest, type VUnionDepth2F68 struct
+pkg vdltest, type VUnionDepth2F68 struct, Value VMap_VInt8_VInt8
+pkg vdltest, type VUnionDepth2F69 struct
+pkg vdltest, type VUnionDepth2F69 struct, Value VMap_Float64_Float64
+pkg vdltest, type VUnionDepth2F7 struct
+pkg vdltest, type VUnionDepth2F7 struct, Value VArray3_VFloat64
+pkg vdltest, type VUnionDepth2F70 struct
+pkg vdltest, type VUnionDepth2F70 struct, Value VMap_VUint16_VUint16
+pkg vdltest, type VUnionDepth2F71 struct
+pkg vdltest, type VUnionDepth2F71 struct, Value map[uint64]uint64
+pkg vdltest, type VUnionDepth2F72 struct
+pkg vdltest, type VUnionDepth2F72 struct, Value map[VEnumBcd]VEnumBcd
+pkg vdltest, type VUnionDepth2F73 struct
+pkg vdltest, type VUnionDepth2F73 struct, Value map[VByte]VByte
+pkg vdltest, type VUnionDepth2F74 struct
+pkg vdltest, type VUnionDepth2F74 struct, Value map[bool]bool
+pkg vdltest, type VUnionDepth2F75 struct
+pkg vdltest, type VUnionDepth2F75 struct, Value map[VInt8]VInt8
+pkg vdltest, type VUnionDepth2F76 struct
+pkg vdltest, type VUnionDepth2F76 struct, Value VMap_VFloat64_VFloat64
+pkg vdltest, type VUnionDepth2F77 struct
+pkg vdltest, type VUnionDepth2F77 struct, Value VMap_String_TypeObject
+pkg vdltest, type VUnionDepth2F78 struct
+pkg vdltest, type VUnionDepth2F78 struct, Value VMap_Int8_Int8
+pkg vdltest, type VUnionDepth2F79 struct
+pkg vdltest, type VUnionDepth2F79 struct, Value map[float64]float64
+pkg vdltest, type VUnionDepth2F8 struct
+pkg vdltest, type VUnionDepth2F8 struct, Value VArray3_Int8
+pkg vdltest, type VUnionDepth2F80 struct
+pkg vdltest, type VUnionDepth2F80 struct, Value VStructDepth1
+pkg vdltest, type VUnionDepth2F81 struct
+pkg vdltest, type VUnionDepth2F81 struct, Value VUnionDepth1
+pkg vdltest, type VUnionDepth2F82 struct
+pkg vdltest, type VUnionDepth2F82 struct, Value *VStructDepth1
+pkg vdltest, type VUnionDepth2F9 struct
+pkg vdltest, type VUnionDepth2F9 struct, Value VArray3_Uint32
+pkg vdltest, type ValueGenerator struct
+pkg vdltest, type ValueGenerator struct, MaxCycleDepth int
+pkg vdltest, type ValueGenerator struct, MaxLen int
+pkg vdltest, type ValueGenerator struct, Types []*vdl.Type
+pkg vdltest, var VEnumAbcAll [...]VEnumAbc
+pkg vdltest, var VEnumBcdAll [...]VEnumBcd

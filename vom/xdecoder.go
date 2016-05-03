@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -521,7 +522,9 @@ func (d *xDecoder) DecodeInt(bitlen int) (int64, error) {
 			return 0, err
 		}
 		ix := int64(x)
-		if shift := 64 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
+		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
+		// numbers should be shifted by 33 rather than 32.
+		if shift := 65 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
 			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
 		}
 		return ix, nil
@@ -586,7 +589,14 @@ func (d *xDecoder) DecodeFloat(bitlen int) (float64, error) {
 		}
 		return float64(x), nil
 	case vdl.Float32, vdl.Float64:
-		return binaryDecodeFloat(d.old.buf)
+		x, err := binaryDecodeFloat(d.old.buf)
+		if err != nil {
+			return 0, err
+		}
+		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
+			return 0, fmt.Errorf(errFmt, tt, bitlen, x)
+		}
+		return x, nil
 	}
 	return 0, fmt.Errorf("vom: type mismatch, got %v, want float%d", tt, bitlen)
 }
