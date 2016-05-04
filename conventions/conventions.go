@@ -11,6 +11,7 @@ package conventions
 import (
 	"strings"
 
+	"v.io/v23/naming"
 	"v.io/v23/security"
 )
 
@@ -29,6 +30,18 @@ func (b *Blessing) String() string {
 		return join(b.IdentityProvider, "u", b.User, b.Rest)
 	case formatAppUser:
 		return join(b.IdentityProvider, "o", b.Application, b.User, b.Rest)
+	default:
+		return ""
+	}
+}
+
+// Home returns the "Home directory" in the global namespace for this Blessing.
+func (b *Blessing) Home() string {
+	switch b.inferFormat() {
+	case formatUser:
+		return naming.Join("home", naming.EncodeAsNameElement(join(b.IdentityProvider, "u", b.User)))
+	case formatAppUser:
+		return naming.Join("home", naming.EncodeAsNameElement(join(b.IdentityProvider, "o", b.Application, b.User)))
 	default:
 		return ""
 	}

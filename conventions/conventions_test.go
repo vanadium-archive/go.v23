@@ -70,6 +70,40 @@ func TestUserPattern(t *testing.T) {
 	}
 }
 
+func TestHome(t *testing.T) {
+	for _, test := range []struct{ Input, Want string }{
+		{
+			"dev.v.io:u:bruce@wayne.com",
+			"home/dev.v.io:u:bruce@wayne.com",
+		},
+		{
+			"dev.v.io:u:bruce/batman@wayne.com",
+			"home/dev.v.io:u:bruce%2Fbatman@wayne.com",
+		},
+		{
+			"dev.v.io:u:bruce@wayne.com:butler:alfred",
+			"home/dev.v.io:u:bruce@wayne.com",
+		},
+		{
+			"dev.v.io:o:836175491023-bhj172jalr081pnjdfpsldjkfh18.apps.googleusercontent.com:mickey@mouse.com",
+			"home/dev.v.io:o:836175491023-bhj172jalr081pnjdfpsldjkfh18.apps.googleusercontent.com:mickey@mouse.com",
+		},
+		{
+			"dev.v.io:o:836175491023-bhj172jalr081pnjdfpsldjkfh18.apps.googleusercontent.com:mickey@mouse.com:debugger:friend",
+			"home/dev.v.io:o:836175491023-bhj172jalr081pnjdfpsldjkfh18.apps.googleusercontent.com:mickey@mouse.com",
+		},
+	} {
+		b := ParseBlessingNames(test.Input)
+		if len(b) != 1 {
+			t.Errorf("%q: expected a single value, got %d (%v)", test.Input, len(b), b)
+			continue
+		}
+		if got := string(b[0].Home()); got != test.Want {
+			t.Errorf("%q: Got %q, want %q", test.Input, got, test.Want)
+		}
+	}
+}
+
 func TestAppPattern(t *testing.T) {
 	for _, test := range []struct{ Input, Want string }{
 		{ // User-centric blessing, cannot restrict to an app
