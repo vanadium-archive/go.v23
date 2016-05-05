@@ -6,7 +6,8 @@
 // DO NOT UPDATE MANUALLY
 
 /*
-Command vdltestgen generates the following files:
+Command vdltestgen generates types and values for the vdltest package.  The
+following files are generated:
 
    vtype_gen.vdl       - A variety of types useful for testing.
    ventry_pass_gen.vdl - Entries that pass conversion from source to target.
@@ -14,6 +15,10 @@ Command vdltestgen generates the following files:
 
 This tool does not run the vdl tool on the generated *.vdl files; you must do
 that yourself, typically via "jiri go install".
+
+Instead of running this tool manually, it is typically invoked via:
+
+   $ jiri run go generate v.io/v23/vdl/vdltest
 
 Usage:
    vdltestgen [flags]

@@ -66,7 +66,12 @@ func (t *statsTable) computeInfo() statsTableInfo {
 		//
 		// There's no need to adjust anything if the header size is smaller than
 		// what's computed; Print takes care of that.
-		if pad := len(header) - info.ColumnSize(header); pad > 0 {
+		//
+		// Note that we only trim spaces from the header to determine its size, but
+		// not to perform lookups.  It's useful to use leading spaces in headers to
+		// force a specific header ordering, so we sort and perform lookups with the
+		// spaces intact, but remove them when printing.
+		if pad := len(strings.TrimSpace(header)) - info.ColumnSize(header); pad > 0 {
 			total, padPerSize := 0, pad/len(sizes)
 			for index := range sizes {
 				sizes[index] += padPerSize
@@ -98,11 +103,16 @@ func fp(w io.Writer, format string, args ...interface{}) error {
 func (t *statsTable) Print(w io.Writer) error {
 	info := t.computeInfo()
 	// Print column headers.
-	if err := fp(w, strings.Repeat(" ", info.RowNameSize)); err != nil {
+	if err := t.printRow(w, info, statRowBreak); err != nil {
+		return err
+	}
+	if err := fp(w, "|"+strings.Repeat(" ", info.RowNameSize)); err != nil {
 		return err
 	}
 	for _, header := range info.Headers {
-		centered := centerString(header, info.ColumnSize(header))
+		// Just like in computeInfo, we only trim spaces from the header for
+		// printing, but leave them intact for lookups.
+		centered := centerString(strings.TrimSpace(header), info.ColumnSize(header))
 		if err := fp(w, "|"+centered); err != nil {
 			return err
 		}
@@ -125,20 +135,14 @@ func (t *statsTable) Print(w io.Writer) error {
 func (t *statsTable) printRow(w io.Writer, info statsTableInfo, row statRow) error {
 	if row.IsBreak() {
 		// Print row break.
-		breakName := strings.Repeat("-", info.RowNameSize)
-		if err := fp(w, breakName); err != nil {
-			return err
-		}
+		total := info.RowNameSize + 2 // +2 for table borders
 		for _, header := range info.Headers {
-			breakHeader := strings.Repeat("-", info.ColumnSize(header))
-			if err := fp(w, "+"+breakHeader); err != nil {
-				return err
-			}
+			total += info.ColumnSize(header) + 1 // +1 for column borders
 		}
-		return fp(w, "|\n")
+		return fp(w, strings.Repeat("-", total)+"\n")
 	}
 	// Print each column.
-	if err := fp(w, "%-[1]*[2]s", info.RowNameSize, row.Name); err != nil {
+	if err := fp(w, "|%-[1]*[2]s", info.RowNameSize, row.Name); err != nil {
 		return err
 	}
 	for _, header := range info.Headers {
@@ -182,29 +186,37 @@ func (r *statRow) IsBreak() bool {
 	return r.Name == statRowBreak.Name && r.Columns.IsEmpty() && len(r.Props) == 0
 }
 
-func (r *statRow) UpdateProp(name string, value int, accumulate bool) {
+func (r *statRow) PropIndex(name string) int {
 	for ix, prop := range r.Props {
-		if name != prop.Name {
-			continue
+		if name == prop.Name {
+			return ix
 		}
-		// Found an existing property, update it.
-		switch {
-		case accumulate:
-			// Min and max are always equal, so they act as a single value.
-			r.Props[ix].Min += value
-			r.Props[ix].Max += value
-		default:
-			if value < prop.Min {
-				r.Props[ix].Min = value
-			}
-			if value > prop.Max {
-				r.Props[ix].Max = value
-			}
-		}
+	}
+	return -1
+}
+
+func (r *statRow) UpdateProp(name string, value int, accumulate bool) {
+	index := r.PropIndex(name)
+	if index == -1 {
+		// Add a new property, init both min and max.
+		r.Props = append(r.Props, statProp{name, value, value})
 		return
 	}
-	// Add a new property, init both min and max.
-	r.Props = append(r.Props, statProp{name, value, value})
+	// Found an existing property, update it.
+	prop := &r.Props[index]
+	switch {
+	case accumulate:
+		// Min and max are always equal, so they act as a single value.
+		prop.Min += value
+		prop.Max += value
+	default:
+		if value < prop.Min {
+			prop.Min = value
+		}
+		if value > prop.Max {
+			prop.Max = value
+		}
+	}
 }
 
 // statColumns holds the columns for a single statRow, represented as a map from
@@ -257,10 +269,14 @@ type statProp struct {
 }
 
 func (p statProp) Print(w io.Writer) error {
-	if p.Min == p.Max {
-		return fp(w, " [%s=%d]", p.Name, p.Min)
+	switch {
+	case p.Min == p.Max:
+		return fp(w, " [%s=%d]", p.Name, p.Max)
+	case p.Min == 0:
+		return fp(w, " [%s max=%d]", p.Name, p.Max)
+	default:
+		return fp(w, " [%s min=%d max=%d]", p.Name, p.Min, p.Max)
 	}
-	return fp(w, " [%s min=%d max=%d]", p.Name, p.Min, p.Max)
 }
 
 // typePropFn gathers the value of a single type property, used to update the
@@ -288,8 +304,9 @@ func (c *typeStatsCollector) Collect(name string, fn func(*vdl.Type) bool, propF
 	row := statRow{Name: name}
 	for _, tt := range c.Types {
 		if fn(tt) {
-			// The predicate matches.  Update the total count and the properties.
-			row.Columns.Delta(".Total", 0, 1)
+			// The predicate matches.  Update the total count and the properties.  The
+			// leading space ensures the Total column shows up first.
+			row.Columns.Delta(" Total", 0, 1)
 			for _, propFn := range propFns {
 				row.UpdateProp(propFn.Name, propFn.Fn(tt), propFn.Accumulate)
 			}
@@ -384,20 +401,37 @@ type entryStatsCollector struct {
 // The propFns are only run against entries that match the predicate, where
 // properties are either accumulated or compared for min/max.
 func (c *entryStatsCollector) Collect(name string, fn func(EntryValue) bool, propFns ...entryPropFn) {
+	const nonCanonicalPropName = "!can"
 	row := statRow{Name: name}
-	for _, e := range c.Entries {
+	if name != "any" && name != "typeobject" {
+		// Ensure the "!can" property shows up first.
+		row.UpdateProp(nonCanonicalPropName, 0, false)
+	}
+	for i, e := range c.Entries {
 		if fn(e) {
 			// The predicate matches.  Update the stats table.
-			index := 1
+			subColumn := 1
 			if e.IsCanonical() {
-				index = 0
+				subColumn = 0
+				// Track the non-canonical entries for a given target, which always
+				// follow immediately after the canonical entry.
+				if row.PropIndex(nonCanonicalPropName) != -1 {
+					noncanon := 0
+					for j := i + 1; j < len(c.Entries); j++ {
+						if !vdl.EqualValue(e.Target, c.Entries[j].Target) {
+							break
+						}
+						noncanon++
+					}
+					row.UpdateProp(nonCanonicalPropName, noncanon, false)
+				}
 			}
-			row.Columns.Delta(".Total", index, 1)
-			row.Columns.Delta(e.Label, index, 1)
+			// The leading space ensures the Total column shows up first.
+			row.Columns.Delta(" Total", subColumn, 1)
+			row.Columns.Delta(e.Label, subColumn, 1)
 			if e.Source.IsZero() {
-				row.Columns.Delta("isZero", index, 1)
+				row.Columns.Delta("isZero", subColumn, 1)
 			}
-			// Update the properties.
 			for _, propFn := range propFns {
 				row.UpdateProp(propFn.Name, propFn.Fn(e), propFn.Accumulate)
 			}
@@ -413,20 +447,15 @@ func (c *entryStatsCollector) Collect(name string, fn func(EntryValue) bool, pro
 	c.Table.Rows = append(c.Table.Rows, row)
 }
 
-const targetEqSourceRowName = "target=src"
-
 // PrintEntryStats prints statistics gathered from entries into w.
 func PrintEntryStats(w io.Writer, entries ...EntryValue) error {
 	stats := entryStatsCollector{Entries: entries}
-	// Collect stats by entry predicate.
+	// Collect stats by summary stats.
 	stats.Collect("total", func(e EntryValue) bool {
 		return true
 	})
 	stats.Collect("isZero", func(e EntryValue) bool {
 		return e.Source.IsZero()
-	})
-	stats.Collect(targetEqSourceRowName, func(e EntryValue) bool {
-		return vdl.EqualValue(e.Target, e.Source)
 	})
 	stats.Table.Rows = append(stats.Table.Rows, statRowBreak)
 	// Collect stats by source kind.
@@ -447,9 +476,35 @@ func PrintEntryStats(w io.Writer, entries ...EntryValue) error {
 			return e.Source.Kind() == kind
 		}, fns...)
 	}
+	stats.Table.Rows = append(stats.Table.Rows, statRowBreak)
+	// Collect stats by source type predicate.
+	stats.Collect("IsNamed", func(e EntryValue) bool {
+		return e.Source.Type().Name() != ""
+	})
+	stats.Collect("IsUnnamed", func(e EntryValue) bool {
+		return e.Source.Type().Name() == ""
+	})
+	stats.Collect("IsBytes", func(e EntryValue) bool {
+		return e.Source.Type().IsBytes()
+	})
 	// Print stats table.
 	if err := fp(w, "Entries: %d\n", len(entries)); err != nil {
 		return err
 	}
-	return stats.Table.Print(w)
+	if err := stats.Table.Print(w); err != nil {
+		return err
+	}
+	const footer = `
+Each column has a pair of entry counts (canonical,non-canonical), computed
+from the Source value.  An entry is canonical if Target == Source.
+!can tracks the number of non-canonical entries for each unique target.
+
++{Max,Min}: Target set to positive max and min values.
+-{Max,Min}: Target set to negative max and min values.
+Full:       Target is entirely non-zero, except for cyclic types.
+NilAny:     Target is optional(nil), source is any(nil).
+Random:     Target is random value.
+Zero:       Target is zero value.
+`
+	return fp(w, footer)
 }

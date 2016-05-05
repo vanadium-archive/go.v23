@@ -16,10 +16,18 @@ import (
 
 // ValueGenerator generates values.
 type ValueGenerator struct {
-	Types         []*vdl.Type
-	MaxLen        int
+	// Types contains the total set of types used for creating any and typeobject
+	// values.  It's initialized by NewValueGenerator.
+	Types []*vdl.Type
+	// RandomZeroPercentage specifies the percentage from [0,100] that we will
+	// return a zero value.
+	RandomZeroPercentage int
+	// MaxLen limits the maximum length of lists, sets and maps.
+	MaxLen int
+	// MaxCycleDepth limits the depth for values of cyclic types.
 	MaxCycleDepth int
-	rng           *rand.Rand
+
+	rng *rand.Rand
 }
 
 // NewValueGenerator returns a new ValueGenerator, which uses a random number
@@ -27,10 +35,11 @@ type ValueGenerator struct {
 // used to generate TypeObject and Any values.
 func NewValueGenerator(types []*vdl.Type) *ValueGenerator {
 	return &ValueGenerator{
-		Types:         types,
-		MaxLen:        3,
-		MaxCycleDepth: 3,
-		rng:           rand.New(rand.NewSource(time.Now().Unix())),
+		Types:                types,
+		RandomZeroPercentage: 20,
+		MaxLen:               3,
+		MaxCycleDepth:        3,
+		rng:                  rand.New(rand.NewSource(time.Now().Unix())),
 	}
 }
 
@@ -199,8 +208,12 @@ func (g *ValueGenerator) gen(tt *vdl.Type, mode GenMode, depth int) *vdl.Value {
 }
 
 func (g *ValueGenerator) genNonNilValue(tt *vdl.Type, mode GenMode, depth int) *vdl.Value {
-	bitlen := uint(tt.Kind().BitLen())
-	switch kind := tt.Kind(); kind {
+	if mode == GenRandom && depth > 0 && g.randomZero() {
+		return vdl.ZeroValue(tt)
+	}
+	kind := tt.Kind()
+	bitlen := uint(kind.BitLen())
+	switch kind {
 	case vdl.Bool:
 		switch mode {
 		case GenPosMax, GenPosMin, GenNegMax, GenNegMin:
@@ -246,7 +259,7 @@ func (g *ValueGenerator) genNonNilValue(tt *vdl.Type, mode GenMode, depth int) *
 		case GenPosMin:
 			return vdl.UintValue(tt, 1)
 		case GenFull:
-			return vdl.UintValue(tt, 11)
+			return vdl.UintValue(tt, 123)
 		default:
 			return vdl.UintValue(tt, g.randomUint(bitlen))
 		}
@@ -261,7 +274,7 @@ func (g *ValueGenerator) genNonNilValue(tt *vdl.Type, mode GenMode, depth int) *
 		case GenNegMin:
 			return vdl.IntValue(tt, -1)
 		case GenFull:
-			return vdl.IntValue(tt, -22)
+			return vdl.IntValue(tt, -123)
 		default:
 			return vdl.IntValue(tt, g.randomInt(bitlen))
 		}
@@ -362,6 +375,10 @@ func (g *ValueGenerator) randomPercentage(p int) bool {
 	return g.rng.Intn(100) < p
 }
 
+func (g *ValueGenerator) randomZero() bool {
+	return g.randomPercentage(g.RandomZeroPercentage)
+}
+
 func (g *ValueGenerator) randomUint(bitlen uint) uint64 {
 	u := uint64(g.rng.Uint32())<<32 + uint64(g.rng.Uint32())
 	shift := 64 - bitlen
@@ -417,6 +434,9 @@ func (g *ValueGenerator) randomString() string {
 	if r0 > r1 {
 		r0, r1 = r1, r0
 	}
+	if r0 == r1 {
+		r1 = rLen
+	}
 	// Translate the startR and endR rune counts into byte indices.
 	rCount, start, end := 0, 0, len(fullString)
 	for i := range fullString {
@@ -441,7 +461,7 @@ func (g *ValueGenerator) randomNil(tt *vdl.Type, mode GenMode, depth int) bool {
 	case GenPosMax, GenPosMin, GenNegMax, GenNegMin:
 		return !needsGenPosNeg(tt, mode)
 	}
-	return g.randomPercentage(30)
+	return g.randomZero()
 }
 
 func (g *ValueGenerator) randomLen(tt *vdl.Type, mode GenMode, depth int) int {
@@ -460,19 +480,25 @@ func (g *ValueGenerator) randomLen(tt *vdl.Type, mode GenMode, depth int) int {
 		}
 		return 1
 	}
-	return g.rng.Intn(g.MaxLen)
+	return 1 + g.rng.Intn(g.MaxLen)
 }
 
 func (g *ValueGenerator) randomType() *vdl.Type {
-	if len(g.Types) == 0 {
-		return ttBuiltIn[g.rng.Intn(len(ttBuiltIn))]
+	if g.randomZero() {
+		return vdl.AnyType
 	}
-	return g.Types[g.rng.Intn(len(g.Types))]
+	return g.randomNonAnyType()
 }
 
 func (g *ValueGenerator) randomNonAnyType() *vdl.Type {
 	for {
-		if tt := g.randomType(); tt != vdl.AnyType {
+		var tt *vdl.Type
+		if len(g.Types) > 0 {
+			tt = g.Types[g.rng.Intn(len(g.Types))]
+		} else {
+			tt = ttBuiltIn[g.rng.Intn(len(ttBuiltIn))]
+		}
+		if tt != vdl.AnyType {
 			return tt
 		}
 	}

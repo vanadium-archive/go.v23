@@ -15,10 +15,6 @@ import (
 	"v.io/v23/vdl"
 )
 
-// TODO(toddw): Generate single-field structs, and favor big structs.
-// TODO(toddw): Add unnamed list,set,map to potential elem types.
-// TODO(toddw): Choose how to handle enum and array lens.
-
 // EntryValue is like Entry, but represents the target and source values as
 // *vdl.Value, rather than interface{}.
 type EntryValue struct {
@@ -34,6 +30,18 @@ func (e EntryValue) IsCanonical() bool {
 
 // EntryGenerator generates test entries.
 type EntryGenerator struct {
+	// AllMaxMinTargets specifies that all max/min targets should be generated.
+	// By default max/min targets are only generated for numbers.
+	AllMaxMinTargets bool
+	// MaxRandomTargets limits the number of random targets that are generated.
+	MaxRandomTargets int
+	// Each of the Num*Entries fields configures, for each unique target, the
+	// number of non-canonical entries with the given label that are generated.
+	NumZeroEntries   int
+	NumMaxMinEntries int
+	NumFullEntries   int
+	NumRandomEntries int
+
 	valueGen *ValueGenerator
 	hasher   hash.Hash64
 	randSeed int64
@@ -47,10 +55,15 @@ type EntryGenerator struct {
 func NewEntryGenerator(types []*vdl.Type) *EntryGenerator {
 	now := time.Now().Unix()
 	g := &EntryGenerator{
-		valueGen: NewValueGenerator(types),
-		hasher:   fnv.New64a(),
-		randSeed: now,
-		rng:      rand.New(rand.NewSource(now)),
+		MaxRandomTargets: 2,
+		NumZeroEntries:   2,
+		NumMaxMinEntries: 2,
+		NumFullEntries:   1,
+		NumRandomEntries: 1,
+		valueGen:         NewValueGenerator(types),
+		hasher:           fnv.New64a(),
+		randSeed:         now,
+		rng:              rand.New(rand.NewSource(now)),
 	}
 	for _, tt := range types {
 		kind := tt.NonOptional().Kind()
@@ -137,7 +150,7 @@ func (g *EntryGenerator) GenAllPass() []EntryValue {
 // result is exactly the target value.
 func (g *EntryGenerator) GenPass(tt *vdl.Type) []EntryValue {
 	// Add entries for zero values.
-	ev := g.genPass("Zero", vdl.ZeroValue(tt), 3, entryAll)
+	ev := g.genPass("Zero", vdl.ZeroValue(tt), g.NumZeroEntries, entryAll)
 	if tt.Kind() == vdl.Optional {
 		// Add entry to convert from any(nil) to optional(nil).
 		ev = append(ev, EntryValue{"NilAny", vdl.ZeroValue(tt), vdl.ZeroValue(vdl.AnyType)})
@@ -154,47 +167,48 @@ func (g *EntryGenerator) GenPass(tt *vdl.Type) []EntryValue {
 		}
 		return ev
 	}
+	// Add entries for max/min number testing.
+	if needsGenPos(tt) && (g.AllMaxMinTargets || tt.Kind().IsNumber()) {
+		max := g.makeValue(tt, GenPosMax, 0)
+		min := g.makeValue(tt, GenPosMin, 0)
+		ev = append(ev, g.genPassMaxMin("+Max", max)...)
+		ev = append(ev, g.genPassMaxMin("+Min", min)...)
+	}
+	if needsGenNeg(tt) && (g.AllMaxMinTargets || tt.Kind().IsNumber()) {
+		max := g.makeValue(tt, GenNegMax, 0)
+		min := g.makeValue(tt, GenNegMin, 0)
+		ev = append(ev, g.genPassMaxMin("-Max", max)...)
+		ev = append(ev, g.genPassMaxMin("-Min", min)...)
+	}
 	// Add full entries, which are deterministic and recursively non-zero.  As a
 	// special-case, for types that are part of a cycle, the values are still
 	// deterministic but will contain zero items.
 	if needsGenFull(tt) {
 		full := g.makeValue(tt, GenFull, 0)
-		ev = append(ev, g.genPass("Full", full, 3, entryAll)...)
-	}
-	// Add entries for max/min number testing.
-	if needsGenPos(tt) {
-		max := g.makeValue(tt, GenPosMax, 0)
-		min := g.makeValue(tt, GenPosMin, 0)
-		ev = append(ev, g.genPassNumbers("PosMax", max)...)
-		ev = append(ev, g.genPassNumbers("PosMin", min)...)
-	}
-	if needsGenNeg(tt) {
-		max := g.makeValue(tt, GenNegMax, 0)
-		min := g.makeValue(tt, GenNegMin, 0)
-		ev = append(ev, g.genPassNumbers("NegMax", max)...)
-		ev = append(ev, g.genPassNumbers("NegMin", min)...)
+		ev = append(ev, g.genPass("Full", full, g.NumFullEntries, entryAll)...)
 	}
 	// Add some random entries.
 	if needsGenRandom(tt) {
-		for ix := 0; ix < 3; ix++ {
+		for ix := 0; ix < g.MaxRandomTargets; ix++ {
 			random := g.makeValue(tt, GenRandom, ix)
-			ev = append(ev, g.genPass("Random", random, 3, entryAll)...)
+			ev = append(ev, g.genPass("Random", random, g.NumRandomEntries, entryAll)...)
 		}
 	}
 	return ev
 }
 
-func (g *EntryGenerator) genPassNumbers(label string, target *vdl.Value) []EntryValue {
+func (g *EntryGenerator) genPassMaxMin(label string, target *vdl.Value) []EntryValue {
 	// We test the boundaries for all unnamed (i.e. built-in) numbers, and limit
 	// the entries otherwise.
 	var ev []EntryValue
 	if tt := target.Type(); tt.Kind().IsNumber() && tt.Name() == "" {
 		ev = append(ev, g.genPass(label, target, -1, entryUnnamed)...)
-		ev = append(ev, g.genPass(label, target, 3, entryNamedNoCanonical)...)
+		ev = append(ev, g.genPass(label, target, g.NumMaxMinEntries, entryNamedNoCanonical)...)
 	} else {
-		ev = append(ev, g.genPass(label, target, 3, entryAll)...)
+		ev = append(ev, g.genPass(label, target, g.NumMaxMinEntries, entryAll)...)
 	}
 	return ev
+	return nil
 }
 
 type entryMode int
