@@ -81,8 +81,8 @@ type Database interface {
 	// All batch-aware RPCs can also be called outside a batch (with an empty
 	// handle), with the exception of Commit and Abort which only make sense on
 	// a batch. Note that glob RPCs are not batch-aware.
-	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
-	// everywhere now that v.io/i/912 is resolved.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
+	// 'opts' once v.io/i/912 is resolved for Java.
 	BeginBatch(bo BatchOptions) (BatchHandle | error) {access.Read}
 
 	// Commit persists the pending changes to the database.

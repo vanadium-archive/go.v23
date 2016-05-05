@@ -40,8 +40,8 @@ func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 		return nil, err
 	}
 	ids := []wire.Id{}
-	for globReply := range ch {
-		switch v := globReply.(type) {
+	for reply := range ch {
+		switch v := reply.(type) {
 		case *naming.GlobReplyEntry:
 			encId := v.Value.Name[strings.LastIndex(v.Value.Name, "/")+1:]
 			// Component ids within object names are always encoded. See comment in

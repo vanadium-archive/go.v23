@@ -8496,8 +8496,8 @@ type DatabaseClientMethods interface {
 	// All batch-aware RPCs can also be called outside a batch (with an empty
 	// handle), with the exception of Commit and Abort which only make sense on
 	// a batch. Note that glob RPCs are not batch-aware.
-	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
-	// everywhere now that v.io/i/912 is resolved.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
+	// 'opts' once v.io/i/912 is resolved for Java.
 	BeginBatch(_ *context.T, bo BatchOptions, _ ...rpc.CallOpt) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
@@ -8790,8 +8790,8 @@ type DatabaseServerMethods interface {
 	// All batch-aware RPCs can also be called outside a batch (with an empty
 	// handle), with the exception of Commit and Abort which only make sense on
 	// a batch. Note that glob RPCs are not batch-aware.
-	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
-	// everywhere now that v.io/i/912 is resolved.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
+	// 'opts' once v.io/i/912 is resolved for Java.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
@@ -8938,8 +8938,8 @@ type DatabaseServerStubMethods interface {
 	// All batch-aware RPCs can also be called outside a batch (with an empty
 	// handle), with the exception of Commit and Abort which only make sense on
 	// a batch. Note that glob RPCs are not batch-aware.
-	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'
-	// everywhere now that v.io/i/912 is resolved.
+	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
+	// 'opts' once v.io/i/912 is resolved for Java.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
@@ -9110,7 +9110,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns a batch handle to pass in when\n// calling batch-aware RPCs.\n// Concurrency semantics are documented in model.go.\n// All batch-aware RPCs can also be called outside a batch (with an empty\n// handle), with the exception of Commit and Abort which only make sense on\n// a batch. Note that glob RPCs are not batch-aware.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename it to 'opts'\n// everywhere now that v.io/i/912 is resolved.",
+			Doc:  "// BeginBatch creates a new batch. It returns a batch handle to pass in when\n// calling batch-aware RPCs.\n// Concurrency semantics are documented in model.go.\n// All batch-aware RPCs can also be called outside a batch (with an empty\n// handle), with the exception of Commit and Abort which only make sense on\n// a batch. Note that glob RPCs are not batch-aware.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to\n// 'opts' once v.io/i/912 is resolved for Java.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
