@@ -15,14 +15,6 @@ import (
 	"v.io/v23/vdl"
 )
 
-// EntryValue is like Entry, but represents the target and source values as
-// *vdl.Value, rather than interface{}.
-type EntryValue struct {
-	Label  string
-	Target *vdl.Value
-	Source *vdl.Value
-}
-
 // IsCanonical returns true iff e.Target == e.Source.
 func (e EntryValue) IsCanonical() bool {
 	return vdl.EqualValue(e.Target, e.Source)

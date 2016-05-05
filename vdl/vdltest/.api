@@ -20,6 +20,8 @@ pkg vdltest, func NewTypeGenerator() *TypeGenerator
 pkg vdltest, func NewValueGenerator([]*vdl.Type) *ValueGenerator
 pkg vdltest, func PrintEntryStats(io.Writer, ...EntryValue) error
 pkg vdltest, func PrintTypeStats(io.Writer, ...*vdl.Type) error
+pkg vdltest, func ToEntryValue(Entry) EntryValue
+pkg vdltest, func ToEntryValues([]Entry) []EntryValue
 pkg vdltest, func VDLReadVUnionDepth1_All(vdl.Decoder, *VUnionDepth1_All) error
 pkg vdltest, func VDLReadVUnionDepth1_Rand0(vdl.Decoder, *VUnionDepth1_Rand0) error
 pkg vdltest, func VDLReadVUnionDepth1_Rand1(vdl.Decoder, *VUnionDepth1_Rand1) error

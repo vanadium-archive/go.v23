@@ -1,0 +1,22 @@
+pkg vomtest, func Data81() []TestCase
+pkg vomtest, method (*TestCase) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vomtest, method (*TestCase) MakeVDLTarget() vdl.Target
+pkg vomtest, method (*TestCase) VDLRead(vdl.Decoder) error
+pkg vomtest, method (*TestCaseTarget) FinishField(vdl.Target, vdl.Target) error
+pkg vomtest, method (*TestCaseTarget) FinishFields(vdl.FieldsTarget) error
+pkg vomtest, method (*TestCaseTarget) StartField(string) (vdl.Target, vdl.Target, error)
+pkg vomtest, method (*TestCaseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
+pkg vomtest, method (*TestCaseTarget) ZeroField(string) error
+pkg vomtest, method (TestCase) VDLIsZero() bool
+pkg vomtest, method (TestCase) VDLWrite(vdl.Encoder) error
+pkg vomtest, type TestCase struct
+pkg vomtest, type TestCase struct, Hex string
+pkg vomtest, type TestCase struct, HexType string
+pkg vomtest, type TestCase struct, HexValue string
+pkg vomtest, type TestCase struct, HexVersion string
+pkg vomtest, type TestCase struct, Name string
+pkg vomtest, type TestCase struct, Value interface{}
+pkg vomtest, type TestCaseTarget struct
+pkg vomtest, type TestCaseTarget struct, Value *TestCase
+pkg vomtest, type TestCaseTarget struct, embedded vdl.FieldsTargetBase
+pkg vomtest, type TestCaseTarget struct, embedded vdl.TargetBase
