@@ -51,11 +51,11 @@ func TestEncodeIdDecodeId(t *testing.T) {
 	}
 }
 
-func TestValidNameFuncs(t *testing.T) {
+func TestValidateNameFuncs(t *testing.T) {
 	for _, a := range tu.OkAppUserBlessings {
 		for _, d := range tu.OkDbCxNames {
 			id := wire.Id{Blessing: a, Name: d}
-			if !util.ValidId(id) {
+			if util.ValidateId(id) != nil {
 				t.Errorf("%v should be valid", id)
 			}
 		}
@@ -63,7 +63,7 @@ func TestValidNameFuncs(t *testing.T) {
 	for _, a := range tu.NotOkAppUserBlessings {
 		for _, d := range append(tu.OkDbCxNames, tu.NotOkDbCxNames...) {
 			id := wire.Id{Blessing: a, Name: d}
-			if util.ValidId(id) {
+			if util.ValidateId(id) == nil {
 				t.Errorf("%v should be invalid", id)
 			}
 		}
@@ -71,18 +71,18 @@ func TestValidNameFuncs(t *testing.T) {
 	for _, d := range tu.NotOkDbCxNames {
 		for _, a := range append(tu.OkAppUserBlessings, tu.NotOkAppUserBlessings...) {
 			id := wire.Id{Blessing: a, Name: d}
-			if util.ValidId(id) {
+			if util.ValidateId(id) == nil {
 				t.Errorf("%v should be invalid", id)
 			}
 		}
 	}
 	for _, s := range tu.OkRowKeys {
-		if !util.ValidRowKey(s) {
+		if util.ValidateRowKey(s) != nil {
 			t.Errorf("%q should be valid", s)
 		}
 	}
 	for _, s := range tu.NotOkRowKeys {
-		if util.ValidRowKey(s) {
+		if util.ValidateRowKey(s) == nil {
 			t.Errorf("%q should be invalid", s)
 		}
 	}

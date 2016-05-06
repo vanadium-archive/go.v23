@@ -10,8 +10,8 @@ pkg util, func PrefixRangeLimit(string) string
 pkg util, func PrefixRangeStart(string) string
 pkg util, func SortIds([]wire.Id)
 pkg util, func UserBlessingFromContext(*context.T) (string, error)
-pkg util, func ValidId(wire.Id) bool
-pkg util, func ValidRowKey(string) bool
+pkg util, func ValidateId(wire.Id) error
+pkg util, func ValidateRowKey(string) error
 pkg util, type AccessController interface { GetPermissions, SetPermissions }
 pkg util, type AccessController interface, GetPermissions(*context.T) (access.Permissions, string, error)
 pkg util, type AccessController interface, SetPermissions(*context.T, access.Permissions, string) error

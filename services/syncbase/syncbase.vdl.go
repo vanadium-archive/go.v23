@@ -6324,14 +6324,14 @@ const NullBlobRef = BlobRef("")
 
 var (
 	ErrNotInDevMode        = verror.Register("v.io/v23/services/syncbase.NotInDevMode", verror.NoRetry, "{1:}{2:} not running with --dev=true")
-	ErrInvalidName         = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: {3}")
-	ErrCorruptDatabase     = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
+	ErrInvalidName         = verror.Register("v.io/v23/services/syncbase.InvalidName", verror.NoRetry, "{1:}{2:} invalid name: '{3}'{:_}")
+	ErrCorruptDatabase     = verror.Register("v.io/v23/services/syncbase.CorruptDatabase", verror.NoRetry, "{1:}{2:} database corrupt, moved to '{3}'; client must create a new database")
 	ErrUnknownBatch        = verror.Register("v.io/v23/services/syncbase.UnknownBatch", verror.NoRetry, "{1:}{2:} unknown batch, perhaps the server restarted")
 	ErrNotBoundToBatch     = verror.Register("v.io/v23/services/syncbase.NotBoundToBatch", verror.NoRetry, "{1:}{2:} not bound to batch")
 	ErrReadOnlyBatch       = verror.Register("v.io/v23/services/syncbase.ReadOnlyBatch", verror.NoRetry, "{1:}{2:} batch is read-only")
 	ErrConcurrentBatch     = verror.Register("v.io/v23/services/syncbase.ConcurrentBatch", verror.NoRetry, "{1:}{2:} concurrent batch")
 	ErrBlobNotCommitted    = verror.Register("v.io/v23/services/syncbase.BlobNotCommitted", verror.NoRetry, "{1:}{2:} blob is not yet committed")
-	ErrSyncgroupJoinFailed = verror.Register("v.io/v23/services/syncbase.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed")
+	ErrSyncgroupJoinFailed = verror.Register("v.io/v23/services/syncbase.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed{:_}")
 	ErrBadExecStreamHeader = verror.Register("v.io/v23/services/syncbase.BadExecStreamHeader", verror.NoRetry, "{1:}{2:} Exec stream header improperly formatted")
 )
 
@@ -9817,14 +9817,14 @@ func __VDLInit() struct{} {
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to {3}; client must create a new database")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidName.ID), "{1:}{2:} invalid name: '{3}'{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCorruptDatabase.ID), "{1:}{2:} database corrupt, moved to '{3}'; client must create a new database")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownBatch.ID), "{1:}{2:} unknown batch, perhaps the server restarted")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotBoundToBatch.ID), "{1:}{2:} not bound to batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrReadOnlyBatch.ID), "{1:}{2:} batch is read-only")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConcurrentBatch.ID), "{1:}{2:} concurrent batch")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBlobNotCommitted.ID), "{1:}{2:} blob is not yet committed")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadExecStreamHeader.ID), "{1:}{2:} Exec stream header improperly formatted")
 
 	return struct{}{}

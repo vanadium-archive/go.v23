@@ -106,8 +106,8 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 
 // Watch implements Database.Watch.
 func (d *database) Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
-	if !util.ValidId(collection) {
-		return nil, verror.New(wire.ErrInvalidName, ctx, collection)
+	if err := util.ValidateId(collection); err != nil {
+		return nil, verror.New(wire.ErrInvalidName, ctx, collection, err)
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{

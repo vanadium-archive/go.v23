@@ -63,8 +63,8 @@ func DecodeId(s string) (wire.Id, error) {
 // sequences are allowed.
 var reservedBytes = []string{"\xfc", "\xfd", "\xfe", "\xff"}
 
-func containsReservedByte(s string) bool {
-	for _, v := range reservedBytes {
+func containsAnyOf(s string, needles []string) bool {
+	for _, v := range needles {
 		if strings.Contains(s, v) {
 			return true
 		}
@@ -72,34 +72,51 @@ func containsReservedByte(s string) bool {
 	return false
 }
 
-var identifierRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")
+// TODO(ivanpi): Consider relaxing this.
+var idNameRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")
 
-func validIdentifier(s string) bool {
-	return identifierRegexp.MatchString(s)
-}
+const (
+	// maxBlessingLen is the max allowed number of bytes in an Id blessing.
+	// TODO(ivanpi): Blessings are theoretically unbounded in length.
+	maxBlessingLen = 1024
+	// maxNameLen is the max allowed number of bytes in an Id name.
+	maxNameLen = 64
+)
 
-// maxNameLen is the max allowed number of bytes in database and collection
-// blessings and names.
-// TODO(sadovsky): Revisit whether 64 bytes is enough for blessings.
-const maxNameLen = 64
-
-// ValidId returns true iff the given Id is a valid database or collection id.
-func ValidId(id wire.Id) bool {
-	if x := len([]byte(id.Blessing)); x == 0 || x > maxNameLen {
-		return false
+// ValidateId returns nil iff the given Id is a valid database, collection, or
+// syncgroup Id.
+func ValidateId(id wire.Id) error {
+	if x := len([]byte(id.Blessing)); x == 0 {
+		return fmt.Errorf("Id blessing cannot be empty")
+	} else if x > maxBlessingLen {
+		return fmt.Errorf("Id blessing %q exceeds %d bytes", id.Blessing, maxBlessingLen)
 	}
-	if x := len([]byte(id.Name)); x == 0 || x > maxNameLen {
-		return false
+	if x := len([]byte(id.Name)); x == 0 {
+		return fmt.Errorf("Id name cannot be empty")
+	} else if x > maxNameLen {
+		return fmt.Errorf("Id name %q exceeds %d bytes", id.Name, maxNameLen)
 	}
 	if !security.BlessingPattern(id.Blessing).IsValid() {
-		return false
+		return fmt.Errorf("Id blessing %q is not a valid blessing pattern", id.Blessing)
 	}
-	return !containsReservedByte(id.Blessing) && validIdentifier(id.Name)
+	if containsAnyOf(id.Blessing, reservedBytes) {
+		return fmt.Errorf("Id blessing %q contains a reserved byte (one of %q)", id.Blessing, reservedBytes)
+	}
+	if !idNameRegexp.MatchString(id.Name) {
+		return fmt.Errorf("Id name %q does not satisfy regex %q", id.Name, idNameRegexp.String())
+	}
+	return nil
 }
 
-// ValidRowKey returns true iff the given string is a valid row key.
-func ValidRowKey(s string) bool {
-	return s != "" && !containsReservedByte(s)
+// ValidateRowKey returns nil iff the given string is a valid row key.
+func ValidateRowKey(s string) error {
+	if s == "" {
+		return fmt.Errorf("row key cannot be empty")
+	}
+	if containsAnyOf(s, reservedBytes) {
+		return fmt.Errorf("row key %q contains a reserved byte (one of %q)", s, reservedBytes)
+	}
+	return nil
 }
 
 // ParseCollectionRowPair splits the "<collectionId>/<row>" part of a Syncbase
@@ -111,11 +128,16 @@ func ParseCollectionRowPair(ctx *context.T, pattern string) (wire.Id, string, er
 	}
 	collectionEnc, row := parts[0], parts[1]
 	collection, err := DecodeId(parts[0])
-	if err != nil || !ValidId(collection) {
-		return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, collectionEnc)
+	if err == nil {
+		err = ValidateId(collection)
 	}
-	if row != "" && !ValidRowKey(row) {
-		return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, row)
+	if err != nil {
+		return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, collectionEnc, err)
+	}
+	if row != "" {
+		if err := ValidateRowKey(row); err != nil {
+			return wire.Id{}, "", verror.New(wire.ErrInvalidName, ctx, row, err)
+		}
 	}
 	return collection, row, nil
 }
