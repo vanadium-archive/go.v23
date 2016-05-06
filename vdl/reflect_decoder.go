@@ -128,19 +128,6 @@ func (d *reflectDecoder) StartValue() error {
 			d.InnerDecoder = dec.Decoder()
 			return d.InnerDecoder.StartValue()
 		}
-
-		if tt == ErrorType {
-			ni, err := nativeInfoForError()
-			if err != nil {
-				return err
-			}
-
-			ptrRv = reflect.New(reflect.TypeOf(WireError{}))
-			if err := ni.FromNative(ptrRv, rv); err != nil {
-				return err
-			}
-			rv = ptrRv.Elem()
-		}
 	}
 
 	if !rv.IsValid() || (tt.Kind() == Any && rv.IsNil()) {

@@ -71,6 +71,11 @@ type GoType struct {
 	//   Imports: {{Path: "time", Name: "time"}},
 	//   Zero:    {Mode: Unique}
 	Type string
+	// ToNative and FromNative override the default name for the native conversion
+	// function with a custom function.
+	// e.g. "verror.ErrorToNative"
+	ToNative string
+	FromNative string
 	// Imports are the Go imports required by the Type, used in generated code.
 	Imports []GoImport
 	// Zero specifies special behavior for zero value setting and checking.
@@ -87,7 +92,7 @@ type GoKind enum {
 	Slice
 	Map
 	Pointer
-	// TODO(toddw): Support native interfaces?
+	Iface
 }
 
 // GoImport describes Go import information.

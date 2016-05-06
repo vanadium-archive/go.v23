@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"reflect"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 	"v.io/v23/vom/testdata/data81"
 )
 

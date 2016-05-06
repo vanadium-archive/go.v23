@@ -4414,15 +4414,11 @@ func (x MStruct) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*NStruct)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.D.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.E != nil && x.E != vdl.AnyType {
 		if err := enc.NextField("E"); err != nil {
@@ -5963,15 +5959,11 @@ func (x RecStruct) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*RecStruct)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.A.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -13906,15 +13898,11 @@ func (x LargeMessageType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*LargeMessageType)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Next.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -14143,15 +14131,11 @@ func (x LargeAnyMessageType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*LargeAnyMessageType)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Next.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err

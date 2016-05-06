@@ -3115,45 +3115,33 @@ func (x RowOp) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.LocalValue.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.RemoteValue != nil {
 		if err := enc.NextField("RemoteValue"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.RemoteValue.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.AncestorValue != nil {
 		if err := enc.NextField("AncestorValue"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.AncestorValue.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -4856,15 +4844,11 @@ func (x ResolutionInfo) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Result.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.Continued {
 		if err := enc.NextField("Continued"); err != nil {

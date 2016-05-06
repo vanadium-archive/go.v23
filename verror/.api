@@ -8,7 +8,9 @@ pkg verror, func Action(error) ActionCode
 pkg verror, func AddSubErrs(error, *context.T, ...SubErr) error
 pkg verror, func Convert(IDAction, *context.T, error) error
 pkg verror, func DebugString(error) string
+pkg verror, func ErrorFromNative(**vdl.WireError, error) error
 pkg verror, func ErrorID(error) ID
+pkg verror, func ErrorToNative(*vdl.WireError, *error) error
 pkg verror, func ExplicitAddSubErrs(error, i18n.LangID, string, string, ...SubErr) error
 pkg verror, func ExplicitConvert(IDAction, i18n.LangID, string, string, error) error
 pkg verror, func ExplicitNew(IDAction, i18n.LangID, string, string, ...interface{}) error
@@ -42,11 +44,13 @@ pkg verror, func VDLWrite(vdl.Encoder, error) error
 pkg verror, func WireFromNative(*vdl.WireError, error) error
 pkg verror, func WireToNative(vdl.WireError, *E) error
 pkg verror, func WithComponentName(*context.T, string) *context.T
+pkg verror, method (*E) VDLRead(vdl.Decoder) error
 pkg verror, method (*ErrorTarget) FinishFields(vdl.FieldsTarget) error
 pkg verror, method (*ErrorTarget) FromNil(*vdl.Type) error
 pkg verror, method (*ErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg verror, method (ActionCode) RetryAction() ActionCode
 pkg verror, method (E) Error() string
+pkg verror, method (E) VDLWrite(vdl.Encoder) error
 pkg verror, method (PCs) String() string
 pkg verror, method (SubErrs) String() string
 pkg verror, type ActionCode uint32

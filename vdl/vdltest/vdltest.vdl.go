@@ -1689,15 +1689,11 @@ func (x VArray3_OptVStructEmpty) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructEmpty)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -2681,15 +2677,11 @@ func (x VList_OptVStructEmpty) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructEmpty)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -5015,15 +5007,11 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructEmpty)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.F30.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -6481,15 +6469,11 @@ func (x VUnionDepth1_AllF30) VDLWrite(enc vdl.Encoder) error {
 		}
 	} else {
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructEmpty)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -7792,15 +7776,11 @@ func (x VArray1_OptVStructDepth1_Rand0) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand0)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -8349,15 +8329,11 @@ func (x VList_OptVStructDepth1_Rand0) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand0)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -9026,30 +9002,22 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_All)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.F12.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.F13 != nil {
 		if err := enc.NextField("F13"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand0)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.F13.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -9766,15 +9734,11 @@ func (x VUnionDepth2_AllF12) VDLWrite(enc vdl.Encoder) error {
 		}
 	} else {
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand0)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -9795,15 +9759,11 @@ func (x VUnionDepth2_AllF13) VDLWrite(enc vdl.Encoder) error {
 		}
 	} else {
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand1)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -10183,15 +10143,11 @@ func (x VUnionDepth2_Rand0F12) VDLWrite(enc vdl.Encoder) error {
 		}
 	} else {
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth1_Rand0)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -10880,15 +10836,11 @@ func (x VArray3_OptVStructDepth2_Rand0) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructDepth2_Rand0)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -11384,15 +11336,11 @@ func (x VList_OptVStructDepth2_Rand0) VDLWrite(enc vdl.Encoder) error {
 			}
 		} else {
 			enc.SetNextStartValueIsOptional()
-			if err := enc.StartValue(vdl.TypeOf((*VStructDepth2_Rand0)(nil)).Elem()); err != nil {
-				return err
-			}
+
 			if err := x[i].VDLWrite(enc); err != nil {
 				return err
 			}
-			if err := enc.FinishValue(); err != nil {
-				return err
-			}
+
 		}
 	}
 	if err := enc.NextEntry(true); err != nil {
@@ -11750,15 +11698,11 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth2_Rand0)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.F12.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -12682,15 +12626,11 @@ func (x VUnionDepth3_AllF12) VDLWrite(enc vdl.Encoder) error {
 		}
 	} else {
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*VStructDepth2_Rand0)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Value.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err
@@ -14060,29 +14000,31 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "error{Msg: \"klmnopΔΘΠΣΦ王普澤\"}",
+		TargetLabel: "error{Id: \"abcdefghijklmn\", RetryCode: RetryConnection, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}",
 		Target: verror.FromWire(vdl.WireError{
-			Msg: "klmnopΔΘΠΣΦ王普澤",
+			Id:        "abcdefghijklmn",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
 		}),
-		SourceLabel: "error{Msg: \"klmnopΔΘΠΣΦ王普澤\"}",
+		SourceLabel: "error{Id: \"abcdefghijklmn\", RetryCode: RetryConnection, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}",
 		Source: verror.FromWire(vdl.WireError{
-			Msg: "klmnopΔΘΠΣΦ王普澤",
+			Id:        "abcdefghijklmn",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
 		}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "error{Id: \"ΠΣΦ王\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣΦ王\"}",
+		TargetLabel: "error{Id: \"h\", Msg: \"ΔΘΠΣΦ王普澤世界\"}",
 		Target: verror.FromWire(vdl.WireError{
-			Id:        "ΠΣΦ王",
-			RetryCode: vdl.WireRetryCodeRetryConnection,
-			Msg:       "hijklmnopΔΘΠΣΦ王",
+			Id:  "h",
+			Msg: "ΔΘΠΣΦ王普澤世界",
 		}),
-		SourceLabel: "error{Id: \"ΠΣΦ王\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣΦ王\"}",
+		SourceLabel: "error{Id: \"h\", Msg: \"ΔΘΠΣΦ王普澤世界\"}",
 		Source: verror.FromWire(vdl.WireError{
-			Id:        "ΠΣΦ王",
-			RetryCode: vdl.WireRetryCodeRetryConnection,
-			Msg:       "hijklmnopΔΘΠΣΦ王",
+			Id:  "h",
+			Msg: "ΔΘΠΣΦ王普澤世界",
 		}),
 	},
 	{
@@ -18334,12 +18276,12 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VArray2_VEnumAbc{VEnumAbc.C, VEnumAbc.C}",
+		TargetLabel: "VArray2_VEnumAbc{C, C}",
 		Target: VArray2_VEnumAbc{
 			VEnumAbcC,
 			VEnumAbcC,
 		},
-		SourceLabel: "VArray2_VEnumAbc{VEnumAbc.C, VEnumAbc.C}",
+		SourceLabel: "VArray2_VEnumAbc{C, C}",
 		Source: VArray2_VEnumAbc{
 			VEnumAbcC,
 			VEnumAbcC,
@@ -18347,12 +18289,12 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VArray2_VEnumAbc{VEnumAbc.C, VEnumAbc.C}",
+		TargetLabel: "VArray2_VEnumAbc{C, C}",
 		Target: VArray2_VEnumAbc{
 			VEnumAbcC,
 			VEnumAbcC,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.C, VEnumBcd.C}",
+		SourceLabel: "[]VEnumBcd{C, C}",
 		Source: []VEnumBcd{
 			VEnumBcdC,
 			VEnumBcdC,
@@ -18380,7 +18322,7 @@ var vAllPass = []Entry{
 		Label:       "Zero",
 		TargetLabel: "VArray2_VEnumBcd{}",
 		Target:      VArray2_VEnumBcd{},
-		SourceLabel: "VList_VEnumBcd{VEnumBcd.B, VEnumBcd.B}",
+		SourceLabel: "VList_VEnumBcd{B, B}",
 		Source: VList_VEnumBcd{
 			VEnumBcdB,
 			VEnumBcdB,
@@ -18389,12 +18331,12 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VArray2_VEnumBcd{VEnumBcd.D, VEnumBcd.D}",
+		TargetLabel: "VArray2_VEnumBcd{D, D}",
 		Target: VArray2_VEnumBcd{
 			VEnumBcdD,
 			VEnumBcdD,
 		},
-		SourceLabel: "VArray2_VEnumBcd{VEnumBcd.D, VEnumBcd.D}",
+		SourceLabel: "VArray2_VEnumBcd{D, D}",
 		Source: VArray2_VEnumBcd{
 			VEnumBcdD,
 			VEnumBcdD,
@@ -18402,12 +18344,12 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VArray2_VEnumBcd{VEnumBcd.D, VEnumBcd.D}",
+		TargetLabel: "VArray2_VEnumBcd{D, D}",
 		Target: VArray2_VEnumBcd{
 			VEnumBcdD,
 			VEnumBcdD,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.D, VEnumBcd.D}",
+		SourceLabel: "[]VEnumBcd{D, D}",
 		Source: []VEnumBcd{
 			VEnumBcdD,
 			VEnumBcdD,
@@ -18509,70 +18451,74 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_Error{{Id: \"e\", RetryCode: RetryBackoff, Msg: \"jklmnopΔΘΠ\"}}",
+		TargetLabel: "VArray1_Error{{Id: \"ΘΠ\", RetryCode: RetryConnection, Msg: \"bcdefghijklmno\"}}",
 		Target: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				Id:        "e",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "jklmnopΔΘΠ",
+				Id:        "ΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "bcdefghijklmno",
 			}),
 		},
-		SourceLabel: "VArray1_Error{{Id: \"e\", RetryCode: RetryBackoff, Msg: \"jklmnopΔΘΠ\"}}",
+		SourceLabel: "VArray1_Error{{Id: \"ΘΠ\", RetryCode: RetryConnection, Msg: \"bcdefghijklmno\"}}",
 		Source: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				Id:        "e",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "jklmnopΔΘΠ",
+				Id:        "ΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "bcdefghijklmno",
 			}),
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_Error{{Id: \"e\", RetryCode: RetryBackoff, Msg: \"jklmnopΔΘΠ\"}}",
+		TargetLabel: "VArray1_Error{{Id: \"ΘΠ\", RetryCode: RetryConnection, Msg: \"bcdefghijklmno\"}}",
 		Target: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				Id:        "e",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "jklmnopΔΘΠ",
+				Id:        "ΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "bcdefghijklmno",
 			}),
 		},
-		SourceLabel: "[]any{error{Id: \"e\", RetryCode: RetryBackoff, Msg: \"jklmnopΔΘΠ\"}}",
+		SourceLabel: "[]any{error{Id: \"ΘΠ\", RetryCode: RetryConnection, Msg: \"bcdefghijklmno\"}}",
 		Source: []interface{}{
 			verror.FromWire(vdl.WireError{
-				Id:        "e",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "jklmnopΔΘΠ",
+				Id:        "ΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "bcdefghijklmno",
 			}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_Error{{RetryCode: RetryRefetch}}",
+		TargetLabel: "VArray1_Error{{Id: \"efghijklmnopΔΘΠΣΦ王普澤世\", Msg: \"jklmnopΔΘΠΣ\"}}",
 		Target: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Id:  "efghijklmnopΔΘΠΣΦ王普澤世",
+				Msg: "jklmnopΔΘΠΣ",
 			}),
 		},
-		SourceLabel: "VArray1_Error{{RetryCode: RetryRefetch}}",
+		SourceLabel: "VArray1_Error{{Id: \"efghijklmnopΔΘΠΣΦ王普澤世\", Msg: \"jklmnopΔΘΠΣ\"}}",
 		Source: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Id:  "efghijklmnopΔΘΠΣΦ王普澤世",
+				Msg: "jklmnopΔΘΠΣ",
 			}),
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_Error{{RetryCode: RetryRefetch}}",
+		TargetLabel: "VArray1_Error{{Id: \"efghijklmnopΔΘΠΣΦ王普澤世\", Msg: \"jklmnopΔΘΠΣ\"}}",
 		Target: VArray1_Error{
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Id:  "efghijklmnopΔΘΠΣΦ王普澤世",
+				Msg: "jklmnopΔΘΠΣ",
 			}),
 		},
-		SourceLabel: "[]any{error{RetryCode: RetryRefetch}}",
+		SourceLabel: "[]any{error{Id: \"efghijklmnopΔΘΠΣΦ王普澤世\", Msg: \"jklmnopΔΘΠΣ\"}}",
 		Source: []interface{}{
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Id:  "efghijklmnopΔΘΠΣΦ王普澤世",
+				Msg: "jklmnopΔΘΠΣ",
 			}),
 		},
 	},
@@ -19693,22 +19639,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "[]VEnumAbc{C}",
 		Target: []VEnumAbc{
 			VEnumAbcC,
 		},
-		SourceLabel: "[]VEnumAbc{VEnumAbc.C}",
+		SourceLabel: "[]VEnumAbc{C}",
 		Source: []VEnumAbc{
 			VEnumAbcC,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "[]VEnumAbc{C}",
 		Target: []VEnumAbc{
 			VEnumAbcC,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.C}",
+		SourceLabel: "[]VEnumBcd{C}",
 		Source: []VEnumBcd{
 			VEnumBcdC,
 		},
@@ -19738,18 +19684,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "[]VEnumBcd{D}",
 		Target: []VEnumBcd{
 			VEnumBcdD,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.D}",
+		SourceLabel: "[]VEnumBcd{D}",
 		Source: []VEnumBcd{
 			VEnumBcdD,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "[]VEnumBcd{D}",
 		Target: []VEnumBcd{
 			VEnumBcdD,
 		},
@@ -19867,78 +19813,98 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]error{{Id: \"bcdefghijklmnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"ΘΠΣ\"}}",
+		TargetLabel: "[]error{{Id: \"jklmnopΔΘΠ\", RetryCode: RetryConnection}, {Id: \"abcdefghijk\", RetryCode: RetryBackoff, Msg: \"bcdefghijklmnopΔΘΠ\"}, {}}",
 		Target: []error{
 			verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijklmnopΔΘΠ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "ΘΠΣ",
+				Id:        "jklmnopΔΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
 			}),
+			verror.FromWire(vdl.WireError{
+				Id:        "abcdefghijk",
+				RetryCode: vdl.WireRetryCodeRetryBackoff,
+				Msg:       "bcdefghijklmnopΔΘΠ",
+			}),
+			verror.FromWire(vdl.WireError{}),
 		},
-		SourceLabel: "[]error{{Id: \"bcdefghijklmnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"ΘΠΣ\"}}",
+		SourceLabel: "[]error{{Id: \"jklmnopΔΘΠ\", RetryCode: RetryConnection}, {Id: \"abcdefghijk\", RetryCode: RetryBackoff, Msg: \"bcdefghijklmnopΔΘΠ\"}, {}}",
 		Source: []error{
 			verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijklmnopΔΘΠ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "ΘΠΣ",
+				Id:        "jklmnopΔΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
 			}),
+			verror.FromWire(vdl.WireError{
+				Id:        "abcdefghijk",
+				RetryCode: vdl.WireRetryCodeRetryBackoff,
+				Msg:       "bcdefghijklmnopΔΘΠ",
+			}),
+			verror.FromWire(vdl.WireError{}),
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]error{{Id: \"bcdefghijklmnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"ΘΠΣ\"}}",
+		TargetLabel: "[]error{{Id: \"jklmnopΔΘΠ\", RetryCode: RetryConnection}, {Id: \"abcdefghijk\", RetryCode: RetryBackoff, Msg: \"bcdefghijklmnopΔΘΠ\"}, {}}",
 		Target: []error{
 			verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijklmnopΔΘΠ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "ΘΠΣ",
+				Id:        "jklmnopΔΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
 			}),
+			verror.FromWire(vdl.WireError{
+				Id:        "abcdefghijk",
+				RetryCode: vdl.WireRetryCodeRetryBackoff,
+				Msg:       "bcdefghijklmnopΔΘΠ",
+			}),
+			verror.FromWire(vdl.WireError{}),
 		},
-		SourceLabel: "[]any{error{Id: \"bcdefghijklmnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"ΘΠΣ\"}}",
+		SourceLabel: "[]any{error{Id: \"jklmnopΔΘΠ\", RetryCode: RetryConnection}, error{Id: \"abcdefghijk\", RetryCode: RetryBackoff, Msg: \"bcdefghijklmnopΔΘΠ\"}, error{}}",
 		Source: []interface{}{
 			verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijklmnopΔΘΠ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "ΘΠΣ",
+				Id:        "jklmnopΔΘΠ",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
 			}),
+			verror.FromWire(vdl.WireError{
+				Id:        "abcdefghijk",
+				RetryCode: vdl.WireRetryCodeRetryBackoff,
+				Msg:       "bcdefghijklmnopΔΘΠ",
+			}),
+			verror.FromWire(vdl.WireError{}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]error{nil, {RetryCode: RetryRefetch, Msg: \"nopΔ\"}}",
+		TargetLabel: "[]error{{Id: \"jklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"e\"}}",
 		Target: []error{
-			nil,
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "nopΔ",
+				Id:        "jklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "e",
 			}),
 		},
-		SourceLabel: "[]error{nil, {RetryCode: RetryRefetch, Msg: \"nopΔ\"}}",
+		SourceLabel: "[]error{{Id: \"jklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"e\"}}",
 		Source: []error{
-			nil,
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "nopΔ",
+				Id:        "jklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "e",
 			}),
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]error{nil, {RetryCode: RetryRefetch, Msg: \"nopΔ\"}}",
+		TargetLabel: "[]error{{Id: \"jklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"e\"}}",
 		Target: []error{
-			nil,
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "nopΔ",
+				Id:        "jklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "e",
 			}),
 		},
-		SourceLabel: "[]any{nil, error{RetryCode: RetryRefetch, Msg: \"nopΔ\"}}",
+		SourceLabel: "[]any{error{Id: \"jklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"e\"}}",
 		Source: []interface{}{
-			nil,
 			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "nopΔ",
+				Id:        "jklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "e",
 			}),
 		},
 	},
@@ -20381,7 +20347,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_Any{VUnionDepth1_Rand0{F8: VEnumAbc.A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
+		TargetLabel: "VList_Any{VUnionDepth1_Rand0{F8: A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
 		Target: VList_Any{
 			VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
 			VArray1_VUnionDepth2_Rand1{
@@ -20390,7 +20356,7 @@ var vAllPass = []Entry{
 				}},
 			},
 		},
-		SourceLabel: "VList_Any{VUnionDepth1_Rand0{F8: VEnumAbc.A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
+		SourceLabel: "VList_Any{VUnionDepth1_Rand0{F8: A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
 		Source: VList_Any{
 			VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
 			VArray1_VUnionDepth2_Rand1{
@@ -20402,7 +20368,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_Any{VUnionDepth1_Rand0{F8: VEnumAbc.A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
+		TargetLabel: "VList_Any{VUnionDepth1_Rand0{F8: A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
 		Target: VList_Any{
 			VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
 			VArray1_VUnionDepth2_Rand1{
@@ -20411,7 +20377,7 @@ var vAllPass = []Entry{
 				}},
 			},
 		},
-		SourceLabel: "[]any{VUnionDepth1_Rand0{F8: VEnumAbc.A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
+		SourceLabel: "[]any{VUnionDepth1_Rand0{F8: A}, VArray1_VUnionDepth2_Rand1{{F2: {4.598040088621417e+07}}}}",
 		Source: []interface{}{
 			VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
 			VArray1_VUnionDepth2_Rand1{
@@ -20996,22 +20962,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "VList_VEnumAbc{C}",
 		Target: VList_VEnumAbc{
 			VEnumAbcC,
 		},
-		SourceLabel: "VList_VEnumAbc{VEnumAbc.C}",
+		SourceLabel: "VList_VEnumAbc{C}",
 		Source: VList_VEnumAbc{
 			VEnumAbcC,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "VList_VEnumAbc{C}",
 		Target: VList_VEnumAbc{
 			VEnumAbcC,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.C}",
+		SourceLabel: "[]VEnumBcd{C}",
 		Source: []VEnumBcd{
 			VEnumBcdC,
 		},
@@ -21041,22 +21007,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "VList_VEnumBcd{D}",
 		Target: VList_VEnumBcd{
 			VEnumBcdD,
 		},
-		SourceLabel: "VList_VEnumBcd{VEnumBcd.D}",
+		SourceLabel: "VList_VEnumBcd{D}",
 		Source: VList_VEnumBcd{
 			VEnumBcdD,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "VList_VEnumBcd{D}",
 		Target: VList_VEnumBcd{
 			VEnumBcdD,
 		},
-		SourceLabel: "[]VEnumBcd{VEnumBcd.D}",
+		SourceLabel: "[]VEnumBcd{D}",
 		Source: []VEnumBcd{
 			VEnumBcdD,
 		},
@@ -21173,83 +21139,47 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_Error{{}, {RetryCode: RetryRefetch, Msg: \"pΔΘΠΣΦ王普澤世\"}}",
+		TargetLabel: "VList_Error{nil}",
 		Target: VList_Error{
-			verror.FromWire(vdl.WireError{}),
-			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "pΔΘΠΣΦ王普澤世",
-			}),
+			nil,
 		},
-		SourceLabel: "VList_Error{{}, {RetryCode: RetryRefetch, Msg: \"pΔΘΠΣΦ王普澤世\"}}",
+		SourceLabel: "VList_Error{nil}",
 		Source: VList_Error{
-			verror.FromWire(vdl.WireError{}),
-			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "pΔΘΠΣΦ王普澤世",
-			}),
+			nil,
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_Error{{}, {RetryCode: RetryRefetch, Msg: \"pΔΘΠΣΦ王普澤世\"}}",
+		TargetLabel: "VList_Error{nil}",
 		Target: VList_Error{
-			verror.FromWire(vdl.WireError{}),
-			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "pΔΘΠΣΦ王普澤世",
-			}),
+			nil,
 		},
-		SourceLabel: "[]any{error{}, error{RetryCode: RetryRefetch, Msg: \"pΔΘΠΣΦ王普澤世\"}}",
-		Source: []interface{}{
-			verror.FromWire(vdl.WireError{}),
-			verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "pΔΘΠΣΦ王普澤世",
-			}),
+		SourceLabel: "[]?VStructEmpty{nil}",
+		Source: []*VStructEmpty{
+			nil,
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_Error{{Id: \"efghijklmnopΔ\", RetryCode: RetryRefetch, Msg: \"jklmno\"}, {}}",
+		TargetLabel: "VList_Error{nil}",
 		Target: VList_Error{
-			verror.FromWire(vdl.WireError{
-				Id:        "efghijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "jklmno",
-			}),
-			verror.FromWire(vdl.WireError{}),
+			nil,
 		},
-		SourceLabel: "VList_Error{{Id: \"efghijklmnopΔ\", RetryCode: RetryRefetch, Msg: \"jklmno\"}, {}}",
+		SourceLabel: "VList_Error{nil}",
 		Source: VList_Error{
-			verror.FromWire(vdl.WireError{
-				Id:        "efghijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "jklmno",
-			}),
-			verror.FromWire(vdl.WireError{}),
+			nil,
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_Error{{Id: \"efghijklmnopΔ\", RetryCode: RetryRefetch, Msg: \"jklmno\"}, {}}",
+		TargetLabel: "VList_Error{nil}",
 		Target: VList_Error{
-			verror.FromWire(vdl.WireError{
-				Id:        "efghijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "jklmno",
-			}),
-			verror.FromWire(vdl.WireError{}),
+			nil,
 		},
-		SourceLabel: "[]any{error{Id: \"efghijklmnopΔ\", RetryCode: RetryRefetch, Msg: \"jklmno\"}, error{}}",
-		Source: []interface{}{
-			verror.FromWire(vdl.WireError{
-				Id:        "efghijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "jklmno",
-			}),
-			verror.FromWire(vdl.WireError{}),
+		SourceLabel: "[]?VStructEmpty{nil}",
+		Source: []*VStructEmpty{
+			nil,
 		},
 	},
 	{
@@ -22101,18 +22031,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "set[VEnumAbc]{VEnumAbc.C}",
+		TargetLabel: "set[VEnumAbc]{C}",
 		Target: map[VEnumAbc]struct{}{
 			VEnumAbcC: struct{}{},
 		},
-		SourceLabel: "set[VEnumAbc]{VEnumAbc.C}",
+		SourceLabel: "set[VEnumAbc]{C}",
 		Source: map[VEnumAbc]struct{}{
 			VEnumAbcC: struct{}{},
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "set[VEnumAbc]{VEnumAbc.C}",
+		TargetLabel: "set[VEnumAbc]{C}",
 		Target: map[VEnumAbc]struct{}{
 			VEnumAbcC: struct{}{},
 		},
@@ -22146,18 +22076,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "set[VEnumBcd]{VEnumBcd.D}",
+		TargetLabel: "set[VEnumBcd]{D}",
 		Target: map[VEnumBcd]struct{}{
 			VEnumBcdD: struct{}{},
 		},
-		SourceLabel: "set[VEnumBcd]{VEnumBcd.D}",
+		SourceLabel: "set[VEnumBcd]{D}",
 		Source: map[VEnumBcd]struct{}{
 			VEnumBcdD: struct{}{},
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "set[VEnumBcd]{VEnumBcd.D}",
+		TargetLabel: "set[VEnumBcd]{D}",
 		Target: map[VEnumBcd]struct{}{
 			VEnumBcdD: struct{}{},
 		},
@@ -23027,22 +22957,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VSet_VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "VSet_VEnumAbc{C}",
 		Target: VSet_VEnumAbc{
 			VEnumAbcC: struct{}{},
 		},
-		SourceLabel: "VSet_VEnumAbc{VEnumAbc.C}",
+		SourceLabel: "VSet_VEnumAbc{C}",
 		Source: VSet_VEnumAbc{
 			VEnumAbcC: struct{}{},
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VSet_VEnumAbc{VEnumAbc.C}",
+		TargetLabel: "VSet_VEnumAbc{C}",
 		Target: VSet_VEnumAbc{
 			VEnumAbcC: struct{}{},
 		},
-		SourceLabel: "set[VEnumAbc]{VEnumAbc.C}",
+		SourceLabel: "set[VEnumAbc]{C}",
 		Source: map[VEnumAbc]struct{}{
 			VEnumAbcC: struct{}{},
 		},
@@ -23072,18 +23002,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VSet_VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "VSet_VEnumBcd{D}",
 		Target: VSet_VEnumBcd{
 			VEnumBcdD: struct{}{},
 		},
-		SourceLabel: "VSet_VEnumBcd{VEnumBcd.D}",
+		SourceLabel: "VSet_VEnumBcd{D}",
 		Source: VSet_VEnumBcd{
 			VEnumBcdD: struct{}{},
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VSet_VEnumBcd{VEnumBcd.D}",
+		TargetLabel: "VSet_VEnumBcd{D}",
 		Target: VSet_VEnumBcd{
 			VEnumBcdD: struct{}{},
 		},
@@ -23929,18 +23859,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "map[VEnumAbc]VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		TargetLabel: "map[VEnumAbc]VEnumAbc{C: C}",
 		Target: map[VEnumAbc]VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
-		SourceLabel: "map[VEnumAbc]VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		SourceLabel: "map[VEnumAbc]VEnumAbc{C: C}",
 		Source: map[VEnumAbc]VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "map[VEnumAbc]VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		TargetLabel: "map[VEnumAbc]VEnumAbc{C: C}",
 		Target: map[VEnumAbc]VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
@@ -23974,18 +23904,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "map[VEnumBcd]VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		TargetLabel: "map[VEnumBcd]VEnumBcd{D: D}",
 		Target: map[VEnumBcd]VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
-		SourceLabel: "map[VEnumBcd]VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		SourceLabel: "map[VEnumBcd]VEnumBcd{D: D}",
 		Source: map[VEnumBcd]VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "map[VEnumBcd]VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		TargetLabel: "map[VEnumBcd]VEnumBcd{D: D}",
 		Target: map[VEnumBcd]VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
@@ -24843,22 +24773,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VMap_VEnumAbc_VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		TargetLabel: "VMap_VEnumAbc_VEnumAbc{C: C}",
 		Target: VMap_VEnumAbc_VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
-		SourceLabel: "VMap_VEnumAbc_VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		SourceLabel: "VMap_VEnumAbc_VEnumAbc{C: C}",
 		Source: VMap_VEnumAbc_VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VMap_VEnumAbc_VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		TargetLabel: "VMap_VEnumAbc_VEnumAbc{C: C}",
 		Target: VMap_VEnumAbc_VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
-		SourceLabel: "map[VEnumAbc]VEnumAbc{VEnumAbc.C: VEnumAbc.C}",
+		SourceLabel: "map[VEnumAbc]VEnumAbc{C: C}",
 		Source: map[VEnumAbc]VEnumAbc{
 			VEnumAbcC: VEnumAbcC,
 		},
@@ -24888,18 +24818,18 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VMap_VEnumBcd_VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		TargetLabel: "VMap_VEnumBcd_VEnumBcd{D: D}",
 		Target: VMap_VEnumBcd_VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
-		SourceLabel: "VMap_VEnumBcd_VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		SourceLabel: "VMap_VEnumBcd_VEnumBcd{D: D}",
 		Source: VMap_VEnumBcd_VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VMap_VEnumBcd_VEnumBcd{VEnumBcd.D: VEnumBcd.D}",
+		TargetLabel: "VMap_VEnumBcd_VEnumBcd{D: D}",
 		Target: VMap_VEnumBcd_VEnumBcd{
 			VEnumBcdD: VEnumBcdD,
 		},
@@ -25252,7 +25182,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		TargetLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Target: VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -25289,7 +25219,7 @@ var vAllPass = []Entry{
 			F29: 1.23,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		SourceLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Source: VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -25329,7 +25259,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		TargetLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Target: VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -25366,7 +25296,7 @@ var vAllPass = []Entry{
 			F29: 1.23,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Source: &VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -25407,283 +25337,247 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_All{F0: set[byte]{109, 247}, F3: \"cdefghijklmnopΔΘΠΣΦ王普澤世\", F4: \"opΔΘΠΣΦ王普澤\", F6: 181, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {Id: \"ghijklmnopΔΘΠ\"}, F12: 63954, F13: 9504, F14: 2342895433, F15: 3653848399, F16: 11218794390353989974, F17: 16661755522663834089, F20: 11034, F21: 7199, F22: -374013856, F23: 297624920, F24: -593386440243474243, F25: 2483428413103898065, F26: -1.5218022e+09, F27: -1.4603266e+08, F28: -2.6499224754752574e+09, F29: 8.574678314057188e+08, F30: {}}",
+		TargetLabel: "VStructDepth1_All{F0: map[VByte]VByte{105: 206, 13: 52}, F2: true, F3: \"m\", F4: \"jklmn\", F7: 252, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王\", Msg: \"fghijklmno\"}, F12: 43773, F13: 59566, F14: 552385561, F15: 4066350924, F16: 809890089465425783, F17: 12503912605015209097, F18: -57, F19: 28, F21: -7099, F22: -109003160, F23: 744896779, F24: 2477876929661157205, F25: -61816698145917948, F27: 1.9869143e+09, F28: 2.451693003444509e+09}",
 		Target: VStructDepth1_All{
-			F0: map[byte]struct{}{
-				109: struct{}{},
-				247: struct{}{},
+			F0: map[VByte]VByte{
+				105: 206,
+				13:  52,
 			},
-			F3: "cdefghijklmnopΔΘΠΣΦ王普澤世",
-			F4: "opΔΘΠΣΦ王普澤",
+			F2: true,
+			F3: "m",
+			F4: "jklmn",
 			F5: vdl.AnyType,
-			F6: 181,
-			F8: VEnumAbcB,
-			F9: VEnumBcdD,
+			F7: 252,
 			F11: verror.FromWire(vdl.WireError{
-				Id: "ghijklmnopΔΘΠ",
+				Id:  "abcdefghijklmnopΔΘΠΣΦ王",
+				Msg: "fghijklmno",
 			}),
-			F12: 63954,
-			F13: 9504,
-			F14: 2342895433,
-			F15: 3653848399,
-			F16: 11218794390353989974,
-			F17: 16661755522663834089,
-			F20: 11034,
-			F21: 7199,
-			F22: -374013856,
-			F23: 297624920,
-			F24: -593386440243474243,
-			F25: 2483428413103898065,
-			F26: -1.5218022e+09,
-			F27: -1.4603266e+08,
-			F28: -2.6499224754752574e+09,
-			F29: 8.574678314057188e+08,
-			F30: &VStructEmpty{},
+			F12: 43773,
+			F13: 59566,
+			F14: 552385561,
+			F15: 4066350924,
+			F16: 809890089465425783,
+			F17: 12503912605015209097,
+			F18: -57,
+			F19: 28,
+			F21: -7099,
+			F22: -109003160,
+			F23: 744896779,
+			F24: 2477876929661157205,
+			F25: -61816698145917948,
+			F27: 1.9869143e+09,
+			F28: 2.451693003444509e+09,
 		},
-		SourceLabel: "VStructDepth1_All{F0: set[byte]{109, 247}, F3: \"cdefghijklmnopΔΘΠΣΦ王普澤世\", F4: \"opΔΘΠΣΦ王普澤\", F6: 181, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {Id: \"ghijklmnopΔΘΠ\"}, F12: 63954, F13: 9504, F14: 2342895433, F15: 3653848399, F16: 11218794390353989974, F17: 16661755522663834089, F20: 11034, F21: 7199, F22: -374013856, F23: 297624920, F24: -593386440243474243, F25: 2483428413103898065, F26: -1.5218022e+09, F27: -1.4603266e+08, F28: -2.6499224754752574e+09, F29: 8.574678314057188e+08, F30: {}}",
+		SourceLabel: "VStructDepth1_All{F0: map[VByte]VByte{105: 206, 13: 52}, F2: true, F3: \"m\", F4: \"jklmn\", F7: 252, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王\", Msg: \"fghijklmno\"}, F12: 43773, F13: 59566, F14: 552385561, F15: 4066350924, F16: 809890089465425783, F17: 12503912605015209097, F18: -57, F19: 28, F21: -7099, F22: -109003160, F23: 744896779, F24: 2477876929661157205, F25: -61816698145917948, F27: 1.9869143e+09, F28: 2.451693003444509e+09}",
 		Source: VStructDepth1_All{
-			F0: map[byte]struct{}{
-				109: struct{}{},
-				247: struct{}{},
+			F0: map[VByte]VByte{
+				105: 206,
+				13:  52,
 			},
-			F3: "cdefghijklmnopΔΘΠΣΦ王普澤世",
-			F4: "opΔΘΠΣΦ王普澤",
+			F2: true,
+			F3: "m",
+			F4: "jklmn",
 			F5: vdl.AnyType,
-			F6: 181,
-			F8: VEnumAbcB,
-			F9: VEnumBcdD,
+			F7: 252,
 			F11: verror.FromWire(vdl.WireError{
-				Id: "ghijklmnopΔΘΠ",
+				Id:  "abcdefghijklmnopΔΘΠΣΦ王",
+				Msg: "fghijklmno",
 			}),
-			F12: 63954,
-			F13: 9504,
-			F14: 2342895433,
-			F15: 3653848399,
-			F16: 11218794390353989974,
-			F17: 16661755522663834089,
-			F20: 11034,
-			F21: 7199,
-			F22: -374013856,
-			F23: 297624920,
-			F24: -593386440243474243,
-			F25: 2483428413103898065,
-			F26: -1.5218022e+09,
-			F27: -1.4603266e+08,
-			F28: -2.6499224754752574e+09,
-			F29: 8.574678314057188e+08,
-			F30: &VStructEmpty{},
+			F12: 43773,
+			F13: 59566,
+			F14: 552385561,
+			F15: 4066350924,
+			F16: 809890089465425783,
+			F17: 12503912605015209097,
+			F18: -57,
+			F19: 28,
+			F21: -7099,
+			F22: -109003160,
+			F23: 744896779,
+			F24: 2477876929661157205,
+			F25: -61816698145917948,
+			F27: 1.9869143e+09,
+			F28: 2.451693003444509e+09,
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_All{F0: set[byte]{109, 247}, F3: \"cdefghijklmnopΔΘΠΣΦ王普澤世\", F4: \"opΔΘΠΣΦ王普澤\", F6: 181, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {Id: \"ghijklmnopΔΘΠ\"}, F12: 63954, F13: 9504, F14: 2342895433, F15: 3653848399, F16: 11218794390353989974, F17: 16661755522663834089, F20: 11034, F21: 7199, F22: -374013856, F23: 297624920, F24: -593386440243474243, F25: 2483428413103898065, F26: -1.5218022e+09, F27: -1.4603266e+08, F28: -2.6499224754752574e+09, F29: 8.574678314057188e+08, F30: {}}",
+		TargetLabel: "VStructDepth1_All{F0: map[VByte]VByte{105: 206, 13: 52}, F2: true, F3: \"m\", F4: \"jklmn\", F7: 252, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王\", Msg: \"fghijklmno\"}, F12: 43773, F13: 59566, F14: 552385561, F15: 4066350924, F16: 809890089465425783, F17: 12503912605015209097, F18: -57, F19: 28, F21: -7099, F22: -109003160, F23: 744896779, F24: 2477876929661157205, F25: -61816698145917948, F27: 1.9869143e+09, F28: 2.451693003444509e+09}",
 		Target: VStructDepth1_All{
-			F0: map[byte]struct{}{
-				109: struct{}{},
-				247: struct{}{},
+			F0: map[VByte]VByte{
+				105: 206,
+				13:  52,
 			},
-			F3: "cdefghijklmnopΔΘΠΣΦ王普澤世",
-			F4: "opΔΘΠΣΦ王普澤",
+			F2: true,
+			F3: "m",
+			F4: "jklmn",
 			F5: vdl.AnyType,
-			F6: 181,
-			F8: VEnumAbcB,
-			F9: VEnumBcdD,
+			F7: 252,
 			F11: verror.FromWire(vdl.WireError{
-				Id: "ghijklmnopΔΘΠ",
+				Id:  "abcdefghijklmnopΔΘΠΣΦ王",
+				Msg: "fghijklmno",
 			}),
-			F12: 63954,
-			F13: 9504,
-			F14: 2342895433,
-			F15: 3653848399,
-			F16: 11218794390353989974,
-			F17: 16661755522663834089,
-			F20: 11034,
-			F21: 7199,
-			F22: -374013856,
-			F23: 297624920,
-			F24: -593386440243474243,
-			F25: 2483428413103898065,
-			F26: -1.5218022e+09,
-			F27: -1.4603266e+08,
-			F28: -2.6499224754752574e+09,
-			F29: 8.574678314057188e+08,
-			F30: &VStructEmpty{},
+			F12: 43773,
+			F13: 59566,
+			F14: 552385561,
+			F15: 4066350924,
+			F16: 809890089465425783,
+			F17: 12503912605015209097,
+			F18: -57,
+			F19: 28,
+			F21: -7099,
+			F22: -109003160,
+			F23: 744896779,
+			F24: 2477876929661157205,
+			F25: -61816698145917948,
+			F27: 1.9869143e+09,
+			F28: 2.451693003444509e+09,
 		},
-		SourceLabel: "?VStructDepth1_All{F0: set[byte]{109, 247}, F3: \"cdefghijklmnopΔΘΠΣΦ王普澤世\", F4: \"opΔΘΠΣΦ王普澤\", F6: 181, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {Id: \"ghijklmnopΔΘΠ\"}, F12: 63954, F13: 9504, F14: 2342895433, F15: 3653848399, F16: 11218794390353989974, F17: 16661755522663834089, F20: 11034, F21: 7199, F22: -374013856, F23: 297624920, F24: -593386440243474243, F25: 2483428413103898065, F26: -1.5218022e+09, F27: -1.4603266e+08, F28: -2.6499224754752574e+09, F29: 8.574678314057188e+08, F30: {}}",
+		SourceLabel: "?VStructDepth1_All{F0: map[VByte]VByte{105: 206, 13: 52}, F2: true, F3: \"m\", F4: \"jklmn\", F7: 252, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王\", Msg: \"fghijklmno\"}, F12: 43773, F13: 59566, F14: 552385561, F15: 4066350924, F16: 809890089465425783, F17: 12503912605015209097, F18: -57, F19: 28, F21: -7099, F22: -109003160, F23: 744896779, F24: 2477876929661157205, F25: -61816698145917948, F27: 1.9869143e+09, F28: 2.451693003444509e+09}",
 		Source: &VStructDepth1_All{
-			F0: map[byte]struct{}{
-				109: struct{}{},
-				247: struct{}{},
+			F0: map[VByte]VByte{
+				105: 206,
+				13:  52,
 			},
-			F3: "cdefghijklmnopΔΘΠΣΦ王普澤世",
-			F4: "opΔΘΠΣΦ王普澤",
+			F2: true,
+			F3: "m",
+			F4: "jklmn",
 			F5: vdl.AnyType,
-			F6: 181,
-			F8: VEnumAbcB,
-			F9: VEnumBcdD,
+			F7: 252,
 			F11: verror.FromWire(vdl.WireError{
-				Id: "ghijklmnopΔΘΠ",
+				Id:  "abcdefghijklmnopΔΘΠΣΦ王",
+				Msg: "fghijklmno",
 			}),
-			F12: 63954,
-			F13: 9504,
-			F14: 2342895433,
-			F15: 3653848399,
-			F16: 11218794390353989974,
-			F17: 16661755522663834089,
-			F20: 11034,
-			F21: 7199,
-			F22: -374013856,
-			F23: 297624920,
-			F24: -593386440243474243,
-			F25: 2483428413103898065,
-			F26: -1.5218022e+09,
-			F27: -1.4603266e+08,
-			F28: -2.6499224754752574e+09,
-			F29: 8.574678314057188e+08,
-			F30: &VStructEmpty{},
+			F12: 43773,
+			F13: 59566,
+			F14: 552385561,
+			F15: 4066350924,
+			F16: 809890089465425783,
+			F17: 12503912605015209097,
+			F18: -57,
+			F19: 28,
+			F21: -7099,
+			F22: -109003160,
+			F23: 744896779,
+			F24: 2477876929661157205,
+			F25: -61816698145917948,
+			F27: 1.9869143e+09,
+			F28: 2.451693003444509e+09,
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_All{F0: VStructDepth1_Rand1{F0: VList_Bool{false}, F7: 115, F9: VEnumBcd.D, F26: -2.896031e+08}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"bcdefghijklm\", F5: typeobject(map[VUnionDepth1_Rand0]VUnionDepth1_Rand0), F6: 21, F7: 212, F11: {}, F13: 21925, F14: 3392111285, F16: 10396017169543075917, F17: 14757721528962708554, F18: 8, F19: 10, F20: 9652, F21: -4385, F23: -50569913, F24: -1027975330844082587, F25: -527806713938789654, F26: -2.0551775e+09, F27: 1.423408e+09, F28: -2.1715119569398582e+07, F29: -1.5500538033212197e+08}",
+		TargetLabel: "VStructDepth1_All{F0: set[int64]{-7706878767009313, 1475996685678812416}, F3: \"ΔΘΠΣΦ\", F4: \"defghijklmnopΔΘΠΣ\", F5: typeobject(VUnionDepth3_All), F6: 5, F7: 216, F11: {}, F12: 43946, F13: 38942, F14: 3183987309, F16: 5096238814079584737, F17: 15186021141646047899, F18: -57, F20: 4240, F22: 25935447, F23: 439142236, F24: -839402267662222009, F25: -2318343178433367627, F28: 1.4009696113901052e+08, F29: 7.60205125999782e+07, F30: {}}",
 		Target: VStructDepth1_All{
-			F0: VStructDepth1_Rand1{
-				F0: VList_Bool{
-					false,
-				},
-				F7:  115,
-				F9:  VEnumBcdD,
-				F26: -2.896031e+08,
+			F0: map[int64]struct{}{
+				-7706878767009313:   struct{}{},
+				1475996685678812416: struct{}{},
 			},
-			F1:  true,
-			F2:  true,
-			F3:  "ΘΠΣΦ王普澤",
-			F4:  "bcdefghijklm",
-			F5:  vdl.TypeOf((*map[VUnionDepth1_Rand0]VUnionDepth1_Rand0)(nil)),
-			F6:  21,
-			F7:  212,
+			F3:  "ΔΘΠΣΦ",
+			F4:  "defghijklmnopΔΘΠΣ",
+			F5:  vdl.TypeOf((*VUnionDepth3_All)(nil)),
+			F6:  5,
+			F7:  216,
 			F11: verror.FromWire(vdl.WireError{}),
-			F13: 21925,
-			F14: 3392111285,
-			F16: 10396017169543075917,
-			F17: 14757721528962708554,
-			F18: 8,
-			F19: 10,
-			F20: 9652,
-			F21: -4385,
-			F23: -50569913,
-			F24: -1027975330844082587,
-			F25: -527806713938789654,
-			F26: -2.0551775e+09,
-			F27: 1.423408e+09,
-			F28: -2.1715119569398582e+07,
-			F29: -1.5500538033212197e+08,
+			F12: 43946,
+			F13: 38942,
+			F14: 3183987309,
+			F16: 5096238814079584737,
+			F17: 15186021141646047899,
+			F18: -57,
+			F20: 4240,
+			F22: 25935447,
+			F23: 439142236,
+			F24: -839402267662222009,
+			F25: -2318343178433367627,
+			F28: 1.4009696113901052e+08,
+			F29: 7.60205125999782e+07,
+			F30: &VStructEmpty{},
 		},
-		SourceLabel: "VStructDepth1_All{F0: VStructDepth1_Rand1{F0: VList_Bool{false}, F7: 115, F9: VEnumBcd.D, F26: -2.896031e+08}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"bcdefghijklm\", F5: typeobject(map[VUnionDepth1_Rand0]VUnionDepth1_Rand0), F6: 21, F7: 212, F11: {}, F13: 21925, F14: 3392111285, F16: 10396017169543075917, F17: 14757721528962708554, F18: 8, F19: 10, F20: 9652, F21: -4385, F23: -50569913, F24: -1027975330844082587, F25: -527806713938789654, F26: -2.0551775e+09, F27: 1.423408e+09, F28: -2.1715119569398582e+07, F29: -1.5500538033212197e+08}",
+		SourceLabel: "VStructDepth1_All{F0: set[int64]{-7706878767009313, 1475996685678812416}, F3: \"ΔΘΠΣΦ\", F4: \"defghijklmnopΔΘΠΣ\", F5: typeobject(VUnionDepth3_All), F6: 5, F7: 216, F11: {}, F12: 43946, F13: 38942, F14: 3183987309, F16: 5096238814079584737, F17: 15186021141646047899, F18: -57, F20: 4240, F22: 25935447, F23: 439142236, F24: -839402267662222009, F25: -2318343178433367627, F28: 1.4009696113901052e+08, F29: 7.60205125999782e+07, F30: {}}",
 		Source: VStructDepth1_All{
-			F0: VStructDepth1_Rand1{
-				F0: VList_Bool{
-					false,
-				},
-				F7:  115,
-				F9:  VEnumBcdD,
-				F26: -2.896031e+08,
+			F0: map[int64]struct{}{
+				-7706878767009313:   struct{}{},
+				1475996685678812416: struct{}{},
 			},
-			F1:  true,
-			F2:  true,
-			F3:  "ΘΠΣΦ王普澤",
-			F4:  "bcdefghijklm",
-			F5:  vdl.TypeOf((*map[VUnionDepth1_Rand0]VUnionDepth1_Rand0)(nil)),
-			F6:  21,
-			F7:  212,
+			F3:  "ΔΘΠΣΦ",
+			F4:  "defghijklmnopΔΘΠΣ",
+			F5:  vdl.TypeOf((*VUnionDepth3_All)(nil)),
+			F6:  5,
+			F7:  216,
 			F11: verror.FromWire(vdl.WireError{}),
-			F13: 21925,
-			F14: 3392111285,
-			F16: 10396017169543075917,
-			F17: 14757721528962708554,
-			F18: 8,
-			F19: 10,
-			F20: 9652,
-			F21: -4385,
-			F23: -50569913,
-			F24: -1027975330844082587,
-			F25: -527806713938789654,
-			F26: -2.0551775e+09,
-			F27: 1.423408e+09,
-			F28: -2.1715119569398582e+07,
-			F29: -1.5500538033212197e+08,
+			F12: 43946,
+			F13: 38942,
+			F14: 3183987309,
+			F16: 5096238814079584737,
+			F17: 15186021141646047899,
+			F18: -57,
+			F20: 4240,
+			F22: 25935447,
+			F23: 439142236,
+			F24: -839402267662222009,
+			F25: -2318343178433367627,
+			F28: 1.4009696113901052e+08,
+			F29: 7.60205125999782e+07,
+			F30: &VStructEmpty{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_All{F0: VStructDepth1_Rand1{F0: VList_Bool{false}, F7: 115, F9: VEnumBcd.D, F26: -2.896031e+08}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"bcdefghijklm\", F5: typeobject(map[VUnionDepth1_Rand0]VUnionDepth1_Rand0), F6: 21, F7: 212, F11: {}, F13: 21925, F14: 3392111285, F16: 10396017169543075917, F17: 14757721528962708554, F18: 8, F19: 10, F20: 9652, F21: -4385, F23: -50569913, F24: -1027975330844082587, F25: -527806713938789654, F26: -2.0551775e+09, F27: 1.423408e+09, F28: -2.1715119569398582e+07, F29: -1.5500538033212197e+08}",
+		TargetLabel: "VStructDepth1_All{F0: set[int64]{-7706878767009313, 1475996685678812416}, F3: \"ΔΘΠΣΦ\", F4: \"defghijklmnopΔΘΠΣ\", F5: typeobject(VUnionDepth3_All), F6: 5, F7: 216, F11: {}, F12: 43946, F13: 38942, F14: 3183987309, F16: 5096238814079584737, F17: 15186021141646047899, F18: -57, F20: 4240, F22: 25935447, F23: 439142236, F24: -839402267662222009, F25: -2318343178433367627, F28: 1.4009696113901052e+08, F29: 7.60205125999782e+07, F30: {}}",
 		Target: VStructDepth1_All{
-			F0: VStructDepth1_Rand1{
-				F0: VList_Bool{
-					false,
-				},
-				F7:  115,
-				F9:  VEnumBcdD,
-				F26: -2.896031e+08,
+			F0: map[int64]struct{}{
+				-7706878767009313:   struct{}{},
+				1475996685678812416: struct{}{},
 			},
-			F1:  true,
-			F2:  true,
-			F3:  "ΘΠΣΦ王普澤",
-			F4:  "bcdefghijklm",
-			F5:  vdl.TypeOf((*map[VUnionDepth1_Rand0]VUnionDepth1_Rand0)(nil)),
-			F6:  21,
-			F7:  212,
+			F3:  "ΔΘΠΣΦ",
+			F4:  "defghijklmnopΔΘΠΣ",
+			F5:  vdl.TypeOf((*VUnionDepth3_All)(nil)),
+			F6:  5,
+			F7:  216,
 			F11: verror.FromWire(vdl.WireError{}),
-			F13: 21925,
-			F14: 3392111285,
-			F16: 10396017169543075917,
-			F17: 14757721528962708554,
-			F18: 8,
-			F19: 10,
-			F20: 9652,
-			F21: -4385,
-			F23: -50569913,
-			F24: -1027975330844082587,
-			F25: -527806713938789654,
-			F26: -2.0551775e+09,
-			F27: 1.423408e+09,
-			F28: -2.1715119569398582e+07,
-			F29: -1.5500538033212197e+08,
+			F12: 43946,
+			F13: 38942,
+			F14: 3183987309,
+			F16: 5096238814079584737,
+			F17: 15186021141646047899,
+			F18: -57,
+			F20: 4240,
+			F22: 25935447,
+			F23: 439142236,
+			F24: -839402267662222009,
+			F25: -2318343178433367627,
+			F28: 1.4009696113901052e+08,
+			F29: 7.60205125999782e+07,
+			F30: &VStructEmpty{},
 		},
-		SourceLabel: "?VStructDepth1_All{F0: VStructDepth1_Rand1{F0: VList_Bool{false}, F7: 115, F9: VEnumBcd.D, F26: -2.896031e+08}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"bcdefghijklm\", F5: typeobject(map[VUnionDepth1_Rand0]VUnionDepth1_Rand0), F6: 21, F7: 212, F11: {}, F13: 21925, F14: 3392111285, F16: 10396017169543075917, F17: 14757721528962708554, F18: 8, F19: 10, F20: 9652, F21: -4385, F23: -50569913, F24: -1027975330844082587, F25: -527806713938789654, F26: -2.0551775e+09, F27: 1.423408e+09, F28: -2.1715119569398582e+07, F29: -1.5500538033212197e+08}",
+		SourceLabel: "?VStructDepth1_All{F0: set[int64]{-7706878767009313, 1475996685678812416}, F3: \"ΔΘΠΣΦ\", F4: \"defghijklmnopΔΘΠΣ\", F5: typeobject(VUnionDepth3_All), F6: 5, F7: 216, F11: {}, F12: 43946, F13: 38942, F14: 3183987309, F16: 5096238814079584737, F17: 15186021141646047899, F18: -57, F20: 4240, F22: 25935447, F23: 439142236, F24: -839402267662222009, F25: -2318343178433367627, F28: 1.4009696113901052e+08, F29: 7.60205125999782e+07, F30: {}}",
 		Source: &VStructDepth1_All{
-			F0: VStructDepth1_Rand1{
-				F0: VList_Bool{
-					false,
-				},
-				F7:  115,
-				F9:  VEnumBcdD,
-				F26: -2.896031e+08,
+			F0: map[int64]struct{}{
+				-7706878767009313:   struct{}{},
+				1475996685678812416: struct{}{},
 			},
-			F1:  true,
-			F2:  true,
-			F3:  "ΘΠΣΦ王普澤",
-			F4:  "bcdefghijklm",
-			F5:  vdl.TypeOf((*map[VUnionDepth1_Rand0]VUnionDepth1_Rand0)(nil)),
-			F6:  21,
-			F7:  212,
+			F3:  "ΔΘΠΣΦ",
+			F4:  "defghijklmnopΔΘΠΣ",
+			F5:  vdl.TypeOf((*VUnionDepth3_All)(nil)),
+			F6:  5,
+			F7:  216,
 			F11: verror.FromWire(vdl.WireError{}),
-			F13: 21925,
-			F14: 3392111285,
-			F16: 10396017169543075917,
-			F17: 14757721528962708554,
-			F18: 8,
-			F19: 10,
-			F20: 9652,
-			F21: -4385,
-			F23: -50569913,
-			F24: -1027975330844082587,
-			F25: -527806713938789654,
-			F26: -2.0551775e+09,
-			F27: 1.423408e+09,
-			F28: -2.1715119569398582e+07,
-			F29: -1.5500538033212197e+08,
+			F12: 43946,
+			F13: 38942,
+			F14: 3183987309,
+			F16: 5096238814079584737,
+			F17: 15186021141646047899,
+			F18: -57,
+			F20: 4240,
+			F22: 25935447,
+			F23: 439142236,
+			F24: -839402267662222009,
+			F25: -2318343178433367627,
+			F28: 1.4009696113901052e+08,
+			F29: 7.60205125999782e+07,
+			F30: &VStructEmpty{},
 		},
 	},
 	{
@@ -25829,7 +25723,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		TargetLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Target: VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -25837,7 +25731,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		},
-		SourceLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		SourceLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Source: VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -25848,7 +25742,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		TargetLabel: "VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Target: VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -25856,7 +25750,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		},
-		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Source: &VStructDepth1_All{
 			F0:  int64(-123),
 			F1:  true,
@@ -25901,7 +25795,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: VEnumBcd.C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: VEnumBcd.D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
+		TargetLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
 		Target: VStructDepth1_Rand1{
 			F0: VArray3_OptVStructDepth2_Rand0{
 				nil,
@@ -25937,7 +25831,7 @@ var vAllPass = []Entry{
 			F7:  108,
 			F26: 1.2211224e+09,
 		},
-		SourceLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: VEnumBcd.C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: VEnumBcd.D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
+		SourceLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
 		Source: VStructDepth1_Rand1{
 			F0: VArray3_OptVStructDepth2_Rand0{
 				nil,
@@ -25976,7 +25870,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: VEnumBcd.C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: VEnumBcd.D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
+		TargetLabel: "VStructDepth1_Rand1{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
 		Target: VStructDepth1_Rand1{
 			F0: VArray3_OptVStructDepth2_Rand0{
 				nil,
@@ -26012,7 +25906,7 @@ var vAllPass = []Entry{
 			F7:  108,
 			F26: 1.2211224e+09,
 		},
-		SourceLabel: "VStructDepth1_All{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: VEnumBcd.C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: VEnumBcd.D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
+		SourceLabel: "VStructDepth1_All{F0: VArray3_OptVStructDepth2_Rand0{nil, {F9: {F0: true, F7: 251, F26: -5.558691e+08}, F10: {F16: 10583390271970772726}, F11: {F9: C}}, {F0: {set[byte]{243, 72}, nil, VFloat32(8.914599e+07)}, F9: {F0: VUnionDepth2_All{F2: {}}, F7: 31, F9: D, F26: 1.1784538e+09}, F10: {F28: 7.057399360312642e+07}}}, F1: true, F7: 108, F26: 1.2211224e+09}",
 		Source: VStructDepth1_All{
 			F0: VArray3_OptVStructDepth2_Rand0{
 				nil,
@@ -26069,62 +25963,46 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_All{F12: 9437}",
-		Target:      VUnionDepth1_All(VUnionDepth1_AllF12{9437}),
-		SourceLabel: "VUnionDepth1_All{F12: 9437}",
-		Source:      VUnionDepth1_All(VUnionDepth1_AllF12{9437}),
+		TargetLabel: "VUnionDepth1_All{F12: 65126}",
+		Target:      VUnionDepth1_All(VUnionDepth1_AllF12{65126}),
+		SourceLabel: "VUnionDepth1_All{F12: 65126}",
+		Source:      VUnionDepth1_All(VUnionDepth1_AllF12{65126}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_All{F12: 9437}",
-		Target:      VUnionDepth1_All(VUnionDepth1_AllF12{9437}),
-		SourceLabel: "VUnionDepth1_Rand0{F12: 9437}",
-		Source:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F12{9437}),
+		TargetLabel: "VUnionDepth1_All{F12: 65126}",
+		Target:      VUnionDepth1_All(VUnionDepth1_AllF12{65126}),
+		SourceLabel: "VUnionDepth1_Rand0{F12: 65126}",
+		Source:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F12{65126}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_All{F0: VArray1_VStructDepth2_Rand0{{F9: {F26: -3.3747283e+08}, F11: {F20: -2673}}}}",
-		Target: VUnionDepth1_All(VUnionDepth1_AllF0{VArray1_VStructDepth2_Rand0{
-			{
-				F9: VStructDepth1_Rand1{
-					F26: -3.3747283e+08,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F20{-2673},
-			},
-		}}),
-		SourceLabel: "VUnionDepth1_All{F0: VArray1_VStructDepth2_Rand0{{F9: {F26: -3.3747283e+08}, F11: {F20: -2673}}}}",
-		Source: VUnionDepth1_All(VUnionDepth1_AllF0{VArray1_VStructDepth2_Rand0{
-			{
-				F9: VStructDepth1_Rand1{
-					F26: -3.3747283e+08,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F20{-2673},
-			},
-		}}),
+		TargetLabel: "VUnionDepth1_All{F7: 116}",
+		Target:      VUnionDepth1_All(VUnionDepth1_AllF7{116}),
+		SourceLabel: "VUnionDepth1_All{F7: 116}",
+		Source:      VUnionDepth1_All(VUnionDepth1_AllF7{116}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Zero",
-		TargetLabel: "VUnionDepth1_Rand0{F8: VEnumAbc.A}",
+		TargetLabel: "VUnionDepth1_Rand0{F8: A}",
 		Target:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
-		SourceLabel: "VUnionDepth1_Rand0{F8: VEnumAbc.A}",
+		SourceLabel: "VUnionDepth1_Rand0{F8: A}",
 		Source:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
 	},
 	{
 		Label:       "Zero",
-		TargetLabel: "VUnionDepth1_Rand0{F8: VEnumAbc.A}",
+		TargetLabel: "VUnionDepth1_Rand0{F8: A}",
 		Target:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
-		SourceLabel: "VUnionDepth1_All{F8: VEnumAbc.A}",
+		SourceLabel: "VUnionDepth1_All{F8: A}",
 		Source:      VUnionDepth1_All(VUnionDepth1_AllF8{}),
 	},
 	{
 		Label:       "Zero",
-		TargetLabel: "VUnionDepth1_Rand0{F8: VEnumAbc.A}",
+		TargetLabel: "VUnionDepth1_Rand0{F8: A}",
 		Target:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{}),
-		SourceLabel: "VUnionDepth1_Rand1{F8: VEnumAbc.A}",
+		SourceLabel: "VUnionDepth1_Rand1{F8: A}",
 		Source:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{}),
 	},
 	{
@@ -26205,32 +26083,60 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_Rand1{F9: VEnumBcd.C}",
-		Target:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F9{VEnumBcdC}),
-		SourceLabel: "VUnionDepth1_Rand1{F9: VEnumBcd.C}",
-		Source:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F9{VEnumBcdC}),
+		TargetLabel: "VUnionDepth1_Rand1{F11: {Id: \"kl\", RetryCode: RetryConnection, Msg: \"lmnopΔΘΠΣΦ王普澤世\"}}",
+		Target: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:        "kl",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "lmnopΔΘΠΣΦ王普澤世",
+		})}),
+		SourceLabel: "VUnionDepth1_Rand1{F11: {Id: \"kl\", RetryCode: RetryConnection, Msg: \"lmnopΔΘΠΣΦ王普澤世\"}}",
+		Source: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:        "kl",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "lmnopΔΘΠΣΦ王普澤世",
+		})}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_Rand1{F9: VEnumBcd.C}",
-		Target:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F9{VEnumBcdC}),
-		SourceLabel: "VUnionDepth1_All{F9: VEnumBcd.C}",
-		Source:      VUnionDepth1_All(VUnionDepth1_AllF9{VEnumBcdC}),
+		TargetLabel: "VUnionDepth1_Rand1{F11: {Id: \"kl\", RetryCode: RetryConnection, Msg: \"lmnopΔΘΠΣΦ王普澤世\"}}",
+		Target: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:        "kl",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "lmnopΔΘΠΣΦ王普澤世",
+		})}),
+		SourceLabel: "VUnionDepth1_All{F11: {Id: \"kl\", RetryCode: RetryConnection, Msg: \"lmnopΔΘΠΣΦ王普澤世\"}}",
+		Source: VUnionDepth1_All(VUnionDepth1_AllF11{verror.FromWire(vdl.WireError{
+			Id:        "kl",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Msg:       "lmnopΔΘΠΣΦ王普澤世",
+		})}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_Rand1{F8: VEnumAbc.B}",
-		Target:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{VEnumAbcB}),
-		SourceLabel: "VUnionDepth1_Rand1{F8: VEnumAbc.B}",
-		Source:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{VEnumAbcB}),
+		TargetLabel: "VUnionDepth1_Rand1{F11: {Id: \"cdefghi\", Msg: \"ghijklmnopΔΘΠΣΦ王普澤世界\"}}",
+		Target: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:  "cdefghi",
+			Msg: "ghijklmnopΔΘΠΣΦ王普澤世界",
+		})}),
+		SourceLabel: "VUnionDepth1_Rand1{F11: {Id: \"cdefghi\", Msg: \"ghijklmnopΔΘΠΣΦ王普澤世界\"}}",
+		Source: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:  "cdefghi",
+			Msg: "ghijklmnopΔΘΠΣΦ王普澤世界",
+		})}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth1_Rand1{F8: VEnumAbc.B}",
-		Target:      VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{VEnumAbcB}),
-		SourceLabel: "VUnionDepth1_Rand0{F8: VEnumAbc.B}",
-		Source:      VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{VEnumAbcB}),
+		TargetLabel: "VUnionDepth1_Rand1{F11: {Id: \"cdefghi\", Msg: \"ghijklmnopΔΘΠΣΦ王普澤世界\"}}",
+		Target: VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+			Id:  "cdefghi",
+			Msg: "ghijklmnopΔΘΠΣΦ王普澤世界",
+		})}),
+		SourceLabel: "VUnionDepth1_All{F11: {Id: \"cdefghi\", Msg: \"ghijklmnopΔΘΠΣΦ王普澤世界\"}}",
+		Source: VUnionDepth1_All(VUnionDepth1_AllF11{verror.FromWire(vdl.WireError{
+			Id:  "cdefghi",
+			Msg: "ghijklmnopΔΘΠΣΦ王普澤世界",
+		})}),
 	},
 	{
 		IsCanonical: true,
@@ -26263,7 +26169,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Target: &VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -26300,7 +26206,7 @@ var vAllPass = []Entry{
 			F29: 1.23,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Source: &VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -26340,7 +26246,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Target: &VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -26377,7 +26283,7 @@ var vAllPass = []Entry{
 			F29: 1.23,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
+		SourceLabel: "VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}",
 		Source: VStructDepth1_All{
 			F0: int64(-123),
 			F1: true,
@@ -26418,278 +26324,390 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth1_All{F0: VUnionDepth2_All{F0: {}}, F3: \"ΘΠΣΦ王普\", F4: \"ΠΣΦ王普\", F5: typeobject(int8), F6: 218, F7: 248, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 25100, F13: 65114, F14: 4218824543, F15: 750529412, F16: 5355147589003670681, F17: 8329439433963036710, F18: -14, F19: 7, F20: 1927, F21: -9313, F22: -539908194, F23: 249481717, F24: 785859430952343945, F26: -6.9762496e+08, F27: -1.0014651e+09, F29: -8.855338604574752e+08, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: ?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 2061}, {F28: 2.0780525009739957e+09}}, F8: {F0: {set[VArray1_VStructDepth1_Rand0]{{}}, float32(-8.119746e+07), VList_VUnionDepth2_All{{F13: {F7: 48, F26: -1.25231816e+08}}, {F1: {{}, {}, {}}}}}, F9: {F0: set[VStructEmpty]{{}}, F9: C, F26: 9.0644224e+08}, F10: {F28: -4.02086314783479e+08}, F11: {F11: {}}}}, F2: true, F5: typeobject(VStructDepth3_Rand1), F6: 129, F7: 191, F9: D, F11: {Id: \"fghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"defghijklmnopΔΘΠΣ\"}, F13: 48403, F14: 3913260502, F15: 705746368, F17: 17898695929006030954, F18: -31, F19: 60, F20: 7668, F21: 6622, F22: 653543082, F23: -969888584, F24: -791746282283847192, F25: 3957405280026048584, F27: 1.2754492e+08, F28: -1.8133996485452944e+08, F29: 5.817727906339282e+08, F30: {}}",
 		Target: &VStructDepth1_All{
-			F0:  VUnionDepth2_All(VUnionDepth2_AllF0{}),
-			F3:  "ΘΠΣΦ王普",
-			F4:  "ΠΣΦ王普",
-			F5:  vdl.Int8Type,
-			F6:  218,
-			F7:  248,
-			F8:  VEnumAbcC,
-			F9:  VEnumBcdD,
-			F11: verror.FromWire(vdl.WireError{}),
-			F12: 25100,
-			F13: 65114,
-			F14: 4218824543,
-			F15: 750529412,
-			F16: 5355147589003670681,
-			F17: 8329439433963036710,
-			F18: -14,
-			F19: 7,
-			F20: 1927,
-			F21: -9313,
-			F22: -539908194,
-			F23: 249481717,
-			F24: 785859430952343945,
-			F26: -6.9762496e+08,
-			F27: -1.0014651e+09,
-			F29: -8.855338604574752e+08,
+			F0: &VStructDepth3_Rand0{
+				F1: VArray1_OptVStructDepth1_Rand0{
+					{},
+				},
+				F5: VSet_VUnionDepth1_Rand0{
+					VUnionDepth1_Rand0F12{2061}:                   struct{}{},
+					VUnionDepth1_Rand0F28{2.0780525009739957e+09}: struct{}{},
+				},
+				F8: VStructDepth2_Rand0{
+					F0: VArray3_Any{
+						map[VArray1_VStructDepth1_Rand0]struct{}{
+							{}: struct{}{},
+						},
+						float32(-8.119746e+07),
+						VList_VUnionDepth2_All{
+							VUnionDepth2_AllF13{&VStructDepth1_Rand1{
+								F7:  48,
+								F26: -1.25231816e+08,
+							}},
+							VUnionDepth2_AllF1{VArray3_OptVStructEmpty{
+								{},
+								{},
+								{},
+							}},
+						},
+					},
+					F9: VStructDepth1_Rand1{
+						F0: map[VStructEmpty]struct{}{
+							{}: struct{}{},
+						},
+						F9:  VEnumBcdC,
+						F26: 9.0644224e+08,
+					},
+					F10: VUnionDepth1_Rand0F28{-4.02086314783479e+08},
+					F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+				},
+			},
+			F2: true,
+			F5: vdl.TypeOf((*VStructDepth3_Rand1)(nil)).Elem(),
+			F6: 129,
+			F7: 191,
+			F9: VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{
+				Id:        "fghijklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "defghijklmnopΔΘΠΣ",
+			}),
+			F13: 48403,
+			F14: 3913260502,
+			F15: 705746368,
+			F17: 17898695929006030954,
+			F18: -31,
+			F19: 60,
+			F20: 7668,
+			F21: 6622,
+			F22: 653543082,
+			F23: -969888584,
+			F24: -791746282283847192,
+			F25: 3957405280026048584,
+			F27: 1.2754492e+08,
+			F28: -1.8133996485452944e+08,
+			F29: 5.817727906339282e+08,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "?VStructDepth1_All{F0: VUnionDepth2_All{F0: {}}, F3: \"ΘΠΣΦ王普\", F4: \"ΠΣΦ王普\", F5: typeobject(int8), F6: 218, F7: 248, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 25100, F13: 65114, F14: 4218824543, F15: 750529412, F16: 5355147589003670681, F17: 8329439433963036710, F18: -14, F19: 7, F20: 1927, F21: -9313, F22: -539908194, F23: 249481717, F24: 785859430952343945, F26: -6.9762496e+08, F27: -1.0014651e+09, F29: -8.855338604574752e+08, F30: {}}",
+		SourceLabel: "?VStructDepth1_All{F0: ?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 2061}, {F28: 2.0780525009739957e+09}}, F8: {F0: {set[VArray1_VStructDepth1_Rand0]{{}}, float32(-8.119746e+07), VList_VUnionDepth2_All{{F13: {F7: 48, F26: -1.25231816e+08}}, {F1: {{}, {}, {}}}}}, F9: {F0: set[VStructEmpty]{{}}, F9: C, F26: 9.0644224e+08}, F10: {F28: -4.02086314783479e+08}, F11: {F11: {}}}}, F2: true, F5: typeobject(VStructDepth3_Rand1), F6: 129, F7: 191, F9: D, F11: {Id: \"fghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"defghijklmnopΔΘΠΣ\"}, F13: 48403, F14: 3913260502, F15: 705746368, F17: 17898695929006030954, F18: -31, F19: 60, F20: 7668, F21: 6622, F22: 653543082, F23: -969888584, F24: -791746282283847192, F25: 3957405280026048584, F27: 1.2754492e+08, F28: -1.8133996485452944e+08, F29: 5.817727906339282e+08, F30: {}}",
 		Source: &VStructDepth1_All{
-			F0:  VUnionDepth2_All(VUnionDepth2_AllF0{}),
-			F3:  "ΘΠΣΦ王普",
-			F4:  "ΠΣΦ王普",
-			F5:  vdl.Int8Type,
-			F6:  218,
-			F7:  248,
-			F8:  VEnumAbcC,
-			F9:  VEnumBcdD,
-			F11: verror.FromWire(vdl.WireError{}),
-			F12: 25100,
-			F13: 65114,
-			F14: 4218824543,
-			F15: 750529412,
-			F16: 5355147589003670681,
-			F17: 8329439433963036710,
-			F18: -14,
-			F19: 7,
-			F20: 1927,
-			F21: -9313,
-			F22: -539908194,
-			F23: 249481717,
-			F24: 785859430952343945,
-			F26: -6.9762496e+08,
-			F27: -1.0014651e+09,
-			F29: -8.855338604574752e+08,
+			F0: &VStructDepth3_Rand0{
+				F1: VArray1_OptVStructDepth1_Rand0{
+					{},
+				},
+				F5: VSet_VUnionDepth1_Rand0{
+					VUnionDepth1_Rand0F12{2061}:                   struct{}{},
+					VUnionDepth1_Rand0F28{2.0780525009739957e+09}: struct{}{},
+				},
+				F8: VStructDepth2_Rand0{
+					F0: VArray3_Any{
+						map[VArray1_VStructDepth1_Rand0]struct{}{
+							{}: struct{}{},
+						},
+						float32(-8.119746e+07),
+						VList_VUnionDepth2_All{
+							VUnionDepth2_AllF13{&VStructDepth1_Rand1{
+								F7:  48,
+								F26: -1.25231816e+08,
+							}},
+							VUnionDepth2_AllF1{VArray3_OptVStructEmpty{
+								{},
+								{},
+								{},
+							}},
+						},
+					},
+					F9: VStructDepth1_Rand1{
+						F0: map[VStructEmpty]struct{}{
+							{}: struct{}{},
+						},
+						F9:  VEnumBcdC,
+						F26: 9.0644224e+08,
+					},
+					F10: VUnionDepth1_Rand0F28{-4.02086314783479e+08},
+					F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+				},
+			},
+			F2: true,
+			F5: vdl.TypeOf((*VStructDepth3_Rand1)(nil)).Elem(),
+			F6: 129,
+			F7: 191,
+			F9: VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{
+				Id:        "fghijklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "defghijklmnopΔΘΠΣ",
+			}),
+			F13: 48403,
+			F14: 3913260502,
+			F15: 705746368,
+			F17: 17898695929006030954,
+			F18: -31,
+			F19: 60,
+			F20: 7668,
+			F21: 6622,
+			F22: 653543082,
+			F23: -969888584,
+			F24: -791746282283847192,
+			F25: 3957405280026048584,
+			F27: 1.2754492e+08,
+			F28: -1.8133996485452944e+08,
+			F29: 5.817727906339282e+08,
 			F30: &VStructEmpty{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth1_All{F0: VUnionDepth2_All{F0: {}}, F3: \"ΘΠΣΦ王普\", F4: \"ΠΣΦ王普\", F5: typeobject(int8), F6: 218, F7: 248, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 25100, F13: 65114, F14: 4218824543, F15: 750529412, F16: 5355147589003670681, F17: 8329439433963036710, F18: -14, F19: 7, F20: 1927, F21: -9313, F22: -539908194, F23: 249481717, F24: 785859430952343945, F26: -6.9762496e+08, F27: -1.0014651e+09, F29: -8.855338604574752e+08, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: ?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 2061}, {F28: 2.0780525009739957e+09}}, F8: {F0: {set[VArray1_VStructDepth1_Rand0]{{}}, float32(-8.119746e+07), VList_VUnionDepth2_All{{F13: {F7: 48, F26: -1.25231816e+08}}, {F1: {{}, {}, {}}}}}, F9: {F0: set[VStructEmpty]{{}}, F9: C, F26: 9.0644224e+08}, F10: {F28: -4.02086314783479e+08}, F11: {F11: {}}}}, F2: true, F5: typeobject(VStructDepth3_Rand1), F6: 129, F7: 191, F9: D, F11: {Id: \"fghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"defghijklmnopΔΘΠΣ\"}, F13: 48403, F14: 3913260502, F15: 705746368, F17: 17898695929006030954, F18: -31, F19: 60, F20: 7668, F21: 6622, F22: 653543082, F23: -969888584, F24: -791746282283847192, F25: 3957405280026048584, F27: 1.2754492e+08, F28: -1.8133996485452944e+08, F29: 5.817727906339282e+08, F30: {}}",
 		Target: &VStructDepth1_All{
-			F0:  VUnionDepth2_All(VUnionDepth2_AllF0{}),
-			F3:  "ΘΠΣΦ王普",
-			F4:  "ΠΣΦ王普",
-			F5:  vdl.Int8Type,
-			F6:  218,
-			F7:  248,
-			F8:  VEnumAbcC,
-			F9:  VEnumBcdD,
-			F11: verror.FromWire(vdl.WireError{}),
-			F12: 25100,
-			F13: 65114,
-			F14: 4218824543,
-			F15: 750529412,
-			F16: 5355147589003670681,
-			F17: 8329439433963036710,
-			F18: -14,
-			F19: 7,
-			F20: 1927,
-			F21: -9313,
-			F22: -539908194,
-			F23: 249481717,
-			F24: 785859430952343945,
-			F26: -6.9762496e+08,
-			F27: -1.0014651e+09,
-			F29: -8.855338604574752e+08,
+			F0: &VStructDepth3_Rand0{
+				F1: VArray1_OptVStructDepth1_Rand0{
+					{},
+				},
+				F5: VSet_VUnionDepth1_Rand0{
+					VUnionDepth1_Rand0F12{2061}:                   struct{}{},
+					VUnionDepth1_Rand0F28{2.0780525009739957e+09}: struct{}{},
+				},
+				F8: VStructDepth2_Rand0{
+					F0: VArray3_Any{
+						map[VArray1_VStructDepth1_Rand0]struct{}{
+							{}: struct{}{},
+						},
+						float32(-8.119746e+07),
+						VList_VUnionDepth2_All{
+							VUnionDepth2_AllF13{&VStructDepth1_Rand1{
+								F7:  48,
+								F26: -1.25231816e+08,
+							}},
+							VUnionDepth2_AllF1{VArray3_OptVStructEmpty{
+								{},
+								{},
+								{},
+							}},
+						},
+					},
+					F9: VStructDepth1_Rand1{
+						F0: map[VStructEmpty]struct{}{
+							{}: struct{}{},
+						},
+						F9:  VEnumBcdC,
+						F26: 9.0644224e+08,
+					},
+					F10: VUnionDepth1_Rand0F28{-4.02086314783479e+08},
+					F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+				},
+			},
+			F2: true,
+			F5: vdl.TypeOf((*VStructDepth3_Rand1)(nil)).Elem(),
+			F6: 129,
+			F7: 191,
+			F9: VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{
+				Id:        "fghijklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "defghijklmnopΔΘΠΣ",
+			}),
+			F13: 48403,
+			F14: 3913260502,
+			F15: 705746368,
+			F17: 17898695929006030954,
+			F18: -31,
+			F19: 60,
+			F20: 7668,
+			F21: 6622,
+			F22: 653543082,
+			F23: -969888584,
+			F24: -791746282283847192,
+			F25: 3957405280026048584,
+			F27: 1.2754492e+08,
+			F28: -1.8133996485452944e+08,
+			F29: 5.817727906339282e+08,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "VStructDepth1_All{F0: VUnionDepth2_All{F0: {}}, F3: \"ΘΠΣΦ王普\", F4: \"ΠΣΦ王普\", F5: typeobject(int8), F6: 218, F7: 248, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 25100, F13: 65114, F14: 4218824543, F15: 750529412, F16: 5355147589003670681, F17: 8329439433963036710, F18: -14, F19: 7, F20: 1927, F21: -9313, F22: -539908194, F23: 249481717, F24: 785859430952343945, F26: -6.9762496e+08, F27: -1.0014651e+09, F29: -8.855338604574752e+08, F30: {}}",
+		SourceLabel: "VStructDepth1_All{F0: ?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 2061}, {F28: 2.0780525009739957e+09}}, F8: {F0: {set[VArray1_VStructDepth1_Rand0]{{}}, float32(-8.119746e+07), VList_VUnionDepth2_All{{F13: {F7: 48, F26: -1.25231816e+08}}, {F1: {{}, {}, {}}}}}, F9: {F0: set[VStructEmpty]{{}}, F9: C, F26: 9.0644224e+08}, F10: {F28: -4.02086314783479e+08}, F11: {F11: {}}}}, F2: true, F5: typeobject(VStructDepth3_Rand1), F6: 129, F7: 191, F9: D, F11: {Id: \"fghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryConnection, Msg: \"defghijklmnopΔΘΠΣ\"}, F13: 48403, F14: 3913260502, F15: 705746368, F17: 17898695929006030954, F18: -31, F19: 60, F20: 7668, F21: 6622, F22: 653543082, F23: -969888584, F24: -791746282283847192, F25: 3957405280026048584, F27: 1.2754492e+08, F28: -1.8133996485452944e+08, F29: 5.817727906339282e+08, F30: {}}",
 		Source: VStructDepth1_All{
-			F0:  VUnionDepth2_All(VUnionDepth2_AllF0{}),
-			F3:  "ΘΠΣΦ王普",
-			F4:  "ΠΣΦ王普",
-			F5:  vdl.Int8Type,
-			F6:  218,
-			F7:  248,
-			F8:  VEnumAbcC,
-			F9:  VEnumBcdD,
-			F11: verror.FromWire(vdl.WireError{}),
-			F12: 25100,
-			F13: 65114,
-			F14: 4218824543,
-			F15: 750529412,
-			F16: 5355147589003670681,
-			F17: 8329439433963036710,
-			F18: -14,
-			F19: 7,
-			F20: 1927,
-			F21: -9313,
-			F22: -539908194,
-			F23: 249481717,
-			F24: 785859430952343945,
-			F26: -6.9762496e+08,
-			F27: -1.0014651e+09,
-			F29: -8.855338604574752e+08,
+			F0: &VStructDepth3_Rand0{
+				F1: VArray1_OptVStructDepth1_Rand0{
+					{},
+				},
+				F5: VSet_VUnionDepth1_Rand0{
+					VUnionDepth1_Rand0F12{2061}:                   struct{}{},
+					VUnionDepth1_Rand0F28{2.0780525009739957e+09}: struct{}{},
+				},
+				F8: VStructDepth2_Rand0{
+					F0: VArray3_Any{
+						map[VArray1_VStructDepth1_Rand0]struct{}{
+							{}: struct{}{},
+						},
+						float32(-8.119746e+07),
+						VList_VUnionDepth2_All{
+							VUnionDepth2_AllF13{&VStructDepth1_Rand1{
+								F7:  48,
+								F26: -1.25231816e+08,
+							}},
+							VUnionDepth2_AllF1{VArray3_OptVStructEmpty{
+								{},
+								{},
+								{},
+							}},
+						},
+					},
+					F9: VStructDepth1_Rand1{
+						F0: map[VStructEmpty]struct{}{
+							{}: struct{}{},
+						},
+						F9:  VEnumBcdC,
+						F26: 9.0644224e+08,
+					},
+					F10: VUnionDepth1_Rand0F28{-4.02086314783479e+08},
+					F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+				},
+			},
+			F2: true,
+			F5: vdl.TypeOf((*VStructDepth3_Rand1)(nil)).Elem(),
+			F6: 129,
+			F7: 191,
+			F9: VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{
+				Id:        "fghijklmnopΔΘΠΣΦ王普澤",
+				RetryCode: vdl.WireRetryCodeRetryConnection,
+				Msg:       "defghijklmnopΔΘΠΣ",
+			}),
+			F13: 48403,
+			F14: 3913260502,
+			F15: 705746368,
+			F17: 17898695929006030954,
+			F18: -31,
+			F19: 60,
+			F20: 7668,
+			F21: 6622,
+			F22: 653543082,
+			F23: -969888584,
+			F24: -791746282283847192,
+			F25: 3957405280026048584,
+			F27: 1.2754492e+08,
+			F28: -1.8133996485452944e+08,
+			F29: 5.817727906339282e+08,
 			F30: &VStructEmpty{},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth1_All{F0: VList_VString{\"ijklmno\", \"pΔΘΠΣΦ王普澤世\", \"hijklmnopΔ\"}, F1: true, F3: \"klmnop\", F4: \"cdefghijk\", F5: typeobject(VUnionDepth3_All), F6: 85, F7: 148, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {Id: \"bcdefghijk\", RetryCode: RetryBackoff, Msg: \"klmn\"}, F13: 2464, F14: 4072886212, F15: 1852503770, F16: 15450136665448462444, F17: 12900142058668225220, F19: 47, F20: 344, F22: -864315256, F23: -800784042, F24: 3552234487259492176, F25: 2871142992497633278, F26: 2.417915e+09, F27: 1.7100503e+09, F28: -2.1418013923060648e+09, F29: -7.473475333897573e+08, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: set[VEnumAbc]{}, F3: \"mnopΔΘΠΣΦ\", F4: \"ΣΦ王\", F5: typeobject(VArray1_VStructDepth1_Rand0), F6: 61, F7: 136, F8: C, F9: C, F12: 60853, F13: 826, F14: 733432635, F15: 1070903580, F16: 6311866462315254278, F17: 6676822197620610655, F18: 54, F19: 13, F20: -549, F21: -11540, F22: -264652056, F25: -890125684197465000, F26: 4.276271e+08, F27: -8.2610784e+08, F28: 1.0030611097261338e+09, F29: -9.691717872266108e+08, F30: {}}",
 		Target: &VStructDepth1_All{
-			F0: VList_VString{
-				"ijklmno",
-				"pΔΘΠΣΦ王普澤世",
-				"hijklmnopΔ",
-			},
-			F1: true,
-			F3: "klmnop",
-			F4: "cdefghijk",
-			F5: vdl.TypeOf((*VUnionDepth3_All)(nil)),
-			F6: 85,
-			F7: 148,
-			F8: VEnumAbcC,
-			F9: VEnumBcdC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijk",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmn",
-			}),
-			F13: 2464,
-			F14: 4072886212,
-			F15: 1852503770,
-			F16: 15450136665448462444,
-			F17: 12900142058668225220,
-			F19: 47,
-			F20: 344,
-			F22: -864315256,
-			F23: -800784042,
-			F24: 3552234487259492176,
-			F25: 2871142992497633278,
-			F26: 2.417915e+09,
-			F27: 1.7100503e+09,
-			F28: -2.1418013923060648e+09,
-			F29: -7.473475333897573e+08,
+			F0:  map[VEnumAbc]struct{}(nil),
+			F3:  "mnopΔΘΠΣΦ",
+			F4:  "ΣΦ王",
+			F5:  vdl.TypeOf((*VArray1_VStructDepth1_Rand0)(nil)),
+			F6:  61,
+			F7:  136,
+			F8:  VEnumAbcC,
+			F9:  VEnumBcdC,
+			F12: 60853,
+			F13: 826,
+			F14: 733432635,
+			F15: 1070903580,
+			F16: 6311866462315254278,
+			F17: 6676822197620610655,
+			F18: 54,
+			F19: 13,
+			F20: -549,
+			F21: -11540,
+			F22: -264652056,
+			F25: -890125684197465000,
+			F26: 4.276271e+08,
+			F27: -8.2610784e+08,
+			F28: 1.0030611097261338e+09,
+			F29: -9.691717872266108e+08,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "?VStructDepth1_All{F0: VList_VString{\"ijklmno\", \"pΔΘΠΣΦ王普澤世\", \"hijklmnopΔ\"}, F1: true, F3: \"klmnop\", F4: \"cdefghijk\", F5: typeobject(VUnionDepth3_All), F6: 85, F7: 148, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {Id: \"bcdefghijk\", RetryCode: RetryBackoff, Msg: \"klmn\"}, F13: 2464, F14: 4072886212, F15: 1852503770, F16: 15450136665448462444, F17: 12900142058668225220, F19: 47, F20: 344, F22: -864315256, F23: -800784042, F24: 3552234487259492176, F25: 2871142992497633278, F26: 2.417915e+09, F27: 1.7100503e+09, F28: -2.1418013923060648e+09, F29: -7.473475333897573e+08, F30: {}}",
+		SourceLabel: "?VStructDepth1_All{F0: set[VEnumAbc]{}, F3: \"mnopΔΘΠΣΦ\", F4: \"ΣΦ王\", F5: typeobject(VArray1_VStructDepth1_Rand0), F6: 61, F7: 136, F8: C, F9: C, F12: 60853, F13: 826, F14: 733432635, F15: 1070903580, F16: 6311866462315254278, F17: 6676822197620610655, F18: 54, F19: 13, F20: -549, F21: -11540, F22: -264652056, F25: -890125684197465000, F26: 4.276271e+08, F27: -8.2610784e+08, F28: 1.0030611097261338e+09, F29: -9.691717872266108e+08, F30: {}}",
 		Source: &VStructDepth1_All{
-			F0: VList_VString{
-				"ijklmno",
-				"pΔΘΠΣΦ王普澤世",
-				"hijklmnopΔ",
-			},
-			F1: true,
-			F3: "klmnop",
-			F4: "cdefghijk",
-			F5: vdl.TypeOf((*VUnionDepth3_All)(nil)),
-			F6: 85,
-			F7: 148,
-			F8: VEnumAbcC,
-			F9: VEnumBcdC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijk",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmn",
-			}),
-			F13: 2464,
-			F14: 4072886212,
-			F15: 1852503770,
-			F16: 15450136665448462444,
-			F17: 12900142058668225220,
-			F19: 47,
-			F20: 344,
-			F22: -864315256,
-			F23: -800784042,
-			F24: 3552234487259492176,
-			F25: 2871142992497633278,
-			F26: 2.417915e+09,
-			F27: 1.7100503e+09,
-			F28: -2.1418013923060648e+09,
-			F29: -7.473475333897573e+08,
+			F0:  map[VEnumAbc]struct{}(nil),
+			F3:  "mnopΔΘΠΣΦ",
+			F4:  "ΣΦ王",
+			F5:  vdl.TypeOf((*VArray1_VStructDepth1_Rand0)(nil)),
+			F6:  61,
+			F7:  136,
+			F8:  VEnumAbcC,
+			F9:  VEnumBcdC,
+			F12: 60853,
+			F13: 826,
+			F14: 733432635,
+			F15: 1070903580,
+			F16: 6311866462315254278,
+			F17: 6676822197620610655,
+			F18: 54,
+			F19: 13,
+			F20: -549,
+			F21: -11540,
+			F22: -264652056,
+			F25: -890125684197465000,
+			F26: 4.276271e+08,
+			F27: -8.2610784e+08,
+			F28: 1.0030611097261338e+09,
+			F29: -9.691717872266108e+08,
 			F30: &VStructEmpty{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth1_All{F0: VList_VString{\"ijklmno\", \"pΔΘΠΣΦ王普澤世\", \"hijklmnopΔ\"}, F1: true, F3: \"klmnop\", F4: \"cdefghijk\", F5: typeobject(VUnionDepth3_All), F6: 85, F7: 148, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {Id: \"bcdefghijk\", RetryCode: RetryBackoff, Msg: \"klmn\"}, F13: 2464, F14: 4072886212, F15: 1852503770, F16: 15450136665448462444, F17: 12900142058668225220, F19: 47, F20: 344, F22: -864315256, F23: -800784042, F24: 3552234487259492176, F25: 2871142992497633278, F26: 2.417915e+09, F27: 1.7100503e+09, F28: -2.1418013923060648e+09, F29: -7.473475333897573e+08, F30: {}}",
+		TargetLabel: "?VStructDepth1_All{F0: set[VEnumAbc]{}, F3: \"mnopΔΘΠΣΦ\", F4: \"ΣΦ王\", F5: typeobject(VArray1_VStructDepth1_Rand0), F6: 61, F7: 136, F8: C, F9: C, F12: 60853, F13: 826, F14: 733432635, F15: 1070903580, F16: 6311866462315254278, F17: 6676822197620610655, F18: 54, F19: 13, F20: -549, F21: -11540, F22: -264652056, F25: -890125684197465000, F26: 4.276271e+08, F27: -8.2610784e+08, F28: 1.0030611097261338e+09, F29: -9.691717872266108e+08, F30: {}}",
 		Target: &VStructDepth1_All{
-			F0: VList_VString{
-				"ijklmno",
-				"pΔΘΠΣΦ王普澤世",
-				"hijklmnopΔ",
-			},
-			F1: true,
-			F3: "klmnop",
-			F4: "cdefghijk",
-			F5: vdl.TypeOf((*VUnionDepth3_All)(nil)),
-			F6: 85,
-			F7: 148,
-			F8: VEnumAbcC,
-			F9: VEnumBcdC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijk",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmn",
-			}),
-			F13: 2464,
-			F14: 4072886212,
-			F15: 1852503770,
-			F16: 15450136665448462444,
-			F17: 12900142058668225220,
-			F19: 47,
-			F20: 344,
-			F22: -864315256,
-			F23: -800784042,
-			F24: 3552234487259492176,
-			F25: 2871142992497633278,
-			F26: 2.417915e+09,
-			F27: 1.7100503e+09,
-			F28: -2.1418013923060648e+09,
-			F29: -7.473475333897573e+08,
+			F0:  map[VEnumAbc]struct{}(nil),
+			F3:  "mnopΔΘΠΣΦ",
+			F4:  "ΣΦ王",
+			F5:  vdl.TypeOf((*VArray1_VStructDepth1_Rand0)(nil)),
+			F6:  61,
+			F7:  136,
+			F8:  VEnumAbcC,
+			F9:  VEnumBcdC,
+			F12: 60853,
+			F13: 826,
+			F14: 733432635,
+			F15: 1070903580,
+			F16: 6311866462315254278,
+			F17: 6676822197620610655,
+			F18: 54,
+			F19: 13,
+			F20: -549,
+			F21: -11540,
+			F22: -264652056,
+			F25: -890125684197465000,
+			F26: 4.276271e+08,
+			F27: -8.2610784e+08,
+			F28: 1.0030611097261338e+09,
+			F29: -9.691717872266108e+08,
 			F30: &VStructEmpty{},
 		},
-		SourceLabel: "VStructDepth1_All{F0: VList_VString{\"ijklmno\", \"pΔΘΠΣΦ王普澤世\", \"hijklmnopΔ\"}, F1: true, F3: \"klmnop\", F4: \"cdefghijk\", F5: typeobject(VUnionDepth3_All), F6: 85, F7: 148, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {Id: \"bcdefghijk\", RetryCode: RetryBackoff, Msg: \"klmn\"}, F13: 2464, F14: 4072886212, F15: 1852503770, F16: 15450136665448462444, F17: 12900142058668225220, F19: 47, F20: 344, F22: -864315256, F23: -800784042, F24: 3552234487259492176, F25: 2871142992497633278, F26: 2.417915e+09, F27: 1.7100503e+09, F28: -2.1418013923060648e+09, F29: -7.473475333897573e+08, F30: {}}",
+		SourceLabel: "VStructDepth1_All{F0: set[VEnumAbc]{}, F3: \"mnopΔΘΠΣΦ\", F4: \"ΣΦ王\", F5: typeobject(VArray1_VStructDepth1_Rand0), F6: 61, F7: 136, F8: C, F9: C, F12: 60853, F13: 826, F14: 733432635, F15: 1070903580, F16: 6311866462315254278, F17: 6676822197620610655, F18: 54, F19: 13, F20: -549, F21: -11540, F22: -264652056, F25: -890125684197465000, F26: 4.276271e+08, F27: -8.2610784e+08, F28: 1.0030611097261338e+09, F29: -9.691717872266108e+08, F30: {}}",
 		Source: VStructDepth1_All{
-			F0: VList_VString{
-				"ijklmno",
-				"pΔΘΠΣΦ王普澤世",
-				"hijklmnopΔ",
-			},
-			F1: true,
-			F3: "klmnop",
-			F4: "cdefghijk",
-			F5: vdl.TypeOf((*VUnionDepth3_All)(nil)),
-			F6: 85,
-			F7: 148,
-			F8: VEnumAbcC,
-			F9: VEnumBcdC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "bcdefghijk",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmn",
-			}),
-			F13: 2464,
-			F14: 4072886212,
-			F15: 1852503770,
-			F16: 15450136665448462444,
-			F17: 12900142058668225220,
-			F19: 47,
-			F20: 344,
-			F22: -864315256,
-			F23: -800784042,
-			F24: 3552234487259492176,
-			F25: 2871142992497633278,
-			F26: 2.417915e+09,
-			F27: 1.7100503e+09,
-			F28: -2.1418013923060648e+09,
-			F29: -7.473475333897573e+08,
+			F0:  map[VEnumAbc]struct{}(nil),
+			F3:  "mnopΔΘΠΣΦ",
+			F4:  "ΣΦ王",
+			F5:  vdl.TypeOf((*VArray1_VStructDepth1_Rand0)(nil)),
+			F6:  61,
+			F7:  136,
+			F8:  VEnumAbcC,
+			F9:  VEnumBcdC,
+			F12: 60853,
+			F13: 826,
+			F14: 733432635,
+			F15: 1070903580,
+			F16: 6311866462315254278,
+			F17: 6676822197620610655,
+			F18: 54,
+			F19: 13,
+			F20: -549,
+			F21: -11540,
+			F22: -264652056,
+			F25: -890125684197465000,
+			F26: 4.276271e+08,
+			F27: -8.2610784e+08,
+			F28: 1.0030611097261338e+09,
+			F29: -9.691717872266108e+08,
 			F30: &VStructEmpty{},
 		},
 	},
@@ -26844,7 +26862,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		TargetLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Target: &VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -26852,7 +26870,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		},
-		SourceLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		SourceLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Source: &VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -26863,7 +26881,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		TargetLabel: "?VStructDepth1_Rand1{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Target: &VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -26871,7 +26889,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		},
-		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}",
+		SourceLabel: "?VStructDepth1_All{F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}",
 		Source: &VStructDepth1_All{
 			F0:  int64(-123),
 			F1:  true,
@@ -27261,7 +27279,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.B, VEnumBcd.C: VEnumBcd.B, VEnumBcd.D: VEnumBcd.C}}}",
+		TargetLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{B: B, C: B, D: C}}}",
 		Target: VArray3_VList_Any{
 			{
 				nil,
@@ -27283,7 +27301,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.B, VEnumBcd.C: VEnumBcd.B, VEnumBcd.D: VEnumBcd.C}}}",
+		SourceLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{B: B, C: B, D: C}}}",
 		Source: VArray3_VList_Any{
 			{
 				nil,
@@ -27308,7 +27326,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.B, VEnumBcd.C: VEnumBcd.B, VEnumBcd.D: VEnumBcd.C}}}",
+		TargetLabel: "VArray3_VList_Any{{nil, VArray3_Bool{}}, {nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, {VMap_VEnumBcd_VEnumBcd{B: B, C: B, D: C}}}",
 		Target: VArray3_VList_Any{
 			{
 				nil,
@@ -27330,7 +27348,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "[]any{VList_Any{nil, VArray3_Bool{}}, VList_Any{nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, VList_Any{VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.B, VEnumBcd.C: VEnumBcd.B, VEnumBcd.D: VEnumBcd.C}}}",
+		SourceLabel: "[]any{VList_Any{nil, VArray3_Bool{}}, VList_Any{nil, VMap_Byte_Byte{129: 0, 37: 138}, VList_VArray1_String{}}, VList_Any{VMap_VEnumBcd_VEnumBcd{B: B, C: B, D: C}}}",
 		Source: []interface{}{
 			VList_Any{
 				nil,
@@ -27927,87 +27945,63 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F11: {Id: \"jklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"i\"}}, {F6: 0}, {F6: 0}}",
+		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F8: A}, {F20: 3358}, {F6: 0}}",
 		Target: VArray3_VUnionDepth1_Rand1{
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "jklmnopΔΘΠΣΦ王普澤世",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "i",
-			})},
-			VUnionDepth1_Rand1F6{},
+			VUnionDepth1_Rand1F8{},
+			VUnionDepth1_Rand1F20{3358},
 			VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "VArray3_VUnionDepth1_Rand1{{F11: {Id: \"jklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"i\"}}, {F6: 0}, {F6: 0}}",
+		SourceLabel: "VArray3_VUnionDepth1_Rand1{{F8: A}, {F20: 3358}, {F6: 0}}",
 		Source: VArray3_VUnionDepth1_Rand1{
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "jklmnopΔΘΠΣΦ王普澤世",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "i",
-			})},
-			VUnionDepth1_Rand1F6{},
+			VUnionDepth1_Rand1F8{},
+			VUnionDepth1_Rand1F20{3358},
 			VUnionDepth1_Rand1F6{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F11: {Id: \"jklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"i\"}}, {F6: 0}, {F6: 0}}",
+		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F8: A}, {F20: 3358}, {F6: 0}}",
 		Target: VArray3_VUnionDepth1_Rand1{
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "jklmnopΔΘΠΣΦ王普澤世",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "i",
-			})},
-			VUnionDepth1_Rand1F6{},
+			VUnionDepth1_Rand1F8{},
+			VUnionDepth1_Rand1F20{3358},
 			VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "[]any{VUnionDepth1_Rand1{F11: {Id: \"jklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"i\"}}, VUnionDepth1_Rand1{F6: 0}, VUnionDepth1_Rand1{F6: 0}}",
+		SourceLabel: "[]any{VUnionDepth1_Rand1{F8: A}, VUnionDepth1_Rand1{F20: 3358}, VUnionDepth1_Rand1{F6: 0}}",
 		Source: []interface{}{
-			VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "jklmnopΔΘΠΣΦ王普澤世",
-				RetryCode: vdl.WireRetryCodeRetryRefetch,
-				Msg:       "i",
-			})}),
-			VUnionDepth1_Rand1(VUnionDepth1_Rand1F6{}),
+			VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{}),
+			VUnionDepth1_Rand1(VUnionDepth1_Rand1F20{3358}),
 			VUnionDepth1_Rand1(VUnionDepth1_Rand1F6{}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F9: VEnumBcd.D}, {F11: {Id: \"efghijklmnopΔΘΠΣ\"}}, {F6: 75}}",
+		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F11: {}}, {F8: A}, {F9: D}}",
 		Target: VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+			VUnionDepth1_Rand1F8{},
 			VUnionDepth1_Rand1F9{VEnumBcdD},
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id: "efghijklmnopΔΘΠΣ",
-			})},
-			VUnionDepth1_Rand1F6{75},
 		},
-		SourceLabel: "VArray3_VUnionDepth1_Rand1{{F9: VEnumBcd.D}, {F11: {Id: \"efghijklmnopΔΘΠΣ\"}}, {F6: 75}}",
+		SourceLabel: "VArray3_VUnionDepth1_Rand1{{F11: {}}, {F8: A}, {F9: D}}",
 		Source: VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+			VUnionDepth1_Rand1F8{},
 			VUnionDepth1_Rand1F9{VEnumBcdD},
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id: "efghijklmnopΔΘΠΣ",
-			})},
-			VUnionDepth1_Rand1F6{75},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F9: VEnumBcd.D}, {F11: {Id: \"efghijklmnopΔΘΠΣ\"}}, {F6: 75}}",
+		TargetLabel: "VArray3_VUnionDepth1_Rand1{{F11: {}}, {F8: A}, {F9: D}}",
 		Target: VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+			VUnionDepth1_Rand1F8{},
 			VUnionDepth1_Rand1F9{VEnumBcdD},
-			VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id: "efghijklmnopΔΘΠΣ",
-			})},
-			VUnionDepth1_Rand1F6{75},
 		},
-		SourceLabel: "[]any{VUnionDepth1_Rand1{F9: VEnumBcd.D}, VUnionDepth1_Rand1{F11: {Id: \"efghijklmnopΔΘΠΣ\"}}, VUnionDepth1_Rand1{F6: 75}}",
+		SourceLabel: "[]any{VUnionDepth1_Rand1{F11: {}}, VUnionDepth1_Rand1{F8: A}, VUnionDepth1_Rand1{F9: D}}",
 		Source: []interface{}{
+			VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})}),
+			VUnionDepth1_Rand1(VUnionDepth1_Rand1F8{}),
 			VUnionDepth1_Rand1(VUnionDepth1_Rand1F9{VEnumBcdD}),
-			VUnionDepth1_Rand1(VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id: "efghijklmnopΔΘΠΣ",
-			})}),
-			VUnionDepth1_Rand1(VUnionDepth1_Rand1F6{75}),
 		},
 	},
 	{
@@ -28301,13 +28295,13 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[][]VEnumAbc{{VEnumAbc.C}}",
+		TargetLabel: "[][]VEnumAbc{{C}}",
 		Target: [][]VEnumAbc{
 			{
 				VEnumAbcC,
 			},
 		},
-		SourceLabel: "[][]VEnumAbc{{VEnumAbc.C}}",
+		SourceLabel: "[][]VEnumAbc{{C}}",
 		Source: [][]VEnumAbc{
 			{
 				VEnumAbcC,
@@ -28316,7 +28310,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[][]VEnumAbc{{VEnumAbc.C}}",
+		TargetLabel: "[][]VEnumAbc{{C}}",
 		Target: [][]VEnumAbc{
 			{
 				VEnumAbcC,
@@ -28477,13 +28471,13 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]VMap_VEnumBcd_VEnumBcd{{VEnumBcd.D: VEnumBcd.D}}",
+		TargetLabel: "[]VMap_VEnumBcd_VEnumBcd{{D: D}}",
 		Target: []VMap_VEnumBcd_VEnumBcd{
 			{
 				VEnumBcdD: VEnumBcdD,
 			},
 		},
-		SourceLabel: "[]VMap_VEnumBcd_VEnumBcd{{VEnumBcd.D: VEnumBcd.D}}",
+		SourceLabel: "[]VMap_VEnumBcd_VEnumBcd{{D: D}}",
 		Source: []VMap_VEnumBcd_VEnumBcd{
 			{
 				VEnumBcdD: VEnumBcdD,
@@ -28492,13 +28486,13 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]VMap_VEnumBcd_VEnumBcd{{VEnumBcd.D: VEnumBcd.D}}",
+		TargetLabel: "[]VMap_VEnumBcd_VEnumBcd{{D: D}}",
 		Target: []VMap_VEnumBcd_VEnumBcd{
 			{
 				VEnumBcdD: VEnumBcdD,
 			},
 		},
-		SourceLabel: "VList_Any{VMap_VEnumBcd_VEnumBcd{VEnumBcd.D: VEnumBcd.D}}",
+		SourceLabel: "VList_Any{VMap_VEnumBcd_VEnumBcd{D: D}}",
 		Source: VList_Any{
 			VMap_VEnumBcd_VEnumBcd{
 				VEnumBcdD: VEnumBcdD,
@@ -28716,59 +28710,75 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth1_All{{F0: nil}, {F13: 810}, {F0: nil}}",
+		TargetLabel: "[]VUnionDepth1_All{{F27: 2.1350005e+08}, {F7: 220}, {F22: 809976502}}",
 		Target: []VUnionDepth1_All{
-			VUnionDepth1_AllF0{},
-			VUnionDepth1_AllF13{810},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF27{2.1350005e+08},
+			VUnionDepth1_AllF7{220},
+			VUnionDepth1_AllF22{809976502},
 		},
-		SourceLabel: "[]VUnionDepth1_All{{F0: nil}, {F13: 810}, {F0: nil}}",
+		SourceLabel: "[]VUnionDepth1_All{{F27: 2.1350005e+08}, {F7: 220}, {F22: 809976502}}",
 		Source: []VUnionDepth1_All{
-			VUnionDepth1_AllF0{},
-			VUnionDepth1_AllF13{810},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF27{2.1350005e+08},
+			VUnionDepth1_AllF7{220},
+			VUnionDepth1_AllF22{809976502},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth1_All{{F0: nil}, {F13: 810}, {F0: nil}}",
+		TargetLabel: "[]VUnionDepth1_All{{F27: 2.1350005e+08}, {F7: 220}, {F22: 809976502}}",
 		Target: []VUnionDepth1_All{
-			VUnionDepth1_AllF0{},
-			VUnionDepth1_AllF13{810},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF27{2.1350005e+08},
+			VUnionDepth1_AllF7{220},
+			VUnionDepth1_AllF22{809976502},
 		},
-		SourceLabel: "[]any{VUnionDepth1_All{F0: nil}, VUnionDepth1_All{F13: 810}, VUnionDepth1_All{F0: nil}}",
+		SourceLabel: "[]any{VUnionDepth1_All{F27: 2.1350005e+08}, VUnionDepth1_All{F7: 220}, VUnionDepth1_All{F22: 809976502}}",
 		Source: []interface{}{
-			VUnionDepth1_All(VUnionDepth1_AllF0{}),
-			VUnionDepth1_All(VUnionDepth1_AllF13{810}),
-			VUnionDepth1_All(VUnionDepth1_AllF0{}),
+			VUnionDepth1_All(VUnionDepth1_AllF27{2.1350005e+08}),
+			VUnionDepth1_All(VUnionDepth1_AllF7{220}),
+			VUnionDepth1_All(VUnionDepth1_AllF22{809976502}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth1_All{{F27: -7.697336e+07}, {F0: nil}}",
+		TargetLabel: "[]VUnionDepth1_All{{F19: 13}, {F0: VList_VInt32{-693542822, -526313624, -1066861006}}}",
 		Target: []VUnionDepth1_All{
-			VUnionDepth1_AllF27{-7.697336e+07},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF19{13},
+			VUnionDepth1_AllF0{VList_VInt32{
+				-693542822,
+				-526313624,
+				-1066861006,
+			}},
 		},
-		SourceLabel: "[]VUnionDepth1_All{{F27: -7.697336e+07}, {F0: nil}}",
+		SourceLabel: "[]VUnionDepth1_All{{F19: 13}, {F0: VList_VInt32{-693542822, -526313624, -1066861006}}}",
 		Source: []VUnionDepth1_All{
-			VUnionDepth1_AllF27{-7.697336e+07},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF19{13},
+			VUnionDepth1_AllF0{VList_VInt32{
+				-693542822,
+				-526313624,
+				-1066861006,
+			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth1_All{{F27: -7.697336e+07}, {F0: nil}}",
+		TargetLabel: "[]VUnionDepth1_All{{F19: 13}, {F0: VList_VInt32{-693542822, -526313624, -1066861006}}}",
 		Target: []VUnionDepth1_All{
-			VUnionDepth1_AllF27{-7.697336e+07},
-			VUnionDepth1_AllF0{},
+			VUnionDepth1_AllF19{13},
+			VUnionDepth1_AllF0{VList_VInt32{
+				-693542822,
+				-526313624,
+				-1066861006,
+			}},
 		},
-		SourceLabel: "[]any{VUnionDepth1_All{F27: -7.697336e+07}, VUnionDepth1_All{F0: nil}}",
+		SourceLabel: "[]any{VUnionDepth1_All{F19: 13}, VUnionDepth1_All{F0: VList_VInt32{-693542822, -526313624, -1066861006}}}",
 		Source: []interface{}{
-			VUnionDepth1_All(VUnionDepth1_AllF27{-7.697336e+07}),
-			VUnionDepth1_All(VUnionDepth1_AllF0{}),
+			VUnionDepth1_All(VUnionDepth1_AllF19{13}),
+			VUnionDepth1_All(VUnionDepth1_AllF0{VList_VInt32{
+				-693542822,
+				-526313624,
+				-1066861006,
+			}}),
 		},
 	},
 	{
@@ -28796,7 +28806,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		TargetLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Target: []*VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -28835,7 +28845,7 @@ var vAllPass = []Entry{
 				F30: &VStructEmpty{},
 			},
 		},
-		SourceLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		SourceLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Source: []*VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -28877,7 +28887,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		TargetLabel: "[]?VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Target: []*VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -28916,7 +28926,7 @@ var vAllPass = []Entry{
 				F30: &VStructEmpty{},
 			},
 		},
-		SourceLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		SourceLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Source: VList_VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -28959,173 +28969,175 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth1_All{{F0: VBool(true), F1: true, F2: true, F3: \"klmno\", F5: typeobject(VArray2_VByte), F7: 175, F9: VEnumBcd.D, F11: {Id: \"mnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ王普澤世\"}, F12: 40855, F13: 17247, F16: 10085357815772873841, F17: 14953109119995679310, F18: 55, F19: 61, F20: -8060, F21: 9689, F22: 1022389604, F23: 826223535, F24: -3498848662622592061, F25: -1442402220057388995, F26: -3.0366864e+08, F27: 7.7202355e+08, F28: -7.816335815366534e+08, F29: -3.999490350439903e+08}}",
+		TargetLabel: "[]?VStructDepth1_All{{}, {}}",
 		Target: []*VStructDepth1_All{
 			{
-				F0: VBool(true),
-				F1: true,
-				F2: true,
-				F3: "klmno",
-				F5: vdl.TypeOf((*VArray2_VByte)(nil)),
-				F7: 175,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "mnopΔΘΠ",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ王普澤世",
-				}),
-				F12: 40855,
-				F13: 17247,
-				F16: 10085357815772873841,
-				F17: 14953109119995679310,
-				F18: 55,
-				F19: 61,
-				F20: -8060,
-				F21: 9689,
-				F22: 1022389604,
-				F23: 826223535,
-				F24: -3498848662622592061,
-				F25: -1442402220057388995,
-				F26: -3.0366864e+08,
-				F27: 7.7202355e+08,
-				F28: -7.816335815366534e+08,
-				F29: -3.999490350439903e+08,
+				F5: vdl.AnyType,
+			},
+			{
+				F5: vdl.AnyType,
 			},
 		},
-		SourceLabel: "[]?VStructDepth1_All{{F0: VBool(true), F1: true, F2: true, F3: \"klmno\", F5: typeobject(VArray2_VByte), F7: 175, F9: VEnumBcd.D, F11: {Id: \"mnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ王普澤世\"}, F12: 40855, F13: 17247, F16: 10085357815772873841, F17: 14953109119995679310, F18: 55, F19: 61, F20: -8060, F21: 9689, F22: 1022389604, F23: 826223535, F24: -3498848662622592061, F25: -1442402220057388995, F26: -3.0366864e+08, F27: 7.7202355e+08, F28: -7.816335815366534e+08, F29: -3.999490350439903e+08}}",
+		SourceLabel: "[]?VStructDepth1_All{{}, {}}",
 		Source: []*VStructDepth1_All{
 			{
-				F0: VBool(true),
-				F1: true,
-				F2: true,
-				F3: "klmno",
-				F5: vdl.TypeOf((*VArray2_VByte)(nil)),
-				F7: 175,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "mnopΔΘΠ",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ王普澤世",
-				}),
-				F12: 40855,
-				F13: 17247,
-				F16: 10085357815772873841,
-				F17: 14953109119995679310,
-				F18: 55,
-				F19: 61,
-				F20: -8060,
-				F21: 9689,
-				F22: 1022389604,
-				F23: 826223535,
-				F24: -3498848662622592061,
-				F25: -1442402220057388995,
-				F26: -3.0366864e+08,
-				F27: 7.7202355e+08,
-				F28: -7.816335815366534e+08,
-				F29: -3.999490350439903e+08,
+				F5: vdl.AnyType,
+			},
+			{
+				F5: vdl.AnyType,
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth1_All{{F0: VBool(true), F1: true, F2: true, F3: \"klmno\", F5: typeobject(VArray2_VByte), F7: 175, F9: VEnumBcd.D, F11: {Id: \"mnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ王普澤世\"}, F12: 40855, F13: 17247, F16: 10085357815772873841, F17: 14953109119995679310, F18: 55, F19: 61, F20: -8060, F21: 9689, F22: 1022389604, F23: 826223535, F24: -3498848662622592061, F25: -1442402220057388995, F26: -3.0366864e+08, F27: 7.7202355e+08, F28: -7.816335815366534e+08, F29: -3.999490350439903e+08}}",
+		TargetLabel: "[]?VStructDepth1_All{{}, {}}",
 		Target: []*VStructDepth1_All{
 			{
-				F0: VBool(true),
-				F1: true,
-				F2: true,
-				F3: "klmno",
-				F5: vdl.TypeOf((*VArray2_VByte)(nil)),
-				F7: 175,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "mnopΔΘΠ",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ王普澤世",
-				}),
-				F12: 40855,
-				F13: 17247,
-				F16: 10085357815772873841,
-				F17: 14953109119995679310,
-				F18: 55,
-				F19: 61,
-				F20: -8060,
-				F21: 9689,
-				F22: 1022389604,
-				F23: 826223535,
-				F24: -3498848662622592061,
-				F25: -1442402220057388995,
-				F26: -3.0366864e+08,
-				F27: 7.7202355e+08,
-				F28: -7.816335815366534e+08,
-				F29: -3.999490350439903e+08,
+				F5: vdl.AnyType,
+			},
+			{
+				F5: vdl.AnyType,
 			},
 		},
-		SourceLabel: "[]any{VStructDepth1_All{F0: VBool(true), F1: true, F2: true, F3: \"klmno\", F5: typeobject(VArray2_VByte), F7: 175, F9: VEnumBcd.D, F11: {Id: \"mnopΔΘΠ\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ王普澤世\"}, F12: 40855, F13: 17247, F16: 10085357815772873841, F17: 14953109119995679310, F18: 55, F19: 61, F20: -8060, F21: 9689, F22: 1022389604, F23: 826223535, F24: -3498848662622592061, F25: -1442402220057388995, F26: -3.0366864e+08, F27: 7.7202355e+08, F28: -7.816335815366534e+08, F29: -3.999490350439903e+08}}",
-		Source: []interface{}{
-			VStructDepth1_All{
-				F0: VBool(true),
-				F1: true,
-				F2: true,
-				F3: "klmno",
-				F5: vdl.TypeOf((*VArray2_VByte)(nil)),
-				F7: 175,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "mnopΔΘΠ",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ王普澤世",
-				}),
-				F12: 40855,
-				F13: 17247,
-				F16: 10085357815772873841,
-				F17: 14953109119995679310,
-				F18: 55,
-				F19: 61,
-				F20: -8060,
-				F21: 9689,
-				F22: 1022389604,
-				F23: 826223535,
-				F24: -3498848662622592061,
-				F25: -1442402220057388995,
-				F26: -3.0366864e+08,
-				F27: 7.7202355e+08,
-				F28: -7.816335815366534e+08,
-				F29: -3.999490350439903e+08,
-			},
+		SourceLabel: "[]VStructDepth1_Rand0{{}, {}}",
+		Source: []VStructDepth1_Rand0{
+			{},
+			{},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth1_All{{}, nil}",
+		TargetLabel: "[]?VStructDepth1_All{{}, {}, {F0: VSet_VBool{true}, F3: \"ΣΦ王普澤世界\", F4: \"cdefghijklmnop\", F7: 239, F8: C, F12: 58762, F13: 24481, F16: 12279421376077321512, F17: 3679344278506090497, F18: -60, F20: -2632, F22: -460221214, F23: 82191003, F24: -1280749698743137210, F25: -463360710480301154, F27: -9.687713e+08, F28: -1.9717678152338676e+09, F29: -9.706963374931696e+07}}",
 		Target: []*VStructDepth1_All{
 			{
 				F5: vdl.AnyType,
 			},
-			nil,
+			{
+				F5: vdl.AnyType,
+			},
+			{
+				F0: VSet_VBool{
+					true: struct{}{},
+				},
+				F3:  "ΣΦ王普澤世界",
+				F4:  "cdefghijklmnop",
+				F5:  vdl.AnyType,
+				F7:  239,
+				F8:  VEnumAbcC,
+				F12: 58762,
+				F13: 24481,
+				F16: 12279421376077321512,
+				F17: 3679344278506090497,
+				F18: -60,
+				F20: -2632,
+				F22: -460221214,
+				F23: 82191003,
+				F24: -1280749698743137210,
+				F25: -463360710480301154,
+				F27: -9.687713e+08,
+				F28: -1.9717678152338676e+09,
+				F29: -9.706963374931696e+07,
+			},
 		},
-		SourceLabel: "[]?VStructDepth1_All{{}, nil}",
+		SourceLabel: "[]?VStructDepth1_All{{}, {}, {F0: VSet_VBool{true}, F3: \"ΣΦ王普澤世界\", F4: \"cdefghijklmnop\", F7: 239, F8: C, F12: 58762, F13: 24481, F16: 12279421376077321512, F17: 3679344278506090497, F18: -60, F20: -2632, F22: -460221214, F23: 82191003, F24: -1280749698743137210, F25: -463360710480301154, F27: -9.687713e+08, F28: -1.9717678152338676e+09, F29: -9.706963374931696e+07}}",
 		Source: []*VStructDepth1_All{
 			{
 				F5: vdl.AnyType,
 			},
-			nil,
+			{
+				F5: vdl.AnyType,
+			},
+			{
+				F0: VSet_VBool{
+					true: struct{}{},
+				},
+				F3:  "ΣΦ王普澤世界",
+				F4:  "cdefghijklmnop",
+				F5:  vdl.AnyType,
+				F7:  239,
+				F8:  VEnumAbcC,
+				F12: 58762,
+				F13: 24481,
+				F16: 12279421376077321512,
+				F17: 3679344278506090497,
+				F18: -60,
+				F20: -2632,
+				F22: -460221214,
+				F23: 82191003,
+				F24: -1280749698743137210,
+				F25: -463360710480301154,
+				F27: -9.687713e+08,
+				F28: -1.9717678152338676e+09,
+				F29: -9.706963374931696e+07,
+			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth1_All{{}, nil}",
+		TargetLabel: "[]?VStructDepth1_All{{}, {}, {F0: VSet_VBool{true}, F3: \"ΣΦ王普澤世界\", F4: \"cdefghijklmnop\", F7: 239, F8: C, F12: 58762, F13: 24481, F16: 12279421376077321512, F17: 3679344278506090497, F18: -60, F20: -2632, F22: -460221214, F23: 82191003, F24: -1280749698743137210, F25: -463360710480301154, F27: -9.687713e+08, F28: -1.9717678152338676e+09, F29: -9.706963374931696e+07}}",
 		Target: []*VStructDepth1_All{
 			{
 				F5: vdl.AnyType,
 			},
-			nil,
+			{
+				F5: vdl.AnyType,
+			},
+			{
+				F0: VSet_VBool{
+					true: struct{}{},
+				},
+				F3:  "ΣΦ王普澤世界",
+				F4:  "cdefghijklmnop",
+				F5:  vdl.AnyType,
+				F7:  239,
+				F8:  VEnumAbcC,
+				F12: 58762,
+				F13: 24481,
+				F16: 12279421376077321512,
+				F17: 3679344278506090497,
+				F18: -60,
+				F20: -2632,
+				F22: -460221214,
+				F23: 82191003,
+				F24: -1280749698743137210,
+				F25: -463360710480301154,
+				F27: -9.687713e+08,
+				F28: -1.9717678152338676e+09,
+				F29: -9.706963374931696e+07,
+			},
 		},
-		SourceLabel: "[]?VStructEmpty{{}, nil}",
-		Source: []*VStructEmpty{
-			{},
-			nil,
+		SourceLabel: "[]any{?VStructDepth1_All{}, ?VStructDepth1_All{}, ?VStructDepth1_All{F0: VSet_VBool{true}, F3: \"ΣΦ王普澤世界\", F4: \"cdefghijklmnop\", F7: 239, F8: C, F12: 58762, F13: 24481, F16: 12279421376077321512, F17: 3679344278506090497, F18: -60, F20: -2632, F22: -460221214, F23: 82191003, F24: -1280749698743137210, F25: -463360710480301154, F27: -9.687713e+08, F28: -1.9717678152338676e+09, F29: -9.706963374931696e+07}}",
+		Source: []interface{}{
+			&VStructDepth1_All{
+				F5: vdl.AnyType,
+			},
+			&VStructDepth1_All{
+				F5: vdl.AnyType,
+			},
+			&VStructDepth1_All{
+				F0: VSet_VBool{
+					true: struct{}{},
+				},
+				F3:  "ΣΦ王普澤世界",
+				F4:  "cdefghijklmnop",
+				F5:  vdl.AnyType,
+				F7:  239,
+				F8:  VEnumAbcC,
+				F12: 58762,
+				F13: 24481,
+				F16: 12279421376077321512,
+				F17: 3679344278506090497,
+				F18: -60,
+				F20: -2632,
+				F22: -460221214,
+				F23: 82191003,
+				F24: -1280749698743137210,
+				F25: -463360710480301154,
+				F27: -9.687713e+08,
+				F28: -1.9717678152338676e+09,
+				F29: -9.706963374931696e+07,
+			},
 		},
 	},
 	{
@@ -29517,7 +29529,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Target: VList_VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -29556,7 +29568,7 @@ var vAllPass = []Entry{
 				F30: &VStructEmpty{},
 			},
 		},
-		SourceLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		SourceLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Source: VList_VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -29598,7 +29610,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Target: VList_VStructDepth1_All{
 			{
 				F0: int64(-123),
@@ -29637,7 +29649,7 @@ var vAllPass = []Entry{
 				F30: &VStructEmpty{},
 			},
 		},
-		SourceLabel: "VList_Any{VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
+		SourceLabel: "VList_Any{VStructDepth1_All{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}",
 		Source: VList_Any{
 			VStructDepth1_All{
 				F0: int64(-123),
@@ -29680,474 +29692,426 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth1_All{{F0: VStructEmpty{}, F3: \"hij\", F5: typeobject([]VStructEmpty), F6: 127, F7: 221, F12: 2610, F13: 44169, F15: 1192130562, F17: 4717029370929212387, F18: 31, F19: -60, F21: 13754, F22: -433658042, F23: 396224895, F24: -2594932725728250170, F25: 948608726767510678, F26: 3.775632e+08, F27: -2.8579523e+08, F28: 5.24815190276143e+08, F29: 2.396278790236233e+09, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: int8(5), F4: \"ghij\", F5: typeobject([]bool), F6: 192, F7: 4, F8: C, F11: {Id: \"jklmno\", RetryCode: RetryRefetch, Msg: \"klm\"}, F12: 4266, F13: 28902, F15: 3970415667, F16: 9486129575864578090, F17: 12058456539967958857, F18: 19, F22: -966216280, F23: -211655131, F25: 3728730146845766981, F26: -2.4851195e+09, F27: 3.0850634e+08, F28: -2.199522231425854e+09, F29: 2.1137356276573002e+08, F30: {}}, {F0: set[VStructEmpty]{{}}, F4: \"普\", F5: typeobject(VList_VUnionDepth2_All), F6: 164, F7: 180, F8: C, F9: C, F11: {Id: \"klmnopΔΘΠΣΦ\", RetryCode: RetryRefetch, Msg: \"ab\"}, F12: 21073, F14: 1796837508, F15: 575154625, F16: 12411282092136224509, F17: 16139797243025693823, F18: -7, F19: 24, F21: -6530, F22: -92705872, F23: -184589513, F24: 35285900527690906, F25: -1630077777113020576, F26: 1.3783112e+08, F27: 2.3134313e+09, F28: 1.7474280157908504e+09, F29: 4.40640535315854e+08}}",
 		Target: VList_VStructDepth1_All{
 			{
-				F0:  VStructEmpty{},
-				F3:  "hij",
-				F5:  vdl.TypeOf((*[]VStructEmpty)(nil)),
-				F6:  127,
-				F7:  221,
-				F12: 2610,
-				F13: 44169,
-				F15: 1192130562,
-				F17: 4717029370929212387,
-				F18: 31,
-				F19: -60,
-				F21: 13754,
-				F22: -433658042,
-				F23: 396224895,
-				F24: -2594932725728250170,
-				F25: 948608726767510678,
-				F26: 3.775632e+08,
-				F27: -2.8579523e+08,
-				F28: 5.24815190276143e+08,
-				F29: 2.396278790236233e+09,
+				F0: int8(5),
+				F4: "ghij",
+				F5: vdl.TypeOf((*[]bool)(nil)),
+				F6: 192,
+				F7: 4,
+				F8: VEnumAbcC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "jklmno",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "klm",
+				}),
+				F12: 4266,
+				F13: 28902,
+				F15: 3970415667,
+				F16: 9486129575864578090,
+				F17: 12058456539967958857,
+				F18: 19,
+				F22: -966216280,
+				F23: -211655131,
+				F25: 3728730146845766981,
+				F26: -2.4851195e+09,
+				F27: 3.0850634e+08,
+				F28: -2.199522231425854e+09,
+				F29: 2.1137356276573002e+08,
 				F30: &VStructEmpty{},
 			},
+			{
+				F0: map[VStructEmpty]struct{}{
+					{}: struct{}{},
+				},
+				F4: "普",
+				F5: vdl.TypeOf((*VList_VUnionDepth2_All)(nil)),
+				F6: 164,
+				F7: 180,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "klmnopΔΘΠΣΦ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "ab",
+				}),
+				F12: 21073,
+				F14: 1796837508,
+				F15: 575154625,
+				F16: 12411282092136224509,
+				F17: 16139797243025693823,
+				F18: -7,
+				F19: 24,
+				F21: -6530,
+				F22: -92705872,
+				F23: -184589513,
+				F24: 35285900527690906,
+				F25: -1630077777113020576,
+				F26: 1.3783112e+08,
+				F27: 2.3134313e+09,
+				F28: 1.7474280157908504e+09,
+				F29: 4.40640535315854e+08,
+			},
 		},
-		SourceLabel: "VList_VStructDepth1_All{{F0: VStructEmpty{}, F3: \"hij\", F5: typeobject([]VStructEmpty), F6: 127, F7: 221, F12: 2610, F13: 44169, F15: 1192130562, F17: 4717029370929212387, F18: 31, F19: -60, F21: 13754, F22: -433658042, F23: 396224895, F24: -2594932725728250170, F25: 948608726767510678, F26: 3.775632e+08, F27: -2.8579523e+08, F28: 5.24815190276143e+08, F29: 2.396278790236233e+09, F30: {}}}",
+		SourceLabel: "VList_VStructDepth1_All{{F0: int8(5), F4: \"ghij\", F5: typeobject([]bool), F6: 192, F7: 4, F8: C, F11: {Id: \"jklmno\", RetryCode: RetryRefetch, Msg: \"klm\"}, F12: 4266, F13: 28902, F15: 3970415667, F16: 9486129575864578090, F17: 12058456539967958857, F18: 19, F22: -966216280, F23: -211655131, F25: 3728730146845766981, F26: -2.4851195e+09, F27: 3.0850634e+08, F28: -2.199522231425854e+09, F29: 2.1137356276573002e+08, F30: {}}, {F0: set[VStructEmpty]{{}}, F4: \"普\", F5: typeobject(VList_VUnionDepth2_All), F6: 164, F7: 180, F8: C, F9: C, F11: {Id: \"klmnopΔΘΠΣΦ\", RetryCode: RetryRefetch, Msg: \"ab\"}, F12: 21073, F14: 1796837508, F15: 575154625, F16: 12411282092136224509, F17: 16139797243025693823, F18: -7, F19: 24, F21: -6530, F22: -92705872, F23: -184589513, F24: 35285900527690906, F25: -1630077777113020576, F26: 1.3783112e+08, F27: 2.3134313e+09, F28: 1.7474280157908504e+09, F29: 4.40640535315854e+08}}",
 		Source: VList_VStructDepth1_All{
 			{
-				F0:  VStructEmpty{},
-				F3:  "hij",
-				F5:  vdl.TypeOf((*[]VStructEmpty)(nil)),
-				F6:  127,
-				F7:  221,
-				F12: 2610,
-				F13: 44169,
-				F15: 1192130562,
-				F17: 4717029370929212387,
-				F18: 31,
-				F19: -60,
-				F21: 13754,
-				F22: -433658042,
-				F23: 396224895,
-				F24: -2594932725728250170,
-				F25: 948608726767510678,
-				F26: 3.775632e+08,
-				F27: -2.8579523e+08,
-				F28: 5.24815190276143e+08,
-				F29: 2.396278790236233e+09,
+				F0: int8(5),
+				F4: "ghij",
+				F5: vdl.TypeOf((*[]bool)(nil)),
+				F6: 192,
+				F7: 4,
+				F8: VEnumAbcC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "jklmno",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "klm",
+				}),
+				F12: 4266,
+				F13: 28902,
+				F15: 3970415667,
+				F16: 9486129575864578090,
+				F17: 12058456539967958857,
+				F18: 19,
+				F22: -966216280,
+				F23: -211655131,
+				F25: 3728730146845766981,
+				F26: -2.4851195e+09,
+				F27: 3.0850634e+08,
+				F28: -2.199522231425854e+09,
+				F29: 2.1137356276573002e+08,
 				F30: &VStructEmpty{},
+			},
+			{
+				F0: map[VStructEmpty]struct{}{
+					{}: struct{}{},
+				},
+				F4: "普",
+				F5: vdl.TypeOf((*VList_VUnionDepth2_All)(nil)),
+				F6: 164,
+				F7: 180,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "klmnopΔΘΠΣΦ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "ab",
+				}),
+				F12: 21073,
+				F14: 1796837508,
+				F15: 575154625,
+				F16: 12411282092136224509,
+				F17: 16139797243025693823,
+				F18: -7,
+				F19: 24,
+				F21: -6530,
+				F22: -92705872,
+				F23: -184589513,
+				F24: 35285900527690906,
+				F25: -1630077777113020576,
+				F26: 1.3783112e+08,
+				F27: 2.3134313e+09,
+				F28: 1.7474280157908504e+09,
+				F29: 4.40640535315854e+08,
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth1_All{{F0: VStructEmpty{}, F3: \"hij\", F5: typeobject([]VStructEmpty), F6: 127, F7: 221, F12: 2610, F13: 44169, F15: 1192130562, F17: 4717029370929212387, F18: 31, F19: -60, F21: 13754, F22: -433658042, F23: 396224895, F24: -2594932725728250170, F25: 948608726767510678, F26: 3.775632e+08, F27: -2.8579523e+08, F28: 5.24815190276143e+08, F29: 2.396278790236233e+09, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: int8(5), F4: \"ghij\", F5: typeobject([]bool), F6: 192, F7: 4, F8: C, F11: {Id: \"jklmno\", RetryCode: RetryRefetch, Msg: \"klm\"}, F12: 4266, F13: 28902, F15: 3970415667, F16: 9486129575864578090, F17: 12058456539967958857, F18: 19, F22: -966216280, F23: -211655131, F25: 3728730146845766981, F26: -2.4851195e+09, F27: 3.0850634e+08, F28: -2.199522231425854e+09, F29: 2.1137356276573002e+08, F30: {}}, {F0: set[VStructEmpty]{{}}, F4: \"普\", F5: typeobject(VList_VUnionDepth2_All), F6: 164, F7: 180, F8: C, F9: C, F11: {Id: \"klmnopΔΘΠΣΦ\", RetryCode: RetryRefetch, Msg: \"ab\"}, F12: 21073, F14: 1796837508, F15: 575154625, F16: 12411282092136224509, F17: 16139797243025693823, F18: -7, F19: 24, F21: -6530, F22: -92705872, F23: -184589513, F24: 35285900527690906, F25: -1630077777113020576, F26: 1.3783112e+08, F27: 2.3134313e+09, F28: 1.7474280157908504e+09, F29: 4.40640535315854e+08}}",
 		Target: VList_VStructDepth1_All{
 			{
-				F0:  VStructEmpty{},
-				F3:  "hij",
-				F5:  vdl.TypeOf((*[]VStructEmpty)(nil)),
-				F6:  127,
-				F7:  221,
-				F12: 2610,
-				F13: 44169,
-				F15: 1192130562,
-				F17: 4717029370929212387,
-				F18: 31,
-				F19: -60,
-				F21: 13754,
-				F22: -433658042,
-				F23: 396224895,
-				F24: -2594932725728250170,
-				F25: 948608726767510678,
-				F26: 3.775632e+08,
-				F27: -2.8579523e+08,
-				F28: 5.24815190276143e+08,
-				F29: 2.396278790236233e+09,
+				F0: int8(5),
+				F4: "ghij",
+				F5: vdl.TypeOf((*[]bool)(nil)),
+				F6: 192,
+				F7: 4,
+				F8: VEnumAbcC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "jklmno",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "klm",
+				}),
+				F12: 4266,
+				F13: 28902,
+				F15: 3970415667,
+				F16: 9486129575864578090,
+				F17: 12058456539967958857,
+				F18: 19,
+				F22: -966216280,
+				F23: -211655131,
+				F25: 3728730146845766981,
+				F26: -2.4851195e+09,
+				F27: 3.0850634e+08,
+				F28: -2.199522231425854e+09,
+				F29: 2.1137356276573002e+08,
 				F30: &VStructEmpty{},
 			},
+			{
+				F0: map[VStructEmpty]struct{}{
+					{}: struct{}{},
+				},
+				F4: "普",
+				F5: vdl.TypeOf((*VList_VUnionDepth2_All)(nil)),
+				F6: 164,
+				F7: 180,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "klmnopΔΘΠΣΦ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "ab",
+				}),
+				F12: 21073,
+				F14: 1796837508,
+				F15: 575154625,
+				F16: 12411282092136224509,
+				F17: 16139797243025693823,
+				F18: -7,
+				F19: 24,
+				F21: -6530,
+				F22: -92705872,
+				F23: -184589513,
+				F24: 35285900527690906,
+				F25: -1630077777113020576,
+				F26: 1.3783112e+08,
+				F27: 2.3134313e+09,
+				F28: 1.7474280157908504e+09,
+				F29: 4.40640535315854e+08,
+			},
 		},
-		SourceLabel: "[]any{VStructDepth1_All{F0: VStructEmpty{}, F3: \"hij\", F5: typeobject([]VStructEmpty), F6: 127, F7: 221, F12: 2610, F13: 44169, F15: 1192130562, F17: 4717029370929212387, F18: 31, F19: -60, F21: 13754, F22: -433658042, F23: 396224895, F24: -2594932725728250170, F25: 948608726767510678, F26: 3.775632e+08, F27: -2.8579523e+08, F28: 5.24815190276143e+08, F29: 2.396278790236233e+09, F30: {}}}",
+		SourceLabel: "[]any{VStructDepth1_All{F0: int8(5), F4: \"ghij\", F5: typeobject([]bool), F6: 192, F7: 4, F8: C, F11: {Id: \"jklmno\", RetryCode: RetryRefetch, Msg: \"klm\"}, F12: 4266, F13: 28902, F15: 3970415667, F16: 9486129575864578090, F17: 12058456539967958857, F18: 19, F22: -966216280, F23: -211655131, F25: 3728730146845766981, F26: -2.4851195e+09, F27: 3.0850634e+08, F28: -2.199522231425854e+09, F29: 2.1137356276573002e+08, F30: {}}, VStructDepth1_All{F0: set[VStructEmpty]{{}}, F4: \"普\", F5: typeobject(VList_VUnionDepth2_All), F6: 164, F7: 180, F8: C, F9: C, F11: {Id: \"klmnopΔΘΠΣΦ\", RetryCode: RetryRefetch, Msg: \"ab\"}, F12: 21073, F14: 1796837508, F15: 575154625, F16: 12411282092136224509, F17: 16139797243025693823, F18: -7, F19: 24, F21: -6530, F22: -92705872, F23: -184589513, F24: 35285900527690906, F25: -1630077777113020576, F26: 1.3783112e+08, F27: 2.3134313e+09, F28: 1.7474280157908504e+09, F29: 4.40640535315854e+08}}",
 		Source: []interface{}{
 			VStructDepth1_All{
-				F0:  VStructEmpty{},
-				F3:  "hij",
-				F5:  vdl.TypeOf((*[]VStructEmpty)(nil)),
-				F6:  127,
-				F7:  221,
-				F12: 2610,
-				F13: 44169,
-				F15: 1192130562,
-				F17: 4717029370929212387,
-				F18: 31,
-				F19: -60,
-				F21: 13754,
-				F22: -433658042,
-				F23: 396224895,
-				F24: -2594932725728250170,
-				F25: 948608726767510678,
-				F26: 3.775632e+08,
-				F27: -2.8579523e+08,
-				F28: 5.24815190276143e+08,
-				F29: 2.396278790236233e+09,
+				F0: int8(5),
+				F4: "ghij",
+				F5: vdl.TypeOf((*[]bool)(nil)),
+				F6: 192,
+				F7: 4,
+				F8: VEnumAbcC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "jklmno",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "klm",
+				}),
+				F12: 4266,
+				F13: 28902,
+				F15: 3970415667,
+				F16: 9486129575864578090,
+				F17: 12058456539967958857,
+				F18: 19,
+				F22: -966216280,
+				F23: -211655131,
+				F25: 3728730146845766981,
+				F26: -2.4851195e+09,
+				F27: 3.0850634e+08,
+				F28: -2.199522231425854e+09,
+				F29: 2.1137356276573002e+08,
 				F30: &VStructEmpty{},
+			},
+			VStructDepth1_All{
+				F0: map[VStructEmpty]struct{}{
+					{}: struct{}{},
+				},
+				F4: "普",
+				F5: vdl.TypeOf((*VList_VUnionDepth2_All)(nil)),
+				F6: 164,
+				F7: 180,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
+				F11: verror.FromWire(vdl.WireError{
+					Id:        "klmnopΔΘΠΣΦ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "ab",
+				}),
+				F12: 21073,
+				F14: 1796837508,
+				F15: 575154625,
+				F16: 12411282092136224509,
+				F17: 16139797243025693823,
+				F18: -7,
+				F19: 24,
+				F21: -6530,
+				F22: -92705872,
+				F23: -184589513,
+				F24: 35285900527690906,
+				F25: -1630077777113020576,
+				F26: 1.3783112e+08,
+				F27: 2.3134313e+09,
+				F28: 1.7474280157908504e+09,
+				F29: 4.40640535315854e+08,
 			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth1_All{{F0: []VString{\"ijklmnopΔΘΠΣΦ王普澤世界\"}, F3: \"fghijklmnopΔΘΠ\", F4: \"klmno\", F6: 173, F7: 111, F9: VEnumBcd.C, F12: 35825, F13: 40082, F14: 2615863100, F15: 3798688582, F18: 27, F19: 57, F20: 15018, F21: 4835, F22: -645003665, F25: -1110992893157873684, F26: 1.8557765e+09, F27: -4.2703712e+08, F29: -7.885279465075186e+08}, {F0: []any{map[VStructEmpty]VStructEmpty{{}: {}}, set[VString]{\"ghij\", \"klmnop\"}}, F2: true, F3: \"defghijklmn\", F4: \"ghi\", F5: typeobject(VArray1_Byte), F6: 79, F7: 4, F9: VEnumBcd.C, F11: {Id: \"cdefghijklmn\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ\"}, F12: 31049, F14: 3137813505, F15: 450176025, F16: 4000023676373990261, F17: 15881086044205763941, F18: -29, F19: 38, F20: 9583, F21: -6199, F22: 1052108838, F23: -67050627, F26: 1.0322535e+09, F27: 2.757682e+09, F28: 8.752941819418495e+08, F30: {}}, {F0: typeobject(any), F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"no\", F5: typeobject(bool), F9: VEnumBcd.D, F11: {Id: \"fghijklmnop\", Msg: \"c\"}, F12: 58349, F13: 45192, F16: 9864256017058945597, F18: -49, F19: -24, F20: -8740, F21: 9562, F23: -968626330, F24: -117405511608200257, F26: -1.129015e+08, F27: 6.913144e+08, F29: 1.4114096119753578e+08, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: VList_VMap_VBool_VBool{{false: true, true: false}}, F2: true, F3: \"mnop\", F4: \"fghijkl\", F6: 161, F7: 241, F8: B, F11: {Id: \"ghij\", RetryCode: RetryRefetch, Msg: \"abcdefghijklmnopΔΘ\"}, F12: 24733, F13: 45960, F14: 3505261569, F16: 7943053407086744058, F17: 3757857731242091785, F18: 3, F19: -14, F21: -13430, F22: -517381375, F24: -355301716204349086, F25: -1691036775238692677, F26: 3.0881244e+09, F27: 7.240828e+08, F28: -4.4743079954544926e+08, F29: 4.677850102443165e+07}, {}}",
 		Target: VList_VStructDepth1_All{
 			{
-				F0: []VString{
-					"ijklmnopΔΘΠΣΦ王普澤世界",
-				},
-				F3:  "fghijklmnopΔΘΠ",
-				F4:  "klmno",
-				F5:  vdl.AnyType,
-				F6:  173,
-				F7:  111,
-				F9:  VEnumBcdC,
-				F12: 35825,
-				F13: 40082,
-				F14: 2615863100,
-				F15: 3798688582,
-				F18: 27,
-				F19: 57,
-				F20: 15018,
-				F21: 4835,
-				F22: -645003665,
-				F25: -1110992893157873684,
-				F26: 1.8557765e+09,
-				F27: -4.2703712e+08,
-				F29: -7.885279465075186e+08,
-			},
-			{
-				F0: []interface{}{
-					map[VStructEmpty]VStructEmpty{
-						{}: {},
-					},
-					map[VString]struct{}{
-						"ghij":   struct{}{},
-						"klmnop": struct{}{},
+				F0: VList_VMap_VBool_VBool{
+					{
+						false: true,
+						true:  false,
 					},
 				},
 				F2: true,
-				F3: "defghijklmn",
-				F4: "ghi",
-				F5: vdl.TypeOf((*VArray1_Byte)(nil)),
-				F6: 79,
-				F7: 4,
-				F9: VEnumBcdC,
+				F3: "mnop",
+				F4: "fghijkl",
+				F5: vdl.AnyType,
+				F6: 161,
+				F7: 241,
+				F8: VEnumAbcB,
 				F11: verror.FromWire(vdl.WireError{
-					Id:        "cdefghijklmn",
+					Id:        "ghij",
 					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ",
+					Msg:       "abcdefghijklmnopΔΘ",
 				}),
-				F12: 31049,
-				F14: 3137813505,
-				F15: 450176025,
-				F16: 4000023676373990261,
-				F17: 15881086044205763941,
-				F18: -29,
-				F19: 38,
-				F20: 9583,
-				F21: -6199,
-				F22: 1052108838,
-				F23: -67050627,
-				F26: 1.0322535e+09,
-				F27: 2.757682e+09,
-				F28: 8.752941819418495e+08,
-				F30: &VStructEmpty{},
+				F12: 24733,
+				F13: 45960,
+				F14: 3505261569,
+				F16: 7943053407086744058,
+				F17: 3757857731242091785,
+				F18: 3,
+				F19: -14,
+				F21: -13430,
+				F22: -517381375,
+				F24: -355301716204349086,
+				F25: -1691036775238692677,
+				F26: 3.0881244e+09,
+				F27: 7.240828e+08,
+				F28: -4.4743079954544926e+08,
+				F29: 4.677850102443165e+07,
 			},
 			{
-				F0: vdl.AnyType,
-				F3: "defghijklmnopΔΘΠΣΦ王",
-				F4: "no",
-				F5: vdl.BoolType,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:  "fghijklmnop",
-					Msg: "c",
-				}),
-				F12: 58349,
-				F13: 45192,
-				F16: 9864256017058945597,
-				F18: -49,
-				F19: -24,
-				F20: -8740,
-				F21: 9562,
-				F23: -968626330,
-				F24: -117405511608200257,
-				F26: -1.129015e+08,
-				F27: 6.913144e+08,
-				F29: 1.4114096119753578e+08,
-				F30: &VStructEmpty{},
+				F5: vdl.AnyType,
 			},
 		},
-		SourceLabel: "VList_VStructDepth1_All{{F0: []VString{\"ijklmnopΔΘΠΣΦ王普澤世界\"}, F3: \"fghijklmnopΔΘΠ\", F4: \"klmno\", F6: 173, F7: 111, F9: VEnumBcd.C, F12: 35825, F13: 40082, F14: 2615863100, F15: 3798688582, F18: 27, F19: 57, F20: 15018, F21: 4835, F22: -645003665, F25: -1110992893157873684, F26: 1.8557765e+09, F27: -4.2703712e+08, F29: -7.885279465075186e+08}, {F0: []any{map[VStructEmpty]VStructEmpty{{}: {}}, set[VString]{\"ghij\", \"klmnop\"}}, F2: true, F3: \"defghijklmn\", F4: \"ghi\", F5: typeobject(VArray1_Byte), F6: 79, F7: 4, F9: VEnumBcd.C, F11: {Id: \"cdefghijklmn\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ\"}, F12: 31049, F14: 3137813505, F15: 450176025, F16: 4000023676373990261, F17: 15881086044205763941, F18: -29, F19: 38, F20: 9583, F21: -6199, F22: 1052108838, F23: -67050627, F26: 1.0322535e+09, F27: 2.757682e+09, F28: 8.752941819418495e+08, F30: {}}, {F0: typeobject(any), F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"no\", F5: typeobject(bool), F9: VEnumBcd.D, F11: {Id: \"fghijklmnop\", Msg: \"c\"}, F12: 58349, F13: 45192, F16: 9864256017058945597, F18: -49, F19: -24, F20: -8740, F21: 9562, F23: -968626330, F24: -117405511608200257, F26: -1.129015e+08, F27: 6.913144e+08, F29: 1.4114096119753578e+08, F30: {}}}",
+		SourceLabel: "VList_VStructDepth1_All{{F0: VList_VMap_VBool_VBool{{false: true, true: false}}, F2: true, F3: \"mnop\", F4: \"fghijkl\", F6: 161, F7: 241, F8: B, F11: {Id: \"ghij\", RetryCode: RetryRefetch, Msg: \"abcdefghijklmnopΔΘ\"}, F12: 24733, F13: 45960, F14: 3505261569, F16: 7943053407086744058, F17: 3757857731242091785, F18: 3, F19: -14, F21: -13430, F22: -517381375, F24: -355301716204349086, F25: -1691036775238692677, F26: 3.0881244e+09, F27: 7.240828e+08, F28: -4.4743079954544926e+08, F29: 4.677850102443165e+07}, {}}",
 		Source: VList_VStructDepth1_All{
 			{
-				F0: []VString{
-					"ijklmnopΔΘΠΣΦ王普澤世界",
-				},
-				F3:  "fghijklmnopΔΘΠ",
-				F4:  "klmno",
-				F5:  vdl.AnyType,
-				F6:  173,
-				F7:  111,
-				F9:  VEnumBcdC,
-				F12: 35825,
-				F13: 40082,
-				F14: 2615863100,
-				F15: 3798688582,
-				F18: 27,
-				F19: 57,
-				F20: 15018,
-				F21: 4835,
-				F22: -645003665,
-				F25: -1110992893157873684,
-				F26: 1.8557765e+09,
-				F27: -4.2703712e+08,
-				F29: -7.885279465075186e+08,
-			},
-			{
-				F0: []interface{}{
-					map[VStructEmpty]VStructEmpty{
-						{}: {},
-					},
-					map[VString]struct{}{
-						"ghij":   struct{}{},
-						"klmnop": struct{}{},
+				F0: VList_VMap_VBool_VBool{
+					{
+						false: true,
+						true:  false,
 					},
 				},
 				F2: true,
-				F3: "defghijklmn",
-				F4: "ghi",
-				F5: vdl.TypeOf((*VArray1_Byte)(nil)),
-				F6: 79,
-				F7: 4,
-				F9: VEnumBcdC,
+				F3: "mnop",
+				F4: "fghijkl",
+				F5: vdl.AnyType,
+				F6: 161,
+				F7: 241,
+				F8: VEnumAbcB,
 				F11: verror.FromWire(vdl.WireError{
-					Id:        "cdefghijklmn",
+					Id:        "ghij",
 					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ",
+					Msg:       "abcdefghijklmnopΔΘ",
 				}),
-				F12: 31049,
-				F14: 3137813505,
-				F15: 450176025,
-				F16: 4000023676373990261,
-				F17: 15881086044205763941,
-				F18: -29,
-				F19: 38,
-				F20: 9583,
-				F21: -6199,
-				F22: 1052108838,
-				F23: -67050627,
-				F26: 1.0322535e+09,
-				F27: 2.757682e+09,
-				F28: 8.752941819418495e+08,
-				F30: &VStructEmpty{},
+				F12: 24733,
+				F13: 45960,
+				F14: 3505261569,
+				F16: 7943053407086744058,
+				F17: 3757857731242091785,
+				F18: 3,
+				F19: -14,
+				F21: -13430,
+				F22: -517381375,
+				F24: -355301716204349086,
+				F25: -1691036775238692677,
+				F26: 3.0881244e+09,
+				F27: 7.240828e+08,
+				F28: -4.4743079954544926e+08,
+				F29: 4.677850102443165e+07,
 			},
 			{
-				F0: vdl.AnyType,
-				F3: "defghijklmnopΔΘΠΣΦ王",
-				F4: "no",
-				F5: vdl.BoolType,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:  "fghijklmnop",
-					Msg: "c",
-				}),
-				F12: 58349,
-				F13: 45192,
-				F16: 9864256017058945597,
-				F18: -49,
-				F19: -24,
-				F20: -8740,
-				F21: 9562,
-				F23: -968626330,
-				F24: -117405511608200257,
-				F26: -1.129015e+08,
-				F27: 6.913144e+08,
-				F29: 1.4114096119753578e+08,
-				F30: &VStructEmpty{},
+				F5: vdl.AnyType,
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth1_All{{F0: []VString{\"ijklmnopΔΘΠΣΦ王普澤世界\"}, F3: \"fghijklmnopΔΘΠ\", F4: \"klmno\", F6: 173, F7: 111, F9: VEnumBcd.C, F12: 35825, F13: 40082, F14: 2615863100, F15: 3798688582, F18: 27, F19: 57, F20: 15018, F21: 4835, F22: -645003665, F25: -1110992893157873684, F26: 1.8557765e+09, F27: -4.2703712e+08, F29: -7.885279465075186e+08}, {F0: []any{map[VStructEmpty]VStructEmpty{{}: {}}, set[VString]{\"ghij\", \"klmnop\"}}, F2: true, F3: \"defghijklmn\", F4: \"ghi\", F5: typeobject(VArray1_Byte), F6: 79, F7: 4, F9: VEnumBcd.C, F11: {Id: \"cdefghijklmn\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ\"}, F12: 31049, F14: 3137813505, F15: 450176025, F16: 4000023676373990261, F17: 15881086044205763941, F18: -29, F19: 38, F20: 9583, F21: -6199, F22: 1052108838, F23: -67050627, F26: 1.0322535e+09, F27: 2.757682e+09, F28: 8.752941819418495e+08, F30: {}}, {F0: typeobject(any), F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"no\", F5: typeobject(bool), F9: VEnumBcd.D, F11: {Id: \"fghijklmnop\", Msg: \"c\"}, F12: 58349, F13: 45192, F16: 9864256017058945597, F18: -49, F19: -24, F20: -8740, F21: 9562, F23: -968626330, F24: -117405511608200257, F26: -1.129015e+08, F27: 6.913144e+08, F29: 1.4114096119753578e+08, F30: {}}}",
+		TargetLabel: "VList_VStructDepth1_All{{F0: VList_VMap_VBool_VBool{{false: true, true: false}}, F2: true, F3: \"mnop\", F4: \"fghijkl\", F6: 161, F7: 241, F8: B, F11: {Id: \"ghij\", RetryCode: RetryRefetch, Msg: \"abcdefghijklmnopΔΘ\"}, F12: 24733, F13: 45960, F14: 3505261569, F16: 7943053407086744058, F17: 3757857731242091785, F18: 3, F19: -14, F21: -13430, F22: -517381375, F24: -355301716204349086, F25: -1691036775238692677, F26: 3.0881244e+09, F27: 7.240828e+08, F28: -4.4743079954544926e+08, F29: 4.677850102443165e+07}, {}}",
 		Target: VList_VStructDepth1_All{
 			{
-				F0: []VString{
-					"ijklmnopΔΘΠΣΦ王普澤世界",
-				},
-				F3:  "fghijklmnopΔΘΠ",
-				F4:  "klmno",
-				F5:  vdl.AnyType,
-				F6:  173,
-				F7:  111,
-				F9:  VEnumBcdC,
-				F12: 35825,
-				F13: 40082,
-				F14: 2615863100,
-				F15: 3798688582,
-				F18: 27,
-				F19: 57,
-				F20: 15018,
-				F21: 4835,
-				F22: -645003665,
-				F25: -1110992893157873684,
-				F26: 1.8557765e+09,
-				F27: -4.2703712e+08,
-				F29: -7.885279465075186e+08,
-			},
-			{
-				F0: []interface{}{
-					map[VStructEmpty]VStructEmpty{
-						{}: {},
-					},
-					map[VString]struct{}{
-						"ghij":   struct{}{},
-						"klmnop": struct{}{},
+				F0: VList_VMap_VBool_VBool{
+					{
+						false: true,
+						true:  false,
 					},
 				},
 				F2: true,
-				F3: "defghijklmn",
-				F4: "ghi",
-				F5: vdl.TypeOf((*VArray1_Byte)(nil)),
-				F6: 79,
-				F7: 4,
-				F9: VEnumBcdC,
+				F3: "mnop",
+				F4: "fghijkl",
+				F5: vdl.AnyType,
+				F6: 161,
+				F7: 241,
+				F8: VEnumAbcB,
 				F11: verror.FromWire(vdl.WireError{
-					Id:        "cdefghijklmn",
+					Id:        "ghij",
 					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ",
+					Msg:       "abcdefghijklmnopΔΘ",
 				}),
-				F12: 31049,
-				F14: 3137813505,
-				F15: 450176025,
-				F16: 4000023676373990261,
-				F17: 15881086044205763941,
-				F18: -29,
-				F19: 38,
-				F20: 9583,
-				F21: -6199,
-				F22: 1052108838,
-				F23: -67050627,
-				F26: 1.0322535e+09,
-				F27: 2.757682e+09,
-				F28: 8.752941819418495e+08,
-				F30: &VStructEmpty{},
+				F12: 24733,
+				F13: 45960,
+				F14: 3505261569,
+				F16: 7943053407086744058,
+				F17: 3757857731242091785,
+				F18: 3,
+				F19: -14,
+				F21: -13430,
+				F22: -517381375,
+				F24: -355301716204349086,
+				F25: -1691036775238692677,
+				F26: 3.0881244e+09,
+				F27: 7.240828e+08,
+				F28: -4.4743079954544926e+08,
+				F29: 4.677850102443165e+07,
 			},
 			{
-				F0: vdl.AnyType,
-				F3: "defghijklmnopΔΘΠΣΦ王",
-				F4: "no",
-				F5: vdl.BoolType,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:  "fghijklmnop",
-					Msg: "c",
-				}),
-				F12: 58349,
-				F13: 45192,
-				F16: 9864256017058945597,
-				F18: -49,
-				F19: -24,
-				F20: -8740,
-				F21: 9562,
-				F23: -968626330,
-				F24: -117405511608200257,
-				F26: -1.129015e+08,
-				F27: 6.913144e+08,
-				F29: 1.4114096119753578e+08,
-				F30: &VStructEmpty{},
+				F5: vdl.AnyType,
 			},
 		},
-		SourceLabel: "[]any{VStructDepth1_All{F0: []VString{\"ijklmnopΔΘΠΣΦ王普澤世界\"}, F3: \"fghijklmnopΔΘΠ\", F4: \"klmno\", F6: 173, F7: 111, F9: VEnumBcd.C, F12: 35825, F13: 40082, F14: 2615863100, F15: 3798688582, F18: 27, F19: 57, F20: 15018, F21: 4835, F22: -645003665, F25: -1110992893157873684, F26: 1.8557765e+09, F27: -4.2703712e+08, F29: -7.885279465075186e+08}, VStructDepth1_All{F0: []any{map[VStructEmpty]VStructEmpty{{}: {}}, set[VString]{\"ghij\", \"klmnop\"}}, F2: true, F3: \"defghijklmn\", F4: \"ghi\", F5: typeobject(VArray1_Byte), F6: 79, F7: 4, F9: VEnumBcd.C, F11: {Id: \"cdefghijklmn\", RetryCode: RetryRefetch, Msg: \"klmnopΔΘΠΣΦ\"}, F12: 31049, F14: 3137813505, F15: 450176025, F16: 4000023676373990261, F17: 15881086044205763941, F18: -29, F19: 38, F20: 9583, F21: -6199, F22: 1052108838, F23: -67050627, F26: 1.0322535e+09, F27: 2.757682e+09, F28: 8.752941819418495e+08, F30: {}}, VStructDepth1_All{F0: typeobject(any), F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"no\", F5: typeobject(bool), F9: VEnumBcd.D, F11: {Id: \"fghijklmnop\", Msg: \"c\"}, F12: 58349, F13: 45192, F16: 9864256017058945597, F18: -49, F19: -24, F20: -8740, F21: 9562, F23: -968626330, F24: -117405511608200257, F26: -1.129015e+08, F27: 6.913144e+08, F29: 1.4114096119753578e+08, F30: {}}}",
+		SourceLabel: "[]any{VStructDepth1_All{F0: VList_VMap_VBool_VBool{{false: true, true: false}}, F2: true, F3: \"mnop\", F4: \"fghijkl\", F6: 161, F7: 241, F8: B, F11: {Id: \"ghij\", RetryCode: RetryRefetch, Msg: \"abcdefghijklmnopΔΘ\"}, F12: 24733, F13: 45960, F14: 3505261569, F16: 7943053407086744058, F17: 3757857731242091785, F18: 3, F19: -14, F21: -13430, F22: -517381375, F24: -355301716204349086, F25: -1691036775238692677, F26: 3.0881244e+09, F27: 7.240828e+08, F28: -4.4743079954544926e+08, F29: 4.677850102443165e+07}, VStructDepth1_All{}}",
 		Source: []interface{}{
 			VStructDepth1_All{
-				F0: []VString{
-					"ijklmnopΔΘΠΣΦ王普澤世界",
-				},
-				F3:  "fghijklmnopΔΘΠ",
-				F4:  "klmno",
-				F5:  vdl.AnyType,
-				F6:  173,
-				F7:  111,
-				F9:  VEnumBcdC,
-				F12: 35825,
-				F13: 40082,
-				F14: 2615863100,
-				F15: 3798688582,
-				F18: 27,
-				F19: 57,
-				F20: 15018,
-				F21: 4835,
-				F22: -645003665,
-				F25: -1110992893157873684,
-				F26: 1.8557765e+09,
-				F27: -4.2703712e+08,
-				F29: -7.885279465075186e+08,
-			},
-			VStructDepth1_All{
-				F0: []interface{}{
-					map[VStructEmpty]VStructEmpty{
-						{}: {},
-					},
-					map[VString]struct{}{
-						"ghij":   struct{}{},
-						"klmnop": struct{}{},
+				F0: VList_VMap_VBool_VBool{
+					{
+						false: true,
+						true:  false,
 					},
 				},
 				F2: true,
-				F3: "defghijklmn",
-				F4: "ghi",
-				F5: vdl.TypeOf((*VArray1_Byte)(nil)),
-				F6: 79,
-				F7: 4,
-				F9: VEnumBcdC,
+				F3: "mnop",
+				F4: "fghijkl",
+				F5: vdl.AnyType,
+				F6: 161,
+				F7: 241,
+				F8: VEnumAbcB,
 				F11: verror.FromWire(vdl.WireError{
-					Id:        "cdefghijklmn",
+					Id:        "ghij",
 					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "klmnopΔΘΠΣΦ",
+					Msg:       "abcdefghijklmnopΔΘ",
 				}),
-				F12: 31049,
-				F14: 3137813505,
-				F15: 450176025,
-				F16: 4000023676373990261,
-				F17: 15881086044205763941,
-				F18: -29,
-				F19: 38,
-				F20: 9583,
-				F21: -6199,
-				F22: 1052108838,
-				F23: -67050627,
-				F26: 1.0322535e+09,
-				F27: 2.757682e+09,
-				F28: 8.752941819418495e+08,
-				F30: &VStructEmpty{},
+				F12: 24733,
+				F13: 45960,
+				F14: 3505261569,
+				F16: 7943053407086744058,
+				F17: 3757857731242091785,
+				F18: 3,
+				F19: -14,
+				F21: -13430,
+				F22: -517381375,
+				F24: -355301716204349086,
+				F25: -1691036775238692677,
+				F26: 3.0881244e+09,
+				F27: 7.240828e+08,
+				F28: -4.4743079954544926e+08,
+				F29: 4.677850102443165e+07,
 			},
 			VStructDepth1_All{
-				F0: vdl.AnyType,
-				F3: "defghijklmnopΔΘΠΣΦ王",
-				F4: "no",
-				F5: vdl.BoolType,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:  "fghijklmnop",
-					Msg: "c",
-				}),
-				F12: 58349,
-				F13: 45192,
-				F16: 9864256017058945597,
-				F18: -49,
-				F19: -24,
-				F20: -8740,
-				F21: 9562,
-				F23: -968626330,
-				F24: -117405511608200257,
-				F26: -1.129015e+08,
-				F27: 6.913144e+08,
-				F29: 1.4114096119753578e+08,
-				F30: &VStructEmpty{},
+				F5: vdl.AnyType,
 			},
 		},
 	},
@@ -30226,22 +30190,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth1_Rand0{{F8: VEnumAbc.B}}",
+		TargetLabel: "VList_VUnionDepth1_Rand0{{F8: B}}",
 		Target: VList_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{VEnumAbcB},
 		},
-		SourceLabel: "VList_VUnionDepth1_Rand0{{F8: VEnumAbc.B}}",
+		SourceLabel: "VList_VUnionDepth1_Rand0{{F8: B}}",
 		Source: VList_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{VEnumAbcB},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth1_Rand0{{F8: VEnumAbc.B}}",
+		TargetLabel: "VList_VUnionDepth1_Rand0{{F8: B}}",
 		Target: VList_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{VEnumAbcB},
 		},
-		SourceLabel: "[]any{VUnionDepth1_Rand0{F8: VEnumAbc.B}}",
+		SourceLabel: "[]any{VUnionDepth1_Rand0{F8: B}}",
 		Source: []interface{}{
 			VUnionDepth1_Rand0(VUnionDepth1_Rand0F8{VEnumAbcB}),
 		},
@@ -30376,14 +30340,14 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "set[VArray2_VEnumBcd]{{VEnumBcd.D, VEnumBcd.D}}",
+		TargetLabel: "set[VArray2_VEnumBcd]{{D, D}}",
 		Target: map[VArray2_VEnumBcd]struct{}{
 			{
 				VEnumBcdD,
 				VEnumBcdD,
 			}: struct{}{},
 		},
-		SourceLabel: "set[VArray2_VEnumBcd]{{VEnumBcd.D, VEnumBcd.D}}",
+		SourceLabel: "set[VArray2_VEnumBcd]{{D, D}}",
 		Source: map[VArray2_VEnumBcd]struct{}{
 			{
 				VEnumBcdD,
@@ -30914,22 +30878,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VSet_VUnionDepth1_Rand0{{F8: VEnumAbc.A}}",
+		TargetLabel: "VSet_VUnionDepth1_Rand0{{F8: A}}",
 		Target: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: struct{}{},
 		},
-		SourceLabel: "VSet_VUnionDepth1_Rand0{{F8: VEnumAbc.A}}",
+		SourceLabel: "VSet_VUnionDepth1_Rand0{{F8: A}}",
 		Source: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: struct{}{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VSet_VUnionDepth1_Rand0{{F8: VEnumAbc.A}}",
+		TargetLabel: "VSet_VUnionDepth1_Rand0{{F8: A}}",
 		Target: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: struct{}{},
 		},
-		SourceLabel: "set[VUnionDepth1_Rand0]{{F8: VEnumAbc.A}}",
+		SourceLabel: "set[VUnionDepth1_Rand0]{{F8: A}}",
 		Source: map[VUnionDepth1_Rand0]struct{}{
 			VUnionDepth1_Rand0F8{}: struct{}{},
 		},
@@ -30937,12 +30901,12 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: VEnumAbc.A}}",
+		TargetLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: A}}",
 		Target: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F28{9.886473838557136e+08}: struct{}{},
 			VUnionDepth1_Rand0F8{}:                       struct{}{},
 		},
-		SourceLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: VEnumAbc.A}}",
+		SourceLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: A}}",
 		Source: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F28{9.886473838557136e+08}: struct{}{},
 			VUnionDepth1_Rand0F8{}:                       struct{}{},
@@ -30950,12 +30914,12 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: VEnumAbc.A}}",
+		TargetLabel: "VSet_VUnionDepth1_Rand0{{F28: 9.886473838557136e+08}, {F8: A}}",
 		Target: VSet_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F28{9.886473838557136e+08}: struct{}{},
 			VUnionDepth1_Rand0F8{}:                       struct{}{},
 		},
-		SourceLabel: "set[VUnionDepth1_Rand0]{{F28: 9.886473838557136e+08}, {F8: VEnumAbc.A}}",
+		SourceLabel: "set[VUnionDepth1_Rand0]{{F28: 9.886473838557136e+08}, {F8: A}}",
 		Source: map[VUnionDepth1_Rand0]struct{}{
 			VUnionDepth1_Rand0F28{9.886473838557136e+08}: struct{}{},
 			VUnionDepth1_Rand0F8{}:                       struct{}{},
@@ -31287,12 +31251,12 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: VEnumAbc.A}: {F28: -2.1931172965358394e+08}}",
+		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: A}: {F28: -2.1931172965358394e+08}}",
 		Target: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F10{},
 			VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F28{-2.1931172965358394e+08},
 		},
-		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: VEnumAbc.A}: {F28: -2.1931172965358394e+08}}",
+		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: A}: {F28: -2.1931172965358394e+08}}",
 		Source: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F10{},
 			VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F28{-2.1931172965358394e+08},
@@ -31300,12 +31264,12 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: VEnumAbc.A}: {F28: -2.1931172965358394e+08}}",
+		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: A}: {F28: -2.1931172965358394e+08}}",
 		Target: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F10{},
 			VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F28{-2.1931172965358394e+08},
 		},
-		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: VEnumAbc.A}: {F28: -2.1931172965358394e+08}}",
+		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F10: {}}, {F8: A}: {F28: -2.1931172965358394e+08}}",
 		Source: VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F10{},
 			VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F28{-2.1931172965358394e+08},
@@ -31314,22 +31278,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: VEnumAbc.A}: {F28: -8.979648282933791e+07}}",
+		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: A}: {F28: -8.979648282933791e+07}}",
 		Target: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F28{-8.979648282933791e+07},
 		},
-		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: VEnumAbc.A}: {F28: -8.979648282933791e+07}}",
+		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: A}: {F28: -8.979648282933791e+07}}",
 		Source: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F28{-8.979648282933791e+07},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: VEnumAbc.A}: {F28: -8.979648282933791e+07}}",
+		TargetLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F8: A}: {F28: -8.979648282933791e+07}}",
 		Target: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F28{-8.979648282933791e+07},
 		},
-		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F8: VEnumAbc.A}: {F28: -8.979648282933791e+07}}",
+		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F8: A}: {F28: -8.979648282933791e+07}}",
 		Source: VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F28{-8.979648282933791e+07},
 		},
@@ -31690,12 +31654,12 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.A}, {F16: 14327712338650488974}: {F8: VEnumAbc.C}}",
+		TargetLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: A}, {F16: 14327712338650488974}: {F8: C}}",
 		Target: VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}:                     VUnionDepth1_Rand0F8{},
 			VUnionDepth1_Rand0F16{14327712338650488974}: VUnionDepth1_Rand0F8{VEnumAbcC},
 		},
-		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.A}, {F16: 14327712338650488974}: {F8: VEnumAbc.C}}",
+		SourceLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: A}, {F16: 14327712338650488974}: {F8: C}}",
 		Source: VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}:                     VUnionDepth1_Rand0F8{},
 			VUnionDepth1_Rand0F16{14327712338650488974}: VUnionDepth1_Rand0F8{VEnumAbcC},
@@ -31703,12 +31667,12 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.A}, {F16: 14327712338650488974}: {F8: VEnumAbc.C}}",
+		TargetLabel: "VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{{F10: {}}: {F8: A}, {F16: 14327712338650488974}: {F8: C}}",
 		Target: VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}:                     VUnionDepth1_Rand0F8{},
 			VUnionDepth1_Rand0F16{14327712338650488974}: VUnionDepth1_Rand0F8{VEnumAbcC},
 		},
-		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.A}, {F16: 14327712338650488974}: {F8: VEnumAbc.C}}",
+		SourceLabel: "map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F8: A}, {F16: 14327712338650488974}: {F8: C}}",
 		Source: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
 			VUnionDepth1_Rand0F10{}:                     VUnionDepth1_Rand0F8{},
 			VUnionDepth1_Rand0F16{14327712338650488974}: VUnionDepth1_Rand0F8{VEnumAbcC},
@@ -31797,7 +31761,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}",
+		TargetLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}",
 		Target: VStructDepth2_All{
 			F0: VArray3_Any{
 				int64(-123),
@@ -31912,7 +31876,7 @@ var vAllPass = []Entry{
 				F21: -123,
 			},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}",
+		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
 				int64(-123),
@@ -32031,370 +31995,430 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_All{F2: {false}, F3: {-992001579, 859164827}, F4: {\"efghijklmno\", \"jklmnopΔΘ\", \"opΔΘΠΣ\"}, F5: {-2.8810332e+09}, F7: {VEnumBcd.B: VEnumBcd.D}, F8: {F3: \"jklmnopΔ\", F4: \"m\", F7: 148, F8: VEnumAbc.B, F11: {RetryCode: RetryBackoff, Msg: \"ΘΠ\"}, F12: 35194, F13: 8611, F15: 1810521625, F16: 10371023406116878193, F17: 14766852211451981394, F18: 21, F19: 47, F20: -15320, F21: -5094, F23: 37568466, F24: 2393078863564874981, F25: -865308087722799124, F26: 2.6044202e+08, F27: 7.2720685e+08, F28: -2.897835295783481e+09, F29: -9.019402346170582e+07, F30: {}}, F9: {F0: \"ghijklmnopΔΘΠΣΦ王普澤世界\", F7: 14}, F10: {F28: 1.3400129324521453e+09}, F11: {F11: {RetryCode: RetryBackoff, Msg: \"klmnop\"}}, F12: {F0: int64(0), F1: true, F2: true, F3: \"ghijklmnopΔΘΠΣΦ王普\", F4: \"ghijklmno\", F5: typeobject(VUnionDepth1_All), F6: 85, F7: 166, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"lmno\", RetryCode: RetryRefetch, Msg: \"i\"}, F12: 2850, F13: 7994, F14: 3165201560, F15: 3409300487, F16: 9301512629019810015, F17: 16738234857887237852, F18: 6, F20: 10580, F21: -13632, F22: 956709032, F24: 568271260570227874, F25: 3443220690640868938, F26: -1.5047203e+09, F27: 1.879804e+07, F28: 3.5325811574456925e+09, F29: 4.822465654749475e+08, F30: {}}, F13: {F15: 2617721233, F21: -6921}}",
+		TargetLabel: "VStructDepth2_All{F0: {[]VUnionDepth1_All{{F0: nil}}, VList_Error{{Id: \"ijklmnopΔΘΠΣ\", RetryCode: RetryConnection, Msg: \"klmnopΔ\"}, nil, {Id: \"abcdefgh\", RetryCode: RetryConnection, Msg: \"澤\"}}, nil}, F1: {\"王普澤世\"}, F2: {false, true}, F3: {193669958, 1069377531}, F4: {\"ghijk\", \"jklmnopΔΘΠΣΦ王\", \"ΣΦ王普澤世界\"}, F5: {1.1478766e+09, 5.4528205e+08, 9.661524e+08}, F8: {F0: set[VArray2_VEnumBcd]{{}, {B, C}}, F2: true, F3: \"ΘΠΣΦ王普澤世\", F4: \"bcdefgh\", F5: typeobject(VUnionDepth2_All), F6: 188, F7: 10, F8: C, F9: C, F11: {RetryCode: RetryRefetch, Msg: \"lmnopΔΘΠΣ\"}, F12: 35402, F13: 43078, F14: 1618384784, F15: 166622482, F16: 8823656779334991216, F17: 15081667106092248800, F19: -26, F20: -14040, F22: 688420803, F23: -963014882, F24: 2479407955342479410, F26: 1.5381179e+08, F27: 1.6291196e+09, F28: 1.0859702495162193e+08, F29: 1.2978003841851497e+09, F30: {}}, F9: {F0: map[bool]bool{false: true}, F1: true, F9: D}, F10: {F12: 54790}, F11: {F11: {Id: \"hijklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"世界\"}}, F12: {F2: true, F3: \"ghijklmnopΔΘΠΣΦ王普\", F4: \"ijklmnopΔΘΠΣ\", F5: typeobject(VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0), F6: 98, F7: 1, F8: B, F11: {}, F12: 42915, F15: 393927796, F16: 586553587769310200, F17: 4149586214255072852, F18: 23, F19: 8, F20: -3367, F21: -15744, F22: -675615021, F23: 499882980, F24: 1766281095617950570, F25: -2746074897480389304, F26: -1.057958e+08, F27: -2.4838428e+09, F28: -8.737233784817061e+08}, F13: {F4: \"bcdefghijk\", F15: 2565779687, F21: 5371}}",
 		Target: VStructDepth2_All{
+			F0: VArray3_Any{
+				[]VUnionDepth1_All{
+					VUnionDepth1_AllF0{},
+				},
+				VList_Error{
+					verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘΠΣ",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "klmnopΔ",
+					}),
+					nil,
+					verror.FromWire(vdl.WireError{
+						Id:        "abcdefgh",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "澤",
+					}),
+				},
+				nil,
+			},
+			F1: VArray1_String{
+				"王普澤世",
+			},
 			F2: VList_VBool{
 				false,
+				true,
 			},
 			F3: VList_VInt32{
-				-992001579,
-				859164827,
+				193669958,
+				1069377531,
 			},
 			F4: VSet_VString{
-				"efghijklmno": struct{}{},
-				"jklmnopΔΘ":   struct{}{},
-				"opΔΘΠΣ":      struct{}{},
+				"ghijk":         struct{}{},
+				"jklmnopΔΘΠΣΦ王": struct{}{},
+				"ΣΦ王普澤世界":       struct{}{},
 			},
 			F5: VSet_Float32{
-				-2.8810332e+09: struct{}{},
-			},
-			F7: VMap_VEnumBcd_VEnumBcd{
-				VEnumBcdB: VEnumBcdD,
+				1.1478766e+09: struct{}{},
+				5.4528205e+08: struct{}{},
+				9.661524e+08:  struct{}{},
 			},
 			F8: VStructDepth1_All{
-				F3: "jklmnopΔ",
-				F4: "m",
-				F5: vdl.AnyType,
-				F7: 148,
-				F8: VEnumAbcB,
+				F0: map[VArray2_VEnumBcd]struct{}{
+					{}: struct{}{},
+					{
+						VEnumBcdB,
+						VEnumBcdC,
+					}: struct{}{},
+				},
+				F2: true,
+				F3: "ΘΠΣΦ王普澤世",
+				F4: "bcdefgh",
+				F5: vdl.TypeOf((*VUnionDepth2_All)(nil)),
+				F6: 188,
+				F7: 10,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
 				F11: verror.FromWire(vdl.WireError{
-					RetryCode: vdl.WireRetryCodeRetryBackoff,
-					Msg:       "ΘΠ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "lmnopΔΘΠΣ",
 				}),
-				F12: 35194,
-				F13: 8611,
-				F15: 1810521625,
-				F16: 10371023406116878193,
-				F17: 14766852211451981394,
-				F18: 21,
-				F19: 47,
-				F20: -15320,
-				F21: -5094,
-				F23: 37568466,
-				F24: 2393078863564874981,
-				F25: -865308087722799124,
-				F26: 2.6044202e+08,
-				F27: 7.2720685e+08,
-				F28: -2.897835295783481e+09,
-				F29: -9.019402346170582e+07,
+				F12: 35402,
+				F13: 43078,
+				F14: 1618384784,
+				F15: 166622482,
+				F16: 8823656779334991216,
+				F17: 15081667106092248800,
+				F19: -26,
+				F20: -14040,
+				F22: 688420803,
+				F23: -963014882,
+				F24: 2479407955342479410,
+				F26: 1.5381179e+08,
+				F27: 1.6291196e+09,
+				F28: 1.0859702495162193e+08,
+				F29: 1.2978003841851497e+09,
 				F30: &VStructEmpty{},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: "ghijklmnopΔΘΠΣΦ王普澤世界",
-				F7: 14,
+				F0: map[bool]bool{
+					false: true,
+				},
+				F1: true,
+				F9: VEnumBcdD,
 			},
-			F10: VUnionDepth1_Rand0F28{1.3400129324521453e+09},
+			F10: VUnionDepth1_Rand0F12{54790},
 			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmnop",
+				Id:        "hijklmnopΔΘΠΣΦ王普澤世",
+				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Msg:       "世界",
 			})},
 			F12: &VStructDepth1_All{
-				F0: int64(0),
-				F1: true,
-				F2: true,
-				F3: "ghijklmnopΔΘΠΣΦ王普",
-				F4: "ghijklmno",
-				F5: vdl.TypeOf((*VUnionDepth1_All)(nil)),
-				F6: 85,
-				F7: 166,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "lmno",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "i",
-				}),
-				F12: 2850,
-				F13: 7994,
-				F14: 3165201560,
-				F15: 3409300487,
-				F16: 9301512629019810015,
-				F17: 16738234857887237852,
-				F18: 6,
-				F20: 10580,
-				F21: -13632,
-				F22: 956709032,
-				F24: 568271260570227874,
-				F25: 3443220690640868938,
-				F26: -1.5047203e+09,
-				F27: 1.879804e+07,
-				F28: 3.5325811574456925e+09,
-				F29: 4.822465654749475e+08,
-				F30: &VStructEmpty{},
+				F2:  true,
+				F3:  "ghijklmnopΔΘΠΣΦ王普",
+				F4:  "ijklmnopΔΘΠΣ",
+				F5:  vdl.TypeOf((*VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0)(nil)),
+				F6:  98,
+				F7:  1,
+				F8:  VEnumAbcB,
+				F11: verror.FromWire(vdl.WireError{}),
+				F12: 42915,
+				F15: 393927796,
+				F16: 586553587769310200,
+				F17: 4149586214255072852,
+				F18: 23,
+				F19: 8,
+				F20: -3367,
+				F21: -15744,
+				F22: -675615021,
+				F23: 499882980,
+				F24: 1766281095617950570,
+				F25: -2746074897480389304,
+				F26: -1.057958e+08,
+				F27: -2.4838428e+09,
+				F28: -8.737233784817061e+08,
 			},
 			F13: &VStructDepth1_Rand0{
-				F15: 2617721233,
-				F21: -6921,
+				F4:  "bcdefghijk",
+				F15: 2565779687,
+				F21: 5371,
 			},
 		},
-		SourceLabel: "VStructDepth2_All{F2: {false}, F3: {-992001579, 859164827}, F4: {\"efghijklmno\", \"jklmnopΔΘ\", \"opΔΘΠΣ\"}, F5: {-2.8810332e+09}, F7: {VEnumBcd.B: VEnumBcd.D}, F8: {F3: \"jklmnopΔ\", F4: \"m\", F7: 148, F8: VEnumAbc.B, F11: {RetryCode: RetryBackoff, Msg: \"ΘΠ\"}, F12: 35194, F13: 8611, F15: 1810521625, F16: 10371023406116878193, F17: 14766852211451981394, F18: 21, F19: 47, F20: -15320, F21: -5094, F23: 37568466, F24: 2393078863564874981, F25: -865308087722799124, F26: 2.6044202e+08, F27: 7.2720685e+08, F28: -2.897835295783481e+09, F29: -9.019402346170582e+07, F30: {}}, F9: {F0: \"ghijklmnopΔΘΠΣΦ王普澤世界\", F7: 14}, F10: {F28: 1.3400129324521453e+09}, F11: {F11: {RetryCode: RetryBackoff, Msg: \"klmnop\"}}, F12: {F0: int64(0), F1: true, F2: true, F3: \"ghijklmnopΔΘΠΣΦ王普\", F4: \"ghijklmno\", F5: typeobject(VUnionDepth1_All), F6: 85, F7: 166, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"lmno\", RetryCode: RetryRefetch, Msg: \"i\"}, F12: 2850, F13: 7994, F14: 3165201560, F15: 3409300487, F16: 9301512629019810015, F17: 16738234857887237852, F18: 6, F20: 10580, F21: -13632, F22: 956709032, F24: 568271260570227874, F25: 3443220690640868938, F26: -1.5047203e+09, F27: 1.879804e+07, F28: 3.5325811574456925e+09, F29: 4.822465654749475e+08, F30: {}}, F13: {F15: 2617721233, F21: -6921}}",
+		SourceLabel: "VStructDepth2_All{F0: {[]VUnionDepth1_All{{F0: nil}}, VList_Error{{Id: \"ijklmnopΔΘΠΣ\", RetryCode: RetryConnection, Msg: \"klmnopΔ\"}, nil, {Id: \"abcdefgh\", RetryCode: RetryConnection, Msg: \"澤\"}}, nil}, F1: {\"王普澤世\"}, F2: {false, true}, F3: {193669958, 1069377531}, F4: {\"ghijk\", \"jklmnopΔΘΠΣΦ王\", \"ΣΦ王普澤世界\"}, F5: {1.1478766e+09, 5.4528205e+08, 9.661524e+08}, F8: {F0: set[VArray2_VEnumBcd]{{}, {B, C}}, F2: true, F3: \"ΘΠΣΦ王普澤世\", F4: \"bcdefgh\", F5: typeobject(VUnionDepth2_All), F6: 188, F7: 10, F8: C, F9: C, F11: {RetryCode: RetryRefetch, Msg: \"lmnopΔΘΠΣ\"}, F12: 35402, F13: 43078, F14: 1618384784, F15: 166622482, F16: 8823656779334991216, F17: 15081667106092248800, F19: -26, F20: -14040, F22: 688420803, F23: -963014882, F24: 2479407955342479410, F26: 1.5381179e+08, F27: 1.6291196e+09, F28: 1.0859702495162193e+08, F29: 1.2978003841851497e+09, F30: {}}, F9: {F0: map[bool]bool{false: true}, F1: true, F9: D}, F10: {F12: 54790}, F11: {F11: {Id: \"hijklmnopΔΘΠΣΦ王普澤世\", RetryCode: RetryRefetch, Msg: \"世界\"}}, F12: {F2: true, F3: \"ghijklmnopΔΘΠΣΦ王普\", F4: \"ijklmnopΔΘΠΣ\", F5: typeobject(VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0), F6: 98, F7: 1, F8: B, F11: {}, F12: 42915, F15: 393927796, F16: 586553587769310200, F17: 4149586214255072852, F18: 23, F19: 8, F20: -3367, F21: -15744, F22: -675615021, F23: 499882980, F24: 1766281095617950570, F25: -2746074897480389304, F26: -1.057958e+08, F27: -2.4838428e+09, F28: -8.737233784817061e+08}, F13: {F4: \"bcdefghijk\", F15: 2565779687, F21: 5371}}",
 		Source: VStructDepth2_All{
+			F0: VArray3_Any{
+				[]VUnionDepth1_All{
+					VUnionDepth1_AllF0{},
+				},
+				VList_Error{
+					verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘΠΣ",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "klmnopΔ",
+					}),
+					nil,
+					verror.FromWire(vdl.WireError{
+						Id:        "abcdefgh",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "澤",
+					}),
+				},
+				nil,
+			},
+			F1: VArray1_String{
+				"王普澤世",
+			},
 			F2: VList_VBool{
 				false,
+				true,
 			},
 			F3: VList_VInt32{
-				-992001579,
-				859164827,
+				193669958,
+				1069377531,
 			},
 			F4: VSet_VString{
-				"efghijklmno": struct{}{},
-				"jklmnopΔΘ":   struct{}{},
-				"opΔΘΠΣ":      struct{}{},
+				"ghijk":         struct{}{},
+				"jklmnopΔΘΠΣΦ王": struct{}{},
+				"ΣΦ王普澤世界":       struct{}{},
 			},
 			F5: VSet_Float32{
-				-2.8810332e+09: struct{}{},
-			},
-			F7: VMap_VEnumBcd_VEnumBcd{
-				VEnumBcdB: VEnumBcdD,
+				1.1478766e+09: struct{}{},
+				5.4528205e+08: struct{}{},
+				9.661524e+08:  struct{}{},
 			},
 			F8: VStructDepth1_All{
-				F3: "jklmnopΔ",
-				F4: "m",
-				F5: vdl.AnyType,
-				F7: 148,
-				F8: VEnumAbcB,
+				F0: map[VArray2_VEnumBcd]struct{}{
+					{}: struct{}{},
+					{
+						VEnumBcdB,
+						VEnumBcdC,
+					}: struct{}{},
+				},
+				F2: true,
+				F3: "ΘΠΣΦ王普澤世",
+				F4: "bcdefgh",
+				F5: vdl.TypeOf((*VUnionDepth2_All)(nil)),
+				F6: 188,
+				F7: 10,
+				F8: VEnumAbcC,
+				F9: VEnumBcdC,
 				F11: verror.FromWire(vdl.WireError{
-					RetryCode: vdl.WireRetryCodeRetryBackoff,
-					Msg:       "ΘΠ",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "lmnopΔΘΠΣ",
 				}),
-				F12: 35194,
-				F13: 8611,
-				F15: 1810521625,
-				F16: 10371023406116878193,
-				F17: 14766852211451981394,
-				F18: 21,
-				F19: 47,
-				F20: -15320,
-				F21: -5094,
-				F23: 37568466,
-				F24: 2393078863564874981,
-				F25: -865308087722799124,
-				F26: 2.6044202e+08,
-				F27: 7.2720685e+08,
-				F28: -2.897835295783481e+09,
-				F29: -9.019402346170582e+07,
+				F12: 35402,
+				F13: 43078,
+				F14: 1618384784,
+				F15: 166622482,
+				F16: 8823656779334991216,
+				F17: 15081667106092248800,
+				F19: -26,
+				F20: -14040,
+				F22: 688420803,
+				F23: -963014882,
+				F24: 2479407955342479410,
+				F26: 1.5381179e+08,
+				F27: 1.6291196e+09,
+				F28: 1.0859702495162193e+08,
+				F29: 1.2978003841851497e+09,
 				F30: &VStructEmpty{},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: "ghijklmnopΔΘΠΣΦ王普澤世界",
-				F7: 14,
+				F0: map[bool]bool{
+					false: true,
+				},
+				F1: true,
+				F9: VEnumBcdD,
 			},
-			F10: VUnionDepth1_Rand0F28{1.3400129324521453e+09},
+			F10: VUnionDepth1_Rand0F12{54790},
 			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "klmnop",
+				Id:        "hijklmnopΔΘΠΣΦ王普澤世",
+				RetryCode: vdl.WireRetryCodeRetryRefetch,
+				Msg:       "世界",
 			})},
 			F12: &VStructDepth1_All{
-				F0: int64(0),
-				F1: true,
-				F2: true,
-				F3: "ghijklmnopΔΘΠΣΦ王普",
-				F4: "ghijklmno",
-				F5: vdl.TypeOf((*VUnionDepth1_All)(nil)),
-				F6: 85,
-				F7: 166,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "lmno",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "i",
-				}),
-				F12: 2850,
-				F13: 7994,
-				F14: 3165201560,
-				F15: 3409300487,
-				F16: 9301512629019810015,
-				F17: 16738234857887237852,
-				F18: 6,
-				F20: 10580,
-				F21: -13632,
-				F22: 956709032,
-				F24: 568271260570227874,
-				F25: 3443220690640868938,
-				F26: -1.5047203e+09,
-				F27: 1.879804e+07,
-				F28: 3.5325811574456925e+09,
-				F29: 4.822465654749475e+08,
-				F30: &VStructEmpty{},
+				F2:  true,
+				F3:  "ghijklmnopΔΘΠΣΦ王普",
+				F4:  "ijklmnopΔΘΠΣ",
+				F5:  vdl.TypeOf((*VMap_VUnionDepth1_Rand0_VUnionDepth1_Rand0)(nil)),
+				F6:  98,
+				F7:  1,
+				F8:  VEnumAbcB,
+				F11: verror.FromWire(vdl.WireError{}),
+				F12: 42915,
+				F15: 393927796,
+				F16: 586553587769310200,
+				F17: 4149586214255072852,
+				F18: 23,
+				F19: 8,
+				F20: -3367,
+				F21: -15744,
+				F22: -675615021,
+				F23: 499882980,
+				F24: 1766281095617950570,
+				F25: -2746074897480389304,
+				F26: -1.057958e+08,
+				F27: -2.4838428e+09,
+				F28: -8.737233784817061e+08,
 			},
 			F13: &VStructDepth1_Rand0{
-				F15: 2617721233,
-				F21: -6921,
+				F4:  "bcdefghijk",
+				F15: 2565779687,
+				F21: 5371,
 			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_All{F0: {VList_OptVStructDepth1_Rand0{{F15: 3797160249, F21: 14084}, {F4: \"ijklmnopΔΘΠ\", F15: 1708490255}, {F4: \"abc\", F21: 15186}}, nil, VSet_VEnumAbc{VEnumAbc.A, VEnumAbc.B, VEnumAbc.C}}, F1: {\"Φ王普澤\"}, F3: {825018958}, F4: {\"efghi\", \"l\"}, F6: {182: 0}, F7: {VEnumBcd.B: VEnumBcd.D}, F8: {F2: true, F3: \"efghijklmno\", F4: \"jklmnopΔ\", F5: typeobject([]VUnionDepth1_All), F6: 238, F7: 47, F9: VEnumBcd.D, F11: {Id: \"def\"}, F12: 24585, F13: 18172, F14: 4135084063, F15: 1932692948, F16: 3445811867943728319, F18: 37, F19: -20, F20: 6830, F21: -6033, F22: -65293462, F23: 375977148, F24: -3985335031790415886, F26: -1.4082583e+09, F27: 9.925805e+08, F28: -2.3234825607730885e+09, F29: 1.3347981529403403e+09}, F9: {F0: VSet_Float32{-1.8495414e+08, 0}, F1: true, F7: 51, F9: VEnumBcd.C, F26: -3.435546e+09}, F10: {F10: {}}, F13: {F4: \"ijklmnopΔ\", F15: 2853996159}}",
+		TargetLabel: "VStructDepth2_All{F0: {VArray3_OptVStructEmpty{}, VArray1_VArray3_Bool{}, nil}, F2: {false, false, true}, F4: {\"defghi\"}, F5: {-1.0116786e+09, 0}, F6: {137: 181, 224: 128}, F7: {B: B}, F8: {F0: VList_Set_VInt16{}, F2: true, F4: \"Φ王普澤\", F5: typeobject(VUnionDepth2_All), F6: 152, F7: 238, F11: {Id: \"ΘΠΣΦ\", Msg: \"ghijklmnopΔΘΠΣΦ王\"}, F12: 59516, F13: 51897, F14: 605574823, F15: 4142227496, F17: 967596274462580890, F18: -22, F19: 20, F20: -2945, F21: -5689, F22: -61885463, F23: 619333130, F24: 1695390365995362146, F26: -1.9062797e+09, F27: 3.7731942e+08, F28: -6.725710465889678e+08, F29: 1.2131247950895727e+09, F30: {}}, F9: {F1: true, F7: 227, F26: -4.2755507e+08}, F10: {F16: 0}, F11: {F11: nil}, F12: {F3: \"ΠΣΦ王\", F4: \"ef\", F5: typeobject(map[VStructDepth1_Rand0]VStructDepth1_Rand0), F6: 48, F7: 104, F8: B, F12: 50232, F13: 63541, F14: 2467193480, F15: 639118940, F17: 5597215062242834278, F18: -21, F19: 52, F22: 368956530, F24: -2624738109896123934, F25: -4220579496605799155, F26: -2.3680965e+08, F27: 6.038184e+08, F30: {}}, F13: {F4: \"opΔΘΠΣΦ王普澤\", F15: 3088405718}}",
 		Target: VStructDepth2_All{
 			F0: VArray3_Any{
-				VList_OptVStructDepth1_Rand0{
-					{
-						F15: 3797160249,
-						F21: 14084,
-					},
-					{
-						F4:  "ijklmnopΔΘΠ",
-						F15: 1708490255,
-					},
-					{
-						F4:  "abc",
-						F21: 15186,
-					},
-				},
+				VArray3_OptVStructEmpty{},
+				VArray1_VArray3_Bool{},
 				nil,
-				VSet_VEnumAbc{
-					VEnumAbcA: struct{}{},
-					VEnumAbcB: struct{}{},
-					VEnumAbcC: struct{}{},
-				},
 			},
-			F1: VArray1_String{
-				"Φ王普澤",
-			},
-			F3: VList_VInt32{
-				825018958,
+			F2: VList_VBool{
+				false,
+				false,
+				true,
 			},
 			F4: VSet_VString{
-				"efghi": struct{}{},
-				"l":     struct{}{},
+				"defghi": struct{}{},
+			},
+			F5: VSet_Float32{
+				-1.0116786e+09: struct{}{},
+				0:              struct{}{},
 			},
 			F6: VMap_VByte_VByte{
-				182: 0,
+				137: 181,
+				224: 128,
 			},
 			F7: VMap_VEnumBcd_VEnumBcd{
-				VEnumBcdB: VEnumBcdD,
+				VEnumBcdB: VEnumBcdB,
 			},
 			F8: VStructDepth1_All{
+				F0: VList_Set_VInt16(nil),
 				F2: true,
-				F3: "efghijklmno",
-				F4: "jklmnopΔ",
-				F5: vdl.TypeOf((*[]VUnionDepth1_All)(nil)),
-				F6: 238,
-				F7: 47,
-				F9: VEnumBcdD,
+				F4: "Φ王普澤",
+				F5: vdl.TypeOf((*VUnionDepth2_All)(nil)),
+				F6: 152,
+				F7: 238,
 				F11: verror.FromWire(vdl.WireError{
-					Id: "def",
+					Id:  "ΘΠΣΦ",
+					Msg: "ghijklmnopΔΘΠΣΦ王",
 				}),
-				F12: 24585,
-				F13: 18172,
-				F14: 4135084063,
-				F15: 1932692948,
-				F16: 3445811867943728319,
-				F18: 37,
-				F19: -20,
-				F20: 6830,
-				F21: -6033,
-				F22: -65293462,
-				F23: 375977148,
-				F24: -3985335031790415886,
-				F26: -1.4082583e+09,
-				F27: 9.925805e+08,
-				F28: -2.3234825607730885e+09,
-				F29: 1.3347981529403403e+09,
+				F12: 59516,
+				F13: 51897,
+				F14: 605574823,
+				F15: 4142227496,
+				F17: 967596274462580890,
+				F18: -22,
+				F19: 20,
+				F20: -2945,
+				F21: -5689,
+				F22: -61885463,
+				F23: 619333130,
+				F24: 1695390365995362146,
+				F26: -1.9062797e+09,
+				F27: 3.7731942e+08,
+				F28: -6.725710465889678e+08,
+				F29: 1.2131247950895727e+09,
+				F30: &VStructEmpty{},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VSet_Float32{
-					-1.8495414e+08: struct{}{},
-					0:              struct{}{},
-				},
 				F1:  true,
-				F7:  51,
-				F9:  VEnumBcdC,
-				F26: -3.435546e+09,
+				F7:  227,
+				F26: -4.2755507e+08,
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F6{},
+			F10: VUnionDepth1_Rand0F16{},
+			F11: VUnionDepth1_Rand1F11{},
+			F12: &VStructDepth1_All{
+				F3:  "ΠΣΦ王",
+				F4:  "ef",
+				F5:  vdl.TypeOf((*map[VStructDepth1_Rand0]VStructDepth1_Rand0)(nil)),
+				F6:  48,
+				F7:  104,
+				F8:  VEnumAbcB,
+				F12: 50232,
+				F13: 63541,
+				F14: 2467193480,
+				F15: 639118940,
+				F17: 5597215062242834278,
+				F18: -21,
+				F19: 52,
+				F22: 368956530,
+				F24: -2624738109896123934,
+				F25: -4220579496605799155,
+				F26: -2.3680965e+08,
+				F27: 6.038184e+08,
+				F30: &VStructEmpty{},
+			},
 			F13: &VStructDepth1_Rand0{
-				F4:  "ijklmnopΔ",
-				F15: 2853996159,
+				F4:  "opΔΘΠΣΦ王普澤",
+				F15: 3088405718,
 			},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {VList_OptVStructDepth1_Rand0{{F15: 3797160249, F21: 14084}, {F4: \"ijklmnopΔΘΠ\", F15: 1708490255}, {F4: \"abc\", F21: 15186}}, nil, VSet_VEnumAbc{VEnumAbc.A, VEnumAbc.B, VEnumAbc.C}}, F1: {\"Φ王普澤\"}, F3: {825018958}, F4: {\"efghi\", \"l\"}, F6: {182: 0}, F7: {VEnumBcd.B: VEnumBcd.D}, F8: {F2: true, F3: \"efghijklmno\", F4: \"jklmnopΔ\", F5: typeobject([]VUnionDepth1_All), F6: 238, F7: 47, F9: VEnumBcd.D, F11: {Id: \"def\"}, F12: 24585, F13: 18172, F14: 4135084063, F15: 1932692948, F16: 3445811867943728319, F18: 37, F19: -20, F20: 6830, F21: -6033, F22: -65293462, F23: 375977148, F24: -3985335031790415886, F26: -1.4082583e+09, F27: 9.925805e+08, F28: -2.3234825607730885e+09, F29: 1.3347981529403403e+09}, F9: {F0: VSet_Float32{-1.8495414e+08, 0}, F1: true, F7: 51, F9: VEnumBcd.C, F26: -3.435546e+09}, F10: {F10: {}}, F13: {F4: \"ijklmnopΔ\", F15: 2853996159}}",
+		SourceLabel: "VStructDepth2_All{F0: {VArray3_OptVStructEmpty{}, VArray1_VArray3_Bool{}, nil}, F2: {false, false, true}, F4: {\"defghi\"}, F5: {-1.0116786e+09, 0}, F6: {137: 181, 224: 128}, F7: {B: B}, F8: {F0: VList_Set_VInt16{}, F2: true, F4: \"Φ王普澤\", F5: typeobject(VUnionDepth2_All), F6: 152, F7: 238, F11: {Id: \"ΘΠΣΦ\", Msg: \"ghijklmnopΔΘΠΣΦ王\"}, F12: 59516, F13: 51897, F14: 605574823, F15: 4142227496, F17: 967596274462580890, F18: -22, F19: 20, F20: -2945, F21: -5689, F22: -61885463, F23: 619333130, F24: 1695390365995362146, F26: -1.9062797e+09, F27: 3.7731942e+08, F28: -6.725710465889678e+08, F29: 1.2131247950895727e+09, F30: {}}, F9: {F1: true, F7: 227, F26: -4.2755507e+08}, F10: {F16: 0}, F11: {F11: nil}, F12: {F3: \"ΠΣΦ王\", F4: \"ef\", F5: typeobject(map[VStructDepth1_Rand0]VStructDepth1_Rand0), F6: 48, F7: 104, F8: B, F12: 50232, F13: 63541, F14: 2467193480, F15: 639118940, F17: 5597215062242834278, F18: -21, F19: 52, F22: 368956530, F24: -2624738109896123934, F25: -4220579496605799155, F26: -2.3680965e+08, F27: 6.038184e+08, F30: {}}, F13: {F4: \"opΔΘΠΣΦ王普澤\", F15: 3088405718}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
-				VList_OptVStructDepth1_Rand0{
-					{
-						F15: 3797160249,
-						F21: 14084,
-					},
-					{
-						F4:  "ijklmnopΔΘΠ",
-						F15: 1708490255,
-					},
-					{
-						F4:  "abc",
-						F21: 15186,
-					},
-				},
+				VArray3_OptVStructEmpty{},
+				VArray1_VArray3_Bool{},
 				nil,
-				VSet_VEnumAbc{
-					VEnumAbcA: struct{}{},
-					VEnumAbcB: struct{}{},
-					VEnumAbcC: struct{}{},
-				},
 			},
-			F1: VArray1_String{
-				"Φ王普澤",
-			},
-			F3: VList_VInt32{
-				825018958,
+			F2: VList_VBool{
+				false,
+				false,
+				true,
 			},
 			F4: VSet_VString{
-				"efghi": struct{}{},
-				"l":     struct{}{},
+				"defghi": struct{}{},
+			},
+			F5: VSet_Float32{
+				-1.0116786e+09: struct{}{},
+				0:              struct{}{},
 			},
 			F6: VMap_VByte_VByte{
-				182: 0,
+				137: 181,
+				224: 128,
 			},
 			F7: VMap_VEnumBcd_VEnumBcd{
-				VEnumBcdB: VEnumBcdD,
+				VEnumBcdB: VEnumBcdB,
 			},
 			F8: VStructDepth1_All{
+				F0: VList_Set_VInt16(nil),
 				F2: true,
-				F3: "efghijklmno",
-				F4: "jklmnopΔ",
-				F5: vdl.TypeOf((*[]VUnionDepth1_All)(nil)),
-				F6: 238,
-				F7: 47,
-				F9: VEnumBcdD,
+				F4: "Φ王普澤",
+				F5: vdl.TypeOf((*VUnionDepth2_All)(nil)),
+				F6: 152,
+				F7: 238,
 				F11: verror.FromWire(vdl.WireError{
-					Id: "def",
+					Id:  "ΘΠΣΦ",
+					Msg: "ghijklmnopΔΘΠΣΦ王",
 				}),
-				F12: 24585,
-				F13: 18172,
-				F14: 4135084063,
-				F15: 1932692948,
-				F16: 3445811867943728319,
-				F18: 37,
-				F19: -20,
-				F20: 6830,
-				F21: -6033,
-				F22: -65293462,
-				F23: 375977148,
-				F24: -3985335031790415886,
-				F26: -1.4082583e+09,
-				F27: 9.925805e+08,
-				F28: -2.3234825607730885e+09,
-				F29: 1.3347981529403403e+09,
+				F12: 59516,
+				F13: 51897,
+				F14: 605574823,
+				F15: 4142227496,
+				F17: 967596274462580890,
+				F18: -22,
+				F19: 20,
+				F20: -2945,
+				F21: -5689,
+				F22: -61885463,
+				F23: 619333130,
+				F24: 1695390365995362146,
+				F26: -1.9062797e+09,
+				F27: 3.7731942e+08,
+				F28: -6.725710465889678e+08,
+				F29: 1.2131247950895727e+09,
+				F30: &VStructEmpty{},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VSet_Float32{
-					-1.8495414e+08: struct{}{},
-					0:              struct{}{},
-				},
 				F1:  true,
-				F7:  51,
-				F9:  VEnumBcdC,
-				F26: -3.435546e+09,
+				F7:  227,
+				F26: -4.2755507e+08,
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F6{},
+			F10: VUnionDepth1_Rand0F16{},
+			F11: VUnionDepth1_Rand1F11{},
+			F12: &VStructDepth1_All{
+				F3:  "ΠΣΦ王",
+				F4:  "ef",
+				F5:  vdl.TypeOf((*map[VStructDepth1_Rand0]VStructDepth1_Rand0)(nil)),
+				F6:  48,
+				F7:  104,
+				F8:  VEnumAbcB,
+				F12: 50232,
+				F13: 63541,
+				F14: 2467193480,
+				F15: 639118940,
+				F17: 5597215062242834278,
+				F18: -21,
+				F19: 52,
+				F22: 368956530,
+				F24: -2624738109896123934,
+				F25: -4220579496605799155,
+				F26: -2.3680965e+08,
+				F27: 6.038184e+08,
+				F30: &VStructEmpty{},
+			},
 			F13: &VStructDepth1_Rand0{
-				F4:  "ijklmnopΔ",
-				F15: 2853996159,
+				F4:  "opΔΘΠΣΦ王普澤",
+				F15: 3088405718,
 			},
 		},
 	},
@@ -32444,7 +32468,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -32461,7 +32485,7 @@ var vAllPass = []Entry{
 			F10: VUnionDepth1_Rand0F28{1.23},
 			F11: VUnionDepth1_Rand1F20{-123},
 		},
-		SourceLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		SourceLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Source: VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -32481,7 +32505,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -32498,7 +32522,7 @@ var vAllPass = []Entry{
 			F10: VUnionDepth1_Rand0F28{1.23},
 			F11: VUnionDepth1_Rand1F20{-123},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
 				int64(-123),
@@ -32522,405 +32546,193 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_Rand0{F0: {map[VString]VString{\"mn\": \"abcdefghijklm\", \"pΔ\": \"gh\", \"ΠΣ\": \"jklmn\"}, VList_VByte(\"\\xf4\"), VSet_Float32{4.3789228e+07}}, F9: {F0: VList_OptVStructDepth2_Rand0{{}, {F0: {[]VBool{false, true}, float32(1.3833646e+08), int8(20)}, F9: {F1: true, F26: 9.317819e+06}, F10: {F8: VEnumAbc.B}, F11: {F11: {Msg: \"opΔΘΠ\"}}}, {F0: {VArray2_VByte(\"\\x00\\x00\"), VStructDepth2_Rand0{F9: {F7: 126, F9: VEnumBcd.C, F26: 1.1265887e+09}, F11: {F11: {RetryCode: RetryConnection, Msg: \"ghijklm\"}}}, nil}, F9: {F0: map[bool]bool{false: true, true: true}, F7: 167, F9: VEnumBcd.C, F26: -4.0748695e+09}, F11: {F8: VEnumAbc.B}}}, F1: true, F9: VEnumBcd.D, F26: -1.6323488e+09}, F11: {F20: 0}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {VMap_VEnumAbc_VEnumAbc{A: A, B: B, C: C}, VArray3_OptVStructEmpty{nil, {}, nil}, nil}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 111, F26: 1.2968383e+09}, F10: {F16: 15486817104661370343}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				map[VString]VString{
-					"mn": "abcdefghijklm",
-					"pΔ": "gh",
-					"ΠΣ": "jklmn",
+				VMap_VEnumAbc_VEnumAbc{
+					VEnumAbcA: VEnumAbcA,
+					VEnumAbcB: VEnumAbcB,
+					VEnumAbcC: VEnumAbcC,
 				},
-				VList_VByte("\xf4"),
-				VSet_Float32{
-					4.3789228e+07: struct{}{},
+				VArray3_OptVStructEmpty{
+					nil,
+					{},
+					nil,
 				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VList_OptVStructDepth2_Rand0{
-					{
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F6{},
-					},
-					{
-						F0: VArray3_Any{
-							[]VBool{
-								false,
-								true,
-							},
-							float32(1.3833646e+08),
-							int8(20),
-						},
-						F9: VStructDepth1_Rand1{
-							F1:  true,
-							F26: 9.317819e+06,
-						},
-						F10: VUnionDepth1_Rand0F8{VEnumAbcB},
-						F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-							Msg: "opΔΘΠ",
-						})},
-					},
-					{
-						F0: VArray3_Any{
-							VArray2_VByte{},
-							VStructDepth2_Rand0{
-								F9: VStructDepth1_Rand1{
-									F7:  126,
-									F9:  VEnumBcdC,
-									F26: 1.1265887e+09,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-									Msg:       "ghijklm",
-								})},
-							},
-							nil,
-						},
-						F9: VStructDepth1_Rand1{
-							F0: map[bool]bool{
-								false: true,
-								true:  true,
-							},
-							F7:  167,
-							F9:  VEnumBcdC,
-							F26: -4.0748695e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-					},
+				F0: VMap_VStructEmpty_VStructEmpty{
+					{}: {},
 				},
-				F1:  true,
-				F9:  VEnumBcdD,
-				F26: -1.6323488e+09,
+				F7:  111,
+				F26: 1.2968383e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F20{},
+			F10: VUnionDepth1_Rand0F16{15486817104661370343},
+			F11: VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "VStructDepth2_Rand0{F0: {map[VString]VString{\"mn\": \"abcdefghijklm\", \"pΔ\": \"gh\", \"ΠΣ\": \"jklmn\"}, VList_VByte(\"\\xf4\"), VSet_Float32{4.3789228e+07}}, F9: {F0: VList_OptVStructDepth2_Rand0{{}, {F0: {[]VBool{false, true}, float32(1.3833646e+08), int8(20)}, F9: {F1: true, F26: 9.317819e+06}, F10: {F8: VEnumAbc.B}, F11: {F11: {Msg: \"opΔΘΠ\"}}}, {F0: {VArray2_VByte(\"\\x00\\x00\"), VStructDepth2_Rand0{F9: {F7: 126, F9: VEnumBcd.C, F26: 1.1265887e+09}, F11: {F11: {RetryCode: RetryConnection, Msg: \"ghijklm\"}}}, nil}, F9: {F0: map[bool]bool{false: true, true: true}, F7: 167, F9: VEnumBcd.C, F26: -4.0748695e+09}, F11: {F8: VEnumAbc.B}}}, F1: true, F9: VEnumBcd.D, F26: -1.6323488e+09}, F11: {F20: 0}}",
+		SourceLabel: "VStructDepth2_Rand0{F0: {VMap_VEnumAbc_VEnumAbc{A: A, B: B, C: C}, VArray3_OptVStructEmpty{nil, {}, nil}, nil}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 111, F26: 1.2968383e+09}, F10: {F16: 15486817104661370343}}",
 		Source: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				map[VString]VString{
-					"mn": "abcdefghijklm",
-					"pΔ": "gh",
-					"ΠΣ": "jklmn",
+				VMap_VEnumAbc_VEnumAbc{
+					VEnumAbcA: VEnumAbcA,
+					VEnumAbcB: VEnumAbcB,
+					VEnumAbcC: VEnumAbcC,
 				},
-				VList_VByte("\xf4"),
-				VSet_Float32{
-					4.3789228e+07: struct{}{},
+				VArray3_OptVStructEmpty{
+					nil,
+					{},
+					nil,
 				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VList_OptVStructDepth2_Rand0{
-					{
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F6{},
-					},
-					{
-						F0: VArray3_Any{
-							[]VBool{
-								false,
-								true,
-							},
-							float32(1.3833646e+08),
-							int8(20),
-						},
-						F9: VStructDepth1_Rand1{
-							F1:  true,
-							F26: 9.317819e+06,
-						},
-						F10: VUnionDepth1_Rand0F8{VEnumAbcB},
-						F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-							Msg: "opΔΘΠ",
-						})},
-					},
-					{
-						F0: VArray3_Any{
-							VArray2_VByte{},
-							VStructDepth2_Rand0{
-								F9: VStructDepth1_Rand1{
-									F7:  126,
-									F9:  VEnumBcdC,
-									F26: 1.1265887e+09,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-									Msg:       "ghijklm",
-								})},
-							},
-							nil,
-						},
-						F9: VStructDepth1_Rand1{
-							F0: map[bool]bool{
-								false: true,
-								true:  true,
-							},
-							F7:  167,
-							F9:  VEnumBcdC,
-							F26: -4.0748695e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-					},
+				F0: VMap_VStructEmpty_VStructEmpty{
+					{}: {},
 				},
-				F1:  true,
-				F9:  VEnumBcdD,
-				F26: -1.6323488e+09,
+				F7:  111,
+				F26: 1.2968383e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F20{},
+			F10: VUnionDepth1_Rand0F16{15486817104661370343},
+			F11: VUnionDepth1_Rand1F6{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_Rand0{F0: {map[VString]VString{\"mn\": \"abcdefghijklm\", \"pΔ\": \"gh\", \"ΠΣ\": \"jklmn\"}, VList_VByte(\"\\xf4\"), VSet_Float32{4.3789228e+07}}, F9: {F0: VList_OptVStructDepth2_Rand0{{}, {F0: {[]VBool{false, true}, float32(1.3833646e+08), int8(20)}, F9: {F1: true, F26: 9.317819e+06}, F10: {F8: VEnumAbc.B}, F11: {F11: {Msg: \"opΔΘΠ\"}}}, {F0: {VArray2_VByte(\"\\x00\\x00\"), VStructDepth2_Rand0{F9: {F7: 126, F9: VEnumBcd.C, F26: 1.1265887e+09}, F11: {F11: {RetryCode: RetryConnection, Msg: \"ghijklm\"}}}, nil}, F9: {F0: map[bool]bool{false: true, true: true}, F7: 167, F9: VEnumBcd.C, F26: -4.0748695e+09}, F11: {F8: VEnumAbc.B}}}, F1: true, F9: VEnumBcd.D, F26: -1.6323488e+09}, F11: {F20: 0}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {VMap_VEnumAbc_VEnumAbc{A: A, B: B, C: C}, VArray3_OptVStructEmpty{nil, {}, nil}, nil}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 111, F26: 1.2968383e+09}, F10: {F16: 15486817104661370343}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				map[VString]VString{
-					"mn": "abcdefghijklm",
-					"pΔ": "gh",
-					"ΠΣ": "jklmn",
+				VMap_VEnumAbc_VEnumAbc{
+					VEnumAbcA: VEnumAbcA,
+					VEnumAbcB: VEnumAbcB,
+					VEnumAbcC: VEnumAbcC,
 				},
-				VList_VByte("\xf4"),
-				VSet_Float32{
-					4.3789228e+07: struct{}{},
+				VArray3_OptVStructEmpty{
+					nil,
+					{},
+					nil,
 				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VList_OptVStructDepth2_Rand0{
-					{
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F6{},
-					},
-					{
-						F0: VArray3_Any{
-							[]VBool{
-								false,
-								true,
-							},
-							float32(1.3833646e+08),
-							int8(20),
-						},
-						F9: VStructDepth1_Rand1{
-							F1:  true,
-							F26: 9.317819e+06,
-						},
-						F10: VUnionDepth1_Rand0F8{VEnumAbcB},
-						F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-							Msg: "opΔΘΠ",
-						})},
-					},
-					{
-						F0: VArray3_Any{
-							VArray2_VByte{},
-							VStructDepth2_Rand0{
-								F9: VStructDepth1_Rand1{
-									F7:  126,
-									F9:  VEnumBcdC,
-									F26: 1.1265887e+09,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-									Msg:       "ghijklm",
-								})},
-							},
-							nil,
-						},
-						F9: VStructDepth1_Rand1{
-							F0: map[bool]bool{
-								false: true,
-								true:  true,
-							},
-							F7:  167,
-							F9:  VEnumBcdC,
-							F26: -4.0748695e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-					},
+				F0: VMap_VStructEmpty_VStructEmpty{
+					{}: {},
 				},
-				F1:  true,
-				F9:  VEnumBcdD,
-				F26: -1.6323488e+09,
+				F7:  111,
+				F26: 1.2968383e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F20{},
+			F10: VUnionDepth1_Rand0F16{15486817104661370343},
+			F11: VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {map[VString]VString{\"mn\": \"abcdefghijklm\", \"pΔ\": \"gh\", \"ΠΣ\": \"jklmn\"}, VList_VByte(\"\\xf4\"), VSet_Float32{4.3789228e+07}}, F9: {F0: VList_OptVStructDepth2_Rand0{{}, {F0: {[]VBool{false, true}, float32(1.3833646e+08), int8(20)}, F9: {F1: true, F26: 9.317819e+06}, F10: {F8: VEnumAbc.B}, F11: {F11: {Msg: \"opΔΘΠ\"}}}, {F0: {VArray2_VByte(\"\\x00\\x00\"), VStructDepth2_Rand0{F9: {F7: 126, F9: VEnumBcd.C, F26: 1.1265887e+09}, F11: {F11: {RetryCode: RetryConnection, Msg: \"ghijklm\"}}}, nil}, F9: {F0: map[bool]bool{false: true, true: true}, F7: 167, F9: VEnumBcd.C, F26: -4.0748695e+09}, F11: {F8: VEnumAbc.B}}}, F1: true, F9: VEnumBcd.D, F26: -1.6323488e+09}, F11: {F20: 0}}",
+		SourceLabel: "VStructDepth2_All{F0: {VMap_VEnumAbc_VEnumAbc{A: A, B: B, C: C}, VArray3_OptVStructEmpty{nil, {}, nil}, nil}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 111, F26: 1.2968383e+09}, F10: {F16: 15486817104661370343}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
-				map[VString]VString{
-					"mn": "abcdefghijklm",
-					"pΔ": "gh",
-					"ΠΣ": "jklmn",
+				VMap_VEnumAbc_VEnumAbc{
+					VEnumAbcA: VEnumAbcA,
+					VEnumAbcB: VEnumAbcB,
+					VEnumAbcC: VEnumAbcC,
 				},
-				VList_VByte("\xf4"),
-				VSet_Float32{
-					4.3789228e+07: struct{}{},
+				VArray3_OptVStructEmpty{
+					nil,
+					{},
+					nil,
 				},
+				nil,
 			},
 			F8: VStructDepth1_All{
 				F5: vdl.AnyType,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VList_OptVStructDepth2_Rand0{
-					{
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F6{},
-					},
-					{
-						F0: VArray3_Any{
-							[]VBool{
-								false,
-								true,
-							},
-							float32(1.3833646e+08),
-							int8(20),
-						},
-						F9: VStructDepth1_Rand1{
-							F1:  true,
-							F26: 9.317819e+06,
-						},
-						F10: VUnionDepth1_Rand0F8{VEnumAbcB},
-						F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-							Msg: "opΔΘΠ",
-						})},
-					},
-					{
-						F0: VArray3_Any{
-							VArray2_VByte{},
-							VStructDepth2_Rand0{
-								F9: VStructDepth1_Rand1{
-									F7:  126,
-									F9:  VEnumBcdC,
-									F26: 1.1265887e+09,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-									Msg:       "ghijklm",
-								})},
-							},
-							nil,
-						},
-						F9: VStructDepth1_Rand1{
-							F0: map[bool]bool{
-								false: true,
-								true:  true,
-							},
-							F7:  167,
-							F9:  VEnumBcdC,
-							F26: -4.0748695e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-					},
+				F0: VMap_VStructEmpty_VStructEmpty{
+					{}: {},
 				},
-				F1:  true,
-				F9:  VEnumBcdD,
-				F26: -1.6323488e+09,
+				F7:  111,
+				F26: 1.2968383e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F20{},
+			F10: VUnionDepth1_Rand0F16{15486817104661370343},
+			F11: VUnionDepth1_Rand1F6{},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_Rand0{F0: {VList_VString{\"\"}, VMap_VEnumAbc_VEnumAbc{}, map[VString]VString{\"\": \"nopΔ\", \"fghijk\": \"ijklmnopΔΘΠΣ\"}}, F9: {F0: set[VByte]{0, 83}, F26: 4.9836035e+08}, F11: {F6: 156}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {set[bool]{}, VList_VEnumBcd{C, D, C}, nil}, F9: {F1: true, F9: C}, F10: {F12: 0}, F11: {F11: {}}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString{
-					"",
+				map[bool]struct{}(nil),
+				VList_VEnumBcd{
+					VEnumBcdC,
+					VEnumBcdD,
+					VEnumBcdC,
 				},
-				VMap_VEnumAbc_VEnumAbc(nil),
-				map[VString]VString{
-					"":       "nopΔ",
-					"fghijk": "ijklmnopΔΘΠΣ",
-				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: map[VByte]struct{}{
-					0:  struct{}{},
-					83: struct{}{},
-				},
-				F26: 4.9836035e+08,
+				F1: true,
+				F9: VEnumBcdC,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F6{156},
+			F10: VUnionDepth1_Rand0F12{},
+			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 		},
-		SourceLabel: "VStructDepth2_Rand0{F0: {VList_VString{\"\"}, VMap_VEnumAbc_VEnumAbc{}, map[VString]VString{\"\": \"nopΔ\", \"fghijk\": \"ijklmnopΔΘΠΣ\"}}, F9: {F0: set[VByte]{0, 83}, F26: 4.9836035e+08}, F11: {F6: 156}}",
+		SourceLabel: "VStructDepth2_Rand0{F0: {set[bool]{}, VList_VEnumBcd{C, D, C}, nil}, F9: {F1: true, F9: C}, F10: {F12: 0}, F11: {F11: {}}}",
 		Source: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString{
-					"",
+				map[bool]struct{}(nil),
+				VList_VEnumBcd{
+					VEnumBcdC,
+					VEnumBcdD,
+					VEnumBcdC,
 				},
-				VMap_VEnumAbc_VEnumAbc(nil),
-				map[VString]VString{
-					"":       "nopΔ",
-					"fghijk": "ijklmnopΔΘΠΣ",
-				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: map[VByte]struct{}{
-					0:  struct{}{},
-					83: struct{}{},
-				},
-				F26: 4.9836035e+08,
+				F1: true,
+				F9: VEnumBcdC,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F6{156},
+			F10: VUnionDepth1_Rand0F12{},
+			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth2_Rand0{F0: {VList_VString{\"\"}, VMap_VEnumAbc_VEnumAbc{}, map[VString]VString{\"\": \"nopΔ\", \"fghijk\": \"ijklmnopΔΘΠΣ\"}}, F9: {F0: set[VByte]{0, 83}, F26: 4.9836035e+08}, F11: {F6: 156}}",
+		TargetLabel: "VStructDepth2_Rand0{F0: {set[bool]{}, VList_VEnumBcd{C, D, C}, nil}, F9: {F1: true, F9: C}, F10: {F12: 0}, F11: {F11: {}}}",
 		Target: VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString{
-					"",
+				map[bool]struct{}(nil),
+				VList_VEnumBcd{
+					VEnumBcdC,
+					VEnumBcdD,
+					VEnumBcdC,
 				},
-				VMap_VEnumAbc_VEnumAbc(nil),
-				map[VString]VString{
-					"":       "nopΔ",
-					"fghijk": "ijklmnopΔΘΠΣ",
-				},
+				nil,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: map[VByte]struct{}{
-					0:  struct{}{},
-					83: struct{}{},
-				},
-				F26: 4.9836035e+08,
+				F1: true,
+				F9: VEnumBcdC,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F6{156},
+			F10: VUnionDepth1_Rand0F12{},
+			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {VList_VString{\"\"}, VMap_VEnumAbc_VEnumAbc{}, map[VString]VString{\"\": \"nopΔ\", \"fghijk\": \"ijklmnopΔΘΠΣ\"}}, F9: {F0: set[VByte]{0, 83}, F26: 4.9836035e+08}, F11: {F6: 156}}",
+		SourceLabel: "VStructDepth2_All{F0: {set[bool]{}, VList_VEnumBcd{C, D, C}, nil}, F9: {F1: true, F9: C}, F10: {F12: 0}, F11: {F11: {}}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
-				VList_VString{
-					"",
+				map[bool]struct{}(nil),
+				VList_VEnumBcd{
+					VEnumBcdC,
+					VEnumBcdD,
+					VEnumBcdC,
 				},
-				VMap_VEnumAbc_VEnumAbc(nil),
-				map[VString]VString{
-					"":       "nopΔ",
-					"fghijk": "ijklmnopΔΘΠΣ",
-				},
+				nil,
 			},
 			F8: VStructDepth1_All{
 				F5: vdl.AnyType,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: map[VByte]struct{}{
-					0:  struct{}{},
-					83: struct{}{},
-				},
-				F26: 4.9836035e+08,
+				F1: true,
+				F9: VEnumBcdC,
 			},
-			F10: VUnionDepth1_Rand0F8{},
-			F11: VUnionDepth1_Rand1F6{156},
+			F10: VUnionDepth1_Rand0F12{},
+			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 		},
 	},
 	{
@@ -32954,13 +32766,13 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth2_Rand1{F7: {VEnumBcd.D: VEnumBcd.D}}",
+		TargetLabel: "VStructDepth2_Rand1{F7: {D: D}}",
 		Target: VStructDepth2_Rand1{
 			F7: VMap_VEnumBcd_VEnumBcd{
 				VEnumBcdD: VEnumBcdD,
 			},
 		},
-		SourceLabel: "VStructDepth2_Rand1{F7: {VEnumBcd.D: VEnumBcd.D}}",
+		SourceLabel: "VStructDepth2_Rand1{F7: {D: D}}",
 		Source: VStructDepth2_Rand1{
 			F7: VMap_VEnumBcd_VEnumBcd{
 				VEnumBcdD: VEnumBcdD,
@@ -32969,13 +32781,13 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VStructDepth2_Rand1{F7: {VEnumBcd.D: VEnumBcd.D}}",
+		TargetLabel: "VStructDepth2_Rand1{F7: {D: D}}",
 		Target: VStructDepth2_Rand1{
 			F7: VMap_VEnumBcd_VEnumBcd{
 				VEnumBcdD: VEnumBcdD,
 			},
 		},
-		SourceLabel: "VStructDepth2_All{F7: {VEnumBcd.D: VEnumBcd.D}}",
+		SourceLabel: "VStructDepth2_All{F7: {D: D}}",
 		Source: VStructDepth2_All{
 			F7: VMap_VEnumBcd_VEnumBcd{
 				VEnumBcdD: VEnumBcdD,
@@ -32998,7 +32810,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}",
+		TargetLabel: "VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}",
 		Target: VUnionDepth2_All(VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -33006,7 +32818,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		}}),
-		SourceLabel: "VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}",
+		SourceLabel: "VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}",
 		Source: VUnionDepth2_All(VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -33018,23 +32830,130 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_All{F10: {F6: 44}}",
-		Target:      VUnionDepth2_All(VUnionDepth2_AllF10{VUnionDepth1_AllF6{44}}),
-		SourceLabel: "VUnionDepth2_All{F10: {F6: 44}}",
-		Source:      VUnionDepth2_All(VUnionDepth2_AllF10{VUnionDepth1_AllF6{44}}),
+		TargetLabel: "VUnionDepth2_All{F6: {\"fghijklmn\": \"efgh\", \"no\": \"hijkl\"}}",
+		Target: VUnionDepth2_All(VUnionDepth2_AllF6{VMap_VString_VString{
+			"fghijklmn": "efgh",
+			"no":        "hijkl",
+		}}),
+		SourceLabel: "VUnionDepth2_All{F6: {\"fghijklmn\": \"efgh\", \"no\": \"hijkl\"}}",
+		Source: VUnionDepth2_All(VUnionDepth2_AllF6{VMap_VString_VString{
+			"fghijklmn": "efgh",
+			"no":        "hijkl",
+		}}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_All{F6: {\"\": \"jklmno\", \"fghijklmnopΔΘΠΣΦ王普澤世\": \"ΠΣΦ王普澤世\"}}",
-		Target: VUnionDepth2_All(VUnionDepth2_AllF6{VMap_VString_VString{
-			"": "jklmno",
-			"fghijklmnopΔΘΠΣΦ王普澤世": "ΠΣΦ王普澤世",
+		TargetLabel: "VUnionDepth2_All{F8: {F0: int16(-7786), F1: true, F2: true, F3: \"fghijkl\", F6: 245, F7: 96, F9: D, F11: {}, F12: 29116, F13: 42064, F14: 2530134519, F15: 4057520508, F16: 16327925196355279549, F17: 6207326654635277592, F18: 33, F19: -61, F20: -6609, F22: 995066646, F25: -3597796560754813159, F26: 1.339539e+09, F27: -1.2871139e+08, F28: -8.601946090668706e+08, F30: {}}}",
+		Target: VUnionDepth2_All(VUnionDepth2_AllF8{VStructDepth1_All{
+			F0:  int16(-7786),
+			F1:  true,
+			F2:  true,
+			F3:  "fghijkl",
+			F5:  vdl.AnyType,
+			F6:  245,
+			F7:  96,
+			F9:  VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{}),
+			F12: 29116,
+			F13: 42064,
+			F14: 2530134519,
+			F15: 4057520508,
+			F16: 16327925196355279549,
+			F17: 6207326654635277592,
+			F18: 33,
+			F19: -61,
+			F20: -6609,
+			F22: 995066646,
+			F25: -3597796560754813159,
+			F26: 1.339539e+09,
+			F27: -1.2871139e+08,
+			F28: -8.601946090668706e+08,
+			F30: &VStructEmpty{},
 		}}),
-		SourceLabel: "VUnionDepth2_All{F6: {\"\": \"jklmno\", \"fghijklmnopΔΘΠΣΦ王普澤世\": \"ΠΣΦ王普澤世\"}}",
-		Source: VUnionDepth2_All(VUnionDepth2_AllF6{VMap_VString_VString{
-			"": "jklmno",
-			"fghijklmnopΔΘΠΣΦ王普澤世": "ΠΣΦ王普澤世",
+		SourceLabel: "VUnionDepth2_All{F8: {F0: int16(-7786), F1: true, F2: true, F3: \"fghijkl\", F6: 245, F7: 96, F9: D, F11: {}, F12: 29116, F13: 42064, F14: 2530134519, F15: 4057520508, F16: 16327925196355279549, F17: 6207326654635277592, F18: 33, F19: -61, F20: -6609, F22: 995066646, F25: -3597796560754813159, F26: 1.339539e+09, F27: -1.2871139e+08, F28: -8.601946090668706e+08, F30: {}}}",
+		Source: VUnionDepth2_All(VUnionDepth2_AllF8{VStructDepth1_All{
+			F0:  int16(-7786),
+			F1:  true,
+			F2:  true,
+			F3:  "fghijkl",
+			F5:  vdl.AnyType,
+			F6:  245,
+			F7:  96,
+			F9:  VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{}),
+			F12: 29116,
+			F13: 42064,
+			F14: 2530134519,
+			F15: 4057520508,
+			F16: 16327925196355279549,
+			F17: 6207326654635277592,
+			F18: 33,
+			F19: -61,
+			F20: -6609,
+			F22: 995066646,
+			F25: -3597796560754813159,
+			F26: 1.339539e+09,
+			F27: -1.2871139e+08,
+			F28: -8.601946090668706e+08,
+			F30: &VStructEmpty{},
+		}}),
+	},
+	{
+		Label:       "Random",
+		TargetLabel: "VUnionDepth2_All{F8: {F0: int16(-7786), F1: true, F2: true, F3: \"fghijkl\", F6: 245, F7: 96, F9: D, F11: {}, F12: 29116, F13: 42064, F14: 2530134519, F15: 4057520508, F16: 16327925196355279549, F17: 6207326654635277592, F18: 33, F19: -61, F20: -6609, F22: 995066646, F25: -3597796560754813159, F26: 1.339539e+09, F27: -1.2871139e+08, F28: -8.601946090668706e+08, F30: {}}}",
+		Target: VUnionDepth2_All(VUnionDepth2_AllF8{VStructDepth1_All{
+			F0:  int16(-7786),
+			F1:  true,
+			F2:  true,
+			F3:  "fghijkl",
+			F5:  vdl.AnyType,
+			F6:  245,
+			F7:  96,
+			F9:  VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{}),
+			F12: 29116,
+			F13: 42064,
+			F14: 2530134519,
+			F15: 4057520508,
+			F16: 16327925196355279549,
+			F17: 6207326654635277592,
+			F18: 33,
+			F19: -61,
+			F20: -6609,
+			F22: 995066646,
+			F25: -3597796560754813159,
+			F26: 1.339539e+09,
+			F27: -1.2871139e+08,
+			F28: -8.601946090668706e+08,
+			F30: &VStructEmpty{},
+		}}),
+		SourceLabel: "VUnionDepth2_Rand0{F8: {F0: int16(-7786), F1: true, F2: true, F3: \"fghijkl\", F6: 245, F7: 96, F9: D, F11: {}, F12: 29116, F13: 42064, F14: 2530134519, F15: 4057520508, F16: 16327925196355279549, F17: 6207326654635277592, F18: 33, F19: -61, F20: -6609, F22: 995066646, F25: -3597796560754813159, F26: 1.339539e+09, F27: -1.2871139e+08, F28: -8.601946090668706e+08, F30: {}}}",
+		Source: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
+			F0:  int16(-7786),
+			F1:  true,
+			F2:  true,
+			F3:  "fghijkl",
+			F5:  vdl.AnyType,
+			F6:  245,
+			F7:  96,
+			F9:  VEnumBcdD,
+			F11: verror.FromWire(vdl.WireError{}),
+			F12: 29116,
+			F13: 42064,
+			F14: 2530134519,
+			F15: 4057520508,
+			F16: 16327925196355279549,
+			F17: 6207326654635277592,
+			F18: 33,
+			F19: -61,
+			F20: -6609,
+			F22: 995066646,
+			F25: -3597796560754813159,
+			F26: 1.339539e+09,
+			F27: -1.2871139e+08,
+			F28: -8.601946090668706e+08,
+			F30: &VStructEmpty{},
 		}}),
 	},
 	{
@@ -33093,231 +33012,59 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_Rand0{F8: {F0: int32(0), F1: true, F2: true, F3: \"bcdefg\", F4: \"ijklmnopΔΘΠΣΦ王普澤世\", F6: 216, F8: VEnumAbc.C, F11: {Id: \"ijklmnopΔ\", RetryCode: RetryBackoff}, F12: 22517, F13: 2959, F14: 2862769819, F15: 4203441709, F16: 14190618389538774740, F17: 8179036233471553079, F18: -20, F20: -5480, F21: 2623, F23: -855940906, F25: 989354617677646993, F26: 6.707546e+08, F30: {}}}",
-		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F0: int32(0),
-			F1: true,
-			F2: true,
-			F3: "bcdefg",
-			F4: "ijklmnopΔΘΠΣΦ王普澤世",
-			F5: vdl.AnyType,
-			F6: 216,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "ijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-			}),
-			F12: 22517,
-			F13: 2959,
-			F14: 2862769819,
-			F15: 4203441709,
-			F16: 14190618389538774740,
-			F17: 8179036233471553079,
-			F18: -20,
-			F20: -5480,
-			F21: 2623,
-			F23: -855940906,
-			F25: 989354617677646993,
-			F26: 6.707546e+08,
-			F30: &VStructEmpty{},
+		TargetLabel: "VUnionDepth2_Rand0{F2: {-1.0194577054779989e+09, 0, -1.1034184636515765e+09}}",
+		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{[]float64{
+			-1.0194577054779989e+09,
+			0,
+			-1.1034184636515765e+09,
 		}}),
-		SourceLabel: "VUnionDepth2_Rand0{F8: {F0: int32(0), F1: true, F2: true, F3: \"bcdefg\", F4: \"ijklmnopΔΘΠΣΦ王普澤世\", F6: 216, F8: VEnumAbc.C, F11: {Id: \"ijklmnopΔ\", RetryCode: RetryBackoff}, F12: 22517, F13: 2959, F14: 2862769819, F15: 4203441709, F16: 14190618389538774740, F17: 8179036233471553079, F18: -20, F20: -5480, F21: 2623, F23: -855940906, F25: 989354617677646993, F26: 6.707546e+08, F30: {}}}",
-		Source: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F0: int32(0),
-			F1: true,
-			F2: true,
-			F3: "bcdefg",
-			F4: "ijklmnopΔΘΠΣΦ王普澤世",
-			F5: vdl.AnyType,
-			F6: 216,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "ijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-			}),
-			F12: 22517,
-			F13: 2959,
-			F14: 2862769819,
-			F15: 4203441709,
-			F16: 14190618389538774740,
-			F17: 8179036233471553079,
-			F18: -20,
-			F20: -5480,
-			F21: 2623,
-			F23: -855940906,
-			F25: 989354617677646993,
-			F26: 6.707546e+08,
-			F30: &VStructEmpty{},
+		SourceLabel: "VUnionDepth2_Rand0{F2: {-1.0194577054779989e+09, 0, -1.1034184636515765e+09}}",
+		Source: VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{[]float64{
+			-1.0194577054779989e+09,
+			0,
+			-1.1034184636515765e+09,
 		}}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_Rand0{F8: {F0: int32(0), F1: true, F2: true, F3: \"bcdefg\", F4: \"ijklmnopΔΘΠΣΦ王普澤世\", F6: 216, F8: VEnumAbc.C, F11: {Id: \"ijklmnopΔ\", RetryCode: RetryBackoff}, F12: 22517, F13: 2959, F14: 2862769819, F15: 4203441709, F16: 14190618389538774740, F17: 8179036233471553079, F18: -20, F20: -5480, F21: 2623, F23: -855940906, F25: 989354617677646993, F26: 6.707546e+08, F30: {}}}",
-		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F0: int32(0),
-			F1: true,
-			F2: true,
-			F3: "bcdefg",
-			F4: "ijklmnopΔΘΠΣΦ王普澤世",
-			F5: vdl.AnyType,
-			F6: 216,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "ijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-			}),
-			F12: 22517,
-			F13: 2959,
-			F14: 2862769819,
-			F15: 4203441709,
-			F16: 14190618389538774740,
-			F17: 8179036233471553079,
-			F18: -20,
-			F20: -5480,
-			F21: 2623,
-			F23: -855940906,
-			F25: 989354617677646993,
-			F26: 6.707546e+08,
-			F30: &VStructEmpty{},
+		TargetLabel: "VUnionDepth2_Rand0{F2: {-1.0194577054779989e+09, 0, -1.1034184636515765e+09}}",
+		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{[]float64{
+			-1.0194577054779989e+09,
+			0,
+			-1.1034184636515765e+09,
 		}}),
-		SourceLabel: "VUnionDepth2_All{F8: {F0: int32(0), F1: true, F2: true, F3: \"bcdefg\", F4: \"ijklmnopΔΘΠΣΦ王普澤世\", F6: 216, F8: VEnumAbc.C, F11: {Id: \"ijklmnopΔ\", RetryCode: RetryBackoff}, F12: 22517, F13: 2959, F14: 2862769819, F15: 4203441709, F16: 14190618389538774740, F17: 8179036233471553079, F18: -20, F20: -5480, F21: 2623, F23: -855940906, F25: 989354617677646993, F26: 6.707546e+08, F30: {}}}",
-		Source: VUnionDepth2_All(VUnionDepth2_AllF8{VStructDepth1_All{
-			F0: int32(0),
-			F1: true,
-			F2: true,
-			F3: "bcdefg",
-			F4: "ijklmnopΔΘΠΣΦ王普澤世",
-			F5: vdl.AnyType,
-			F6: 216,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:        "ijklmnopΔ",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-			}),
-			F12: 22517,
-			F13: 2959,
-			F14: 2862769819,
-			F15: 4203441709,
-			F16: 14190618389538774740,
-			F17: 8179036233471553079,
-			F18: -20,
-			F20: -5480,
-			F21: 2623,
-			F23: -855940906,
-			F25: 989354617677646993,
-			F26: 6.707546e+08,
-			F30: &VStructEmpty{},
+		SourceLabel: "VUnionDepth2_All{F2: {-1.0194577054779989e+09, 0, -1.1034184636515765e+09}}",
+		Source: VUnionDepth2_All(VUnionDepth2_AllF2{[]float64{
+			-1.0194577054779989e+09,
+			0,
+			-1.1034184636515765e+09,
 		}}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_Rand0{F8: {F4: \"bcdefghijk\", F6: 216, F7: 117, F8: VEnumAbc.C, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", Msg: \"efghijkl\"}, F12: 57776, F13: 40836, F14: 2525942076, F15: 819858416, F16: 8424299311887555092, F17: 18229808470874273372, F20: 10561, F21: -5673, F22: 762032459, F24: -3303695915173461276, F26: 7.459228e+07, F28: -3.5350978984287006e+08, F29: -8.747007497061703e+08, F30: {}}}",
-		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F4: "bcdefghijk",
-			F5: vdl.AnyType,
-			F6: 216,
-			F7: 117,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:  "efghijklmnopΔΘΠΣΦ王",
-				Msg: "efghijkl",
-			}),
-			F12: 57776,
-			F13: 40836,
-			F14: 2525942076,
-			F15: 819858416,
-			F16: 8424299311887555092,
-			F17: 18229808470874273372,
-			F20: 10561,
-			F21: -5673,
-			F22: 762032459,
-			F24: -3303695915173461276,
-			F26: 7.459228e+07,
-			F28: -3.5350978984287006e+08,
-			F29: -8.747007497061703e+08,
-			F30: &VStructEmpty{},
+		TargetLabel: "VUnionDepth2_Rand0{F12: {F4: \"ijklmnopΔΘΠΣ\", F21: -9809}}",
+		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+			F4:  "ijklmnopΔΘΠΣ",
+			F21: -9809,
 		}}),
-		SourceLabel: "VUnionDepth2_Rand0{F8: {F4: \"bcdefghijk\", F6: 216, F7: 117, F8: VEnumAbc.C, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", Msg: \"efghijkl\"}, F12: 57776, F13: 40836, F14: 2525942076, F15: 819858416, F16: 8424299311887555092, F17: 18229808470874273372, F20: 10561, F21: -5673, F22: 762032459, F24: -3303695915173461276, F26: 7.459228e+07, F28: -3.5350978984287006e+08, F29: -8.747007497061703e+08, F30: {}}}",
-		Source: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F4: "bcdefghijk",
-			F5: vdl.AnyType,
-			F6: 216,
-			F7: 117,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:  "efghijklmnopΔΘΠΣΦ王",
-				Msg: "efghijkl",
-			}),
-			F12: 57776,
-			F13: 40836,
-			F14: 2525942076,
-			F15: 819858416,
-			F16: 8424299311887555092,
-			F17: 18229808470874273372,
-			F20: 10561,
-			F21: -5673,
-			F22: 762032459,
-			F24: -3303695915173461276,
-			F26: 7.459228e+07,
-			F28: -3.5350978984287006e+08,
-			F29: -8.747007497061703e+08,
-			F30: &VStructEmpty{},
+		SourceLabel: "VUnionDepth2_Rand0{F12: {F4: \"ijklmnopΔΘΠΣ\", F21: -9809}}",
+		Source: VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+			F4:  "ijklmnopΔΘΠΣ",
+			F21: -9809,
 		}}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth2_Rand0{F8: {F4: \"bcdefghijk\", F6: 216, F7: 117, F8: VEnumAbc.C, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", Msg: \"efghijkl\"}, F12: 57776, F13: 40836, F14: 2525942076, F15: 819858416, F16: 8424299311887555092, F17: 18229808470874273372, F20: 10561, F21: -5673, F22: 762032459, F24: -3303695915173461276, F26: 7.459228e+07, F28: -3.5350978984287006e+08, F29: -8.747007497061703e+08, F30: {}}}",
-		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-			F4: "bcdefghijk",
-			F5: vdl.AnyType,
-			F6: 216,
-			F7: 117,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:  "efghijklmnopΔΘΠΣΦ王",
-				Msg: "efghijkl",
-			}),
-			F12: 57776,
-			F13: 40836,
-			F14: 2525942076,
-			F15: 819858416,
-			F16: 8424299311887555092,
-			F17: 18229808470874273372,
-			F20: 10561,
-			F21: -5673,
-			F22: 762032459,
-			F24: -3303695915173461276,
-			F26: 7.459228e+07,
-			F28: -3.5350978984287006e+08,
-			F29: -8.747007497061703e+08,
-			F30: &VStructEmpty{},
+		TargetLabel: "VUnionDepth2_Rand0{F12: {F4: \"ijklmnopΔΘΠΣ\", F21: -9809}}",
+		Target: VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+			F4:  "ijklmnopΔΘΠΣ",
+			F21: -9809,
 		}}),
-		SourceLabel: "VUnionDepth2_All{F8: {F4: \"bcdefghijk\", F6: 216, F7: 117, F8: VEnumAbc.C, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", Msg: \"efghijkl\"}, F12: 57776, F13: 40836, F14: 2525942076, F15: 819858416, F16: 8424299311887555092, F17: 18229808470874273372, F20: 10561, F21: -5673, F22: 762032459, F24: -3303695915173461276, F26: 7.459228e+07, F28: -3.5350978984287006e+08, F29: -8.747007497061703e+08, F30: {}}}",
-		Source: VUnionDepth2_All(VUnionDepth2_AllF8{VStructDepth1_All{
-			F4: "bcdefghijk",
-			F5: vdl.AnyType,
-			F6: 216,
-			F7: 117,
-			F8: VEnumAbcC,
-			F11: verror.FromWire(vdl.WireError{
-				Id:  "efghijklmnopΔΘΠΣΦ王",
-				Msg: "efghijkl",
-			}),
-			F12: 57776,
-			F13: 40836,
-			F14: 2525942076,
-			F15: 819858416,
-			F16: 8424299311887555092,
-			F17: 18229808470874273372,
-			F20: 10561,
-			F21: -5673,
-			F22: 762032459,
-			F24: -3303695915173461276,
-			F26: 7.459228e+07,
-			F28: -3.5350978984287006e+08,
-			F29: -8.747007497061703e+08,
-			F30: &VStructEmpty{},
+		SourceLabel: "VUnionDepth2_All{F12: {F4: \"ijklmnopΔΘΠΣ\", F21: -9809}}",
+		Source: VUnionDepth2_All(VUnionDepth2_AllF12{&VStructDepth1_Rand0{
+			F4:  "ijklmnopΔΘΠΣ",
+			F21: -9809,
 		}}),
 	},
 	{
@@ -33435,7 +33182,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Target: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -33452,7 +33199,7 @@ var vAllPass = []Entry{
 			F10: VUnionDepth1_Rand0F28{1.23},
 			F11: VUnionDepth1_Rand1F20{-123},
 		},
-		SourceLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		SourceLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Source: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -33472,7 +33219,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Target: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -33489,7 +33236,7 @@ var vAllPass = []Entry{
 			F10: VUnionDepth1_Rand0F28{1.23},
 			F11: VUnionDepth1_Rand1F20{-123},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
+		SourceLabel: "VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
 				int64(-123),
@@ -33513,345 +33260,453 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth2_Rand0{F9: {F1: true, F7: 55}, F10: {F10: {}}, F11: {F11: {Id: \"王普\", RetryCode: RetryBackoff, Msg: \"abcde\"}}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {[]VArray1_VArray3_Bool{{}, {{true, true, true}}}, VList_VEnumAbc{A, B}, set[VArray1_VStructDepth1_Rand0]{{{F15: 1410813170, F21: 1352}}}}, F9: {F0: []VSet_VStructDepth1_Rand0{}, F26: 3.3149235e+08}}",
 		Target: &VStructDepth2_Rand0{
-			F9: VStructDepth1_Rand1{
-				F1: true,
-				F7: 55,
+			F0: VArray3_Any{
+				[]VArray1_VArray3_Bool{
+					{},
+					{
+						{
+							true,
+							true,
+							true,
+						},
+					},
+				},
+				VList_VEnumAbc{
+					VEnumAbcA,
+					VEnumAbcB,
+				},
+				map[VArray1_VStructDepth1_Rand0]struct{}{
+					{
+						{
+							F15: 1410813170,
+							F21: 1352,
+						},
+					}: struct{}{},
+				},
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "王普",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "abcde",
-			})},
+			F9: VStructDepth1_Rand1{
+				F0:  []VSet_VStructDepth1_Rand0(nil),
+				F26: 3.3149235e+08,
+			},
+			F10: VUnionDepth1_Rand0F8{},
+			F11: VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "?VStructDepth2_Rand0{F9: {F1: true, F7: 55}, F10: {F10: {}}, F11: {F11: {Id: \"王普\", RetryCode: RetryBackoff, Msg: \"abcde\"}}}",
+		SourceLabel: "?VStructDepth2_Rand0{F0: {[]VArray1_VArray3_Bool{{}, {{true, true, true}}}, VList_VEnumAbc{A, B}, set[VArray1_VStructDepth1_Rand0]{{{F15: 1410813170, F21: 1352}}}}, F9: {F0: []VSet_VStructDepth1_Rand0{}, F26: 3.3149235e+08}}",
 		Source: &VStructDepth2_Rand0{
-			F9: VStructDepth1_Rand1{
-				F1: true,
-				F7: 55,
+			F0: VArray3_Any{
+				[]VArray1_VArray3_Bool{
+					{},
+					{
+						{
+							true,
+							true,
+							true,
+						},
+					},
+				},
+				VList_VEnumAbc{
+					VEnumAbcA,
+					VEnumAbcB,
+				},
+				map[VArray1_VStructDepth1_Rand0]struct{}{
+					{
+						{
+							F15: 1410813170,
+							F21: 1352,
+						},
+					}: struct{}{},
+				},
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "王普",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "abcde",
-			})},
+			F9: VStructDepth1_Rand1{
+				F0:  []VSet_VStructDepth1_Rand0(nil),
+				F26: 3.3149235e+08,
+			},
+			F10: VUnionDepth1_Rand0F8{},
+			F11: VUnionDepth1_Rand1F6{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth2_Rand0{F9: {F1: true, F7: 55}, F10: {F10: {}}, F11: {F11: {Id: \"王普\", RetryCode: RetryBackoff, Msg: \"abcde\"}}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {[]VArray1_VArray3_Bool{{}, {{true, true, true}}}, VList_VEnumAbc{A, B}, set[VArray1_VStructDepth1_Rand0]{{{F15: 1410813170, F21: 1352}}}}, F9: {F0: []VSet_VStructDepth1_Rand0{}, F26: 3.3149235e+08}}",
 		Target: &VStructDepth2_Rand0{
-			F9: VStructDepth1_Rand1{
-				F1: true,
-				F7: 55,
+			F0: VArray3_Any{
+				[]VArray1_VArray3_Bool{
+					{},
+					{
+						{
+							true,
+							true,
+							true,
+						},
+					},
+				},
+				VList_VEnumAbc{
+					VEnumAbcA,
+					VEnumAbcB,
+				},
+				map[VArray1_VStructDepth1_Rand0]struct{}{
+					{
+						{
+							F15: 1410813170,
+							F21: 1352,
+						},
+					}: struct{}{},
+				},
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "王普",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "abcde",
-			})},
+			F9: VStructDepth1_Rand1{
+				F0:  []VSet_VStructDepth1_Rand0(nil),
+				F26: 3.3149235e+08,
+			},
+			F10: VUnionDepth1_Rand0F8{},
+			F11: VUnionDepth1_Rand1F6{},
 		},
-		SourceLabel: "VStructDepth2_All{F9: {F1: true, F7: 55}, F10: {F10: {}}, F11: {F11: {Id: \"王普\", RetryCode: RetryBackoff, Msg: \"abcde\"}}}",
+		SourceLabel: "VStructDepth2_All{F0: {[]VArray1_VArray3_Bool{{}, {{true, true, true}}}, VList_VEnumAbc{A, B}, set[VArray1_VStructDepth1_Rand0]{{{F15: 1410813170, F21: 1352}}}}, F9: {F0: []VSet_VStructDepth1_Rand0{}, F26: 3.3149235e+08}}",
 		Source: VStructDepth2_All{
+			F0: VArray3_Any{
+				[]VArray1_VArray3_Bool{
+					{},
+					{
+						{
+							true,
+							true,
+							true,
+						},
+					},
+				},
+				VList_VEnumAbc{
+					VEnumAbcA,
+					VEnumAbcB,
+				},
+				map[VArray1_VStructDepth1_Rand0]struct{}{
+					{
+						{
+							F15: 1410813170,
+							F21: 1352,
+						},
+					}: struct{}{},
+				},
+			},
 			F8: VStructDepth1_All{
 				F5: vdl.AnyType,
 			},
 			F9: VStructDepth1_Rand1{
-				F1: true,
-				F7: 55,
+				F0:  []VSet_VStructDepth1_Rand0(nil),
+				F26: 3.3149235e+08,
 			},
-			F10: VUnionDepth1_Rand0F10{},
-			F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-				Id:        "王普",
-				RetryCode: vdl.WireRetryCodeRetryBackoff,
-				Msg:       "abcde",
-			})},
+			F10: VUnionDepth1_Rand0F8{},
+			F11: VUnionDepth1_Rand1F6{},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth2_Rand0{F0: {VList_VString{}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F4: \"pΔΘ\"}: {F4: \"abcdefghijkl\", F15: 2172401363, F21: -8835}}, nil}, F9: {F0: VArray3_VList_Any{{VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}, VEnumAbc.A, VList_VMap_VBool_VBool{}}, {map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{{}: {{true, true, false}}, {{false, false, true}}: {{false, false, true}}, {{true, false, true}}: {}}}, {nil}}, F1: true, F7: 76, F9: VEnumBcd.D, F26: -4.5741398e+08}, F10: {F8: VEnumAbc.C}, F11: {F6: 48}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {VArray3_VArray1_VStructDepth1_Rand0{{{F21: 1497}}, {{F4: \"gh\", F15: 3841855323, F21: -12956}}, {{F4: \"世界\", F15: 1663663323, F21: -2460}}}, []VUnionDepth2_Rand0{{F8: {F0: VBool(false), F1: true, F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"mno\", F5: typeobject([]VByte), F6: 151, F7: 194, F9: D, F11: {Id: \"ghijklmnopΔΘΠΣ\", Msg: \"klmnopΔΘΠ\"}, F12: 8260, F13: 38126, F14: 3673688878, F15: 358286932, F17: 3005757339147685194, F18: 27, F19: -47, F20: -1651, F21: 3319, F22: 818820716, F23: 993560523, F24: 4358163243667025429, F25: 1598555640048870905, F26: -1.2564104e+09, F28: 1.6946547675229838e+08, F29: 9.212779866661752e+08, F30: {}}}, {F12: {}}}, VSet_VStructEmpty{{}}}, F9: {F0: ?VStructDepth1_Rand0{F15: 350353992, F21: 931}, F1: true, F7: 207, F9: C, F26: 1.0288615e+09}, F10: {F12: 25478}, F11: {F6: 2}}",
 		Target: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString(nil),
-				map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+				VArray3_VArray1_VStructDepth1_Rand0{
 					{
-						F4: "pΔΘ",
-					}: {
-						F4:  "abcdefghijkl",
-						F15: 2172401363,
-						F21: -8835,
+						{
+							F21: 1497,
+						},
+					},
+					{
+						{
+							F4:  "gh",
+							F15: 3841855323,
+							F21: -12956,
+						},
+					},
+					{
+						{
+							F4:  "世界",
+							F15: 1663663323,
+							F21: -2460,
+						},
 					},
 				},
-				nil,
+				[]VUnionDepth2_Rand0{
+					VUnionDepth2_Rand0F8{VStructDepth1_All{
+						F0: VBool(false),
+						F1: true,
+						F3: "defghijklmnopΔΘΠΣΦ王",
+						F4: "mno",
+						F5: vdl.TypeOf((*[]VByte)(nil)),
+						F6: 151,
+						F7: 194,
+						F9: VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{
+							Id:  "ghijklmnopΔΘΠΣ",
+							Msg: "klmnopΔΘΠ",
+						}),
+						F12: 8260,
+						F13: 38126,
+						F14: 3673688878,
+						F15: 358286932,
+						F17: 3005757339147685194,
+						F18: 27,
+						F19: -47,
+						F20: -1651,
+						F21: 3319,
+						F22: 818820716,
+						F23: 993560523,
+						F24: 4358163243667025429,
+						F25: 1598555640048870905,
+						F26: -1.2564104e+09,
+						F28: 1.6946547675229838e+08,
+						F29: 9.212779866661752e+08,
+						F30: &VStructEmpty{},
+					}},
+					VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+				},
+				VSet_VStructEmpty{
+					{}: struct{}{},
+				},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VArray3_VList_Any{
-					{
-						VMap_VEnumBcd_VEnumBcd{
-							VEnumBcdB: VEnumBcdD,
-							VEnumBcdD: VEnumBcdB,
-						},
-						VEnumAbcA,
-						VList_VMap_VBool_VBool(nil),
-					},
-					{
-						map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{
-							{}: {
-								{
-									true,
-									true,
-									false,
-								},
-							},
-							{
-								{
-									false,
-									false,
-									true,
-								},
-							}: {
-								{
-									false,
-									false,
-									true,
-								},
-							},
-							{
-								{
-									true,
-									false,
-									true,
-								},
-							}: {},
-						},
-					},
-					{
-						nil,
-					},
+				F0: &VStructDepth1_Rand0{
+					F15: 350353992,
+					F21: 931,
 				},
 				F1:  true,
-				F7:  76,
-				F9:  VEnumBcdD,
-				F26: -4.5741398e+08,
+				F7:  207,
+				F9:  VEnumBcdC,
+				F26: 1.0288615e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-			F11: VUnionDepth1_Rand1F6{48},
+			F10: VUnionDepth1_Rand0F12{25478},
+			F11: VUnionDepth1_Rand1F6{2},
 		},
-		SourceLabel: "?VStructDepth2_Rand0{F0: {VList_VString{}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F4: \"pΔΘ\"}: {F4: \"abcdefghijkl\", F15: 2172401363, F21: -8835}}, nil}, F9: {F0: VArray3_VList_Any{{VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}, VEnumAbc.A, VList_VMap_VBool_VBool{}}, {map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{{}: {{true, true, false}}, {{false, false, true}}: {{false, false, true}}, {{true, false, true}}: {}}}, {nil}}, F1: true, F7: 76, F9: VEnumBcd.D, F26: -4.5741398e+08}, F10: {F8: VEnumAbc.C}, F11: {F6: 48}}",
+		SourceLabel: "?VStructDepth2_Rand0{F0: {VArray3_VArray1_VStructDepth1_Rand0{{{F21: 1497}}, {{F4: \"gh\", F15: 3841855323, F21: -12956}}, {{F4: \"世界\", F15: 1663663323, F21: -2460}}}, []VUnionDepth2_Rand0{{F8: {F0: VBool(false), F1: true, F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"mno\", F5: typeobject([]VByte), F6: 151, F7: 194, F9: D, F11: {Id: \"ghijklmnopΔΘΠΣ\", Msg: \"klmnopΔΘΠ\"}, F12: 8260, F13: 38126, F14: 3673688878, F15: 358286932, F17: 3005757339147685194, F18: 27, F19: -47, F20: -1651, F21: 3319, F22: 818820716, F23: 993560523, F24: 4358163243667025429, F25: 1598555640048870905, F26: -1.2564104e+09, F28: 1.6946547675229838e+08, F29: 9.212779866661752e+08, F30: {}}}, {F12: {}}}, VSet_VStructEmpty{{}}}, F9: {F0: ?VStructDepth1_Rand0{F15: 350353992, F21: 931}, F1: true, F7: 207, F9: C, F26: 1.0288615e+09}, F10: {F12: 25478}, F11: {F6: 2}}",
 		Source: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString(nil),
-				map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+				VArray3_VArray1_VStructDepth1_Rand0{
 					{
-						F4: "pΔΘ",
-					}: {
-						F4:  "abcdefghijkl",
-						F15: 2172401363,
-						F21: -8835,
+						{
+							F21: 1497,
+						},
+					},
+					{
+						{
+							F4:  "gh",
+							F15: 3841855323,
+							F21: -12956,
+						},
+					},
+					{
+						{
+							F4:  "世界",
+							F15: 1663663323,
+							F21: -2460,
+						},
 					},
 				},
-				nil,
+				[]VUnionDepth2_Rand0{
+					VUnionDepth2_Rand0F8{VStructDepth1_All{
+						F0: VBool(false),
+						F1: true,
+						F3: "defghijklmnopΔΘΠΣΦ王",
+						F4: "mno",
+						F5: vdl.TypeOf((*[]VByte)(nil)),
+						F6: 151,
+						F7: 194,
+						F9: VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{
+							Id:  "ghijklmnopΔΘΠΣ",
+							Msg: "klmnopΔΘΠ",
+						}),
+						F12: 8260,
+						F13: 38126,
+						F14: 3673688878,
+						F15: 358286932,
+						F17: 3005757339147685194,
+						F18: 27,
+						F19: -47,
+						F20: -1651,
+						F21: 3319,
+						F22: 818820716,
+						F23: 993560523,
+						F24: 4358163243667025429,
+						F25: 1598555640048870905,
+						F26: -1.2564104e+09,
+						F28: 1.6946547675229838e+08,
+						F29: 9.212779866661752e+08,
+						F30: &VStructEmpty{},
+					}},
+					VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+				},
+				VSet_VStructEmpty{
+					{}: struct{}{},
+				},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VArray3_VList_Any{
-					{
-						VMap_VEnumBcd_VEnumBcd{
-							VEnumBcdB: VEnumBcdD,
-							VEnumBcdD: VEnumBcdB,
-						},
-						VEnumAbcA,
-						VList_VMap_VBool_VBool(nil),
-					},
-					{
-						map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{
-							{}: {
-								{
-									true,
-									true,
-									false,
-								},
-							},
-							{
-								{
-									false,
-									false,
-									true,
-								},
-							}: {
-								{
-									false,
-									false,
-									true,
-								},
-							},
-							{
-								{
-									true,
-									false,
-									true,
-								},
-							}: {},
-						},
-					},
-					{
-						nil,
-					},
+				F0: &VStructDepth1_Rand0{
+					F15: 350353992,
+					F21: 931,
 				},
 				F1:  true,
-				F7:  76,
-				F9:  VEnumBcdD,
-				F26: -4.5741398e+08,
+				F7:  207,
+				F9:  VEnumBcdC,
+				F26: 1.0288615e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-			F11: VUnionDepth1_Rand1F6{48},
+			F10: VUnionDepth1_Rand0F12{25478},
+			F11: VUnionDepth1_Rand1F6{2},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth2_Rand0{F0: {VList_VString{}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F4: \"pΔΘ\"}: {F4: \"abcdefghijkl\", F15: 2172401363, F21: -8835}}, nil}, F9: {F0: VArray3_VList_Any{{VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}, VEnumAbc.A, VList_VMap_VBool_VBool{}}, {map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{{}: {{true, true, false}}, {{false, false, true}}: {{false, false, true}}, {{true, false, true}}: {}}}, {nil}}, F1: true, F7: 76, F9: VEnumBcd.D, F26: -4.5741398e+08}, F10: {F8: VEnumAbc.C}, F11: {F6: 48}}",
+		TargetLabel: "?VStructDepth2_Rand0{F0: {VArray3_VArray1_VStructDepth1_Rand0{{{F21: 1497}}, {{F4: \"gh\", F15: 3841855323, F21: -12956}}, {{F4: \"世界\", F15: 1663663323, F21: -2460}}}, []VUnionDepth2_Rand0{{F8: {F0: VBool(false), F1: true, F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"mno\", F5: typeobject([]VByte), F6: 151, F7: 194, F9: D, F11: {Id: \"ghijklmnopΔΘΠΣ\", Msg: \"klmnopΔΘΠ\"}, F12: 8260, F13: 38126, F14: 3673688878, F15: 358286932, F17: 3005757339147685194, F18: 27, F19: -47, F20: -1651, F21: 3319, F22: 818820716, F23: 993560523, F24: 4358163243667025429, F25: 1598555640048870905, F26: -1.2564104e+09, F28: 1.6946547675229838e+08, F29: 9.212779866661752e+08, F30: {}}}, {F12: {}}}, VSet_VStructEmpty{{}}}, F9: {F0: ?VStructDepth1_Rand0{F15: 350353992, F21: 931}, F1: true, F7: 207, F9: C, F26: 1.0288615e+09}, F10: {F12: 25478}, F11: {F6: 2}}",
 		Target: &VStructDepth2_Rand0{
 			F0: VArray3_Any{
-				VList_VString(nil),
-				map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+				VArray3_VArray1_VStructDepth1_Rand0{
 					{
-						F4: "pΔΘ",
-					}: {
-						F4:  "abcdefghijkl",
-						F15: 2172401363,
-						F21: -8835,
+						{
+							F21: 1497,
+						},
+					},
+					{
+						{
+							F4:  "gh",
+							F15: 3841855323,
+							F21: -12956,
+						},
+					},
+					{
+						{
+							F4:  "世界",
+							F15: 1663663323,
+							F21: -2460,
+						},
 					},
 				},
-				nil,
+				[]VUnionDepth2_Rand0{
+					VUnionDepth2_Rand0F8{VStructDepth1_All{
+						F0: VBool(false),
+						F1: true,
+						F3: "defghijklmnopΔΘΠΣΦ王",
+						F4: "mno",
+						F5: vdl.TypeOf((*[]VByte)(nil)),
+						F6: 151,
+						F7: 194,
+						F9: VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{
+							Id:  "ghijklmnopΔΘΠΣ",
+							Msg: "klmnopΔΘΠ",
+						}),
+						F12: 8260,
+						F13: 38126,
+						F14: 3673688878,
+						F15: 358286932,
+						F17: 3005757339147685194,
+						F18: 27,
+						F19: -47,
+						F20: -1651,
+						F21: 3319,
+						F22: 818820716,
+						F23: 993560523,
+						F24: 4358163243667025429,
+						F25: 1598555640048870905,
+						F26: -1.2564104e+09,
+						F28: 1.6946547675229838e+08,
+						F29: 9.212779866661752e+08,
+						F30: &VStructEmpty{},
+					}},
+					VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+				},
+				VSet_VStructEmpty{
+					{}: struct{}{},
+				},
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VArray3_VList_Any{
-					{
-						VMap_VEnumBcd_VEnumBcd{
-							VEnumBcdB: VEnumBcdD,
-							VEnumBcdD: VEnumBcdB,
-						},
-						VEnumAbcA,
-						VList_VMap_VBool_VBool(nil),
-					},
-					{
-						map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{
-							{}: {
-								{
-									true,
-									true,
-									false,
-								},
-							},
-							{
-								{
-									false,
-									false,
-									true,
-								},
-							}: {
-								{
-									false,
-									false,
-									true,
-								},
-							},
-							{
-								{
-									true,
-									false,
-									true,
-								},
-							}: {},
-						},
-					},
-					{
-						nil,
-					},
+				F0: &VStructDepth1_Rand0{
+					F15: 350353992,
+					F21: 931,
 				},
 				F1:  true,
-				F7:  76,
-				F9:  VEnumBcdD,
-				F26: -4.5741398e+08,
+				F7:  207,
+				F9:  VEnumBcdC,
+				F26: 1.0288615e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-			F11: VUnionDepth1_Rand1F6{48},
+			F10: VUnionDepth1_Rand0F12{25478},
+			F11: VUnionDepth1_Rand1F6{2},
 		},
-		SourceLabel: "VStructDepth2_All{F0: {VList_VString{}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F4: \"pΔΘ\"}: {F4: \"abcdefghijkl\", F15: 2172401363, F21: -8835}}, nil}, F9: {F0: VArray3_VList_Any{{VMap_VEnumBcd_VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}, VEnumAbc.A, VList_VMap_VBool_VBool{}}, {map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{{}: {{true, true, false}}, {{false, false, true}}: {{false, false, true}}, {{true, false, true}}: {}}}, {nil}}, F1: true, F7: 76, F9: VEnumBcd.D, F26: -4.5741398e+08}, F10: {F8: VEnumAbc.C}, F11: {F6: 48}}",
+		SourceLabel: "VStructDepth2_All{F0: {VArray3_VArray1_VStructDepth1_Rand0{{{F21: 1497}}, {{F4: \"gh\", F15: 3841855323, F21: -12956}}, {{F4: \"世界\", F15: 1663663323, F21: -2460}}}, []VUnionDepth2_Rand0{{F8: {F0: VBool(false), F1: true, F3: \"defghijklmnopΔΘΠΣΦ王\", F4: \"mno\", F5: typeobject([]VByte), F6: 151, F7: 194, F9: D, F11: {Id: \"ghijklmnopΔΘΠΣ\", Msg: \"klmnopΔΘΠ\"}, F12: 8260, F13: 38126, F14: 3673688878, F15: 358286932, F17: 3005757339147685194, F18: 27, F19: -47, F20: -1651, F21: 3319, F22: 818820716, F23: 993560523, F24: 4358163243667025429, F25: 1598555640048870905, F26: -1.2564104e+09, F28: 1.6946547675229838e+08, F29: 9.212779866661752e+08, F30: {}}}, {F12: {}}}, VSet_VStructEmpty{{}}}, F9: {F0: ?VStructDepth1_Rand0{F15: 350353992, F21: 931}, F1: true, F7: 207, F9: C, F26: 1.0288615e+09}, F10: {F12: 25478}, F11: {F6: 2}}",
 		Source: VStructDepth2_All{
 			F0: VArray3_Any{
-				VList_VString(nil),
-				map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+				VArray3_VArray1_VStructDepth1_Rand0{
 					{
-						F4: "pΔΘ",
-					}: {
-						F4:  "abcdefghijkl",
-						F15: 2172401363,
-						F21: -8835,
+						{
+							F21: 1497,
+						},
+					},
+					{
+						{
+							F4:  "gh",
+							F15: 3841855323,
+							F21: -12956,
+						},
+					},
+					{
+						{
+							F4:  "世界",
+							F15: 1663663323,
+							F21: -2460,
+						},
 					},
 				},
-				nil,
+				[]VUnionDepth2_Rand0{
+					VUnionDepth2_Rand0F8{VStructDepth1_All{
+						F0: VBool(false),
+						F1: true,
+						F3: "defghijklmnopΔΘΠΣΦ王",
+						F4: "mno",
+						F5: vdl.TypeOf((*[]VByte)(nil)),
+						F6: 151,
+						F7: 194,
+						F9: VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{
+							Id:  "ghijklmnopΔΘΠΣ",
+							Msg: "klmnopΔΘΠ",
+						}),
+						F12: 8260,
+						F13: 38126,
+						F14: 3673688878,
+						F15: 358286932,
+						F17: 3005757339147685194,
+						F18: 27,
+						F19: -47,
+						F20: -1651,
+						F21: 3319,
+						F22: 818820716,
+						F23: 993560523,
+						F24: 4358163243667025429,
+						F25: 1598555640048870905,
+						F26: -1.2564104e+09,
+						F28: 1.6946547675229838e+08,
+						F29: 9.212779866661752e+08,
+						F30: &VStructEmpty{},
+					}},
+					VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+				},
+				VSet_VStructEmpty{
+					{}: struct{}{},
+				},
 			},
 			F8: VStructDepth1_All{
 				F5: vdl.AnyType,
 			},
 			F9: VStructDepth1_Rand1{
-				F0: VArray3_VList_Any{
-					{
-						VMap_VEnumBcd_VEnumBcd{
-							VEnumBcdB: VEnumBcdD,
-							VEnumBcdD: VEnumBcdB,
-						},
-						VEnumAbcA,
-						VList_VMap_VBool_VBool(nil),
-					},
-					{
-						map[VArray1_VArray3_Bool]VArray1_VArray3_Bool{
-							{}: {
-								{
-									true,
-									true,
-									false,
-								},
-							},
-							{
-								{
-									false,
-									false,
-									true,
-								},
-							}: {
-								{
-									false,
-									false,
-									true,
-								},
-							},
-							{
-								{
-									true,
-									false,
-									true,
-								},
-							}: {},
-						},
-					},
-					{
-						nil,
-					},
+				F0: &VStructDepth1_Rand0{
+					F15: 350353992,
+					F21: 931,
 				},
 				F1:  true,
-				F7:  76,
-				F9:  VEnumBcdD,
-				F26: -4.5741398e+08,
+				F7:  207,
+				F9:  VEnumBcdC,
+				F26: 1.0288615e+09,
 			},
-			F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-			F11: VUnionDepth1_Rand1F6{48},
+			F10: VUnionDepth1_Rand0F12{25478},
+			F11: VUnionDepth1_Rand1F6{2},
 		},
 	},
 	{
@@ -34176,7 +34031,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
@@ -34217,7 +34072,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
+		SourceLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
 		Source: VArray1_VList_VStructDepth1_All{
 			{
 				{
@@ -34261,7 +34116,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
@@ -34302,7 +34157,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VList_Any{VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
+		SourceLabel: "VList_Any{VList_VStructDepth1_All{{F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}}}",
 		Source: VList_Any{
 			VList_VStructDepth1_All{
 				{
@@ -34347,262 +34202,126 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VMap_VInt16_VInt16{-5440: 8997, 7127: 0}, F1: true, F3: \"Σ\", F4: \"abcdefghi\", F5: typeobject(VArray2_VEnumBcd), F6: 235, F7: 54, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 53692, F13: 25084, F14: 2913339523, F15: 1767739976, F16: 10109020038781903223, F17: 4124108545585069088, F18: 33, F19: -42, F20: 7749, F21: 2432, F22: -973131108, F23: -35791211, F24: 1092183691854927527, F26: 3.857179e+08, F27: 1.2641184e+09, F28: 3.327033511478356e+08, F29: 1.9384438170283693e+08, F30: {}}, {F0: VUint16(37877), F1: true, F4: \"hijklmno\", F5: typeobject(VList_Byte), F6: 132, F7: 224, F11: {Id: \"ijklmnop\", Msg: \"ghijklmnopΔΘΠΣΦ王普\"}, F12: 19734, F14: 1202208851, F16: 14800971101591592803, F18: 41, F19: -47, F20: 2269, F21: -605, F22: 629256880, F23: -530103131, F25: 2617987913730779192, F26: -4.015805e+08, F28: -2.6970493144642673e+09, F29: -3.9528077884970794e+09, F30: {}}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VByte(68), F1: true, F3: \"lmnopΔΘΠΣΦ王\", F4: \"cdefghijklmnopΔ\", F5: typeobject(VList_Set_VStructDepth1_Rand0), F6: 162, F8: C, F12: 58767, F13: 46381, F14: 302442737, F15: 547679603, F16: 12858756239540706829, F18: 47, F19: -34, F20: -12123, F21: 13000, F24: 997471882820669258, F25: 2132864236390081594, F26: -8.448894e+08, F30: {}}, {}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F0: VMap_VInt16_VInt16{
-						-5440: 8997,
-						7127:  0,
-					},
+					F0:  VByte(68),
 					F1:  true,
-					F3:  "Σ",
-					F4:  "abcdefghi",
-					F5:  vdl.TypeOf((*VArray2_VEnumBcd)(nil)),
-					F6:  235,
-					F7:  54,
+					F3:  "lmnopΔΘΠΣΦ王",
+					F4:  "cdefghijklmnopΔ",
+					F5:  vdl.TypeOf((*VList_Set_VStructDepth1_Rand0)(nil)),
+					F6:  162,
 					F8:  VEnumAbcC,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 53692,
-					F13: 25084,
-					F14: 2913339523,
-					F15: 1767739976,
-					F16: 10109020038781903223,
-					F17: 4124108545585069088,
-					F18: 33,
-					F19: -42,
-					F20: 7749,
-					F21: 2432,
-					F22: -973131108,
-					F23: -35791211,
-					F24: 1092183691854927527,
-					F26: 3.857179e+08,
-					F27: 1.2641184e+09,
-					F28: 3.327033511478356e+08,
-					F29: 1.9384438170283693e+08,
+					F12: 58767,
+					F13: 46381,
+					F14: 302442737,
+					F15: 547679603,
+					F16: 12858756239540706829,
+					F18: 47,
+					F19: -34,
+					F20: -12123,
+					F21: 13000,
+					F24: 997471882820669258,
+					F25: 2132864236390081594,
+					F26: -8.448894e+08,
 					F30: &VStructEmpty{},
 				},
 				{
-					F0: VUint16(37877),
-					F1: true,
-					F4: "hijklmno",
-					F5: vdl.TypeOf((*VList_Byte)(nil)),
-					F6: 132,
-					F7: 224,
-					F11: verror.FromWire(vdl.WireError{
-						Id:  "ijklmnop",
-						Msg: "ghijklmnopΔΘΠΣΦ王普",
-					}),
-					F12: 19734,
-					F14: 1202208851,
-					F16: 14800971101591592803,
-					F18: 41,
-					F19: -47,
-					F20: 2269,
-					F21: -605,
-					F22: 629256880,
-					F23: -530103131,
-					F25: 2617987913730779192,
-					F26: -4.015805e+08,
-					F28: -2.6970493144642673e+09,
-					F29: -3.9528077884970794e+09,
-					F30: &VStructEmpty{},
+					F5: vdl.AnyType,
 				},
 			},
 		},
-		SourceLabel: "VArray1_VList_VStructDepth1_All{{{F0: VMap_VInt16_VInt16{-5440: 8997, 7127: 0}, F1: true, F3: \"Σ\", F4: \"abcdefghi\", F5: typeobject(VArray2_VEnumBcd), F6: 235, F7: 54, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 53692, F13: 25084, F14: 2913339523, F15: 1767739976, F16: 10109020038781903223, F17: 4124108545585069088, F18: 33, F19: -42, F20: 7749, F21: 2432, F22: -973131108, F23: -35791211, F24: 1092183691854927527, F26: 3.857179e+08, F27: 1.2641184e+09, F28: 3.327033511478356e+08, F29: 1.9384438170283693e+08, F30: {}}, {F0: VUint16(37877), F1: true, F4: \"hijklmno\", F5: typeobject(VList_Byte), F6: 132, F7: 224, F11: {Id: \"ijklmnop\", Msg: \"ghijklmnopΔΘΠΣΦ王普\"}, F12: 19734, F14: 1202208851, F16: 14800971101591592803, F18: 41, F19: -47, F20: 2269, F21: -605, F22: 629256880, F23: -530103131, F25: 2617987913730779192, F26: -4.015805e+08, F28: -2.6970493144642673e+09, F29: -3.9528077884970794e+09, F30: {}}}}",
+		SourceLabel: "VArray1_VList_VStructDepth1_All{{{F0: VByte(68), F1: true, F3: \"lmnopΔΘΠΣΦ王\", F4: \"cdefghijklmnopΔ\", F5: typeobject(VList_Set_VStructDepth1_Rand0), F6: 162, F8: C, F12: 58767, F13: 46381, F14: 302442737, F15: 547679603, F16: 12858756239540706829, F18: 47, F19: -34, F20: -12123, F21: 13000, F24: 997471882820669258, F25: 2132864236390081594, F26: -8.448894e+08, F30: {}}, {}}}",
 		Source: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F0: VMap_VInt16_VInt16{
-						-5440: 8997,
-						7127:  0,
-					},
+					F0:  VByte(68),
 					F1:  true,
-					F3:  "Σ",
-					F4:  "abcdefghi",
-					F5:  vdl.TypeOf((*VArray2_VEnumBcd)(nil)),
-					F6:  235,
-					F7:  54,
+					F3:  "lmnopΔΘΠΣΦ王",
+					F4:  "cdefghijklmnopΔ",
+					F5:  vdl.TypeOf((*VList_Set_VStructDepth1_Rand0)(nil)),
+					F6:  162,
 					F8:  VEnumAbcC,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 53692,
-					F13: 25084,
-					F14: 2913339523,
-					F15: 1767739976,
-					F16: 10109020038781903223,
-					F17: 4124108545585069088,
-					F18: 33,
-					F19: -42,
-					F20: 7749,
-					F21: 2432,
-					F22: -973131108,
-					F23: -35791211,
-					F24: 1092183691854927527,
-					F26: 3.857179e+08,
-					F27: 1.2641184e+09,
-					F28: 3.327033511478356e+08,
-					F29: 1.9384438170283693e+08,
+					F12: 58767,
+					F13: 46381,
+					F14: 302442737,
+					F15: 547679603,
+					F16: 12858756239540706829,
+					F18: 47,
+					F19: -34,
+					F20: -12123,
+					F21: 13000,
+					F24: 997471882820669258,
+					F25: 2132864236390081594,
+					F26: -8.448894e+08,
 					F30: &VStructEmpty{},
 				},
 				{
-					F0: VUint16(37877),
-					F1: true,
-					F4: "hijklmno",
-					F5: vdl.TypeOf((*VList_Byte)(nil)),
-					F6: 132,
-					F7: 224,
-					F11: verror.FromWire(vdl.WireError{
-						Id:  "ijklmnop",
-						Msg: "ghijklmnopΔΘΠΣΦ王普",
-					}),
-					F12: 19734,
-					F14: 1202208851,
-					F16: 14800971101591592803,
-					F18: 41,
-					F19: -47,
-					F20: 2269,
-					F21: -605,
-					F22: 629256880,
-					F23: -530103131,
-					F25: 2617987913730779192,
-					F26: -4.015805e+08,
-					F28: -2.6970493144642673e+09,
-					F29: -3.9528077884970794e+09,
-					F30: &VStructEmpty{},
+					F5: vdl.AnyType,
 				},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VMap_VInt16_VInt16{-5440: 8997, 7127: 0}, F1: true, F3: \"Σ\", F4: \"abcdefghi\", F5: typeobject(VArray2_VEnumBcd), F6: 235, F7: 54, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 53692, F13: 25084, F14: 2913339523, F15: 1767739976, F16: 10109020038781903223, F17: 4124108545585069088, F18: 33, F19: -42, F20: 7749, F21: 2432, F22: -973131108, F23: -35791211, F24: 1092183691854927527, F26: 3.857179e+08, F27: 1.2641184e+09, F28: 3.327033511478356e+08, F29: 1.9384438170283693e+08, F30: {}}, {F0: VUint16(37877), F1: true, F4: \"hijklmno\", F5: typeobject(VList_Byte), F6: 132, F7: 224, F11: {Id: \"ijklmnop\", Msg: \"ghijklmnopΔΘΠΣΦ王普\"}, F12: 19734, F14: 1202208851, F16: 14800971101591592803, F18: 41, F19: -47, F20: 2269, F21: -605, F22: 629256880, F23: -530103131, F25: 2617987913730779192, F26: -4.015805e+08, F28: -2.6970493144642673e+09, F29: -3.9528077884970794e+09, F30: {}}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VByte(68), F1: true, F3: \"lmnopΔΘΠΣΦ王\", F4: \"cdefghijklmnopΔ\", F5: typeobject(VList_Set_VStructDepth1_Rand0), F6: 162, F8: C, F12: 58767, F13: 46381, F14: 302442737, F15: 547679603, F16: 12858756239540706829, F18: 47, F19: -34, F20: -12123, F21: 13000, F24: 997471882820669258, F25: 2132864236390081594, F26: -8.448894e+08, F30: {}}, {}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F0: VMap_VInt16_VInt16{
-						-5440: 8997,
-						7127:  0,
-					},
+					F0:  VByte(68),
 					F1:  true,
-					F3:  "Σ",
-					F4:  "abcdefghi",
-					F5:  vdl.TypeOf((*VArray2_VEnumBcd)(nil)),
-					F6:  235,
-					F7:  54,
+					F3:  "lmnopΔΘΠΣΦ王",
+					F4:  "cdefghijklmnopΔ",
+					F5:  vdl.TypeOf((*VList_Set_VStructDepth1_Rand0)(nil)),
+					F6:  162,
 					F8:  VEnumAbcC,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 53692,
-					F13: 25084,
-					F14: 2913339523,
-					F15: 1767739976,
-					F16: 10109020038781903223,
-					F17: 4124108545585069088,
-					F18: 33,
-					F19: -42,
-					F20: 7749,
-					F21: 2432,
-					F22: -973131108,
-					F23: -35791211,
-					F24: 1092183691854927527,
-					F26: 3.857179e+08,
-					F27: 1.2641184e+09,
-					F28: 3.327033511478356e+08,
-					F29: 1.9384438170283693e+08,
+					F12: 58767,
+					F13: 46381,
+					F14: 302442737,
+					F15: 547679603,
+					F16: 12858756239540706829,
+					F18: 47,
+					F19: -34,
+					F20: -12123,
+					F21: 13000,
+					F24: 997471882820669258,
+					F25: 2132864236390081594,
+					F26: -8.448894e+08,
 					F30: &VStructEmpty{},
 				},
 				{
-					F0: VUint16(37877),
-					F1: true,
-					F4: "hijklmno",
-					F5: vdl.TypeOf((*VList_Byte)(nil)),
-					F6: 132,
-					F7: 224,
-					F11: verror.FromWire(vdl.WireError{
-						Id:  "ijklmnop",
-						Msg: "ghijklmnopΔΘΠΣΦ王普",
-					}),
-					F12: 19734,
-					F14: 1202208851,
-					F16: 14800971101591592803,
-					F18: 41,
-					F19: -47,
-					F20: 2269,
-					F21: -605,
-					F22: 629256880,
-					F23: -530103131,
-					F25: 2617987913730779192,
-					F26: -4.015805e+08,
-					F28: -2.6970493144642673e+09,
-					F29: -3.9528077884970794e+09,
-					F30: &VStructEmpty{},
+					F5: vdl.AnyType,
 				},
 			},
 		},
-		SourceLabel: "[]any{VList_VStructDepth1_All{{F0: VMap_VInt16_VInt16{-5440: 8997, 7127: 0}, F1: true, F3: \"Σ\", F4: \"abcdefghi\", F5: typeobject(VArray2_VEnumBcd), F6: 235, F7: 54, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {}, F12: 53692, F13: 25084, F14: 2913339523, F15: 1767739976, F16: 10109020038781903223, F17: 4124108545585069088, F18: 33, F19: -42, F20: 7749, F21: 2432, F22: -973131108, F23: -35791211, F24: 1092183691854927527, F26: 3.857179e+08, F27: 1.2641184e+09, F28: 3.327033511478356e+08, F29: 1.9384438170283693e+08, F30: {}}, {F0: VUint16(37877), F1: true, F4: \"hijklmno\", F5: typeobject(VList_Byte), F6: 132, F7: 224, F11: {Id: \"ijklmnop\", Msg: \"ghijklmnopΔΘΠΣΦ王普\"}, F12: 19734, F14: 1202208851, F16: 14800971101591592803, F18: 41, F19: -47, F20: 2269, F21: -605, F22: 629256880, F23: -530103131, F25: 2617987913730779192, F26: -4.015805e+08, F28: -2.6970493144642673e+09, F29: -3.9528077884970794e+09, F30: {}}}}",
+		SourceLabel: "[]any{VList_VStructDepth1_All{{F0: VByte(68), F1: true, F3: \"lmnopΔΘΠΣΦ王\", F4: \"cdefghijklmnopΔ\", F5: typeobject(VList_Set_VStructDepth1_Rand0), F6: 162, F8: C, F12: 58767, F13: 46381, F14: 302442737, F15: 547679603, F16: 12858756239540706829, F18: 47, F19: -34, F20: -12123, F21: 13000, F24: 997471882820669258, F25: 2132864236390081594, F26: -8.448894e+08, F30: {}}, {}}}",
 		Source: []interface{}{
 			VList_VStructDepth1_All{
 				{
-					F0: VMap_VInt16_VInt16{
-						-5440: 8997,
-						7127:  0,
-					},
+					F0:  VByte(68),
 					F1:  true,
-					F3:  "Σ",
-					F4:  "abcdefghi",
-					F5:  vdl.TypeOf((*VArray2_VEnumBcd)(nil)),
-					F6:  235,
-					F7:  54,
+					F3:  "lmnopΔΘΠΣΦ王",
+					F4:  "cdefghijklmnopΔ",
+					F5:  vdl.TypeOf((*VList_Set_VStructDepth1_Rand0)(nil)),
+					F6:  162,
 					F8:  VEnumAbcC,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 53692,
-					F13: 25084,
-					F14: 2913339523,
-					F15: 1767739976,
-					F16: 10109020038781903223,
-					F17: 4124108545585069088,
-					F18: 33,
-					F19: -42,
-					F20: 7749,
-					F21: 2432,
-					F22: -973131108,
-					F23: -35791211,
-					F24: 1092183691854927527,
-					F26: 3.857179e+08,
-					F27: 1.2641184e+09,
-					F28: 3.327033511478356e+08,
-					F29: 1.9384438170283693e+08,
+					F12: 58767,
+					F13: 46381,
+					F14: 302442737,
+					F15: 547679603,
+					F16: 12858756239540706829,
+					F18: 47,
+					F19: -34,
+					F20: -12123,
+					F21: 13000,
+					F24: 997471882820669258,
+					F25: 2132864236390081594,
+					F26: -8.448894e+08,
 					F30: &VStructEmpty{},
 				},
 				{
-					F0: VUint16(37877),
-					F1: true,
-					F4: "hijklmno",
-					F5: vdl.TypeOf((*VList_Byte)(nil)),
-					F6: 132,
-					F7: 224,
-					F11: verror.FromWire(vdl.WireError{
-						Id:  "ijklmnop",
-						Msg: "ghijklmnopΔΘΠΣΦ王普",
-					}),
-					F12: 19734,
-					F14: 1202208851,
-					F16: 14800971101591592803,
-					F18: 41,
-					F19: -47,
-					F20: 2269,
-					F21: -605,
-					F22: 629256880,
-					F23: -530103131,
-					F25: 2617987913730779192,
-					F26: -4.015805e+08,
-					F28: -2.6970493144642673e+09,
-					F29: -3.9528077884970794e+09,
-					F30: &VStructEmpty{},
+					F5: vdl.AnyType,
 				},
 			},
 		},
@@ -34610,37 +34329,175 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VList_Any{map[VEnumAbc]VEnumAbc{A: B}}, F2: true, F3: \"cdefghijk\", F4: \"bcdefgh\", F5: typeobject(byte), F6: 220, F7: 201, F8: B, F11: {Id: \"jk\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣ\"}, F12: 56670, F13: 28221, F14: 3933078158, F15: 2927171079, F16: 7242486007822564587, F18: 5, F19: -50, F20: -5714, F21: 11956, F22: 163691986, F23: 597408518, F24: -1066805372488704445, F25: -3940142183516882268, F26: -9.045203e+07, F27: -2.0751706e+09, F28: 3.570759325427667e+09, F29: -1.1710972092026205e+09, F30: {}}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F5: vdl.AnyType,
+					F0: VList_Any{
+						map[VEnumAbc]VEnumAbc{
+							VEnumAbcA: VEnumAbcB,
+						},
+					},
+					F2: true,
+					F3: "cdefghijk",
+					F4: "bcdefgh",
+					F5: vdl.ByteType,
+					F6: 220,
+					F7: 201,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "jk",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "hijklmnopΔΘΠΣ",
+					}),
+					F12: 56670,
+					F13: 28221,
+					F14: 3933078158,
+					F15: 2927171079,
+					F16: 7242486007822564587,
+					F18: 5,
+					F19: -50,
+					F20: -5714,
+					F21: 11956,
+					F22: 163691986,
+					F23: 597408518,
+					F24: -1066805372488704445,
+					F25: -3940142183516882268,
+					F26: -9.045203e+07,
+					F27: -2.0751706e+09,
+					F28: 3.570759325427667e+09,
+					F29: -1.1710972092026205e+09,
+					F30: &VStructEmpty{},
 				},
 			},
 		},
-		SourceLabel: "VArray1_VList_VStructDepth1_All{{{}}}",
+		SourceLabel: "VArray1_VList_VStructDepth1_All{{{F0: VList_Any{map[VEnumAbc]VEnumAbc{A: B}}, F2: true, F3: \"cdefghijk\", F4: \"bcdefgh\", F5: typeobject(byte), F6: 220, F7: 201, F8: B, F11: {Id: \"jk\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣ\"}, F12: 56670, F13: 28221, F14: 3933078158, F15: 2927171079, F16: 7242486007822564587, F18: 5, F19: -50, F20: -5714, F21: 11956, F22: 163691986, F23: 597408518, F24: -1066805372488704445, F25: -3940142183516882268, F26: -9.045203e+07, F27: -2.0751706e+09, F28: 3.570759325427667e+09, F29: -1.1710972092026205e+09, F30: {}}}}",
 		Source: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F5: vdl.AnyType,
+					F0: VList_Any{
+						map[VEnumAbc]VEnumAbc{
+							VEnumAbcA: VEnumAbcB,
+						},
+					},
+					F2: true,
+					F3: "cdefghijk",
+					F4: "bcdefgh",
+					F5: vdl.ByteType,
+					F6: 220,
+					F7: 201,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "jk",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "hijklmnopΔΘΠΣ",
+					}),
+					F12: 56670,
+					F13: 28221,
+					F14: 3933078158,
+					F15: 2927171079,
+					F16: 7242486007822564587,
+					F18: 5,
+					F19: -50,
+					F20: -5714,
+					F21: 11956,
+					F22: 163691986,
+					F23: 597408518,
+					F24: -1066805372488704445,
+					F25: -3940142183516882268,
+					F26: -9.045203e+07,
+					F27: -2.0751706e+09,
+					F28: 3.570759325427667e+09,
+					F29: -1.1710972092026205e+09,
+					F30: &VStructEmpty{},
 				},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VList_VStructDepth1_All{{{}}}",
+		TargetLabel: "VArray1_VList_VStructDepth1_All{{{F0: VList_Any{map[VEnumAbc]VEnumAbc{A: B}}, F2: true, F3: \"cdefghijk\", F4: \"bcdefgh\", F5: typeobject(byte), F6: 220, F7: 201, F8: B, F11: {Id: \"jk\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣ\"}, F12: 56670, F13: 28221, F14: 3933078158, F15: 2927171079, F16: 7242486007822564587, F18: 5, F19: -50, F20: -5714, F21: 11956, F22: 163691986, F23: 597408518, F24: -1066805372488704445, F25: -3940142183516882268, F26: -9.045203e+07, F27: -2.0751706e+09, F28: 3.570759325427667e+09, F29: -1.1710972092026205e+09, F30: {}}}}",
 		Target: VArray1_VList_VStructDepth1_All{
 			{
 				{
-					F5: vdl.AnyType,
+					F0: VList_Any{
+						map[VEnumAbc]VEnumAbc{
+							VEnumAbcA: VEnumAbcB,
+						},
+					},
+					F2: true,
+					F3: "cdefghijk",
+					F4: "bcdefgh",
+					F5: vdl.ByteType,
+					F6: 220,
+					F7: 201,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "jk",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "hijklmnopΔΘΠΣ",
+					}),
+					F12: 56670,
+					F13: 28221,
+					F14: 3933078158,
+					F15: 2927171079,
+					F16: 7242486007822564587,
+					F18: 5,
+					F19: -50,
+					F20: -5714,
+					F21: 11956,
+					F22: 163691986,
+					F23: 597408518,
+					F24: -1066805372488704445,
+					F25: -3940142183516882268,
+					F26: -9.045203e+07,
+					F27: -2.0751706e+09,
+					F28: 3.570759325427667e+09,
+					F29: -1.1710972092026205e+09,
+					F30: &VStructEmpty{},
 				},
 			},
 		},
-		SourceLabel: "VList_VArray1_OptVStructDepth1_Rand0{{{}}}",
-		Source: VList_VArray1_OptVStructDepth1_Rand0{
-			{
-				{},
+		SourceLabel: "[]any{VList_VStructDepth1_All{{F0: VList_Any{map[VEnumAbc]VEnumAbc{A: B}}, F2: true, F3: \"cdefghijk\", F4: \"bcdefgh\", F5: typeobject(byte), F6: 220, F7: 201, F8: B, F11: {Id: \"jk\", RetryCode: RetryConnection, Msg: \"hijklmnopΔΘΠΣ\"}, F12: 56670, F13: 28221, F14: 3933078158, F15: 2927171079, F16: 7242486007822564587, F18: 5, F19: -50, F20: -5714, F21: 11956, F22: 163691986, F23: 597408518, F24: -1066805372488704445, F25: -3940142183516882268, F26: -9.045203e+07, F27: -2.0751706e+09, F28: 3.570759325427667e+09, F29: -1.1710972092026205e+09, F30: {}}}}",
+		Source: []interface{}{
+			VList_VStructDepth1_All{
+				{
+					F0: VList_Any{
+						map[VEnumAbc]VEnumAbc{
+							VEnumAbcA: VEnumAbcB,
+						},
+					},
+					F2: true,
+					F3: "cdefghijk",
+					F4: "bcdefgh",
+					F5: vdl.ByteType,
+					F6: 220,
+					F7: 201,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "jk",
+						RetryCode: vdl.WireRetryCodeRetryConnection,
+						Msg:       "hijklmnopΔΘΠΣ",
+					}),
+					F12: 56670,
+					F13: 28221,
+					F14: 3933078158,
+					F15: 2927171079,
+					F16: 7242486007822564587,
+					F18: 5,
+					F19: -50,
+					F20: -5714,
+					F21: 11956,
+					F22: 163691986,
+					F23: 597408518,
+					F24: -1066805372488704445,
+					F25: -3940142183516882268,
+					F26: -9.045203e+07,
+					F27: -2.0751706e+09,
+					F28: 3.570759325427667e+09,
+					F29: -1.1710972092026205e+09,
+					F30: &VStructEmpty{},
+				},
 			},
 		},
 	},
@@ -34916,7 +34773,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -34935,7 +34792,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -34957,7 +34814,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -34976,7 +34833,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -34999,41 +34856,49 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VBool]{false}, ?VStructDepth2_Rand0(nil), nil}, F9: {F1: true, F7: 100, F9: VEnumBcd.D, F26: -2.8337814e+08}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VString]{}, VSet_VEnumAbc{A, B}, map[byte]byte{0: 0, 196: 0}}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 87}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					map[VBool]struct{}{
-						false: struct{}{},
+					map[VString]struct{}(nil),
+					VSet_VEnumAbc{
+						VEnumAbcA: struct{}{},
+						VEnumAbcB: struct{}{},
 					},
-					(*VStructDepth2_Rand0)(nil),
-					nil,
+					map[byte]byte{
+						0:   0,
+						196: 0,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  100,
-					F9:  VEnumBcdD,
-					F26: -2.8337814e+08,
+					F0: VMap_VStructEmpty_VStructEmpty{
+						{}: {},
+					},
+					F7: 87,
 				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VBool]{false}, ?VStructDepth2_Rand0(nil), nil}, F9: {F1: true, F7: 100, F9: VEnumBcd.D, F26: -2.8337814e+08}}}",
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VString]{}, VSet_VEnumAbc{A, B}, map[byte]byte{0: 0, 196: 0}}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 87}}}",
 		Source: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					map[VBool]struct{}{
-						false: struct{}{},
+					map[VString]struct{}(nil),
+					VSet_VEnumAbc{
+						VEnumAbcA: struct{}{},
+						VEnumAbcB: struct{}{},
 					},
-					(*VStructDepth2_Rand0)(nil),
-					nil,
+					map[byte]byte{
+						0:   0,
+						196: 0,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  100,
-					F9:  VEnumBcdD,
-					F26: -2.8337814e+08,
+					F0: VMap_VStructEmpty_VStructEmpty{
+						{}: {},
+					},
+					F7: 87,
 				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
@@ -35042,41 +34907,49 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VBool]{false}, ?VStructDepth2_Rand0(nil), nil}, F9: {F1: true, F7: 100, F9: VEnumBcd.D, F26: -2.8337814e+08}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {set[VString]{}, VSet_VEnumAbc{A, B}, map[byte]byte{0: 0, 196: 0}}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 87}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					map[VBool]struct{}{
-						false: struct{}{},
+					map[VString]struct{}(nil),
+					VSet_VEnumAbc{
+						VEnumAbcA: struct{}{},
+						VEnumAbcB: struct{}{},
 					},
-					(*VStructDepth2_Rand0)(nil),
-					nil,
+					map[byte]byte{
+						0:   0,
+						196: 0,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  100,
-					F9:  VEnumBcdD,
-					F26: -2.8337814e+08,
+					F0: VMap_VStructEmpty_VStructEmpty{
+						{}: {},
+					},
+					F7: 87,
 				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {set[VBool]{false}, nil, nil}, F9: {F1: true, F7: 100, F9: VEnumBcd.D, F26: -2.8337814e+08}}}",
+		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {set[VString]{}, VSet_VEnumAbc{A, B}, map[byte]byte{0: 0, 196: 0}}, F9: {F0: VMap_VStructEmpty_VStructEmpty{{}: {}}, F7: 87}}}",
 		Source: []interface{}{
 			VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					map[VBool]struct{}{
-						false: struct{}{},
+					map[VString]struct{}(nil),
+					VSet_VEnumAbc{
+						VEnumAbcA: struct{}{},
+						VEnumAbcB: struct{}{},
 					},
-					nil,
-					nil,
+					map[byte]byte{
+						0:   0,
+						196: 0,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  100,
-					F9:  VEnumBcdD,
-					F26: -2.8337814e+08,
+					F0: VMap_VStructEmpty_VStructEmpty{
+						{}: {},
+					},
+					F7: 87,
 				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
@@ -35086,183 +34959,135 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {VList_VStructEmpty{}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"ab\", F15: 486507645}: {F4: \"Φ王普澤\", F15: 2015291028, F21: 5443}, {F4: \"defghijklm\", F15: 3901902926, F21: -1664}: {F21: -429}, {F4: \"klmnopΔΘΠΣ\", F15: 2912912870, F21: -3701}: {F4: \"王\", F15: 1078120227, F21: -4044}}}, VInt8(0)}, F9: {F0: []VEnumBcd{}, F9: VEnumBcd.C, F26: 2.8674652e+09}, F11: {F11: nil}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"abcdefghijklmnopΔΘΠΣΦ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世\", \"cdefghijklmno\", \"jklmnopΔΘ\"}}, VArray3_VBool{false, true, false}, []VUint64{7337360629205209471}}, F9: {F7: 81, F9: D, F26: -6.7337024e+08}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VList_VStructEmpty(nil),
-					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
+					VArray2_VSet_String{
 						{
-							{
-								F4:  "ab",
-								F15: 486507645,
-							}: {
-								F4:  "Φ王普澤",
-								F15: 2015291028,
-								F21: 5443,
-							},
-							{
-								F4:  "defghijklm",
-								F15: 3901902926,
-								F21: -1664,
-							}: {
-								F21: -429,
-							},
-							{
-								F4:  "klmnopΔΘΠΣ",
-								F15: 2912912870,
-								F21: -3701,
-							}: {
-								F4:  "王",
-								F15: 1078120227,
-								F21: -4044,
-							},
+							"abcdefghijklmnopΔΘΠΣΦ": struct{}{},
+						},
+						{
+							"abcdefghijklmnopΔΘΠΣΦ王普澤世": struct{}{},
+							"cdefghijklmno":             struct{}{},
+							"jklmnopΔΘ":                 struct{}{},
 						},
 					},
-					VInt8(0),
+					VArray3_VBool{
+						false,
+						true,
+						false,
+					},
+					[]VUint64{
+						7337360629205209471,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  []VEnumBcd(nil),
-					F9:  VEnumBcdC,
-					F26: 2.8674652e+09,
+					F7:  81,
+					F9:  VEnumBcdD,
+					F26: -6.7337024e+08,
 				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {VList_VStructEmpty{}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"ab\", F15: 486507645}: {F4: \"Φ王普澤\", F15: 2015291028, F21: 5443}, {F4: \"defghijklm\", F15: 3901902926, F21: -1664}: {F21: -429}, {F4: \"klmnopΔΘΠΣ\", F15: 2912912870, F21: -3701}: {F4: \"王\", F15: 1078120227, F21: -4044}}}, VInt8(0)}, F9: {F0: []VEnumBcd{}, F9: VEnumBcd.C, F26: 2.8674652e+09}, F11: {F11: nil}}}",
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"abcdefghijklmnopΔΘΠΣΦ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世\", \"cdefghijklmno\", \"jklmnopΔΘ\"}}, VArray3_VBool{false, true, false}, []VUint64{7337360629205209471}}, F9: {F7: 81, F9: D, F26: -6.7337024e+08}}}",
 		Source: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VList_VStructEmpty(nil),
-					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
+					VArray2_VSet_String{
 						{
-							{
-								F4:  "ab",
-								F15: 486507645,
-							}: {
-								F4:  "Φ王普澤",
-								F15: 2015291028,
-								F21: 5443,
-							},
-							{
-								F4:  "defghijklm",
-								F15: 3901902926,
-								F21: -1664,
-							}: {
-								F21: -429,
-							},
-							{
-								F4:  "klmnopΔΘΠΣ",
-								F15: 2912912870,
-								F21: -3701,
-							}: {
-								F4:  "王",
-								F15: 1078120227,
-								F21: -4044,
-							},
+							"abcdefghijklmnopΔΘΠΣΦ": struct{}{},
+						},
+						{
+							"abcdefghijklmnopΔΘΠΣΦ王普澤世": struct{}{},
+							"cdefghijklmno":             struct{}{},
+							"jklmnopΔΘ":                 struct{}{},
 						},
 					},
-					VInt8(0),
+					VArray3_VBool{
+						false,
+						true,
+						false,
+					},
+					[]VUint64{
+						7337360629205209471,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  []VEnumBcd(nil),
-					F9:  VEnumBcdC,
-					F26: 2.8674652e+09,
+					F7:  81,
+					F9:  VEnumBcdD,
+					F26: -6.7337024e+08,
 				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {VList_VStructEmpty{}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"ab\", F15: 486507645}: {F4: \"Φ王普澤\", F15: 2015291028, F21: 5443}, {F4: \"defghijklm\", F15: 3901902926, F21: -1664}: {F21: -429}, {F4: \"klmnopΔΘΠΣ\", F15: 2912912870, F21: -3701}: {F4: \"王\", F15: 1078120227, F21: -4044}}}, VInt8(0)}, F9: {F0: []VEnumBcd{}, F9: VEnumBcd.C, F26: 2.8674652e+09}, F11: {F11: nil}}}",
+		TargetLabel: "VArray1_VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"abcdefghijklmnopΔΘΠΣΦ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世\", \"cdefghijklmno\", \"jklmnopΔΘ\"}}, VArray3_VBool{false, true, false}, []VUint64{7337360629205209471}}, F9: {F7: 81, F9: D, F26: -6.7337024e+08}}}",
 		Target: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VList_VStructEmpty(nil),
-					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
+					VArray2_VSet_String{
 						{
-							{
-								F4:  "ab",
-								F15: 486507645,
-							}: {
-								F4:  "Φ王普澤",
-								F15: 2015291028,
-								F21: 5443,
-							},
-							{
-								F4:  "defghijklm",
-								F15: 3901902926,
-								F21: -1664,
-							}: {
-								F21: -429,
-							},
-							{
-								F4:  "klmnopΔΘΠΣ",
-								F15: 2912912870,
-								F21: -3701,
-							}: {
-								F4:  "王",
-								F15: 1078120227,
-								F21: -4044,
-							},
+							"abcdefghijklmnopΔΘΠΣΦ": struct{}{},
+						},
+						{
+							"abcdefghijklmnopΔΘΠΣΦ王普澤世": struct{}{},
+							"cdefghijklmno":             struct{}{},
+							"jklmnopΔΘ":                 struct{}{},
 						},
 					},
-					VInt8(0),
+					VArray3_VBool{
+						false,
+						true,
+						false,
+					},
+					[]VUint64{
+						7337360629205209471,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  []VEnumBcd(nil),
-					F9:  VEnumBcdC,
-					F26: 2.8674652e+09,
+					F7:  81,
+					F9:  VEnumBcdD,
+					F26: -6.7337024e+08,
 				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {VList_VStructEmpty{}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"ab\", F15: 486507645}: {F4: \"Φ王普澤\", F15: 2015291028, F21: 5443}, {F4: \"defghijklm\", F15: 3901902926, F21: -1664}: {F21: -429}, {F4: \"klmnopΔΘΠΣ\", F15: 2912912870, F21: -3701}: {F4: \"王\", F15: 1078120227, F21: -4044}}}, VInt8(0)}, F9: {F0: []VEnumBcd{}, F9: VEnumBcd.C, F26: 2.8674652e+09}, F11: {F11: nil}}}",
+		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {VArray2_VSet_String{{\"abcdefghijklmnopΔΘΠΣΦ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世\", \"cdefghijklmno\", \"jklmnopΔΘ\"}}, VArray3_VBool{false, true, false}, []VUint64{7337360629205209471}}, F9: {F7: 81, F9: D, F26: -6.7337024e+08}}}",
 		Source: []interface{}{
 			VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					VList_VStructEmpty(nil),
-					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
+					VArray2_VSet_String{
 						{
-							{
-								F4:  "ab",
-								F15: 486507645,
-							}: {
-								F4:  "Φ王普澤",
-								F15: 2015291028,
-								F21: 5443,
-							},
-							{
-								F4:  "defghijklm",
-								F15: 3901902926,
-								F21: -1664,
-							}: {
-								F21: -429,
-							},
-							{
-								F4:  "klmnopΔΘΠΣ",
-								F15: 2912912870,
-								F21: -3701,
-							}: {
-								F4:  "王",
-								F15: 1078120227,
-								F21: -4044,
-							},
+							"abcdefghijklmnopΔΘΠΣΦ": struct{}{},
+						},
+						{
+							"abcdefghijklmnopΔΘΠΣΦ王普澤世": struct{}{},
+							"cdefghijklmno":             struct{}{},
+							"jklmnopΔΘ":                 struct{}{},
 						},
 					},
-					VInt8(0),
+					VArray3_VBool{
+						false,
+						true,
+						false,
+					},
+					[]VUint64{
+						7337360629205209471,
+					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  []VEnumBcd(nil),
-					F9:  VEnumBcdC,
-					F26: 2.8674652e+09,
+					F7:  81,
+					F9:  VEnumBcdD,
+					F26: -6.7337024e+08,
 				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
@@ -35326,22 +35151,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Target: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
-		SourceLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Source: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Target: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
-		SourceLabel: "[]any{VUnionDepth2_Rand1{F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "[]any{VUnionDepth2_Rand1{F11: {F8: A}}}",
 		Source: []interface{}{
 			VUnionDepth2_Rand1(VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}}),
 		},
@@ -35349,22 +35174,22 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Target: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
-		SourceLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Source: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray1_VUnionDepth2_Rand1{{F11: {F8: A}}}",
 		Target: VArray1_VUnionDepth2_Rand1{
 			VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}},
 		},
-		SourceLabel: "[]any{VUnionDepth2_Rand1{F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "[]any{VUnionDepth2_Rand1{F11: {F8: A}}}",
 		Source: []interface{}{
 			VUnionDepth2_Rand1(VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F8{}}),
 		},
@@ -35398,7 +35223,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VArray3_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -35449,7 +35274,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VArray3_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -35503,7 +35328,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VArray3_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -35554,7 +35379,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -35609,503 +35434,235 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{}, nil, {F9: {F7: 249, F26: -2.3734718e+08}, F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F9: {F0: uint64(7615343006602304117), F7: 163, F9: D, F26: 1.8631564e+09}, F10: {F10: {}}}, {}, {F0: {[][]VEnumAbc{}, []VStructDepth1_Rand0{}, VList_OptVStructEmpty{}}, F10: {F28: 9.410260989686064e+08}, F11: {F9: B}}}",
 		Target: VArray3_OptVStructDepth2_Rand0{
 			{
+				F9: VStructDepth1_Rand1{
+					F0:  uint64(7615343006602304117),
+					F7:  163,
+					F9:  VEnumBcdD,
+					F26: 1.8631564e+09,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
-			nil,
 			{
-				F9: VStructDepth1_Rand1{
-					F7:  249,
-					F26: -2.3734718e+08,
+				F0: VArray3_Any{
+					[][]VEnumAbc(nil),
+					[]VStructDepth1_Rand0(nil),
+					VList_OptVStructEmpty(nil),
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F28{9.410260989686064e+08},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
-		SourceLabel: "VArray3_OptVStructDepth2_Rand0{{}, nil, {F9: {F7: 249, F26: -2.3734718e+08}, F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "VArray3_OptVStructDepth2_Rand0{{F9: {F0: uint64(7615343006602304117), F7: 163, F9: D, F26: 1.8631564e+09}, F10: {F10: {}}}, {}, {F0: {[][]VEnumAbc{}, []VStructDepth1_Rand0{}, VList_OptVStructEmpty{}}, F10: {F28: 9.410260989686064e+08}, F11: {F9: B}}}",
 		Source: VArray3_OptVStructDepth2_Rand0{
+			{
+				F9: VStructDepth1_Rand1{
+					F0:  uint64(7615343006602304117),
+					F7:  163,
+					F9:  VEnumBcdD,
+					F26: 1.8631564e+09,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
 			{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
-			nil,
 			{
-				F9: VStructDepth1_Rand1{
-					F7:  249,
-					F26: -2.3734718e+08,
+				F0: VArray3_Any{
+					[][]VEnumAbc(nil),
+					[]VStructDepth1_Rand0(nil),
+					VList_OptVStructEmpty(nil),
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F28{9.410260989686064e+08},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{}, nil, {F9: {F7: 249, F26: -2.3734718e+08}, F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F9: {F0: uint64(7615343006602304117), F7: 163, F9: D, F26: 1.8631564e+09}, F10: {F10: {}}}, {}, {F0: {[][]VEnumAbc{}, []VStructDepth1_Rand0{}, VList_OptVStructEmpty{}}, F10: {F28: 9.410260989686064e+08}, F11: {F9: B}}}",
 		Target: VArray3_OptVStructDepth2_Rand0{
 			{
+				F9: VStructDepth1_Rand1{
+					F0:  uint64(7615343006602304117),
+					F7:  163,
+					F9:  VEnumBcdD,
+					F26: 1.8631564e+09,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
-			nil,
 			{
-				F9: VStructDepth1_Rand1{
-					F7:  249,
-					F26: -2.3734718e+08,
+				F0: VArray3_Any{
+					[][]VEnumAbc(nil),
+					[]VStructDepth1_Rand0(nil),
+					VList_OptVStructEmpty(nil),
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F28{9.410260989686064e+08},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{}, nil, VStructDepth2_Rand0{F9: {F7: 249, F26: -2.3734718e+08}, F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "[]any{?VStructDepth2_Rand0{F9: {F0: uint64(7615343006602304117), F7: 163, F9: D, F26: 1.8631564e+09}, F10: {F10: {}}}, ?VStructDepth2_Rand0{}, ?VStructDepth2_Rand0{F0: {[][]VEnumAbc{}, []VStructDepth1_Rand0{}, VList_OptVStructEmpty{}}, F10: {F28: 9.410260989686064e+08}, F11: {F9: B}}}",
 		Source: []interface{}{
-			VStructDepth2_Rand0{
+			&VStructDepth2_Rand0{
+				F9: VStructDepth1_Rand1{
+					F0:  uint64(7615343006602304117),
+					F7:  163,
+					F9:  VEnumBcdD,
+					F26: 1.8631564e+09,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			&VStructDepth2_Rand0{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
-			nil,
-			VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F7:  249,
-					F26: -2.3734718e+08,
+			&VStructDepth2_Rand0{
+				F0: VArray3_Any{
+					[][]VEnumAbc(nil),
+					[]VStructDepth1_Rand0(nil),
+					VList_OptVStructEmpty(nil),
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F28{9.410260989686064e+08},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth2_Rand0{{F12: nil}, {F8: {F0: map[VBool]VBool{true: false}, F1: true, F3: \"ijklmnopΔ\", F4: \"klmn\", F5: typeobject(VSet_VEnumAbc), F6: 137, F7: 218, F8: VEnumAbc.C, F12: 13857, F13: 37902, F14: 650201280, F15: 3920518667, F16: 9271928586033663647, F19: 34, F20: -7684, F22: -678961400, F23: 339484972, F24: -478913906129708347, F25: 978017837427645721, F26: 1.31259656e+08, F27: 3.0070438e+09, F28: 1.7877394274183822e+08, F29: -1.6292280986000445e+09, F30: {}}}}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.C: VEnumBcd.B}, VList_List_VMap_VEnumBcd_VEnumBcd{}}, F9: {F0: []int32{0, 0, 338661643}, F1: true, F7: 100, F9: VEnumBcd.D}, F10: {F12: 12307}, F11: {F6: 219}}, {F0: {[]VList_VArray1_String{{}, {{\"efghijklmnopΔΘ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王\"}, {}}, {}}, VList_Any{nil, nil}, VSet_VEnumBcd{VEnumBcd.C}}, F11: {F11: {Id: \"bcdefghi\", RetryCode: RetryRefetch, Msg: \"fgh\"}}}, {F0: {[]bool{true, false}, VMap_VInt16_VInt16{-3800: 9520, 0: 0}, false}, F9: {F0: VList_VInt32{}, F1: true, F7: 213, F26: -2.1656532e+07}, F10: {F16: 1410740624689925395}, F11: {F11: nil}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{nil, {F0: {[]VStructEmpty{{}, {}, {}}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"hijklmnopΔΘΠΣΦ\", F15: 4019700205}: {}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 2886493035}: {}}}, nil}, F10: {F12: 13523}, F11: {F20: 3424}}, nil}",
 		Target: VArray3_OptVStructDepth2_Rand0{
+			nil,
 			{
 				F0: VArray3_Any{
-					[]VUnionDepth2_Rand0{
-						VUnionDepth2_Rand0F12{},
-						VUnionDepth2_Rand0F8{VStructDepth1_All{
-							F0: map[VBool]VBool{
-								true: false,
-							},
-							F1:  true,
-							F3:  "ijklmnopΔ",
-							F4:  "klmn",
-							F5:  vdl.TypeOf((*VSet_VEnumAbc)(nil)),
-							F6:  137,
-							F7:  218,
-							F8:  VEnumAbcC,
-							F12: 13857,
-							F13: 37902,
-							F14: 650201280,
-							F15: 3920518667,
-							F16: 9271928586033663647,
-							F19: 34,
-							F20: -7684,
-							F22: -678961400,
-							F23: 339484972,
-							F24: -478913906129708347,
-							F25: 978017837427645721,
-							F26: 1.31259656e+08,
-							F27: 3.0070438e+09,
-							F28: 1.7877394274183822e+08,
-							F29: -1.6292280986000445e+09,
-							F30: &VStructEmpty{},
-						}},
+					[]VStructEmpty{
+						{},
+						{},
+						{},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdC: VEnumBcdB,
-					},
-					VList_List_VMap_VEnumBcd_VEnumBcd(nil),
-				},
-				F9: VStructDepth1_Rand1{
-					F0: []int32{
-						0,
-						0,
-						338661643,
-					},
-					F1: true,
-					F7: 100,
-					F9: VEnumBcdD,
-				},
-				F10: VUnionDepth1_Rand0F12{12307},
-				F11: VUnionDepth1_Rand1F6{219},
-			},
-			{
-				F0: VArray3_Any{
-					[]VList_VArray1_String{
-						nil,
+					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
 						{
 							{
-								"efghijklmnopΔΘ",
-							},
+								F4:  "hijklmnopΔΘΠΣΦ",
+								F15: 4019700205,
+							}: {},
 							{
-								"abcdefghijklmnopΔΘΠΣΦ王",
-							},
-							{},
+								F4:  "ijklmnopΔΘΠΣΦ王普",
+								F15: 2886493035,
+							}: {},
 						},
-						nil,
 					},
-					VList_Any{
-						nil,
-						nil,
-					},
-					VSet_VEnumBcd{
-						VEnumBcdC: struct{}{},
-					},
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:        "bcdefghi",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "fgh",
-				})},
+				F10: VUnionDepth1_Rand0F12{13523},
+				F11: VUnionDepth1_Rand1F20{3424},
 			},
-			{
-				F0: VArray3_Any{
-					[]bool{
-						true,
-						false,
-					},
-					VMap_VInt16_VInt16{
-						-3800: 9520,
-						0:     0,
-					},
-					false,
-				},
-				F9: VStructDepth1_Rand1{
-					F0:  VList_VInt32(nil),
-					F1:  true,
-					F7:  213,
-					F26: -2.1656532e+07,
-				},
-				F10: VUnionDepth1_Rand0F16{1410740624689925395},
-				F11: VUnionDepth1_Rand1F11{},
-			},
+			nil,
 		},
-		SourceLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth2_Rand0{{F12: nil}, {F8: {F0: map[VBool]VBool{true: false}, F1: true, F3: \"ijklmnopΔ\", F4: \"klmn\", F5: typeobject(VSet_VEnumAbc), F6: 137, F7: 218, F8: VEnumAbc.C, F12: 13857, F13: 37902, F14: 650201280, F15: 3920518667, F16: 9271928586033663647, F19: 34, F20: -7684, F22: -678961400, F23: 339484972, F24: -478913906129708347, F25: 978017837427645721, F26: 1.31259656e+08, F27: 3.0070438e+09, F28: 1.7877394274183822e+08, F29: -1.6292280986000445e+09, F30: {}}}}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.C: VEnumBcd.B}, VList_List_VMap_VEnumBcd_VEnumBcd{}}, F9: {F0: []int32{0, 0, 338661643}, F1: true, F7: 100, F9: VEnumBcd.D}, F10: {F12: 12307}, F11: {F6: 219}}, {F0: {[]VList_VArray1_String{{}, {{\"efghijklmnopΔΘ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王\"}, {}}, {}}, VList_Any{nil, nil}, VSet_VEnumBcd{VEnumBcd.C}}, F11: {F11: {Id: \"bcdefghi\", RetryCode: RetryRefetch, Msg: \"fgh\"}}}, {F0: {[]bool{true, false}, VMap_VInt16_VInt16{-3800: 9520, 0: 0}, false}, F9: {F0: VList_VInt32{}, F1: true, F7: 213, F26: -2.1656532e+07}, F10: {F16: 1410740624689925395}, F11: {F11: nil}}}",
+		SourceLabel: "VArray3_OptVStructDepth2_Rand0{nil, {F0: {[]VStructEmpty{{}, {}, {}}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"hijklmnopΔΘΠΣΦ\", F15: 4019700205}: {}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 2886493035}: {}}}, nil}, F10: {F12: 13523}, F11: {F20: 3424}}, nil}",
 		Source: VArray3_OptVStructDepth2_Rand0{
+			nil,
 			{
 				F0: VArray3_Any{
-					[]VUnionDepth2_Rand0{
-						VUnionDepth2_Rand0F12{},
-						VUnionDepth2_Rand0F8{VStructDepth1_All{
-							F0: map[VBool]VBool{
-								true: false,
-							},
-							F1:  true,
-							F3:  "ijklmnopΔ",
-							F4:  "klmn",
-							F5:  vdl.TypeOf((*VSet_VEnumAbc)(nil)),
-							F6:  137,
-							F7:  218,
-							F8:  VEnumAbcC,
-							F12: 13857,
-							F13: 37902,
-							F14: 650201280,
-							F15: 3920518667,
-							F16: 9271928586033663647,
-							F19: 34,
-							F20: -7684,
-							F22: -678961400,
-							F23: 339484972,
-							F24: -478913906129708347,
-							F25: 978017837427645721,
-							F26: 1.31259656e+08,
-							F27: 3.0070438e+09,
-							F28: 1.7877394274183822e+08,
-							F29: -1.6292280986000445e+09,
-							F30: &VStructEmpty{},
-						}},
+					[]VStructEmpty{
+						{},
+						{},
+						{},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdC: VEnumBcdB,
-					},
-					VList_List_VMap_VEnumBcd_VEnumBcd(nil),
-				},
-				F9: VStructDepth1_Rand1{
-					F0: []int32{
-						0,
-						0,
-						338661643,
-					},
-					F1: true,
-					F7: 100,
-					F9: VEnumBcdD,
-				},
-				F10: VUnionDepth1_Rand0F12{12307},
-				F11: VUnionDepth1_Rand1F6{219},
-			},
-			{
-				F0: VArray3_Any{
-					[]VList_VArray1_String{
-						nil,
+					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
 						{
 							{
-								"efghijklmnopΔΘ",
-							},
+								F4:  "hijklmnopΔΘΠΣΦ",
+								F15: 4019700205,
+							}: {},
 							{
-								"abcdefghijklmnopΔΘΠΣΦ王",
-							},
-							{},
+								F4:  "ijklmnopΔΘΠΣΦ王普",
+								F15: 2886493035,
+							}: {},
 						},
-						nil,
 					},
-					VList_Any{
-						nil,
-						nil,
-					},
-					VSet_VEnumBcd{
-						VEnumBcdC: struct{}{},
-					},
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:        "bcdefghi",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "fgh",
-				})},
+				F10: VUnionDepth1_Rand0F12{13523},
+				F11: VUnionDepth1_Rand1F20{3424},
 			},
-			{
-				F0: VArray3_Any{
-					[]bool{
-						true,
-						false,
-					},
-					VMap_VInt16_VInt16{
-						-3800: 9520,
-						0:     0,
-					},
-					false,
-				},
-				F9: VStructDepth1_Rand1{
-					F0:  VList_VInt32(nil),
-					F1:  true,
-					F7:  213,
-					F26: -2.1656532e+07,
-				},
-				F10: VUnionDepth1_Rand0F16{1410740624689925395},
-				F11: VUnionDepth1_Rand1F11{},
-			},
+			nil,
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VArray3_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth2_Rand0{{F12: nil}, {F8: {F0: map[VBool]VBool{true: false}, F1: true, F3: \"ijklmnopΔ\", F4: \"klmn\", F5: typeobject(VSet_VEnumAbc), F6: 137, F7: 218, F8: VEnumAbc.C, F12: 13857, F13: 37902, F14: 650201280, F15: 3920518667, F16: 9271928586033663647, F19: 34, F20: -7684, F22: -678961400, F23: 339484972, F24: -478913906129708347, F25: 978017837427645721, F26: 1.31259656e+08, F27: 3.0070438e+09, F28: 1.7877394274183822e+08, F29: -1.6292280986000445e+09, F30: {}}}}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.C: VEnumBcd.B}, VList_List_VMap_VEnumBcd_VEnumBcd{}}, F9: {F0: []int32{0, 0, 338661643}, F1: true, F7: 100, F9: VEnumBcd.D}, F10: {F12: 12307}, F11: {F6: 219}}, {F0: {[]VList_VArray1_String{{}, {{\"efghijklmnopΔΘ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王\"}, {}}, {}}, VList_Any{nil, nil}, VSet_VEnumBcd{VEnumBcd.C}}, F11: {F11: {Id: \"bcdefghi\", RetryCode: RetryRefetch, Msg: \"fgh\"}}}, {F0: {[]bool{true, false}, VMap_VInt16_VInt16{-3800: 9520, 0: 0}, false}, F9: {F0: VList_VInt32{}, F1: true, F7: 213, F26: -2.1656532e+07}, F10: {F16: 1410740624689925395}, F11: {F11: nil}}}",
+		TargetLabel: "VArray3_OptVStructDepth2_Rand0{nil, {F0: {[]VStructEmpty{{}, {}, {}}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"hijklmnopΔΘΠΣΦ\", F15: 4019700205}: {}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 2886493035}: {}}}, nil}, F10: {F12: 13523}, F11: {F20: 3424}}, nil}",
 		Target: VArray3_OptVStructDepth2_Rand0{
+			nil,
 			{
 				F0: VArray3_Any{
-					[]VUnionDepth2_Rand0{
-						VUnionDepth2_Rand0F12{},
-						VUnionDepth2_Rand0F8{VStructDepth1_All{
-							F0: map[VBool]VBool{
-								true: false,
-							},
-							F1:  true,
-							F3:  "ijklmnopΔ",
-							F4:  "klmn",
-							F5:  vdl.TypeOf((*VSet_VEnumAbc)(nil)),
-							F6:  137,
-							F7:  218,
-							F8:  VEnumAbcC,
-							F12: 13857,
-							F13: 37902,
-							F14: 650201280,
-							F15: 3920518667,
-							F16: 9271928586033663647,
-							F19: 34,
-							F20: -7684,
-							F22: -678961400,
-							F23: 339484972,
-							F24: -478913906129708347,
-							F25: 978017837427645721,
-							F26: 1.31259656e+08,
-							F27: 3.0070438e+09,
-							F28: 1.7877394274183822e+08,
-							F29: -1.6292280986000445e+09,
-							F30: &VStructEmpty{},
-						}},
+					[]VStructEmpty{
+						{},
+						{},
+						{},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdC: VEnumBcdB,
-					},
-					VList_List_VMap_VEnumBcd_VEnumBcd(nil),
-				},
-				F9: VStructDepth1_Rand1{
-					F0: []int32{
-						0,
-						0,
-						338661643,
-					},
-					F1: true,
-					F7: 100,
-					F9: VEnumBcdD,
-				},
-				F10: VUnionDepth1_Rand0F12{12307},
-				F11: VUnionDepth1_Rand1F6{219},
-			},
-			{
-				F0: VArray3_Any{
-					[]VList_VArray1_String{
-						nil,
+					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
 						{
 							{
-								"efghijklmnopΔΘ",
-							},
+								F4:  "hijklmnopΔΘΠΣΦ",
+								F15: 4019700205,
+							}: {},
 							{
-								"abcdefghijklmnopΔΘΠΣΦ王",
-							},
-							{},
+								F4:  "ijklmnopΔΘΠΣΦ王普",
+								F15: 2886493035,
+							}: {},
 						},
-						nil,
 					},
-					VList_Any{
-						nil,
-						nil,
-					},
-					VSet_VEnumBcd{
-						VEnumBcdC: struct{}{},
-					},
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:        "bcdefghi",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "fgh",
-				})},
+				F10: VUnionDepth1_Rand0F12{13523},
+				F11: VUnionDepth1_Rand1F20{3424},
 			},
-			{
-				F0: VArray3_Any{
-					[]bool{
-						true,
-						false,
-					},
-					VMap_VInt16_VInt16{
-						-3800: 9520,
-						0:     0,
-					},
-					false,
-				},
-				F9: VStructDepth1_Rand1{
-					F0:  VList_VInt32(nil),
-					F1:  true,
-					F7:  213,
-					F26: -2.1656532e+07,
-				},
-				F10: VUnionDepth1_Rand0F16{1410740624689925395},
-				F11: VUnionDepth1_Rand1F11{},
-			},
+			nil,
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {[]VUnionDepth2_Rand0{{F12: nil}, {F8: {F0: map[VBool]VBool{true: false}, F1: true, F3: \"ijklmnopΔ\", F4: \"klmn\", F5: typeobject(VSet_VEnumAbc), F6: 137, F7: 218, F8: VEnumAbc.C, F12: 13857, F13: 37902, F14: 650201280, F15: 3920518667, F16: 9271928586033663647, F19: 34, F20: -7684, F22: -678961400, F23: 339484972, F24: -478913906129708347, F25: 978017837427645721, F26: 1.31259656e+08, F27: 3.0070438e+09, F28: 1.7877394274183822e+08, F29: -1.6292280986000445e+09, F30: {}}}}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.C: VEnumBcd.B}, VList_List_VMap_VEnumBcd_VEnumBcd{}}, F9: {F0: []int32{0, 0, 338661643}, F1: true, F7: 100, F9: VEnumBcd.D}, F10: {F12: 12307}, F11: {F6: 219}}, VStructDepth2_Rand0{F0: {[]VList_VArray1_String{{}, {{\"efghijklmnopΔΘ\"}, {\"abcdefghijklmnopΔΘΠΣΦ王\"}, {}}, {}}, VList_Any{nil, nil}, VSet_VEnumBcd{VEnumBcd.C}}, F11: {F11: {Id: \"bcdefghi\", RetryCode: RetryRefetch, Msg: \"fgh\"}}}, VStructDepth2_Rand0{F0: {[]bool{true, false}, VMap_VInt16_VInt16{-3800: 9520, 0: 0}, false}, F9: {F0: VList_VInt32{}, F1: true, F7: 213, F26: -2.1656532e+07}, F10: {F16: 1410740624689925395}, F11: {F11: nil}}}",
+		SourceLabel: "[]any{nil, ?VStructDepth2_Rand0{F0: {[]VStructEmpty{{}, {}, {}}, VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{{{F4: \"hijklmnopΔΘΠΣΦ\", F15: 4019700205}: {}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 2886493035}: {}}}, nil}, F10: {F12: 13523}, F11: {F20: 3424}}, nil}",
 		Source: []interface{}{
-			VStructDepth2_Rand0{
+			nil,
+			&VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					[]VUnionDepth2_Rand0{
-						VUnionDepth2_Rand0F12{},
-						VUnionDepth2_Rand0F8{VStructDepth1_All{
-							F0: map[VBool]VBool{
-								true: false,
-							},
-							F1:  true,
-							F3:  "ijklmnopΔ",
-							F4:  "klmn",
-							F5:  vdl.TypeOf((*VSet_VEnumAbc)(nil)),
-							F6:  137,
-							F7:  218,
-							F8:  VEnumAbcC,
-							F12: 13857,
-							F13: 37902,
-							F14: 650201280,
-							F15: 3920518667,
-							F16: 9271928586033663647,
-							F19: 34,
-							F20: -7684,
-							F22: -678961400,
-							F23: 339484972,
-							F24: -478913906129708347,
-							F25: 978017837427645721,
-							F26: 1.31259656e+08,
-							F27: 3.0070438e+09,
-							F28: 1.7877394274183822e+08,
-							F29: -1.6292280986000445e+09,
-							F30: &VStructEmpty{},
-						}},
+					[]VStructEmpty{
+						{},
+						{},
+						{},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdC: VEnumBcdB,
-					},
-					VList_List_VMap_VEnumBcd_VEnumBcd(nil),
-				},
-				F9: VStructDepth1_Rand1{
-					F0: []int32{
-						0,
-						0,
-						338661643,
-					},
-					F1: true,
-					F7: 100,
-					F9: VEnumBcdD,
-				},
-				F10: VUnionDepth1_Rand0F12{12307},
-				F11: VUnionDepth1_Rand1F6{219},
-			},
-			VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					[]VList_VArray1_String{
-						nil,
+					VList_VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
 						{
 							{
-								"efghijklmnopΔΘ",
-							},
+								F4:  "hijklmnopΔΘΠΣΦ",
+								F15: 4019700205,
+							}: {},
 							{
-								"abcdefghijklmnopΔΘΠΣΦ王",
-							},
-							{},
+								F4:  "ijklmnopΔΘΠΣΦ王普",
+								F15: 2886493035,
+							}: {},
 						},
-						nil,
 					},
-					VList_Any{
-						nil,
-						nil,
-					},
-					VSet_VEnumBcd{
-						VEnumBcdC: struct{}{},
-					},
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:        "bcdefghi",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-					Msg:       "fgh",
-				})},
+				F10: VUnionDepth1_Rand0F12{13523},
+				F11: VUnionDepth1_Rand1F20{3424},
 			},
-			VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					[]bool{
-						true,
-						false,
-					},
-					VMap_VInt16_VInt16{
-						-3800: 9520,
-						0:     0,
-					},
-					false,
-				},
-				F9: VStructDepth1_Rand1{
-					F0:  VList_VInt32(nil),
-					F1:  true,
-					F7:  213,
-					F26: -2.1656532e+07,
-				},
-				F10: VUnionDepth1_Rand0F16{1410740624689925395},
-				F11: VUnionDepth1_Rand1F11{},
-			},
+			nil,
 		},
 	},
 	{
@@ -36947,7 +36504,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -36966,7 +36523,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -36988,7 +36545,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37007,7 +36564,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37030,126 +36587,778 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VByte(\"\\xca\\x1e\"), VMap_VBool_VBool{false: false, true: false}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F9: {F0: VEnumBcd.D, F7: 222, F26: -1.6810204e+09}, F10: {F16: 14294019705296587163}, F11: {F6: 142}}, {}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"ghijklmnopΔΘ\", \"k\", \"Θ\"}, {\"lmnopΔΘ\", \"ΣΦ\"}}, VList_VStructDepth2_All{{F0: {nil, VArray3_OptVStructDepth2_Rand0{{}, {}, {F0: {map[VEnumBcd]VEnumBcd{B: B}, set[VEnumAbc]{A, B, C}, VSet_VStructDepth1_Rand0{{}, {F15: 274416478, F21: 3003}}}, F10: {F12: 0}}}, VSet_VStructEmpty{{}}}, F1: {\"ghijklmn\"}, F2: {false, false, true}, F3: {0, 331502182}, F4: {\"abcdefghijklmnopΔΘ\", \"efghijklmnopΔΘΠΣΦ\", \"opΔΘΠΣ\"}, F5: {-5.2400682e+08, 1.6889864e+08, 7.9051315e+08}, F6: {218: 45, 234: 0}, F7: {B: C, D: B}, F8: {F0: VArray3_VString{\"abcdefgh\", \"hijklmnopΔΘΠΣΦ王\", \"pΔΘ\"}, F1: true, F3: \"abcdefghijkl\", F4: \"ΠΣΦ王普\", F5: typeobject(byte), F6: 218, F7: 222, F12: 32247, F13: 40507, F14: 2582734184, F15: 3142928452, F18: 63, F19: -61, F20: -15797, F24: -2669176990115907474, F25: -1735575579573305209, F26: -2.4216786e+09, F27: -1.7466433e+09, F28: -8.263044124537586e+08}, F9: {F0: VList_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth1_All{{F0: map[VByte]VByte{30: 0, 44: 0}}, {F14: 4018867364}, {F24: 516525750659450540}}, nil, []VArray1_String{{}, {\"efghijklmnopΔΘΠΣΦ王普澤世\"}, {}}}, F9: {F0: set[VEnumAbc]{A}, F1: true, F26: 1.1532326e+09}, F11: {F11: {}}}}, F9: D}, F10: {F10: {}}, F11: {F9: D}, F12: {F0: VSet_VUnionDepth1_Rand0{{F10: {}}, {F8: A}, {F8: B}}, F2: true, F3: \"klmnopΔΘΠΣΦ王普澤世\", F5: typeobject([]VUnionDepth2_Rand0), F7: 242, F8: B, F9: C, F12: 20099, F14: 1380252894, F15: 4005675170, F16: 17637172552429207713, F17: 5811345339427185880, F18: -17, F22: -127070305, F23: 685908080, F24: -471469747791260292, F25: 4593546952259391523, F26: -4.9066656e+07, F27: 3.1216187e+09, F28: -6.46981840713098e+08, F29: -5.342313101766018e+08, F30: {}}, F13: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F21: 905}}}, VArray1_Uint64{2803368414001685425}}, F9: {F1: true, F7: 14, F9: C, F26: -2.3952862e+08}, F10: {F28: -8.67510848715285e+08}}}",
 		Target: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_VByte{
-						202,
-						30,
+					VArray2_VSet_String{
+						{
+							"ghijklmnopΔΘ": struct{}{},
+							"k":            struct{}{},
+							"Θ":            struct{}{},
+						},
+						{
+							"lmnopΔΘ": struct{}{},
+							"ΣΦ":      struct{}{},
+						},
 					},
-					VMap_VBool_VBool{
-						false: false,
-						true:  false,
+					VList_VStructDepth2_All{
+						{
+							F0: VArray3_Any{
+								nil,
+								VArray3_OptVStructDepth2_Rand0{
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F0: VArray3_Any{
+											map[VEnumBcd]VEnumBcd{
+												VEnumBcdB: VEnumBcdB,
+											},
+											map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+												VEnumAbcB: struct{}{},
+												VEnumAbcC: struct{}{},
+											},
+											VSet_VStructDepth1_Rand0{
+												{}: struct{}{},
+												{
+													F15: 274416478,
+													F21: 3003,
+												}: struct{}{},
+											},
+										},
+										F10: VUnionDepth1_Rand0F12{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+								},
+								VSet_VStructEmpty{
+									{}: struct{}{},
+								},
+							},
+							F1: VArray1_String{
+								"ghijklmn",
+							},
+							F2: VList_VBool{
+								false,
+								false,
+								true,
+							},
+							F3: VList_VInt32{
+								0,
+								331502182,
+							},
+							F4: VSet_VString{
+								"abcdefghijklmnopΔΘ": struct{}{},
+								"efghijklmnopΔΘΠΣΦ":  struct{}{},
+								"opΔΘΠΣ":             struct{}{},
+							},
+							F5: VSet_Float32{
+								-5.2400682e+08: struct{}{},
+								1.6889864e+08:  struct{}{},
+								7.9051315e+08:  struct{}{},
+							},
+							F6: VMap_VByte_VByte{
+								218: 45,
+								234: 0,
+							},
+							F7: VMap_VEnumBcd_VEnumBcd{
+								VEnumBcdB: VEnumBcdC,
+								VEnumBcdD: VEnumBcdB,
+							},
+							F8: VStructDepth1_All{
+								F0: VArray3_VString{
+									"abcdefgh",
+									"hijklmnopΔΘΠΣΦ王",
+									"pΔΘ",
+								},
+								F1:  true,
+								F3:  "abcdefghijkl",
+								F4:  "ΠΣΦ王普",
+								F5:  vdl.ByteType,
+								F6:  218,
+								F7:  222,
+								F12: 32247,
+								F13: 40507,
+								F14: 2582734184,
+								F15: 3142928452,
+								F18: 63,
+								F19: -61,
+								F20: -15797,
+								F24: -2669176990115907474,
+								F25: -1735575579573305209,
+								F26: -2.4216786e+09,
+								F27: -1.7466433e+09,
+								F28: -8.263044124537586e+08,
+							},
+							F9: VStructDepth1_Rand1{
+								F0: VList_OptVStructDepth2_Rand0{
+									{
+										F0: VArray3_Any{
+											[]VUnionDepth1_All{
+												VUnionDepth1_AllF0{map[VByte]VByte{
+													30: 0,
+													44: 0,
+												}},
+												VUnionDepth1_AllF14{4018867364},
+												VUnionDepth1_AllF24{516525750659450540},
+											},
+											nil,
+											[]VArray1_String{
+												{},
+												{
+													"efghijklmnopΔΘΠΣΦ王普澤世",
+												},
+												{},
+											},
+										},
+										F9: VStructDepth1_Rand1{
+											F0: map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+											},
+											F1:  true,
+											F26: 1.1532326e+09,
+										},
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+									},
+								},
+								F9: VEnumBcdD,
+							},
+							F10: VUnionDepth1_Rand0F10{},
+							F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+							F12: &VStructDepth1_All{
+								F0: VSet_VUnionDepth1_Rand0{
+									VUnionDepth1_Rand0F10{}:         struct{}{},
+									VUnionDepth1_Rand0F8{}:          struct{}{},
+									VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
+								},
+								F2:  true,
+								F3:  "klmnopΔΘΠΣΦ王普澤世",
+								F5:  vdl.TypeOf((*[]VUnionDepth2_Rand0)(nil)),
+								F7:  242,
+								F8:  VEnumAbcB,
+								F9:  VEnumBcdC,
+								F12: 20099,
+								F14: 1380252894,
+								F15: 4005675170,
+								F16: 17637172552429207713,
+								F17: 5811345339427185880,
+								F18: -17,
+								F22: -127070305,
+								F23: 685908080,
+								F24: -471469747791260292,
+								F25: 4593546952259391523,
+								F26: -4.9066656e+07,
+								F27: 3.1216187e+09,
+								F28: -6.46981840713098e+08,
+								F29: -5.342313101766018e+08,
+								F30: &VStructEmpty{},
+							},
+							F13: &VStructDepth1_Rand0{
+								F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
+								F21: 905,
+							},
+						},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdD: VEnumBcdB,
+					VArray1_Uint64{
+						2803368414001685425,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VEnumBcdD,
-					F7:  222,
-					F26: -1.6810204e+09,
+					F1:  true,
+					F7:  14,
+					F9:  VEnumBcdC,
+					F26: -2.3952862e+08,
 				},
-				F10: VUnionDepth1_Rand0F16{14294019705296587163},
-				F11: VUnionDepth1_Rand1F6{142},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{},
+				F10: VUnionDepth1_Rand0F28{-8.67510848715285e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VByte(\"\\xca\\x1e\"), VMap_VBool_VBool{false: false, true: false}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F9: {F0: VEnumBcd.D, F7: 222, F26: -1.6810204e+09}, F10: {F16: 14294019705296587163}, F11: {F6: 142}}, {}}",
+		SourceLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"ghijklmnopΔΘ\", \"k\", \"Θ\"}, {\"lmnopΔΘ\", \"ΣΦ\"}}, VList_VStructDepth2_All{{F0: {nil, VArray3_OptVStructDepth2_Rand0{{}, {}, {F0: {map[VEnumBcd]VEnumBcd{B: B}, set[VEnumAbc]{A, B, C}, VSet_VStructDepth1_Rand0{{}, {F15: 274416478, F21: 3003}}}, F10: {F12: 0}}}, VSet_VStructEmpty{{}}}, F1: {\"ghijklmn\"}, F2: {false, false, true}, F3: {0, 331502182}, F4: {\"abcdefghijklmnopΔΘ\", \"efghijklmnopΔΘΠΣΦ\", \"opΔΘΠΣ\"}, F5: {-5.2400682e+08, 1.6889864e+08, 7.9051315e+08}, F6: {218: 45, 234: 0}, F7: {B: C, D: B}, F8: {F0: VArray3_VString{\"abcdefgh\", \"hijklmnopΔΘΠΣΦ王\", \"pΔΘ\"}, F1: true, F3: \"abcdefghijkl\", F4: \"ΠΣΦ王普\", F5: typeobject(byte), F6: 218, F7: 222, F12: 32247, F13: 40507, F14: 2582734184, F15: 3142928452, F18: 63, F19: -61, F20: -15797, F24: -2669176990115907474, F25: -1735575579573305209, F26: -2.4216786e+09, F27: -1.7466433e+09, F28: -8.263044124537586e+08}, F9: {F0: VList_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth1_All{{F0: map[VByte]VByte{30: 0, 44: 0}}, {F14: 4018867364}, {F24: 516525750659450540}}, nil, []VArray1_String{{}, {\"efghijklmnopΔΘΠΣΦ王普澤世\"}, {}}}, F9: {F0: set[VEnumAbc]{A}, F1: true, F26: 1.1532326e+09}, F11: {F11: {}}}}, F9: D}, F10: {F10: {}}, F11: {F9: D}, F12: {F0: VSet_VUnionDepth1_Rand0{{F10: {}}, {F8: A}, {F8: B}}, F2: true, F3: \"klmnopΔΘΠΣΦ王普澤世\", F5: typeobject([]VUnionDepth2_Rand0), F7: 242, F8: B, F9: C, F12: 20099, F14: 1380252894, F15: 4005675170, F16: 17637172552429207713, F17: 5811345339427185880, F18: -17, F22: -127070305, F23: 685908080, F24: -471469747791260292, F25: 4593546952259391523, F26: -4.9066656e+07, F27: 3.1216187e+09, F28: -6.46981840713098e+08, F29: -5.342313101766018e+08, F30: {}}, F13: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F21: 905}}}, VArray1_Uint64{2803368414001685425}}, F9: {F1: true, F7: 14, F9: C, F26: -2.3952862e+08}, F10: {F28: -8.67510848715285e+08}}}",
 		Source: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_VByte{
-						202,
-						30,
+					VArray2_VSet_String{
+						{
+							"ghijklmnopΔΘ": struct{}{},
+							"k":            struct{}{},
+							"Θ":            struct{}{},
+						},
+						{
+							"lmnopΔΘ": struct{}{},
+							"ΣΦ":      struct{}{},
+						},
 					},
-					VMap_VBool_VBool{
-						false: false,
-						true:  false,
+					VList_VStructDepth2_All{
+						{
+							F0: VArray3_Any{
+								nil,
+								VArray3_OptVStructDepth2_Rand0{
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F0: VArray3_Any{
+											map[VEnumBcd]VEnumBcd{
+												VEnumBcdB: VEnumBcdB,
+											},
+											map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+												VEnumAbcB: struct{}{},
+												VEnumAbcC: struct{}{},
+											},
+											VSet_VStructDepth1_Rand0{
+												{}: struct{}{},
+												{
+													F15: 274416478,
+													F21: 3003,
+												}: struct{}{},
+											},
+										},
+										F10: VUnionDepth1_Rand0F12{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+								},
+								VSet_VStructEmpty{
+									{}: struct{}{},
+								},
+							},
+							F1: VArray1_String{
+								"ghijklmn",
+							},
+							F2: VList_VBool{
+								false,
+								false,
+								true,
+							},
+							F3: VList_VInt32{
+								0,
+								331502182,
+							},
+							F4: VSet_VString{
+								"abcdefghijklmnopΔΘ": struct{}{},
+								"efghijklmnopΔΘΠΣΦ":  struct{}{},
+								"opΔΘΠΣ":             struct{}{},
+							},
+							F5: VSet_Float32{
+								-5.2400682e+08: struct{}{},
+								1.6889864e+08:  struct{}{},
+								7.9051315e+08:  struct{}{},
+							},
+							F6: VMap_VByte_VByte{
+								218: 45,
+								234: 0,
+							},
+							F7: VMap_VEnumBcd_VEnumBcd{
+								VEnumBcdB: VEnumBcdC,
+								VEnumBcdD: VEnumBcdB,
+							},
+							F8: VStructDepth1_All{
+								F0: VArray3_VString{
+									"abcdefgh",
+									"hijklmnopΔΘΠΣΦ王",
+									"pΔΘ",
+								},
+								F1:  true,
+								F3:  "abcdefghijkl",
+								F4:  "ΠΣΦ王普",
+								F5:  vdl.ByteType,
+								F6:  218,
+								F7:  222,
+								F12: 32247,
+								F13: 40507,
+								F14: 2582734184,
+								F15: 3142928452,
+								F18: 63,
+								F19: -61,
+								F20: -15797,
+								F24: -2669176990115907474,
+								F25: -1735575579573305209,
+								F26: -2.4216786e+09,
+								F27: -1.7466433e+09,
+								F28: -8.263044124537586e+08,
+							},
+							F9: VStructDepth1_Rand1{
+								F0: VList_OptVStructDepth2_Rand0{
+									{
+										F0: VArray3_Any{
+											[]VUnionDepth1_All{
+												VUnionDepth1_AllF0{map[VByte]VByte{
+													30: 0,
+													44: 0,
+												}},
+												VUnionDepth1_AllF14{4018867364},
+												VUnionDepth1_AllF24{516525750659450540},
+											},
+											nil,
+											[]VArray1_String{
+												{},
+												{
+													"efghijklmnopΔΘΠΣΦ王普澤世",
+												},
+												{},
+											},
+										},
+										F9: VStructDepth1_Rand1{
+											F0: map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+											},
+											F1:  true,
+											F26: 1.1532326e+09,
+										},
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+									},
+								},
+								F9: VEnumBcdD,
+							},
+							F10: VUnionDepth1_Rand0F10{},
+							F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+							F12: &VStructDepth1_All{
+								F0: VSet_VUnionDepth1_Rand0{
+									VUnionDepth1_Rand0F10{}:         struct{}{},
+									VUnionDepth1_Rand0F8{}:          struct{}{},
+									VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
+								},
+								F2:  true,
+								F3:  "klmnopΔΘΠΣΦ王普澤世",
+								F5:  vdl.TypeOf((*[]VUnionDepth2_Rand0)(nil)),
+								F7:  242,
+								F8:  VEnumAbcB,
+								F9:  VEnumBcdC,
+								F12: 20099,
+								F14: 1380252894,
+								F15: 4005675170,
+								F16: 17637172552429207713,
+								F17: 5811345339427185880,
+								F18: -17,
+								F22: -127070305,
+								F23: 685908080,
+								F24: -471469747791260292,
+								F25: 4593546952259391523,
+								F26: -4.9066656e+07,
+								F27: 3.1216187e+09,
+								F28: -6.46981840713098e+08,
+								F29: -5.342313101766018e+08,
+								F30: &VStructEmpty{},
+							},
+							F13: &VStructDepth1_Rand0{
+								F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
+								F21: 905,
+							},
+						},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdD: VEnumBcdB,
+					VArray1_Uint64{
+						2803368414001685425,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VEnumBcdD,
-					F7:  222,
-					F26: -1.6810204e+09,
+					F1:  true,
+					F7:  14,
+					F9:  VEnumBcdC,
+					F26: -2.3952862e+08,
 				},
-				F10: VUnionDepth1_Rand0F16{14294019705296587163},
-				F11: VUnionDepth1_Rand1F6{142},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{},
+				F10: VUnionDepth1_Rand0F28{-8.67510848715285e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VByte(\"\\xca\\x1e\"), VMap_VBool_VBool{false: false, true: false}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F9: {F0: VEnumBcd.D, F7: 222, F26: -1.6810204e+09}, F10: {F16: 14294019705296587163}, F11: {F6: 142}}, {}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"ghijklmnopΔΘ\", \"k\", \"Θ\"}, {\"lmnopΔΘ\", \"ΣΦ\"}}, VList_VStructDepth2_All{{F0: {nil, VArray3_OptVStructDepth2_Rand0{{}, {}, {F0: {map[VEnumBcd]VEnumBcd{B: B}, set[VEnumAbc]{A, B, C}, VSet_VStructDepth1_Rand0{{}, {F15: 274416478, F21: 3003}}}, F10: {F12: 0}}}, VSet_VStructEmpty{{}}}, F1: {\"ghijklmn\"}, F2: {false, false, true}, F3: {0, 331502182}, F4: {\"abcdefghijklmnopΔΘ\", \"efghijklmnopΔΘΠΣΦ\", \"opΔΘΠΣ\"}, F5: {-5.2400682e+08, 1.6889864e+08, 7.9051315e+08}, F6: {218: 45, 234: 0}, F7: {B: C, D: B}, F8: {F0: VArray3_VString{\"abcdefgh\", \"hijklmnopΔΘΠΣΦ王\", \"pΔΘ\"}, F1: true, F3: \"abcdefghijkl\", F4: \"ΠΣΦ王普\", F5: typeobject(byte), F6: 218, F7: 222, F12: 32247, F13: 40507, F14: 2582734184, F15: 3142928452, F18: 63, F19: -61, F20: -15797, F24: -2669176990115907474, F25: -1735575579573305209, F26: -2.4216786e+09, F27: -1.7466433e+09, F28: -8.263044124537586e+08}, F9: {F0: VList_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth1_All{{F0: map[VByte]VByte{30: 0, 44: 0}}, {F14: 4018867364}, {F24: 516525750659450540}}, nil, []VArray1_String{{}, {\"efghijklmnopΔΘΠΣΦ王普澤世\"}, {}}}, F9: {F0: set[VEnumAbc]{A}, F1: true, F26: 1.1532326e+09}, F11: {F11: {}}}}, F9: D}, F10: {F10: {}}, F11: {F9: D}, F12: {F0: VSet_VUnionDepth1_Rand0{{F10: {}}, {F8: A}, {F8: B}}, F2: true, F3: \"klmnopΔΘΠΣΦ王普澤世\", F5: typeobject([]VUnionDepth2_Rand0), F7: 242, F8: B, F9: C, F12: 20099, F14: 1380252894, F15: 4005675170, F16: 17637172552429207713, F17: 5811345339427185880, F18: -17, F22: -127070305, F23: 685908080, F24: -471469747791260292, F25: 4593546952259391523, F26: -4.9066656e+07, F27: 3.1216187e+09, F28: -6.46981840713098e+08, F29: -5.342313101766018e+08, F30: {}}, F13: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F21: 905}}}, VArray1_Uint64{2803368414001685425}}, F9: {F1: true, F7: 14, F9: C, F26: -2.3952862e+08}, F10: {F28: -8.67510848715285e+08}}}",
 		Target: []VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_VByte{
-						202,
-						30,
+					VArray2_VSet_String{
+						{
+							"ghijklmnopΔΘ": struct{}{},
+							"k":            struct{}{},
+							"Θ":            struct{}{},
+						},
+						{
+							"lmnopΔΘ": struct{}{},
+							"ΣΦ":      struct{}{},
+						},
 					},
-					VMap_VBool_VBool{
-						false: false,
-						true:  false,
+					VList_VStructDepth2_All{
+						{
+							F0: VArray3_Any{
+								nil,
+								VArray3_OptVStructDepth2_Rand0{
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F0: VArray3_Any{
+											map[VEnumBcd]VEnumBcd{
+												VEnumBcdB: VEnumBcdB,
+											},
+											map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+												VEnumAbcB: struct{}{},
+												VEnumAbcC: struct{}{},
+											},
+											VSet_VStructDepth1_Rand0{
+												{}: struct{}{},
+												{
+													F15: 274416478,
+													F21: 3003,
+												}: struct{}{},
+											},
+										},
+										F10: VUnionDepth1_Rand0F12{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+								},
+								VSet_VStructEmpty{
+									{}: struct{}{},
+								},
+							},
+							F1: VArray1_String{
+								"ghijklmn",
+							},
+							F2: VList_VBool{
+								false,
+								false,
+								true,
+							},
+							F3: VList_VInt32{
+								0,
+								331502182,
+							},
+							F4: VSet_VString{
+								"abcdefghijklmnopΔΘ": struct{}{},
+								"efghijklmnopΔΘΠΣΦ":  struct{}{},
+								"opΔΘΠΣ":             struct{}{},
+							},
+							F5: VSet_Float32{
+								-5.2400682e+08: struct{}{},
+								1.6889864e+08:  struct{}{},
+								7.9051315e+08:  struct{}{},
+							},
+							F6: VMap_VByte_VByte{
+								218: 45,
+								234: 0,
+							},
+							F7: VMap_VEnumBcd_VEnumBcd{
+								VEnumBcdB: VEnumBcdC,
+								VEnumBcdD: VEnumBcdB,
+							},
+							F8: VStructDepth1_All{
+								F0: VArray3_VString{
+									"abcdefgh",
+									"hijklmnopΔΘΠΣΦ王",
+									"pΔΘ",
+								},
+								F1:  true,
+								F3:  "abcdefghijkl",
+								F4:  "ΠΣΦ王普",
+								F5:  vdl.ByteType,
+								F6:  218,
+								F7:  222,
+								F12: 32247,
+								F13: 40507,
+								F14: 2582734184,
+								F15: 3142928452,
+								F18: 63,
+								F19: -61,
+								F20: -15797,
+								F24: -2669176990115907474,
+								F25: -1735575579573305209,
+								F26: -2.4216786e+09,
+								F27: -1.7466433e+09,
+								F28: -8.263044124537586e+08,
+							},
+							F9: VStructDepth1_Rand1{
+								F0: VList_OptVStructDepth2_Rand0{
+									{
+										F0: VArray3_Any{
+											[]VUnionDepth1_All{
+												VUnionDepth1_AllF0{map[VByte]VByte{
+													30: 0,
+													44: 0,
+												}},
+												VUnionDepth1_AllF14{4018867364},
+												VUnionDepth1_AllF24{516525750659450540},
+											},
+											nil,
+											[]VArray1_String{
+												{},
+												{
+													"efghijklmnopΔΘΠΣΦ王普澤世",
+												},
+												{},
+											},
+										},
+										F9: VStructDepth1_Rand1{
+											F0: map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+											},
+											F1:  true,
+											F26: 1.1532326e+09,
+										},
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+									},
+								},
+								F9: VEnumBcdD,
+							},
+							F10: VUnionDepth1_Rand0F10{},
+							F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+							F12: &VStructDepth1_All{
+								F0: VSet_VUnionDepth1_Rand0{
+									VUnionDepth1_Rand0F10{}:         struct{}{},
+									VUnionDepth1_Rand0F8{}:          struct{}{},
+									VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
+								},
+								F2:  true,
+								F3:  "klmnopΔΘΠΣΦ王普澤世",
+								F5:  vdl.TypeOf((*[]VUnionDepth2_Rand0)(nil)),
+								F7:  242,
+								F8:  VEnumAbcB,
+								F9:  VEnumBcdC,
+								F12: 20099,
+								F14: 1380252894,
+								F15: 4005675170,
+								F16: 17637172552429207713,
+								F17: 5811345339427185880,
+								F18: -17,
+								F22: -127070305,
+								F23: 685908080,
+								F24: -471469747791260292,
+								F25: 4593546952259391523,
+								F26: -4.9066656e+07,
+								F27: 3.1216187e+09,
+								F28: -6.46981840713098e+08,
+								F29: -5.342313101766018e+08,
+								F30: &VStructEmpty{},
+							},
+							F13: &VStructDepth1_Rand0{
+								F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
+								F21: 905,
+							},
+						},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdD: VEnumBcdB,
+					VArray1_Uint64{
+						2803368414001685425,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VEnumBcdD,
-					F7:  222,
-					F26: -1.6810204e+09,
+					F1:  true,
+					F7:  14,
+					F9:  VEnumBcdC,
+					F26: -2.3952862e+08,
 				},
-				F10: VUnionDepth1_Rand0F16{14294019705296587163},
-				F11: VUnionDepth1_Rand1F6{142},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{},
+				F10: VUnionDepth1_Rand0F28{-8.67510848715285e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {VArray2_VByte(\"\\xca\\x1e\"), VMap_VBool_VBool{false: false, true: false}, map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F9: {F0: VEnumBcd.D, F7: 222, F26: -1.6810204e+09}, F10: {F16: 14294019705296587163}, F11: {F6: 142}}, VStructDepth2_Rand0{}}",
-		Source: []interface{}{
-			VStructDepth2_Rand0{
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {VArray2_VSet_String{{\"ghijklmnopΔΘ\", \"k\", \"Θ\"}, {\"lmnopΔΘ\", \"ΣΦ\"}}, VList_VStructDepth2_All{{F0: {nil, VArray3_OptVStructDepth2_Rand0{{}, {}, {F0: {map[VEnumBcd]VEnumBcd{B: B}, set[VEnumAbc]{A, B, C}, VSet_VStructDepth1_Rand0{{}, {F15: 274416478, F21: 3003}}}, F10: {F12: 0}}}, VSet_VStructEmpty{{}}}, F1: {\"ghijklmn\"}, F2: {false, false, true}, F3: {0, 331502182}, F4: {\"abcdefghijklmnopΔΘ\", \"efghijklmnopΔΘΠΣΦ\", \"opΔΘΠΣ\"}, F5: {-5.2400682e+08, 1.6889864e+08, 7.9051315e+08}, F6: {218: 45, 234: 0}, F7: {B: C, D: B}, F8: {F0: VArray3_VString{\"abcdefgh\", \"hijklmnopΔΘΠΣΦ王\", \"pΔΘ\"}, F1: true, F3: \"abcdefghijkl\", F4: \"ΠΣΦ王普\", F5: typeobject(byte), F6: 218, F7: 222, F12: 32247, F13: 40507, F14: 2582734184, F15: 3142928452, F18: 63, F19: -61, F20: -15797, F24: -2669176990115907474, F25: -1735575579573305209, F26: -2.4216786e+09, F27: -1.7466433e+09, F28: -8.263044124537586e+08}, F9: {F0: VList_OptVStructDepth2_Rand0{{F0: {[]VUnionDepth1_All{{F0: map[VByte]VByte{30: 0, 44: 0}}, {F14: 4018867364}, {F24: 516525750659450540}}, nil, []VArray1_String{{}, {\"efghijklmnopΔΘΠΣΦ王普澤世\"}, {}}}, F9: {F0: set[VEnumAbc]{A}, F1: true, F26: 1.1532326e+09}, F11: {F11: {}}}}, F9: D}, F10: {F10: {}}, F11: {F9: D}, F12: {F0: VSet_VUnionDepth1_Rand0{{F10: {}}, {F8: A}, {F8: B}}, F2: true, F3: \"klmnopΔΘΠΣΦ王普澤世\", F5: typeobject([]VUnionDepth2_Rand0), F7: 242, F8: B, F9: C, F12: 20099, F14: 1380252894, F15: 4005675170, F16: 17637172552429207713, F17: 5811345339427185880, F18: -17, F22: -127070305, F23: 685908080, F24: -471469747791260292, F25: 4593546952259391523, F26: -4.9066656e+07, F27: 3.1216187e+09, F28: -6.46981840713098e+08, F29: -5.342313101766018e+08, F30: {}}, F13: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F21: 905}}}, VArray1_Uint64{2803368414001685425}}, F9: {F1: true, F7: 14, F9: C, F26: -2.3952862e+08}, F10: {F28: -8.67510848715285e+08}}}",
+		Source: VArray1_VStructDepth2_Rand0{
+			{
 				F0: VArray3_Any{
-					VArray2_VByte{
-						202,
-						30,
+					VArray2_VSet_String{
+						{
+							"ghijklmnopΔΘ": struct{}{},
+							"k":            struct{}{},
+							"Θ":            struct{}{},
+						},
+						{
+							"lmnopΔΘ": struct{}{},
+							"ΣΦ":      struct{}{},
+						},
 					},
-					VMap_VBool_VBool{
-						false: false,
-						true:  false,
+					VList_VStructDepth2_All{
+						{
+							F0: VArray3_Any{
+								nil,
+								VArray3_OptVStructDepth2_Rand0{
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+									{
+										F0: VArray3_Any{
+											map[VEnumBcd]VEnumBcd{
+												VEnumBcdB: VEnumBcdB,
+											},
+											map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+												VEnumAbcB: struct{}{},
+												VEnumAbcC: struct{}{},
+											},
+											VSet_VStructDepth1_Rand0{
+												{}: struct{}{},
+												{
+													F15: 274416478,
+													F21: 3003,
+												}: struct{}{},
+											},
+										},
+										F10: VUnionDepth1_Rand0F12{},
+										F11: VUnionDepth1_Rand1F6{},
+									},
+								},
+								VSet_VStructEmpty{
+									{}: struct{}{},
+								},
+							},
+							F1: VArray1_String{
+								"ghijklmn",
+							},
+							F2: VList_VBool{
+								false,
+								false,
+								true,
+							},
+							F3: VList_VInt32{
+								0,
+								331502182,
+							},
+							F4: VSet_VString{
+								"abcdefghijklmnopΔΘ": struct{}{},
+								"efghijklmnopΔΘΠΣΦ":  struct{}{},
+								"opΔΘΠΣ":             struct{}{},
+							},
+							F5: VSet_Float32{
+								-5.2400682e+08: struct{}{},
+								1.6889864e+08:  struct{}{},
+								7.9051315e+08:  struct{}{},
+							},
+							F6: VMap_VByte_VByte{
+								218: 45,
+								234: 0,
+							},
+							F7: VMap_VEnumBcd_VEnumBcd{
+								VEnumBcdB: VEnumBcdC,
+								VEnumBcdD: VEnumBcdB,
+							},
+							F8: VStructDepth1_All{
+								F0: VArray3_VString{
+									"abcdefgh",
+									"hijklmnopΔΘΠΣΦ王",
+									"pΔΘ",
+								},
+								F1:  true,
+								F3:  "abcdefghijkl",
+								F4:  "ΠΣΦ王普",
+								F5:  vdl.ByteType,
+								F6:  218,
+								F7:  222,
+								F12: 32247,
+								F13: 40507,
+								F14: 2582734184,
+								F15: 3142928452,
+								F18: 63,
+								F19: -61,
+								F20: -15797,
+								F24: -2669176990115907474,
+								F25: -1735575579573305209,
+								F26: -2.4216786e+09,
+								F27: -1.7466433e+09,
+								F28: -8.263044124537586e+08,
+							},
+							F9: VStructDepth1_Rand1{
+								F0: VList_OptVStructDepth2_Rand0{
+									{
+										F0: VArray3_Any{
+											[]VUnionDepth1_All{
+												VUnionDepth1_AllF0{map[VByte]VByte{
+													30: 0,
+													44: 0,
+												}},
+												VUnionDepth1_AllF14{4018867364},
+												VUnionDepth1_AllF24{516525750659450540},
+											},
+											nil,
+											[]VArray1_String{
+												{},
+												{
+													"efghijklmnopΔΘΠΣΦ王普澤世",
+												},
+												{},
+											},
+										},
+										F9: VStructDepth1_Rand1{
+											F0: map[VEnumAbc]struct{}{
+												VEnumAbcA: struct{}{},
+											},
+											F1:  true,
+											F26: 1.1532326e+09,
+										},
+										F10: VUnionDepth1_Rand0F8{},
+										F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
+									},
+								},
+								F9: VEnumBcdD,
+							},
+							F10: VUnionDepth1_Rand0F10{},
+							F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+							F12: &VStructDepth1_All{
+								F0: VSet_VUnionDepth1_Rand0{
+									VUnionDepth1_Rand0F10{}:         struct{}{},
+									VUnionDepth1_Rand0F8{}:          struct{}{},
+									VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
+								},
+								F2:  true,
+								F3:  "klmnopΔΘΠΣΦ王普澤世",
+								F5:  vdl.TypeOf((*[]VUnionDepth2_Rand0)(nil)),
+								F7:  242,
+								F8:  VEnumAbcB,
+								F9:  VEnumBcdC,
+								F12: 20099,
+								F14: 1380252894,
+								F15: 4005675170,
+								F16: 17637172552429207713,
+								F17: 5811345339427185880,
+								F18: -17,
+								F22: -127070305,
+								F23: 685908080,
+								F24: -471469747791260292,
+								F25: 4593546952259391523,
+								F26: -4.9066656e+07,
+								F27: 3.1216187e+09,
+								F28: -6.46981840713098e+08,
+								F29: -5.342313101766018e+08,
+								F30: &VStructEmpty{},
+							},
+							F13: &VStructDepth1_Rand0{
+								F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
+								F21: 905,
+							},
+						},
 					},
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-						VEnumBcdD: VEnumBcdB,
+					VArray1_Uint64{
+						2803368414001685425,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VEnumBcdD,
-					F7:  222,
-					F26: -1.6810204e+09,
+					F1:  true,
+					F7:  14,
+					F9:  VEnumBcdC,
+					F26: -2.3952862e+08,
 				},
-				F10: VUnionDepth1_Rand0F16{14294019705296587163},
-				F11: VUnionDepth1_Rand1F6{142},
-			},
-			VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{},
+				F10: VUnionDepth1_Rand0F28{-8.67510848715285e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
@@ -37157,107 +37366,119 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VStructDepth2_Rand0{{F9: {F0: []byte(\"M\\x16\"), F7: 95, F26: -5.5200744e+07}, F10: {F28: -4.8972663466098624e+08}, F11: {F8: VEnumAbc.A}}, {F10: {F8: VEnumAbc.C}, F11: {F9: VEnumBcd.B}}, {F9: {F1: true, F7: 97, F26: 9.6149734e+08}, F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{}, {F0: {[]VMap_VEnumBcd_VEnumBcd{{B: C, C: B}}, map[VArray1_VStructEmpty]VArray1_VStructEmpty{{}: {}}, VInt64(4577878619345695629)}, F9: {F7: 19, F9: C, F26: 4.1679488e+08}, F10: {F10: {}}, F11: {F20: 14196}}}",
 		Target: []VStructDepth2_Rand0{
 			{
-				F9: VStructDepth1_Rand1{
-					F0:  []byte("M\x16"),
-					F7:  95,
-					F26: -5.5200744e+07,
-				},
-				F10: VUnionDepth1_Rand0F28{-4.8972663466098624e+08},
-				F11: VUnionDepth1_Rand1F8{},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-				F11: VUnionDepth1_Rand1F9{},
-			},
-			{
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  97,
-					F26: 9.6149734e+08,
-				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			{
+				F0: VArray3_Any{
+					[]VMap_VEnumBcd_VEnumBcd{
+						{
+							VEnumBcdB: VEnumBcdC,
+							VEnumBcdC: VEnumBcdB,
+						},
+					},
+					map[VArray1_VStructEmpty]VArray1_VStructEmpty{
+						{}: {},
+					},
+					VInt64(4577878619345695629),
+				},
+				F9: VStructDepth1_Rand1{
+					F7:  19,
+					F9:  VEnumBcdC,
+					F26: 4.1679488e+08,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F20{14196},
 			},
 		},
-		SourceLabel: "[]VStructDepth2_Rand0{{F9: {F0: []byte(\"M\\x16\"), F7: 95, F26: -5.5200744e+07}, F10: {F28: -4.8972663466098624e+08}, F11: {F8: VEnumAbc.A}}, {F10: {F8: VEnumAbc.C}, F11: {F9: VEnumBcd.B}}, {F9: {F1: true, F7: 97, F26: 9.6149734e+08}, F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "[]VStructDepth2_Rand0{{}, {F0: {[]VMap_VEnumBcd_VEnumBcd{{B: C, C: B}}, map[VArray1_VStructEmpty]VArray1_VStructEmpty{{}: {}}, VInt64(4577878619345695629)}, F9: {F7: 19, F9: C, F26: 4.1679488e+08}, F10: {F10: {}}, F11: {F20: 14196}}}",
 		Source: []VStructDepth2_Rand0{
 			{
-				F9: VStructDepth1_Rand1{
-					F0:  []byte("M\x16"),
-					F7:  95,
-					F26: -5.5200744e+07,
-				},
-				F10: VUnionDepth1_Rand0F28{-4.8972663466098624e+08},
-				F11: VUnionDepth1_Rand1F8{},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-				F11: VUnionDepth1_Rand1F9{},
-			},
-			{
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  97,
-					F26: 9.6149734e+08,
-				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			{
+				F0: VArray3_Any{
+					[]VMap_VEnumBcd_VEnumBcd{
+						{
+							VEnumBcdB: VEnumBcdC,
+							VEnumBcdC: VEnumBcdB,
+						},
+					},
+					map[VArray1_VStructEmpty]VArray1_VStructEmpty{
+						{}: {},
+					},
+					VInt64(4577878619345695629),
+				},
+				F9: VStructDepth1_Rand1{
+					F7:  19,
+					F9:  VEnumBcdC,
+					F26: 4.1679488e+08,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F20{14196},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VStructDepth2_Rand0{{F9: {F0: []byte(\"M\\x16\"), F7: 95, F26: -5.5200744e+07}, F10: {F28: -4.8972663466098624e+08}, F11: {F8: VEnumAbc.A}}, {F10: {F8: VEnumAbc.C}, F11: {F9: VEnumBcd.B}}, {F9: {F1: true, F7: 97, F26: 9.6149734e+08}, F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "[]VStructDepth2_Rand0{{}, {F0: {[]VMap_VEnumBcd_VEnumBcd{{B: C, C: B}}, map[VArray1_VStructEmpty]VArray1_VStructEmpty{{}: {}}, VInt64(4577878619345695629)}, F9: {F7: 19, F9: C, F26: 4.1679488e+08}, F10: {F10: {}}, F11: {F20: 14196}}}",
 		Target: []VStructDepth2_Rand0{
 			{
-				F9: VStructDepth1_Rand1{
-					F0:  []byte("M\x16"),
-					F7:  95,
-					F26: -5.5200744e+07,
-				},
-				F10: VUnionDepth1_Rand0F28{-4.8972663466098624e+08},
-				F11: VUnionDepth1_Rand1F8{},
-			},
-			{
-				F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-				F11: VUnionDepth1_Rand1F9{},
-			},
-			{
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  97,
-					F26: 9.6149734e+08,
-				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			{
+				F0: VArray3_Any{
+					[]VMap_VEnumBcd_VEnumBcd{
+						{
+							VEnumBcdB: VEnumBcdC,
+							VEnumBcdC: VEnumBcdB,
+						},
+					},
+					map[VArray1_VStructEmpty]VArray1_VStructEmpty{
+						{}: {},
+					},
+					VInt64(4577878619345695629),
+				},
+				F9: VStructDepth1_Rand1{
+					F7:  19,
+					F9:  VEnumBcdC,
+					F26: 4.1679488e+08,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F20{14196},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F9: {F0: []byte(\"M\\x16\"), F7: 95, F26: -5.5200744e+07}, F10: {F28: -4.8972663466098624e+08}, F11: {F8: VEnumAbc.A}}, VStructDepth2_Rand0{F10: {F8: VEnumAbc.C}, F11: {F9: VEnumBcd.B}}, VStructDepth2_Rand0{F9: {F1: true, F7: 97, F26: 9.6149734e+08}, F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "[]any{VStructDepth2_Rand0{}, VStructDepth2_Rand0{F0: {[]VMap_VEnumBcd_VEnumBcd{{B: C, C: B}}, map[VArray1_VStructEmpty]VArray1_VStructEmpty{{}: {}}, VInt64(4577878619345695629)}, F9: {F7: 19, F9: C, F26: 4.1679488e+08}, F10: {F10: {}}, F11: {F20: 14196}}}",
 		Source: []interface{}{
 			VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F0:  []byte("M\x16"),
-					F7:  95,
-					F26: -5.5200744e+07,
-				},
-				F10: VUnionDepth1_Rand0F28{-4.8972663466098624e+08},
-				F11: VUnionDepth1_Rand1F8{},
-			},
-			VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{VEnumAbcC},
-				F11: VUnionDepth1_Rand1F9{},
-			},
-			VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  97,
-					F26: 9.6149734e+08,
-				},
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			VStructDepth2_Rand0{
+				F0: VArray3_Any{
+					[]VMap_VEnumBcd_VEnumBcd{
+						{
+							VEnumBcdB: VEnumBcdC,
+							VEnumBcdC: VEnumBcdB,
+						},
+					},
+					map[VArray1_VStructEmpty]VArray1_VStructEmpty{
+						{}: {},
+					},
+					VInt64(4577878619345695629),
+				},
+				F9: VStructDepth1_Rand1{
+					F7:  19,
+					F9:  VEnumBcdC,
+					F26: 4.1679488e+08,
+				},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F20{14196},
 			},
 		},
 	},
@@ -37325,454 +37546,90 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth2_Rand0{{F8: {F0: VUnionDepth3_All{F0: {}}, F3: \"a\", F4: \"hijklmnopΔΘΠΣΦ王普澤世界\", F6: 173, F7: 144, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", RetryCode: RetryRefetch}, F12: 22216, F13: 16843, F14: 1949891821, F15: 4053790805, F17: 2520900785589838010, F18: 7, F19: 63, F20: -10745, F21: 3717, F22: 1059818813, F23: -44079863, F25: -97586117680093795, F26: -4.394958e+08, F27: -2.544058e+09, F28: 3.46408085119897e+08, F29: 2.978480554672562e+09, F30: {}}}, {F8: {F0: ?VStructDepth2_Rand0{F0: {[]byte(\"\\x00\"), VSet_Float32{0, 6.7647744e+08}, set[VStructEmpty]{}}, F9: {F0: VEnumBcd.C, F7: 104}, F10: {F16: 8386490593845264226}, F11: {F20: 0}}, F2: true, F3: \"Σ\", F4: \"lmnop\", F5: typeobject(VUint32), F6: 247, F7: 106, F11: {Id: \"nopΔΘΠΣΦ王普\", RetryCode: RetryConnection, Msg: \"defghij\"}, F12: 48645, F14: 1194866312, F15: 3087276373, F16: 9505479587622112893, F18: 6, F19: -24, F20: -1191, F21: -7922, F22: 145584375, F23: 267086197, F24: 2572269375686291308, F25: 602135779596336161, F26: 3.8564562e+09, F27: -2.2183349e+08, F29: 5.586016361090086e+07, F30: {}}}}",
+		TargetLabel: "[]VUnionDepth2_Rand0{{F12: {F4: \"opΔΘΠΣΦ王\", F15: 874517915, F21: 11597}}, {F12: {}}, {F2: {}}}",
 		Target: []VUnionDepth2_Rand0{
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VUnionDepth3_All(VUnionDepth3_AllF0{}),
-				F3: "a",
-				F4: "hijklmnopΔΘΠΣΦ王普澤世界",
-				F5: vdl.AnyType,
-				F6: 173,
-				F7: 144,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "efghijklmnopΔΘΠΣΦ王",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-				}),
-				F12: 22216,
-				F13: 16843,
-				F14: 1949891821,
-				F15: 4053790805,
-				F17: 2520900785589838010,
-				F18: 7,
-				F19: 63,
-				F20: -10745,
-				F21: 3717,
-				F22: 1059818813,
-				F23: -44079863,
-				F25: -97586117680093795,
-				F26: -4.394958e+08,
-				F27: -2.544058e+09,
-				F28: 3.46408085119897e+08,
-				F29: 2.978480554672562e+09,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "opΔΘΠΣΦ王",
+				F15: 874517915,
+				F21: 11597,
 			}},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: &VStructDepth2_Rand0{
-					F0: VArray3_Any{
-						[]byte("\x00"),
-						VSet_Float32{
-							0:             struct{}{},
-							6.7647744e+08: struct{}{},
-						},
-						map[VStructEmpty]struct{}(nil),
-					},
-					F9: VStructDepth1_Rand1{
-						F0: VEnumBcdC,
-						F7: 104,
-					},
-					F10: VUnionDepth1_Rand0F16{8386490593845264226},
-					F11: VUnionDepth1_Rand1F20{},
-				},
-				F2: true,
-				F3: "Σ",
-				F4: "lmnop",
-				F5: vdl.TypeOf((*VUint32)(nil)),
-				F6: 247,
-				F7: 106,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "nopΔΘΠΣΦ王普",
-					RetryCode: vdl.WireRetryCodeRetryConnection,
-					Msg:       "defghij",
-				}),
-				F12: 48645,
-				F14: 1194866312,
-				F15: 3087276373,
-				F16: 9505479587622112893,
-				F18: 6,
-				F19: -24,
-				F20: -1191,
-				F21: -7922,
-				F22: 145584375,
-				F23: 267086197,
-				F24: 2572269375686291308,
-				F25: 602135779596336161,
-				F26: 3.8564562e+09,
-				F27: -2.2183349e+08,
-				F29: 5.586016361090086e+07,
-				F30: &VStructEmpty{},
-			}},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_Rand0F2{},
 		},
-		SourceLabel: "[]VUnionDepth2_Rand0{{F8: {F0: VUnionDepth3_All{F0: {}}, F3: \"a\", F4: \"hijklmnopΔΘΠΣΦ王普澤世界\", F6: 173, F7: 144, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", RetryCode: RetryRefetch}, F12: 22216, F13: 16843, F14: 1949891821, F15: 4053790805, F17: 2520900785589838010, F18: 7, F19: 63, F20: -10745, F21: 3717, F22: 1059818813, F23: -44079863, F25: -97586117680093795, F26: -4.394958e+08, F27: -2.544058e+09, F28: 3.46408085119897e+08, F29: 2.978480554672562e+09, F30: {}}}, {F8: {F0: ?VStructDepth2_Rand0{F0: {[]byte(\"\\x00\"), VSet_Float32{0, 6.7647744e+08}, set[VStructEmpty]{}}, F9: {F0: VEnumBcd.C, F7: 104}, F10: {F16: 8386490593845264226}, F11: {F20: 0}}, F2: true, F3: \"Σ\", F4: \"lmnop\", F5: typeobject(VUint32), F6: 247, F7: 106, F11: {Id: \"nopΔΘΠΣΦ王普\", RetryCode: RetryConnection, Msg: \"defghij\"}, F12: 48645, F14: 1194866312, F15: 3087276373, F16: 9505479587622112893, F18: 6, F19: -24, F20: -1191, F21: -7922, F22: 145584375, F23: 267086197, F24: 2572269375686291308, F25: 602135779596336161, F26: 3.8564562e+09, F27: -2.2183349e+08, F29: 5.586016361090086e+07, F30: {}}}}",
+		SourceLabel: "[]VUnionDepth2_Rand0{{F12: {F4: \"opΔΘΠΣΦ王\", F15: 874517915, F21: 11597}}, {F12: {}}, {F2: {}}}",
 		Source: []VUnionDepth2_Rand0{
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VUnionDepth3_All(VUnionDepth3_AllF0{}),
-				F3: "a",
-				F4: "hijklmnopΔΘΠΣΦ王普澤世界",
-				F5: vdl.AnyType,
-				F6: 173,
-				F7: 144,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "efghijklmnopΔΘΠΣΦ王",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-				}),
-				F12: 22216,
-				F13: 16843,
-				F14: 1949891821,
-				F15: 4053790805,
-				F17: 2520900785589838010,
-				F18: 7,
-				F19: 63,
-				F20: -10745,
-				F21: 3717,
-				F22: 1059818813,
-				F23: -44079863,
-				F25: -97586117680093795,
-				F26: -4.394958e+08,
-				F27: -2.544058e+09,
-				F28: 3.46408085119897e+08,
-				F29: 2.978480554672562e+09,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "opΔΘΠΣΦ王",
+				F15: 874517915,
+				F21: 11597,
 			}},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: &VStructDepth2_Rand0{
-					F0: VArray3_Any{
-						[]byte("\x00"),
-						VSet_Float32{
-							0:             struct{}{},
-							6.7647744e+08: struct{}{},
-						},
-						map[VStructEmpty]struct{}(nil),
-					},
-					F9: VStructDepth1_Rand1{
-						F0: VEnumBcdC,
-						F7: 104,
-					},
-					F10: VUnionDepth1_Rand0F16{8386490593845264226},
-					F11: VUnionDepth1_Rand1F20{},
-				},
-				F2: true,
-				F3: "Σ",
-				F4: "lmnop",
-				F5: vdl.TypeOf((*VUint32)(nil)),
-				F6: 247,
-				F7: 106,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "nopΔΘΠΣΦ王普",
-					RetryCode: vdl.WireRetryCodeRetryConnection,
-					Msg:       "defghij",
-				}),
-				F12: 48645,
-				F14: 1194866312,
-				F15: 3087276373,
-				F16: 9505479587622112893,
-				F18: 6,
-				F19: -24,
-				F20: -1191,
-				F21: -7922,
-				F22: 145584375,
-				F23: 267086197,
-				F24: 2572269375686291308,
-				F25: 602135779596336161,
-				F26: 3.8564562e+09,
-				F27: -2.2183349e+08,
-				F29: 5.586016361090086e+07,
-				F30: &VStructEmpty{},
-			}},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_Rand0F2{},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth2_Rand0{{F8: {F0: VUnionDepth3_All{F0: {}}, F3: \"a\", F4: \"hijklmnopΔΘΠΣΦ王普澤世界\", F6: 173, F7: 144, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", RetryCode: RetryRefetch}, F12: 22216, F13: 16843, F14: 1949891821, F15: 4053790805, F17: 2520900785589838010, F18: 7, F19: 63, F20: -10745, F21: 3717, F22: 1059818813, F23: -44079863, F25: -97586117680093795, F26: -4.394958e+08, F27: -2.544058e+09, F28: 3.46408085119897e+08, F29: 2.978480554672562e+09, F30: {}}}, {F8: {F0: ?VStructDepth2_Rand0{F0: {[]byte(\"\\x00\"), VSet_Float32{0, 6.7647744e+08}, set[VStructEmpty]{}}, F9: {F0: VEnumBcd.C, F7: 104}, F10: {F16: 8386490593845264226}, F11: {F20: 0}}, F2: true, F3: \"Σ\", F4: \"lmnop\", F5: typeobject(VUint32), F6: 247, F7: 106, F11: {Id: \"nopΔΘΠΣΦ王普\", RetryCode: RetryConnection, Msg: \"defghij\"}, F12: 48645, F14: 1194866312, F15: 3087276373, F16: 9505479587622112893, F18: 6, F19: -24, F20: -1191, F21: -7922, F22: 145584375, F23: 267086197, F24: 2572269375686291308, F25: 602135779596336161, F26: 3.8564562e+09, F27: -2.2183349e+08, F29: 5.586016361090086e+07, F30: {}}}}",
+		TargetLabel: "[]VUnionDepth2_Rand0{{F12: {F4: \"opΔΘΠΣΦ王\", F15: 874517915, F21: 11597}}, {F12: {}}, {F2: {}}}",
 		Target: []VUnionDepth2_Rand0{
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VUnionDepth3_All(VUnionDepth3_AllF0{}),
-				F3: "a",
-				F4: "hijklmnopΔΘΠΣΦ王普澤世界",
-				F5: vdl.AnyType,
-				F6: 173,
-				F7: 144,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "efghijklmnopΔΘΠΣΦ王",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-				}),
-				F12: 22216,
-				F13: 16843,
-				F14: 1949891821,
-				F15: 4053790805,
-				F17: 2520900785589838010,
-				F18: 7,
-				F19: 63,
-				F20: -10745,
-				F21: 3717,
-				F22: 1059818813,
-				F23: -44079863,
-				F25: -97586117680093795,
-				F26: -4.394958e+08,
-				F27: -2.544058e+09,
-				F28: 3.46408085119897e+08,
-				F29: 2.978480554672562e+09,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "opΔΘΠΣΦ王",
+				F15: 874517915,
+				F21: 11597,
 			}},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: &VStructDepth2_Rand0{
-					F0: VArray3_Any{
-						[]byte("\x00"),
-						VSet_Float32{
-							0:             struct{}{},
-							6.7647744e+08: struct{}{},
-						},
-						map[VStructEmpty]struct{}(nil),
-					},
-					F9: VStructDepth1_Rand1{
-						F0: VEnumBcdC,
-						F7: 104,
-					},
-					F10: VUnionDepth1_Rand0F16{8386490593845264226},
-					F11: VUnionDepth1_Rand1F20{},
-				},
-				F2: true,
-				F3: "Σ",
-				F4: "lmnop",
-				F5: vdl.TypeOf((*VUint32)(nil)),
-				F6: 247,
-				F7: 106,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "nopΔΘΠΣΦ王普",
-					RetryCode: vdl.WireRetryCodeRetryConnection,
-					Msg:       "defghij",
-				}),
-				F12: 48645,
-				F14: 1194866312,
-				F15: 3087276373,
-				F16: 9505479587622112893,
-				F18: 6,
-				F19: -24,
-				F20: -1191,
-				F21: -7922,
-				F22: 145584375,
-				F23: 267086197,
-				F24: 2572269375686291308,
-				F25: 602135779596336161,
-				F26: 3.8564562e+09,
-				F27: -2.2183349e+08,
-				F29: 5.586016361090086e+07,
-				F30: &VStructEmpty{},
-			}},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_Rand0F2{},
 		},
-		SourceLabel: "[]any{VUnionDepth2_Rand0{F8: {F0: VUnionDepth3_All{F0: {}}, F3: \"a\", F4: \"hijklmnopΔΘΠΣΦ王普澤世界\", F6: 173, F7: 144, F11: {Id: \"efghijklmnopΔΘΠΣΦ王\", RetryCode: RetryRefetch}, F12: 22216, F13: 16843, F14: 1949891821, F15: 4053790805, F17: 2520900785589838010, F18: 7, F19: 63, F20: -10745, F21: 3717, F22: 1059818813, F23: -44079863, F25: -97586117680093795, F26: -4.394958e+08, F27: -2.544058e+09, F28: 3.46408085119897e+08, F29: 2.978480554672562e+09, F30: {}}}, VUnionDepth2_Rand0{F8: {F0: VStructDepth2_Rand0{F0: {[]byte(\"\\x00\"), VSet_Float32{0, 6.7647744e+08}, set[VStructEmpty]{}}, F9: {F0: VEnumBcd.C, F7: 104}, F10: {F16: 8386490593845264226}, F11: {F20: 0}}, F2: true, F3: \"Σ\", F4: \"lmnop\", F5: typeobject(VUint32), F6: 247, F7: 106, F11: {Id: \"nopΔΘΠΣΦ王普\", RetryCode: RetryConnection, Msg: \"defghij\"}, F12: 48645, F14: 1194866312, F15: 3087276373, F16: 9505479587622112893, F18: 6, F19: -24, F20: -1191, F21: -7922, F22: 145584375, F23: 267086197, F24: 2572269375686291308, F25: 602135779596336161, F26: 3.8564562e+09, F27: -2.2183349e+08, F29: 5.586016361090086e+07, F30: {}}}}",
+		SourceLabel: "[]any{VUnionDepth2_Rand0{F12: {F4: \"opΔΘΠΣΦ王\", F15: 874517915, F21: 11597}}, VUnionDepth2_Rand0{F12: {}}, VUnionDepth2_Rand0{F2: {}}}",
 		Source: []interface{}{
-			VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VUnionDepth3_All(VUnionDepth3_AllF0{}),
-				F3: "a",
-				F4: "hijklmnopΔΘΠΣΦ王普澤世界",
-				F5: vdl.AnyType,
-				F6: 173,
-				F7: 144,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "efghijklmnopΔΘΠΣΦ王",
-					RetryCode: vdl.WireRetryCodeRetryRefetch,
-				}),
-				F12: 22216,
-				F13: 16843,
-				F14: 1949891821,
-				F15: 4053790805,
-				F17: 2520900785589838010,
-				F18: 7,
-				F19: 63,
-				F20: -10745,
-				F21: 3717,
-				F22: 1059818813,
-				F23: -44079863,
-				F25: -97586117680093795,
-				F26: -4.394958e+08,
-				F27: -2.544058e+09,
-				F28: 3.46408085119897e+08,
-				F29: 2.978480554672562e+09,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "opΔΘΠΣΦ王",
+				F15: 874517915,
+				F21: 11597,
 			}}),
-			VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VStructDepth2_Rand0{
-					F0: VArray3_Any{
-						[]byte("\x00"),
-						VSet_Float32{
-							0:             struct{}{},
-							6.7647744e+08: struct{}{},
-						},
-						map[VStructEmpty]struct{}(nil),
-					},
-					F9: VStructDepth1_Rand1{
-						F0: VEnumBcdC,
-						F7: 104,
-					},
-					F10: VUnionDepth1_Rand0F16{8386490593845264226},
-					F11: VUnionDepth1_Rand1F20{},
-				},
-				F2: true,
-				F3: "Σ",
-				F4: "lmnop",
-				F5: vdl.TypeOf((*VUint32)(nil)),
-				F6: 247,
-				F7: 106,
-				F11: verror.FromWire(vdl.WireError{
-					Id:        "nopΔΘΠΣΦ王普",
-					RetryCode: vdl.WireRetryCodeRetryConnection,
-					Msg:       "defghij",
-				}),
-				F12: 48645,
-				F14: 1194866312,
-				F15: 3087276373,
-				F16: 9505479587622112893,
-				F18: 6,
-				F19: -24,
-				F20: -1191,
-				F21: -7922,
-				F22: 145584375,
-				F23: 267086197,
-				F24: 2572269375686291308,
-				F25: 602135779596336161,
-				F26: 3.8564562e+09,
-				F27: -2.2183349e+08,
-				F29: 5.586016361090086e+07,
-				F30: &VStructEmpty{},
-			}}),
+			VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{}}),
+			VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F8: {F0: VMap_Bool_Bool{}, F1: true, F2: true, F3: \"lmn\", F5: typeobject(VList_VArray1_OptVStructDepth1_Rand0), F6: 43, F7: 246, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"cdefghijklmnopΔΘΠΣ\"}, F14: 2548923923, F15: 480863388, F16: 4331680488552628043, F17: 5294049071205634520, F18: -63, F19: 10, F20: -2478, F21: -759, F22: 1031796700, F24: -3270127183808892588, F25: 896679519638793675, F26: 4.6446912e+08, F28: 1.5555480375889156e+09, F29: 4.811909965516112e+08, F30: {}}}}",
+		TargetLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F2: {}}, {F12: {F4: \"ΔΘ\", F21: -14113}}}",
 		Target: []VUnionDepth2_Rand0{
 			VUnionDepth2_Rand0F2{},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VMap_Bool_Bool(nil),
-				F1: true,
-				F2: true,
-				F3: "lmn",
-				F5: vdl.TypeOf((*VList_VArray1_OptVStructDepth1_Rand0)(nil)),
-				F6: 43,
-				F7: 246,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id: "cdefghijklmnopΔΘΠΣ",
-				}),
-				F14: 2548923923,
-				F15: 480863388,
-				F16: 4331680488552628043,
-				F17: 5294049071205634520,
-				F18: -63,
-				F19: 10,
-				F20: -2478,
-				F21: -759,
-				F22: 1031796700,
-				F24: -3270127183808892588,
-				F25: 896679519638793675,
-				F26: 4.6446912e+08,
-				F28: 1.5555480375889156e+09,
-				F29: 4.811909965516112e+08,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F2{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "ΔΘ",
+				F21: -14113,
 			}},
 		},
-		SourceLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F8: {F0: VMap_Bool_Bool{}, F1: true, F2: true, F3: \"lmn\", F5: typeobject(VList_VArray1_OptVStructDepth1_Rand0), F6: 43, F7: 246, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"cdefghijklmnopΔΘΠΣ\"}, F14: 2548923923, F15: 480863388, F16: 4331680488552628043, F17: 5294049071205634520, F18: -63, F19: 10, F20: -2478, F21: -759, F22: 1031796700, F24: -3270127183808892588, F25: 896679519638793675, F26: 4.6446912e+08, F28: 1.5555480375889156e+09, F29: 4.811909965516112e+08, F30: {}}}}",
+		SourceLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F2: {}}, {F12: {F4: \"ΔΘ\", F21: -14113}}}",
 		Source: []VUnionDepth2_Rand0{
 			VUnionDepth2_Rand0F2{},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VMap_Bool_Bool(nil),
-				F1: true,
-				F2: true,
-				F3: "lmn",
-				F5: vdl.TypeOf((*VList_VArray1_OptVStructDepth1_Rand0)(nil)),
-				F6: 43,
-				F7: 246,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id: "cdefghijklmnopΔΘΠΣ",
-				}),
-				F14: 2548923923,
-				F15: 480863388,
-				F16: 4331680488552628043,
-				F17: 5294049071205634520,
-				F18: -63,
-				F19: 10,
-				F20: -2478,
-				F21: -759,
-				F22: 1031796700,
-				F24: -3270127183808892588,
-				F25: 896679519638793675,
-				F26: 4.6446912e+08,
-				F28: 1.5555480375889156e+09,
-				F29: 4.811909965516112e+08,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F2{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "ΔΘ",
+				F21: -14113,
 			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F8: {F0: VMap_Bool_Bool{}, F1: true, F2: true, F3: \"lmn\", F5: typeobject(VList_VArray1_OptVStructDepth1_Rand0), F6: 43, F7: 246, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"cdefghijklmnopΔΘΠΣ\"}, F14: 2548923923, F15: 480863388, F16: 4331680488552628043, F17: 5294049071205634520, F18: -63, F19: 10, F20: -2478, F21: -759, F22: 1031796700, F24: -3270127183808892588, F25: 896679519638793675, F26: 4.6446912e+08, F28: 1.5555480375889156e+09, F29: 4.811909965516112e+08, F30: {}}}}",
+		TargetLabel: "[]VUnionDepth2_Rand0{{F2: {}}, {F2: {}}, {F12: {F4: \"ΔΘ\", F21: -14113}}}",
 		Target: []VUnionDepth2_Rand0{
 			VUnionDepth2_Rand0F2{},
-			VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VMap_Bool_Bool(nil),
-				F1: true,
-				F2: true,
-				F3: "lmn",
-				F5: vdl.TypeOf((*VList_VArray1_OptVStructDepth1_Rand0)(nil)),
-				F6: 43,
-				F7: 246,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id: "cdefghijklmnopΔΘΠΣ",
-				}),
-				F14: 2548923923,
-				F15: 480863388,
-				F16: 4331680488552628043,
-				F17: 5294049071205634520,
-				F18: -63,
-				F19: 10,
-				F20: -2478,
-				F21: -759,
-				F22: 1031796700,
-				F24: -3270127183808892588,
-				F25: 896679519638793675,
-				F26: 4.6446912e+08,
-				F28: 1.5555480375889156e+09,
-				F29: 4.811909965516112e+08,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0F2{},
+			VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "ΔΘ",
+				F21: -14113,
 			}},
 		},
-		SourceLabel: "[]any{VUnionDepth2_Rand0{F2: {}}, VUnionDepth2_Rand0{F8: {F0: VMap_Bool_Bool{}, F1: true, F2: true, F3: \"lmn\", F5: typeobject(VList_VArray1_OptVStructDepth1_Rand0), F6: 43, F7: 246, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"cdefghijklmnopΔΘΠΣ\"}, F14: 2548923923, F15: 480863388, F16: 4331680488552628043, F17: 5294049071205634520, F18: -63, F19: 10, F20: -2478, F21: -759, F22: 1031796700, F24: -3270127183808892588, F25: 896679519638793675, F26: 4.6446912e+08, F28: 1.5555480375889156e+09, F29: 4.811909965516112e+08, F30: {}}}}",
+		SourceLabel: "[]any{VUnionDepth2_Rand0{F2: {}}, VUnionDepth2_Rand0{F2: {}}, VUnionDepth2_Rand0{F12: {F4: \"ΔΘ\", F21: -14113}}}",
 		Source: []interface{}{
 			VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{}),
-			VUnionDepth2_Rand0(VUnionDepth2_Rand0F8{VStructDepth1_All{
-				F0: VMap_Bool_Bool(nil),
-				F1: true,
-				F2: true,
-				F3: "lmn",
-				F5: vdl.TypeOf((*VList_VArray1_OptVStructDepth1_Rand0)(nil)),
-				F6: 43,
-				F7: 246,
-				F8: VEnumAbcC,
-				F9: VEnumBcdD,
-				F11: verror.FromWire(vdl.WireError{
-					Id: "cdefghijklmnopΔΘΠΣ",
-				}),
-				F14: 2548923923,
-				F15: 480863388,
-				F16: 4331680488552628043,
-				F17: 5294049071205634520,
-				F18: -63,
-				F19: 10,
-				F20: -2478,
-				F21: -759,
-				F22: 1031796700,
-				F24: -3270127183808892588,
-				F25: 896679519638793675,
-				F26: 4.6446912e+08,
-				F28: 1.5555480375889156e+09,
-				F29: 4.811909965516112e+08,
-				F30: &VStructEmpty{},
+			VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{}),
+			VUnionDepth2_Rand0(VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "ΔΘ",
+				F21: -14113,
 			}}),
 		},
 	},
@@ -37801,7 +37658,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37820,7 +37677,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37842,7 +37699,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37861,7 +37718,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -37884,382 +37741,614 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth2_Rand0{{}, {F0: {VStructDepth3_All{}, map[uint16]uint16{25818: 28934}, []VBool{false, false, false}}, F9: {F0: VList_Byte(\"\\xe5H\\x00\"), F7: 184, F9: VEnumBcd.C, F26: -1.1856021e+08}, F10: {F16: 5705426062069651698}, F11: {F20: -3910}}, nil}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {VStructDepth1_All{F0: VList_Any{}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"opΔΘΠΣΦ王\", F5: typeobject(VMap_String_String), F7: 32, F8: B, F9: C, F11: {Id: \"hijklmn\", RetryCode: RetryConnection, Msg: \"no\"}, F13: 53660, F14: 3895621833, F16: 6867919140687966355, F17: 8934112542476230754, F18: 56, F19: -33, F20: -6380, F22: -581739645, F23: -701358412, F24: -4425419180310865555, F25: 152249505789090535, F26: -1.483556e+09, F27: -3.149157e+08, F28: 2.400771153600824e+08, F29: -2.891487407705236e+09, F30: {}}, set[VEnumBcd]{D}, []VStructDepth1_Rand0{}}, F9: {F0: []VBool{}, F7: 167, F9: D, F26: -1.0391229e+09}}, {F0: {VArray2_Uint32{2313367988, 565743876}, byte(0), VList_Set_VStructDepth1_Rand0{{{}, {F4: \"ghijklmnop\", F21: 16273}, {F4: \"ijklmnopΔ\", F15: 454081483, F21: 14745}}, {{}, {F4: \"defg\", F15: 2545964845, F21: -10005}, {F4: \"klmnopΔΘ\", F15: 3289388824, F21: 11923}}}}, F9: {F0: VArray1_VArray3_Bool{{true, false, true}}, F7: 93, F9: C, F26: -1.7274775e+09}, F10: {F12: 60810}, F11: {F11: {Id: \"efg\", Msg: \"defghij\"}}}, {}}",
 		Target: []*VStructDepth2_Rand0{
 			{
+				F0: VArray3_Any{
+					VStructDepth1_All{
+						F0: VList_Any(nil),
+						F1: true,
+						F2: true,
+						F3: "ΘΠΣΦ王普澤",
+						F4: "opΔΘΠΣΦ王",
+						F5: vdl.TypeOf((*VMap_String_String)(nil)),
+						F7: 32,
+						F8: VEnumAbcB,
+						F9: VEnumBcdC,
+						F11: verror.FromWire(vdl.WireError{
+							Id:        "hijklmn",
+							RetryCode: vdl.WireRetryCodeRetryConnection,
+							Msg:       "no",
+						}),
+						F13: 53660,
+						F14: 3895621833,
+						F16: 6867919140687966355,
+						F17: 8934112542476230754,
+						F18: 56,
+						F19: -33,
+						F20: -6380,
+						F22: -581739645,
+						F23: -701358412,
+						F24: -4425419180310865555,
+						F25: 152249505789090535,
+						F26: -1.483556e+09,
+						F27: -3.149157e+08,
+						F28: 2.400771153600824e+08,
+						F29: -2.891487407705236e+09,
+						F30: &VStructEmpty{},
+					},
+					map[VEnumBcd]struct{}{
+						VEnumBcdD: struct{}{},
+					},
+					[]VStructDepth1_Rand0(nil),
+				},
+				F9: VStructDepth1_Rand1{
+					F0:  []VBool(nil),
+					F7:  167,
+					F9:  VEnumBcdD,
+					F26: -1.0391229e+09,
+				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 			{
 				F0: VArray3_Any{
-					VStructDepth3_All{
-						F8: VStructDepth2_Rand0{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
+					VArray2_Uint32{
+						2313367988,
+						565743876,
+					},
+					byte(0),
+					VList_Set_VStructDepth1_Rand0{
+						{
+							{}: struct{}{},
+							{
+								F4:  "ghijklmnop",
+								F21: 16273,
+							}: struct{}{},
+							{
+								F4:  "ijklmnopΔ",
+								F15: 454081483,
+								F21: 14745,
+							}: struct{}{},
 						},
-						F10: VUnionDepth2_AllF0{},
-						F11: VUnionDepth2_Rand0F2{},
-					},
-					map[uint16]uint16{
-						25818: 28934,
-					},
-					[]VBool{
-						false,
-						false,
-						false,
+						{
+							{}: struct{}{},
+							{
+								F4:  "defg",
+								F15: 2545964845,
+								F21: -10005,
+							}: struct{}{},
+							{
+								F4:  "klmnopΔΘ",
+								F15: 3289388824,
+								F21: 11923,
+							}: struct{}{},
+						},
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_Byte("\xe5H\x00"),
-					F7:  184,
+					F0: VArray1_VArray3_Bool{
+						{
+							true,
+							false,
+							true,
+						},
+					},
+					F7:  93,
 					F9:  VEnumBcdC,
-					F26: -1.1856021e+08,
+					F26: -1.7274775e+09,
 				},
-				F10: VUnionDepth1_Rand0F16{5705426062069651698},
-				F11: VUnionDepth1_Rand1F20{-3910},
+				F10: VUnionDepth1_Rand0F12{60810},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:  "efg",
+					Msg: "defghij",
+				})},
 			},
-			nil,
+			{
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{}, {F0: {VStructDepth3_All{}, map[uint16]uint16{25818: 28934}, []VBool{false, false, false}}, F9: {F0: VList_Byte(\"\\xe5H\\x00\"), F7: 184, F9: VEnumBcd.C, F26: -1.1856021e+08}, F10: {F16: 5705426062069651698}, F11: {F20: -3910}}, nil}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {VStructDepth1_All{F0: VList_Any{}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"opΔΘΠΣΦ王\", F5: typeobject(VMap_String_String), F7: 32, F8: B, F9: C, F11: {Id: \"hijklmn\", RetryCode: RetryConnection, Msg: \"no\"}, F13: 53660, F14: 3895621833, F16: 6867919140687966355, F17: 8934112542476230754, F18: 56, F19: -33, F20: -6380, F22: -581739645, F23: -701358412, F24: -4425419180310865555, F25: 152249505789090535, F26: -1.483556e+09, F27: -3.149157e+08, F28: 2.400771153600824e+08, F29: -2.891487407705236e+09, F30: {}}, set[VEnumBcd]{D}, []VStructDepth1_Rand0{}}, F9: {F0: []VBool{}, F7: 167, F9: D, F26: -1.0391229e+09}}, {F0: {VArray2_Uint32{2313367988, 565743876}, byte(0), VList_Set_VStructDepth1_Rand0{{{}, {F4: \"ghijklmnop\", F21: 16273}, {F4: \"ijklmnopΔ\", F15: 454081483, F21: 14745}}, {{}, {F4: \"defg\", F15: 2545964845, F21: -10005}, {F4: \"klmnopΔΘ\", F15: 3289388824, F21: 11923}}}}, F9: {F0: VArray1_VArray3_Bool{{true, false, true}}, F7: 93, F9: C, F26: -1.7274775e+09}, F10: {F12: 60810}, F11: {F11: {Id: \"efg\", Msg: \"defghij\"}}}, {}}",
 		Source: []*VStructDepth2_Rand0{
 			{
+				F0: VArray3_Any{
+					VStructDepth1_All{
+						F0: VList_Any(nil),
+						F1: true,
+						F2: true,
+						F3: "ΘΠΣΦ王普澤",
+						F4: "opΔΘΠΣΦ王",
+						F5: vdl.TypeOf((*VMap_String_String)(nil)),
+						F7: 32,
+						F8: VEnumAbcB,
+						F9: VEnumBcdC,
+						F11: verror.FromWire(vdl.WireError{
+							Id:        "hijklmn",
+							RetryCode: vdl.WireRetryCodeRetryConnection,
+							Msg:       "no",
+						}),
+						F13: 53660,
+						F14: 3895621833,
+						F16: 6867919140687966355,
+						F17: 8934112542476230754,
+						F18: 56,
+						F19: -33,
+						F20: -6380,
+						F22: -581739645,
+						F23: -701358412,
+						F24: -4425419180310865555,
+						F25: 152249505789090535,
+						F26: -1.483556e+09,
+						F27: -3.149157e+08,
+						F28: 2.400771153600824e+08,
+						F29: -2.891487407705236e+09,
+						F30: &VStructEmpty{},
+					},
+					map[VEnumBcd]struct{}{
+						VEnumBcdD: struct{}{},
+					},
+					[]VStructDepth1_Rand0(nil),
+				},
+				F9: VStructDepth1_Rand1{
+					F0:  []VBool(nil),
+					F7:  167,
+					F9:  VEnumBcdD,
+					F26: -1.0391229e+09,
+				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 			{
 				F0: VArray3_Any{
-					VStructDepth3_All{
-						F8: VStructDepth2_Rand0{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
+					VArray2_Uint32{
+						2313367988,
+						565743876,
+					},
+					byte(0),
+					VList_Set_VStructDepth1_Rand0{
+						{
+							{}: struct{}{},
+							{
+								F4:  "ghijklmnop",
+								F21: 16273,
+							}: struct{}{},
+							{
+								F4:  "ijklmnopΔ",
+								F15: 454081483,
+								F21: 14745,
+							}: struct{}{},
 						},
-						F10: VUnionDepth2_AllF0{},
-						F11: VUnionDepth2_Rand0F2{},
-					},
-					map[uint16]uint16{
-						25818: 28934,
-					},
-					[]VBool{
-						false,
-						false,
-						false,
+						{
+							{}: struct{}{},
+							{
+								F4:  "defg",
+								F15: 2545964845,
+								F21: -10005,
+							}: struct{}{},
+							{
+								F4:  "klmnopΔΘ",
+								F15: 3289388824,
+								F21: 11923,
+							}: struct{}{},
+						},
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_Byte("\xe5H\x00"),
-					F7:  184,
+					F0: VArray1_VArray3_Bool{
+						{
+							true,
+							false,
+							true,
+						},
+					},
+					F7:  93,
 					F9:  VEnumBcdC,
-					F26: -1.1856021e+08,
+					F26: -1.7274775e+09,
 				},
-				F10: VUnionDepth1_Rand0F16{5705426062069651698},
-				F11: VUnionDepth1_Rand1F20{-3910},
+				F10: VUnionDepth1_Rand0F12{60810},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:  "efg",
+					Msg: "defghij",
+				})},
 			},
-			nil,
+			{
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth2_Rand0{{}, {F0: {VStructDepth3_All{}, map[uint16]uint16{25818: 28934}, []VBool{false, false, false}}, F9: {F0: VList_Byte(\"\\xe5H\\x00\"), F7: 184, F9: VEnumBcd.C, F26: -1.1856021e+08}, F10: {F16: 5705426062069651698}, F11: {F20: -3910}}, nil}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {VStructDepth1_All{F0: VList_Any{}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"opΔΘΠΣΦ王\", F5: typeobject(VMap_String_String), F7: 32, F8: B, F9: C, F11: {Id: \"hijklmn\", RetryCode: RetryConnection, Msg: \"no\"}, F13: 53660, F14: 3895621833, F16: 6867919140687966355, F17: 8934112542476230754, F18: 56, F19: -33, F20: -6380, F22: -581739645, F23: -701358412, F24: -4425419180310865555, F25: 152249505789090535, F26: -1.483556e+09, F27: -3.149157e+08, F28: 2.400771153600824e+08, F29: -2.891487407705236e+09, F30: {}}, set[VEnumBcd]{D}, []VStructDepth1_Rand0{}}, F9: {F0: []VBool{}, F7: 167, F9: D, F26: -1.0391229e+09}}, {F0: {VArray2_Uint32{2313367988, 565743876}, byte(0), VList_Set_VStructDepth1_Rand0{{{}, {F4: \"ghijklmnop\", F21: 16273}, {F4: \"ijklmnopΔ\", F15: 454081483, F21: 14745}}, {{}, {F4: \"defg\", F15: 2545964845, F21: -10005}, {F4: \"klmnopΔΘ\", F15: 3289388824, F21: 11923}}}}, F9: {F0: VArray1_VArray3_Bool{{true, false, true}}, F7: 93, F9: C, F26: -1.7274775e+09}, F10: {F12: 60810}, F11: {F11: {Id: \"efg\", Msg: \"defghij\"}}}, {}}",
 		Target: []*VStructDepth2_Rand0{
 			{
+				F0: VArray3_Any{
+					VStructDepth1_All{
+						F0: VList_Any(nil),
+						F1: true,
+						F2: true,
+						F3: "ΘΠΣΦ王普澤",
+						F4: "opΔΘΠΣΦ王",
+						F5: vdl.TypeOf((*VMap_String_String)(nil)),
+						F7: 32,
+						F8: VEnumAbcB,
+						F9: VEnumBcdC,
+						F11: verror.FromWire(vdl.WireError{
+							Id:        "hijklmn",
+							RetryCode: vdl.WireRetryCodeRetryConnection,
+							Msg:       "no",
+						}),
+						F13: 53660,
+						F14: 3895621833,
+						F16: 6867919140687966355,
+						F17: 8934112542476230754,
+						F18: 56,
+						F19: -33,
+						F20: -6380,
+						F22: -581739645,
+						F23: -701358412,
+						F24: -4425419180310865555,
+						F25: 152249505789090535,
+						F26: -1.483556e+09,
+						F27: -3.149157e+08,
+						F28: 2.400771153600824e+08,
+						F29: -2.891487407705236e+09,
+						F30: &VStructEmpty{},
+					},
+					map[VEnumBcd]struct{}{
+						VEnumBcdD: struct{}{},
+					},
+					[]VStructDepth1_Rand0(nil),
+				},
+				F9: VStructDepth1_Rand1{
+					F0:  []VBool(nil),
+					F7:  167,
+					F9:  VEnumBcdD,
+					F26: -1.0391229e+09,
+				},
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 			{
 				F0: VArray3_Any{
-					VStructDepth3_All{
-						F8: VStructDepth2_Rand0{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
+					VArray2_Uint32{
+						2313367988,
+						565743876,
+					},
+					byte(0),
+					VList_Set_VStructDepth1_Rand0{
+						{
+							{}: struct{}{},
+							{
+								F4:  "ghijklmnop",
+								F21: 16273,
+							}: struct{}{},
+							{
+								F4:  "ijklmnopΔ",
+								F15: 454081483,
+								F21: 14745,
+							}: struct{}{},
 						},
-						F10: VUnionDepth2_AllF0{},
-						F11: VUnionDepth2_Rand0F2{},
-					},
-					map[uint16]uint16{
-						25818: 28934,
-					},
-					[]VBool{
-						false,
-						false,
-						false,
+						{
+							{}: struct{}{},
+							{
+								F4:  "defg",
+								F15: 2545964845,
+								F21: -10005,
+							}: struct{}{},
+							{
+								F4:  "klmnopΔΘ",
+								F15: 3289388824,
+								F21: 11923,
+							}: struct{}{},
+						},
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_Byte("\xe5H\x00"),
-					F7:  184,
+					F0: VArray1_VArray3_Bool{
+						{
+							true,
+							false,
+							true,
+						},
+					},
+					F7:  93,
 					F9:  VEnumBcdC,
-					F26: -1.1856021e+08,
+					F26: -1.7274775e+09,
 				},
-				F10: VUnionDepth1_Rand0F16{5705426062069651698},
-				F11: VUnionDepth1_Rand1F20{-3910},
+				F10: VUnionDepth1_Rand0F12{60810},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:  "efg",
+					Msg: "defghij",
+				})},
 			},
-			nil,
-		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{}, VStructDepth2_Rand0{F0: {VStructDepth3_All{}, map[uint16]uint16{25818: 28934}, []VBool{false, false, false}}, F9: {F0: VList_Byte(\"\\xe5H\\x00\"), F7: 184, F9: VEnumBcd.C, F26: -1.1856021e+08}, F10: {F16: 5705426062069651698}, F11: {F20: -3910}}, nil}",
-		Source: []interface{}{
-			VStructDepth2_Rand0{
+			{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
-			VStructDepth2_Rand0{
+		},
+		SourceLabel: "[]any{?VStructDepth2_Rand0{F0: {VStructDepth1_All{F0: VList_Any{}, F1: true, F2: true, F3: \"ΘΠΣΦ王普澤\", F4: \"opΔΘΠΣΦ王\", F5: typeobject(VMap_String_String), F7: 32, F8: B, F9: C, F11: {Id: \"hijklmn\", RetryCode: RetryConnection, Msg: \"no\"}, F13: 53660, F14: 3895621833, F16: 6867919140687966355, F17: 8934112542476230754, F18: 56, F19: -33, F20: -6380, F22: -581739645, F23: -701358412, F24: -4425419180310865555, F25: 152249505789090535, F26: -1.483556e+09, F27: -3.149157e+08, F28: 2.400771153600824e+08, F29: -2.891487407705236e+09, F30: {}}, set[VEnumBcd]{D}, []VStructDepth1_Rand0{}}, F9: {F0: []VBool{}, F7: 167, F9: D, F26: -1.0391229e+09}}, ?VStructDepth2_Rand0{F0: {VArray2_Uint32{2313367988, 565743876}, byte(0), VList_Set_VStructDepth1_Rand0{{{}, {F4: \"ghijklmnop\", F21: 16273}, {F4: \"ijklmnopΔ\", F15: 454081483, F21: 14745}}, {{}, {F4: \"defg\", F15: 2545964845, F21: -10005}, {F4: \"klmnopΔΘ\", F15: 3289388824, F21: 11923}}}}, F9: {F0: VArray1_VArray3_Bool{{true, false, true}}, F7: 93, F9: C, F26: -1.7274775e+09}, F10: {F12: 60810}, F11: {F11: {Id: \"efg\", Msg: \"defghij\"}}}, ?VStructDepth2_Rand0{}}",
+		Source: []interface{}{
+			&VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					VStructDepth3_All{
-						F8: VStructDepth2_Rand0{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
+					VStructDepth1_All{
+						F0: VList_Any(nil),
+						F1: true,
+						F2: true,
+						F3: "ΘΠΣΦ王普澤",
+						F4: "opΔΘΠΣΦ王",
+						F5: vdl.TypeOf((*VMap_String_String)(nil)),
+						F7: 32,
+						F8: VEnumAbcB,
+						F9: VEnumBcdC,
+						F11: verror.FromWire(vdl.WireError{
+							Id:        "hijklmn",
+							RetryCode: vdl.WireRetryCodeRetryConnection,
+							Msg:       "no",
+						}),
+						F13: 53660,
+						F14: 3895621833,
+						F16: 6867919140687966355,
+						F17: 8934112542476230754,
+						F18: 56,
+						F19: -33,
+						F20: -6380,
+						F22: -581739645,
+						F23: -701358412,
+						F24: -4425419180310865555,
+						F25: 152249505789090535,
+						F26: -1.483556e+09,
+						F27: -3.149157e+08,
+						F28: 2.400771153600824e+08,
+						F29: -2.891487407705236e+09,
+						F30: &VStructEmpty{},
+					},
+					map[VEnumBcd]struct{}{
+						VEnumBcdD: struct{}{},
+					},
+					[]VStructDepth1_Rand0(nil),
+				},
+				F9: VStructDepth1_Rand1{
+					F0:  []VBool(nil),
+					F7:  167,
+					F9:  VEnumBcdD,
+					F26: -1.0391229e+09,
+				},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
+			&VStructDepth2_Rand0{
+				F0: VArray3_Any{
+					VArray2_Uint32{
+						2313367988,
+						565743876,
+					},
+					byte(0),
+					VList_Set_VStructDepth1_Rand0{
+						{
+							{}: struct{}{},
+							{
+								F4:  "ghijklmnop",
+								F21: 16273,
+							}: struct{}{},
+							{
+								F4:  "ijklmnopΔ",
+								F15: 454081483,
+								F21: 14745,
+							}: struct{}{},
 						},
-						F10: VUnionDepth2_AllF0{},
-						F11: VUnionDepth2_Rand0F2{},
-					},
-					map[uint16]uint16{
-						25818: 28934,
-					},
-					[]VBool{
-						false,
-						false,
-						false,
+						{
+							{}: struct{}{},
+							{
+								F4:  "defg",
+								F15: 2545964845,
+								F21: -10005,
+							}: struct{}{},
+							{
+								F4:  "klmnopΔΘ",
+								F15: 3289388824,
+								F21: 11923,
+							}: struct{}{},
+						},
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_Byte("\xe5H\x00"),
-					F7:  184,
+					F0: VArray1_VArray3_Bool{
+						{
+							true,
+							false,
+							true,
+						},
+					},
+					F7:  93,
 					F9:  VEnumBcdC,
-					F26: -1.1856021e+08,
+					F26: -1.7274775e+09,
 				},
-				F10: VUnionDepth1_Rand0F16{5705426062069651698},
-				F11: VUnionDepth1_Rand1F20{-3910},
+				F10: VUnionDepth1_Rand0F12{60810},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:  "efg",
+					Msg: "defghij",
+				})},
 			},
-			nil,
+			&VStructDepth2_Rand0{
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
+			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {VArray2_Uint32{}, nil, set[byte]{131}}, F9: {F1: true, F9: VEnumBcd.D, F26: 2.4647555e+09}, F10: {F16: 16986751601119878784}, F11: {F11: {Id: \"ij\", Msg: \"hijklmnopΔΘΠΣΦ王\"}}}, {F0: {VMap_VInt16_VInt16{}, ?VStructDepth1_All{}, nil}, F9: {F1: true, F7: 45, F26: 7.413571e+08}, F10: {F12: 20601}, F11: {F8: VEnumAbc.B}}, {F0: {VList_VString{\"ΘΠΣΦ王普澤世界\"}, VList_VUnionDepth2_All{{F0: {}}, {F5: {124, 218, 51}}}, VArray1_Set_VStructDepth1_Rand0{}}, F10: {F28: 1.595287345162213e+09}, F11: {F20: 9908}}}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {map[VBool]VBool{false: false, true: true}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F15: 3300611876, F21: 5159}: {F4: \"klmnopΔΘ\", F15: 3152775642, F21: 5581}, {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 1307369946, F21: 15441}: {F4: \"ΘΠΣΦ王\", F15: 1603298929, F21: -14150}, {F4: \"ghijklmnopΔΘΠΣ\", F15: 2744980564, F21: 2328}: {F4: \"澤世\", F15: 2292943602, F21: 6178}}, VUint16(38359)}, F10: {F12: 0}}}",
 		Target: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_Uint32{},
-					nil,
-					map[byte]struct{}{
-						131: struct{}{},
+					map[VBool]VBool{
+						false: false,
+						true:  true,
 					},
-				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F9:  VEnumBcdD,
-					F26: 2.4647555e+09,
-				},
-				F10: VUnionDepth1_Rand0F16{16986751601119878784},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:  "ij",
-					Msg: "hijklmnopΔΘΠΣΦ王",
-				})},
-			},
-			{
-				F0: VArray3_Any{
-					VMap_VInt16_VInt16(nil),
-					&VStructDepth1_All{
-						F5: vdl.AnyType,
+					map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+						{
+							F15: 3300611876,
+							F21: 5159,
+						}: {
+							F4:  "klmnopΔΘ",
+							F15: 3152775642,
+							F21: 5581,
+						},
+						{
+							F4:  "efghijklmnopΔΘΠΣΦ王普",
+							F15: 1307369946,
+							F21: 15441,
+						}: {
+							F4:  "ΘΠΣΦ王",
+							F15: 1603298929,
+							F21: -14150,
+						},
+						{
+							F4:  "ghijklmnopΔΘΠΣ",
+							F15: 2744980564,
+							F21: 2328,
+						}: {
+							F4:  "澤世",
+							F15: 2292943602,
+							F21: 6178,
+						},
 					},
-					nil,
+					VUint16(38359),
 				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  45,
-					F26: 7.413571e+08,
-				},
-				F10: VUnionDepth1_Rand0F12{20601},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-			},
-			{
-				F0: VArray3_Any{
-					VList_VString{
-						"ΘΠΣΦ王普澤世界",
-					},
-					VList_VUnionDepth2_All{
-						VUnionDepth2_AllF0{},
-						VUnionDepth2_AllF5{VSet_Byte{
-							124: struct{}{},
-							218: struct{}{},
-							51:  struct{}{},
-						}},
-					},
-					VArray1_Set_VStructDepth1_Rand0{},
-				},
-				F10: VUnionDepth1_Rand0F28{1.595287345162213e+09},
-				F11: VUnionDepth1_Rand1F20{9908},
+				F10: VUnionDepth1_Rand0F12{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {VArray2_Uint32{}, nil, set[byte]{131}}, F9: {F1: true, F9: VEnumBcd.D, F26: 2.4647555e+09}, F10: {F16: 16986751601119878784}, F11: {F11: {Id: \"ij\", Msg: \"hijklmnopΔΘΠΣΦ王\"}}}, {F0: {VMap_VInt16_VInt16{}, ?VStructDepth1_All{}, nil}, F9: {F1: true, F7: 45, F26: 7.413571e+08}, F10: {F12: 20601}, F11: {F8: VEnumAbc.B}}, {F0: {VList_VString{\"ΘΠΣΦ王普澤世界\"}, VList_VUnionDepth2_All{{F0: {}}, {F5: {124, 218, 51}}}, VArray1_Set_VStructDepth1_Rand0{}}, F10: {F28: 1.595287345162213e+09}, F11: {F20: 9908}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {map[VBool]VBool{false: false, true: true}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F15: 3300611876, F21: 5159}: {F4: \"klmnopΔΘ\", F15: 3152775642, F21: 5581}, {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 1307369946, F21: 15441}: {F4: \"ΘΠΣΦ王\", F15: 1603298929, F21: -14150}, {F4: \"ghijklmnopΔΘΠΣ\", F15: 2744980564, F21: 2328}: {F4: \"澤世\", F15: 2292943602, F21: 6178}}, VUint16(38359)}, F10: {F12: 0}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_Uint32{},
-					nil,
-					map[byte]struct{}{
-						131: struct{}{},
+					map[VBool]VBool{
+						false: false,
+						true:  true,
 					},
-				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F9:  VEnumBcdD,
-					F26: 2.4647555e+09,
-				},
-				F10: VUnionDepth1_Rand0F16{16986751601119878784},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:  "ij",
-					Msg: "hijklmnopΔΘΠΣΦ王",
-				})},
-			},
-			{
-				F0: VArray3_Any{
-					VMap_VInt16_VInt16(nil),
-					&VStructDepth1_All{
-						F5: vdl.AnyType,
+					map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+						{
+							F15: 3300611876,
+							F21: 5159,
+						}: {
+							F4:  "klmnopΔΘ",
+							F15: 3152775642,
+							F21: 5581,
+						},
+						{
+							F4:  "efghijklmnopΔΘΠΣΦ王普",
+							F15: 1307369946,
+							F21: 15441,
+						}: {
+							F4:  "ΘΠΣΦ王",
+							F15: 1603298929,
+							F21: -14150,
+						},
+						{
+							F4:  "ghijklmnopΔΘΠΣ",
+							F15: 2744980564,
+							F21: 2328,
+						}: {
+							F4:  "澤世",
+							F15: 2292943602,
+							F21: 6178,
+						},
 					},
-					nil,
+					VUint16(38359),
 				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  45,
-					F26: 7.413571e+08,
-				},
-				F10: VUnionDepth1_Rand0F12{20601},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-			},
-			{
-				F0: VArray3_Any{
-					VList_VString{
-						"ΘΠΣΦ王普澤世界",
-					},
-					VList_VUnionDepth2_All{
-						VUnionDepth2_AllF0{},
-						VUnionDepth2_AllF5{VSet_Byte{
-							124: struct{}{},
-							218: struct{}{},
-							51:  struct{}{},
-						}},
-					},
-					VArray1_Set_VStructDepth1_Rand0{},
-				},
-				F10: VUnionDepth1_Rand0F28{1.595287345162213e+09},
-				F11: VUnionDepth1_Rand1F20{9908},
+				F10: VUnionDepth1_Rand0F12{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {VArray2_Uint32{}, nil, set[byte]{131}}, F9: {F1: true, F9: VEnumBcd.D, F26: 2.4647555e+09}, F10: {F16: 16986751601119878784}, F11: {F11: {Id: \"ij\", Msg: \"hijklmnopΔΘΠΣΦ王\"}}}, {F0: {VMap_VInt16_VInt16{}, ?VStructDepth1_All{}, nil}, F9: {F1: true, F7: 45, F26: 7.413571e+08}, F10: {F12: 20601}, F11: {F8: VEnumAbc.B}}, {F0: {VList_VString{\"ΘΠΣΦ王普澤世界\"}, VList_VUnionDepth2_All{{F0: {}}, {F5: {124, 218, 51}}}, VArray1_Set_VStructDepth1_Rand0{}}, F10: {F28: 1.595287345162213e+09}, F11: {F20: 9908}}}",
+		TargetLabel: "[]?VStructDepth2_Rand0{{F0: {map[VBool]VBool{false: false, true: true}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F15: 3300611876, F21: 5159}: {F4: \"klmnopΔΘ\", F15: 3152775642, F21: 5581}, {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 1307369946, F21: 15441}: {F4: \"ΘΠΣΦ王\", F15: 1603298929, F21: -14150}, {F4: \"ghijklmnopΔΘΠΣ\", F15: 2744980564, F21: 2328}: {F4: \"澤世\", F15: 2292943602, F21: 6178}}, VUint16(38359)}, F10: {F12: 0}}}",
 		Target: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					VArray2_Uint32{},
-					nil,
-					map[byte]struct{}{
-						131: struct{}{},
+					map[VBool]VBool{
+						false: false,
+						true:  true,
 					},
-				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F9:  VEnumBcdD,
-					F26: 2.4647555e+09,
-				},
-				F10: VUnionDepth1_Rand0F16{16986751601119878784},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:  "ij",
-					Msg: "hijklmnopΔΘΠΣΦ王",
-				})},
-			},
-			{
-				F0: VArray3_Any{
-					VMap_VInt16_VInt16(nil),
-					&VStructDepth1_All{
-						F5: vdl.AnyType,
+					map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+						{
+							F15: 3300611876,
+							F21: 5159,
+						}: {
+							F4:  "klmnopΔΘ",
+							F15: 3152775642,
+							F21: 5581,
+						},
+						{
+							F4:  "efghijklmnopΔΘΠΣΦ王普",
+							F15: 1307369946,
+							F21: 15441,
+						}: {
+							F4:  "ΘΠΣΦ王",
+							F15: 1603298929,
+							F21: -14150,
+						},
+						{
+							F4:  "ghijklmnopΔΘΠΣ",
+							F15: 2744980564,
+							F21: 2328,
+						}: {
+							F4:  "澤世",
+							F15: 2292943602,
+							F21: 6178,
+						},
 					},
-					nil,
+					VUint16(38359),
 				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  45,
-					F26: 7.413571e+08,
-				},
-				F10: VUnionDepth1_Rand0F12{20601},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-			},
-			{
-				F0: VArray3_Any{
-					VList_VString{
-						"ΘΠΣΦ王普澤世界",
-					},
-					VList_VUnionDepth2_All{
-						VUnionDepth2_AllF0{},
-						VUnionDepth2_AllF5{VSet_Byte{
-							124: struct{}{},
-							218: struct{}{},
-							51:  struct{}{},
-						}},
-					},
-					VArray1_Set_VStructDepth1_Rand0{},
-				},
-				F10: VUnionDepth1_Rand0F28{1.595287345162213e+09},
-				F11: VUnionDepth1_Rand1F20{9908},
+				F10: VUnionDepth1_Rand0F12{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_Rand0{F0: {VArray2_Uint32{}, nil, set[byte]{131}}, F9: {F1: true, F9: VEnumBcd.D, F26: 2.4647555e+09}, F10: {F16: 16986751601119878784}, F11: {F11: {Id: \"ij\", Msg: \"hijklmnopΔΘΠΣΦ王\"}}}, VStructDepth2_Rand0{F0: {VMap_VInt16_VInt16{}, VStructDepth1_All{}, nil}, F9: {F1: true, F7: 45, F26: 7.413571e+08}, F10: {F12: 20601}, F11: {F8: VEnumAbc.B}}, VStructDepth2_Rand0{F0: {VList_VString{\"ΘΠΣΦ王普澤世界\"}, VList_VUnionDepth2_All{{F0: {}}, {F5: {124, 218, 51}}}, VArray1_Set_VStructDepth1_Rand0{}}, F10: {F28: 1.595287345162213e+09}, F11: {F20: 9908}}}",
-		Source: []interface{}{
-			VStructDepth2_Rand0{
+		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {map[VBool]VBool{false: false, true: true}, map[VStructDepth1_Rand0]VStructDepth1_Rand0{{F15: 3300611876, F21: 5159}: {F4: \"klmnopΔΘ\", F15: 3152775642, F21: 5581}, {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 1307369946, F21: 15441}: {F4: \"ΘΠΣΦ王\", F15: 1603298929, F21: -14150}, {F4: \"ghijklmnopΔΘΠΣ\", F15: 2744980564, F21: 2328}: {F4: \"澤世\", F15: 2292943602, F21: 6178}}, VUint16(38359)}, F10: {F12: 0}}}",
+		Source: VArray1_VStructDepth2_Rand0{
+			{
 				F0: VArray3_Any{
-					VArray2_Uint32{},
-					nil,
-					map[byte]struct{}{
-						131: struct{}{},
+					map[VBool]VBool{
+						false: false,
+						true:  true,
 					},
-				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F9:  VEnumBcdD,
-					F26: 2.4647555e+09,
-				},
-				F10: VUnionDepth1_Rand0F16{16986751601119878784},
-				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
-					Id:  "ij",
-					Msg: "hijklmnopΔΘΠΣΦ王",
-				})},
-			},
-			VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VMap_VInt16_VInt16(nil),
-					VStructDepth1_All{
-						F5: vdl.AnyType,
+					map[VStructDepth1_Rand0]VStructDepth1_Rand0{
+						{
+							F15: 3300611876,
+							F21: 5159,
+						}: {
+							F4:  "klmnopΔΘ",
+							F15: 3152775642,
+							F21: 5581,
+						},
+						{
+							F4:  "efghijklmnopΔΘΠΣΦ王普",
+							F15: 1307369946,
+							F21: 15441,
+						}: {
+							F4:  "ΘΠΣΦ王",
+							F15: 1603298929,
+							F21: -14150,
+						},
+						{
+							F4:  "ghijklmnopΔΘΠΣ",
+							F15: 2744980564,
+							F21: 2328,
+						}: {
+							F4:  "澤世",
+							F15: 2292943602,
+							F21: 6178,
+						},
 					},
-					nil,
+					VUint16(38359),
 				},
-				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  45,
-					F26: 7.413571e+08,
-				},
-				F10: VUnionDepth1_Rand0F12{20601},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcB},
-			},
-			VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VList_VString{
-						"ΘΠΣΦ王普澤世界",
-					},
-					VList_VUnionDepth2_All{
-						VUnionDepth2_AllF0{},
-						VUnionDepth2_AllF5{VSet_Byte{
-							124: struct{}{},
-							218: struct{}{},
-							51:  struct{}{},
-						}},
-					},
-					VArray1_Set_VStructDepth1_Rand0{},
-				},
-				F10: VUnionDepth1_Rand0F28{1.595287345162213e+09},
-				F11: VUnionDepth1_Rand1F20{9908},
+				F10: VUnionDepth1_Rand0F12{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
@@ -38524,7 +38613,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{VEnumBcd.D: VEnumBcd.D}}}",
+		TargetLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{D: D}}}",
 		Target: VList_List_VMap_VEnumBcd_VEnumBcd{
 			{
 				{
@@ -38532,7 +38621,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{VEnumBcd.D: VEnumBcd.D}}}",
+		SourceLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{D: D}}}",
 		Source: VList_List_VMap_VEnumBcd_VEnumBcd{
 			{
 				{
@@ -38543,7 +38632,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{VEnumBcd.D: VEnumBcd.D}}}",
+		TargetLabel: "VList_List_VMap_VEnumBcd_VEnumBcd{{{D: D}}}",
 		Target: VList_List_VMap_VEnumBcd_VEnumBcd{
 			{
 				{
@@ -38551,7 +38640,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VList_Any{[]VMap_VEnumBcd_VEnumBcd{{VEnumBcd.D: VEnumBcd.D}}}",
+		SourceLabel: "VList_Any{[]VMap_VEnumBcd_VEnumBcd{{D: D}}}",
 		Source: VList_Any{
 			[]VMap_VEnumBcd_VEnumBcd{
 				{
@@ -39155,7 +39244,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
 		Target: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
@@ -39272,7 +39361,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
+		SourceLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
 		Source: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
@@ -39392,7 +39481,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
 		Target: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
@@ -39509,7 +39598,7 @@ var vAllPass = []Entry{
 				},
 			},
 		},
-		SourceLabel: "VList_Any{VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {VEnumBcd.D: VEnumBcd.D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: VEnumAbc.C, F9: VEnumBcd.D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
+		SourceLabel: "VList_Any{VStructDepth2_All{F0: {int64(-123), int64(-123), int64(-123)}, F1: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F2: {true}, F3: {-123}, F4: {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.23}, F6: {123: 123}, F7: {D: D}, F8: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}, F12: {F0: int64(-123), F1: true, F2: true, F3: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F5: typeobject(int64), F6: 123, F7: 123, F8: C, F9: D, F11: {Id: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", RetryCode: RetryBackoff, Msg: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, F12: 123, F13: 123, F14: 123, F15: 123, F16: 123, F17: 123, F18: -123, F19: -123, F20: -123, F21: -123, F22: -123, F23: -123, F24: -123, F25: -123, F26: 1.23, F27: 1.23, F28: 1.23, F29: 1.23, F30: {}}, F13: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}}",
 		Source: VList_Any{
 			VStructDepth2_All{
 				F0: VArray3_Any{
@@ -39630,554 +39719,922 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth2_All{{}, {F0: {nil, VMap_VInt16_VInt16{-3171: -12820}, map[VEnumAbc]VEnumAbc{}}, F1: {\"nop\"}, F2: {false}, F3: {-922375359, -291429100}, F4: {\"\"}, F5: {-1.3150874e+09, -1.734008e+09, -1.9959872e+09}, F6: {219: 0}, F8: {F0: VArray1_VList_VStructDepth1_All{{{F0: VList_VBool{false, true}, F1: true, F2: true, F3: \"defghijklmnopΔΘΠΣΦ王普澤世\", F5: typeobject(VList_VStructEmpty), F6: 6, F7: 17, F8: VEnumAbc.B, F11: {RetryCode: RetryConnection}, F12: 14137, F13: 539, F14: 67064449, F15: 832599842, F16: 14938577165673322602, F17: 1093224975412848999, F18: -61, F19: -9, F20: -6321, F22: -285826347, F23: 960160580, F25: 238060495485167559, F26: 1.2795723e+08, F27: -7.656217e+08, F28: -3.6343917969250166e+08, F30: {}}}}, F3: \"def\", F4: \"bcdefghijklmn\", F6: 78, F7: 46, F11: {RetryCode: RetryBackoff, Msg: \"ghijklm\"}, F12: 19988, F13: 12928, F14: 747146914, F16: 15046594242116098501, F18: -42, F19: 2, F22: -117407618, F23: -952968977, F25: 2014611795630948830, F26: -3.726601e+08, F28: 1.0666524600348439e+09, F29: 7.834294079292618e+07}, F9: {F0: VList_VUint32{}, F7: 91, F9: VEnumBcd.D, F26: -1.2869686e+08}, F10: {F12: 63260}, F11: {F8: VEnumAbc.C}, F12: {F0: []byte(\">J\\xa0\"), F1: true, F4: \"efghijklmnopΔΘΠΣ\", F5: typeobject(VInt32), F6: 31, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {}, F12: 36329, F13: 32155, F14: 662162596, F15: 2645045424, F17: 2990527527079487032, F18: 50, F19: -35, F20: 2994, F21: -14553, F22: -541310693, F23: -1023511696, F24: -601403991114981851, F25: 3862758654704486901, F28: 1.3558145952252014e+09, F29: -1.3999479221066225e+08, F30: {}}, F13: {F15: 1190332237, F21: -10412}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {nil, VList_VInt32{}, set[VString]{\"ΔΘΠΣΦ\"}}, F1: {\"bcdefghijklmnopΔΘ\"}, F3: {938903271}, F4: {\"\"}, F6: {16: 208, 20: 88, 73: 30}, F7: {C: C, D: D}, F8: {F0: set[VStructEmpty]{{}}, F1: true, F3: \"fghijklmnopΔ\", F4: \"ΔΘΠΣΦ王普澤世界\", F5: typeobject(VUint32), F6: 241, F7: 177, F8: C, F9: D, F12: 47779, F13: 42875, F14: 2029389016, F15: 2904109023, F16: 16459413507593524110, F17: 16353344988285253454, F18: -35, F19: -12, F21: -7964, F23: -259665583, F24: -1338931562517998444, F25: -670039189790201905, F26: 2.673405e+09, F27: -1.4632109e+07, F28: 2.1534617647327882e+08, F29: 1.618167384379011e+09, F30: {}}, F9: {F7: 158, F9: C}, F10: {F16: 0}, F11: {F6: 147}, F12: {}, F13: {F4: \"ij\", F15: 4172107035, F21: -3998}}, {F0: {[]?VStructEmpty{}, []bool{true, false}, nil}, F1: {\"lmnopΔΘΠΣ\"}, F2: {false, true, false}, F3: {-53470879, 407444663}, F4: {\"efghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.8341453e+09}, F6: {196: 184, 250: 140, 78: 91}, F9: {F0: []error{{}}, F1: true, F7: 133, F26: -4.8271664e+08}, F10: {F28: 9.20108040128041e+08}, F11: {F9: D}}, {F1: {\"cde\"}, F2: {false}, F3: {590230257, -420206767}, F4: {\"\", \"pΔΘΠ\"}, F5: {1.07074976e+09}, F6: {158: 104}, F7: {B: B, D: D}, F8: {F0: set[VBool]{false}, F1: true, F2: true, F3: \"abcdefghijk\", F5: typeobject([]any), F7: 32, F9: D, F11: {Id: \"pΔΘΠ\", Msg: \"ghijklmnopΔΘ\"}, F12: 43613, F15: 1940405721, F16: 12529417034803210940, F17: 11791211780177265784, F19: 23, F20: 9411, F22: -804334462, F24: -4124501530930399990, F25: -144923103721623010, F28: 2.8121074164207834e+08, F29: -1.1109080576437273e+09, F30: {}}, F9: {F0: VArray3_VBool{false, false, true}, F7: 49, F26: 2.8564147e+09}, F10: {F12: 12834}, F11: {F6: 134}, F12: {F0: VArray3_Map_String_String{{\"cdefghijklmnop\": \"王普澤\", \"jklmnopΔ\": \"abcdefghijklmnopΔΘΠΣΦ\"}, {\"\": \"\", \"hijklmnopΔΘΠΣ\": \"efghijklmnopΔ\"}, {\"bcdefgh\": \"jklmnopΔΘ\", \"世\": \"efghijklmnopΔΘΠΣΦ王普澤\"}}, F3: \"c\", F4: \"i\", F5: typeobject(VSet_Bool), F6: 166, F7: 2, F8: B, F11: {Id: \"ijklmnopΔΘ\", RetryCode: RetryRefetch, Msg: \"ijklm\"}, F12: 41254, F13: 59413, F14: 2745767794, F15: 1832032809, F17: 4013984000384576030, F18: 64, F19: 24, F20: 3859, F22: 134042941, F23: -372320150, F24: 2212666009926881529, F26: -2.2718244e+09, F27: 5.1861e+08, F30: {}}, F13: {F4: \"defghij\", F21: 14761}}}",
 		Target: VList_VStructDepth2_All{
-			{
-				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{},
-			},
 			{
 				F0: VArray3_Any{
 					nil,
-					VMap_VInt16_VInt16{
-						-3171: -12820,
+					VList_VInt32(nil),
+					map[VString]struct{}{
+						"ΔΘΠΣΦ": struct{}{},
 					},
-					map[VEnumAbc]VEnumAbc(nil),
 				},
 				F1: VArray1_String{
-					"nop",
+					"bcdefghijklmnopΔΘ",
+				},
+				F3: VList_VInt32{
+					938903271,
+				},
+				F4: VSet_VString{
+					"": struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					16: 208,
+					20: 88,
+					73: 30,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdC: VEnumBcdC,
+					VEnumBcdD: VEnumBcdD,
+				},
+				F8: VStructDepth1_All{
+					F0: map[VStructEmpty]struct{}{
+						{}: struct{}{},
+					},
+					F1:  true,
+					F3:  "fghijklmnopΔ",
+					F4:  "ΔΘΠΣΦ王普澤世界",
+					F5:  vdl.TypeOf((*VUint32)(nil)),
+					F6:  241,
+					F7:  177,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdD,
+					F12: 47779,
+					F13: 42875,
+					F14: 2029389016,
+					F15: 2904109023,
+					F16: 16459413507593524110,
+					F17: 16353344988285253454,
+					F18: -35,
+					F19: -12,
+					F21: -7964,
+					F23: -259665583,
+					F24: -1338931562517998444,
+					F25: -670039189790201905,
+					F26: 2.673405e+09,
+					F27: -1.4632109e+07,
+					F28: 2.1534617647327882e+08,
+					F29: 1.618167384379011e+09,
+					F30: &VStructEmpty{},
+				},
+				F9: VStructDepth1_Rand1{
+					F7: 158,
+					F9: VEnumBcdC,
+				},
+				F10: VUnionDepth1_Rand0F16{},
+				F11: VUnionDepth1_Rand1F6{147},
+				F12: &VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F13: &VStructDepth1_Rand0{
+					F4:  "ij",
+					F15: 4172107035,
+					F21: -3998,
+				},
+			},
+			{
+				F0: VArray3_Any{
+					[]*VStructEmpty(nil),
+					[]bool{
+						true,
+						false,
+					},
+					nil,
+				},
+				F1: VArray1_String{
+					"lmnopΔΘΠΣ",
+				},
+				F2: VList_VBool{
+					false,
+					true,
+					false,
+				},
+				F3: VList_VInt32{
+					-53470879,
+					407444663,
+				},
+				F4: VSet_VString{
+					"efghijklmnopΔΘΠΣΦ王普澤世界": struct{}{},
+				},
+				F5: VSet_Float32{
+					1.8341453e+09: struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					196: 184,
+					250: 140,
+					78:  91,
+				},
+				F8: VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F9: VStructDepth1_Rand1{
+					F0: []error{
+						verror.FromWire(vdl.WireError{}),
+					},
+					F1:  true,
+					F7:  133,
+					F26: -4.8271664e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{9.20108040128041e+08},
+				F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+			},
+			{
+				F1: VArray1_String{
+					"cde",
 				},
 				F2: VList_VBool{
 					false,
 				},
 				F3: VList_VInt32{
-					-922375359,
-					-291429100,
+					590230257,
+					-420206767,
 				},
 				F4: VSet_VString{
-					"": struct{}{},
+					"":     struct{}{},
+					"pΔΘΠ": struct{}{},
 				},
 				F5: VSet_Float32{
-					-1.3150874e+09: struct{}{},
-					-1.734008e+09:  struct{}{},
-					-1.9959872e+09: struct{}{},
+					1.07074976e+09: struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					219: 0,
+					158: 104,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
+					VEnumBcdD: VEnumBcdD,
 				},
 				F8: VStructDepth1_All{
-					F0: VArray1_VList_VStructDepth1_All{
-						{
-							{
-								F0: VList_VBool{
-									false,
-									true,
-								},
-								F1: true,
-								F2: true,
-								F3: "defghijklmnopΔΘΠΣΦ王普澤世",
-								F5: vdl.TypeOf((*VList_VStructEmpty)(nil)),
-								F6: 6,
-								F7: 17,
-								F8: VEnumAbcB,
-								F11: verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-								}),
-								F12: 14137,
-								F13: 539,
-								F14: 67064449,
-								F15: 832599842,
-								F16: 14938577165673322602,
-								F17: 1093224975412848999,
-								F18: -61,
-								F19: -9,
-								F20: -6321,
-								F22: -285826347,
-								F23: 960160580,
-								F25: 238060495485167559,
-								F26: 1.2795723e+08,
-								F27: -7.656217e+08,
-								F28: -3.6343917969250166e+08,
-								F30: &VStructEmpty{},
-							},
-						},
+					F0: map[VBool]struct{}{
+						false: struct{}{},
 					},
-					F3: "def",
-					F4: "bcdefghijklmn",
-					F5: vdl.AnyType,
-					F6: 78,
-					F7: 46,
+					F1: true,
+					F2: true,
+					F3: "abcdefghijk",
+					F5: vdl.TypeOf((*[]interface{})(nil)),
+					F7: 32,
+					F9: VEnumBcdD,
 					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryBackoff,
-						Msg:       "ghijklm",
+						Id:  "pΔΘΠ",
+						Msg: "ghijklmnopΔΘ",
 					}),
-					F12: 19988,
-					F13: 12928,
-					F14: 747146914,
-					F16: 15046594242116098501,
-					F18: -42,
-					F19: 2,
-					F22: -117407618,
-					F23: -952968977,
-					F25: 2014611795630948830,
-					F26: -3.726601e+08,
-					F28: 1.0666524600348439e+09,
-					F29: 7.834294079292618e+07,
+					F12: 43613,
+					F15: 1940405721,
+					F16: 12529417034803210940,
+					F17: 11791211780177265784,
+					F19: 23,
+					F20: 9411,
+					F22: -804334462,
+					F24: -4124501530930399990,
+					F25: -144923103721623010,
+					F28: 2.8121074164207834e+08,
+					F29: -1.1109080576437273e+09,
+					F30: &VStructEmpty{},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_VUint32(nil),
-					F7:  91,
-					F9:  VEnumBcdD,
-					F26: -1.2869686e+08,
+					F0: VArray3_VBool{
+						false,
+						false,
+						true,
+					},
+					F7:  49,
+					F26: 2.8564147e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{63260},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+				F10: VUnionDepth1_Rand0F12{12834},
+				F11: VUnionDepth1_Rand1F6{134},
 				F12: &VStructDepth1_All{
-					F0:  []byte(">J\xa0"),
-					F1:  true,
-					F4:  "efghijklmnopΔΘΠΣ",
-					F5:  vdl.TypeOf((*VInt32)(nil)),
-					F6:  31,
-					F8:  VEnumAbcB,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 36329,
-					F13: 32155,
-					F14: 662162596,
-					F15: 2645045424,
-					F17: 2990527527079487032,
-					F18: 50,
-					F19: -35,
-					F20: 2994,
-					F21: -14553,
-					F22: -541310693,
-					F23: -1023511696,
-					F24: -601403991114981851,
-					F25: 3862758654704486901,
-					F28: 1.3558145952252014e+09,
-					F29: -1.3999479221066225e+08,
+					F0: VArray3_Map_String_String{
+						{
+							"cdefghijklmnop": "王普澤",
+							"jklmnopΔ":       "abcdefghijklmnopΔΘΠΣΦ",
+						},
+						{
+							"":              "",
+							"hijklmnopΔΘΠΣ": "efghijklmnopΔ",
+						},
+						{
+							"bcdefgh": "jklmnopΔΘ",
+							"世":       "efghijklmnopΔΘΠΣΦ王普澤",
+						},
+					},
+					F3: "c",
+					F4: "i",
+					F5: vdl.TypeOf((*VSet_Bool)(nil)),
+					F6: 166,
+					F7: 2,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘ",
+						RetryCode: vdl.WireRetryCodeRetryRefetch,
+						Msg:       "ijklm",
+					}),
+					F12: 41254,
+					F13: 59413,
+					F14: 2745767794,
+					F15: 1832032809,
+					F17: 4013984000384576030,
+					F18: 64,
+					F19: 24,
+					F20: 3859,
+					F22: 134042941,
+					F23: -372320150,
+					F24: 2212666009926881529,
+					F26: -2.2718244e+09,
+					F27: 5.1861e+08,
 					F30: &VStructEmpty{},
 				},
 				F13: &VStructDepth1_Rand0{
-					F15: 1190332237,
-					F21: -10412,
+					F4:  "defghij",
+					F21: 14761,
 				},
 			},
 		},
-		SourceLabel: "VList_VStructDepth2_All{{}, {F0: {nil, VMap_VInt16_VInt16{-3171: -12820}, map[VEnumAbc]VEnumAbc{}}, F1: {\"nop\"}, F2: {false}, F3: {-922375359, -291429100}, F4: {\"\"}, F5: {-1.3150874e+09, -1.734008e+09, -1.9959872e+09}, F6: {219: 0}, F8: {F0: VArray1_VList_VStructDepth1_All{{{F0: VList_VBool{false, true}, F1: true, F2: true, F3: \"defghijklmnopΔΘΠΣΦ王普澤世\", F5: typeobject(VList_VStructEmpty), F6: 6, F7: 17, F8: VEnumAbc.B, F11: {RetryCode: RetryConnection}, F12: 14137, F13: 539, F14: 67064449, F15: 832599842, F16: 14938577165673322602, F17: 1093224975412848999, F18: -61, F19: -9, F20: -6321, F22: -285826347, F23: 960160580, F25: 238060495485167559, F26: 1.2795723e+08, F27: -7.656217e+08, F28: -3.6343917969250166e+08, F30: {}}}}, F3: \"def\", F4: \"bcdefghijklmn\", F6: 78, F7: 46, F11: {RetryCode: RetryBackoff, Msg: \"ghijklm\"}, F12: 19988, F13: 12928, F14: 747146914, F16: 15046594242116098501, F18: -42, F19: 2, F22: -117407618, F23: -952968977, F25: 2014611795630948830, F26: -3.726601e+08, F28: 1.0666524600348439e+09, F29: 7.834294079292618e+07}, F9: {F0: VList_VUint32{}, F7: 91, F9: VEnumBcd.D, F26: -1.2869686e+08}, F10: {F12: 63260}, F11: {F8: VEnumAbc.C}, F12: {F0: []byte(\">J\\xa0\"), F1: true, F4: \"efghijklmnopΔΘΠΣ\", F5: typeobject(VInt32), F6: 31, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {}, F12: 36329, F13: 32155, F14: 662162596, F15: 2645045424, F17: 2990527527079487032, F18: 50, F19: -35, F20: 2994, F21: -14553, F22: -541310693, F23: -1023511696, F24: -601403991114981851, F25: 3862758654704486901, F28: 1.3558145952252014e+09, F29: -1.3999479221066225e+08, F30: {}}, F13: {F15: 1190332237, F21: -10412}}}",
+		SourceLabel: "VList_VStructDepth2_All{{F0: {nil, VList_VInt32{}, set[VString]{\"ΔΘΠΣΦ\"}}, F1: {\"bcdefghijklmnopΔΘ\"}, F3: {938903271}, F4: {\"\"}, F6: {16: 208, 20: 88, 73: 30}, F7: {C: C, D: D}, F8: {F0: set[VStructEmpty]{{}}, F1: true, F3: \"fghijklmnopΔ\", F4: \"ΔΘΠΣΦ王普澤世界\", F5: typeobject(VUint32), F6: 241, F7: 177, F8: C, F9: D, F12: 47779, F13: 42875, F14: 2029389016, F15: 2904109023, F16: 16459413507593524110, F17: 16353344988285253454, F18: -35, F19: -12, F21: -7964, F23: -259665583, F24: -1338931562517998444, F25: -670039189790201905, F26: 2.673405e+09, F27: -1.4632109e+07, F28: 2.1534617647327882e+08, F29: 1.618167384379011e+09, F30: {}}, F9: {F7: 158, F9: C}, F10: {F16: 0}, F11: {F6: 147}, F12: {}, F13: {F4: \"ij\", F15: 4172107035, F21: -3998}}, {F0: {[]?VStructEmpty{}, []bool{true, false}, nil}, F1: {\"lmnopΔΘΠΣ\"}, F2: {false, true, false}, F3: {-53470879, 407444663}, F4: {\"efghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.8341453e+09}, F6: {196: 184, 250: 140, 78: 91}, F9: {F0: []error{{}}, F1: true, F7: 133, F26: -4.8271664e+08}, F10: {F28: 9.20108040128041e+08}, F11: {F9: D}}, {F1: {\"cde\"}, F2: {false}, F3: {590230257, -420206767}, F4: {\"\", \"pΔΘΠ\"}, F5: {1.07074976e+09}, F6: {158: 104}, F7: {B: B, D: D}, F8: {F0: set[VBool]{false}, F1: true, F2: true, F3: \"abcdefghijk\", F5: typeobject([]any), F7: 32, F9: D, F11: {Id: \"pΔΘΠ\", Msg: \"ghijklmnopΔΘ\"}, F12: 43613, F15: 1940405721, F16: 12529417034803210940, F17: 11791211780177265784, F19: 23, F20: 9411, F22: -804334462, F24: -4124501530930399990, F25: -144923103721623010, F28: 2.8121074164207834e+08, F29: -1.1109080576437273e+09, F30: {}}, F9: {F0: VArray3_VBool{false, false, true}, F7: 49, F26: 2.8564147e+09}, F10: {F12: 12834}, F11: {F6: 134}, F12: {F0: VArray3_Map_String_String{{\"cdefghijklmnop\": \"王普澤\", \"jklmnopΔ\": \"abcdefghijklmnopΔΘΠΣΦ\"}, {\"\": \"\", \"hijklmnopΔΘΠΣ\": \"efghijklmnopΔ\"}, {\"bcdefgh\": \"jklmnopΔΘ\", \"世\": \"efghijklmnopΔΘΠΣΦ王普澤\"}}, F3: \"c\", F4: \"i\", F5: typeobject(VSet_Bool), F6: 166, F7: 2, F8: B, F11: {Id: \"ijklmnopΔΘ\", RetryCode: RetryRefetch, Msg: \"ijklm\"}, F12: 41254, F13: 59413, F14: 2745767794, F15: 1832032809, F17: 4013984000384576030, F18: 64, F19: 24, F20: 3859, F22: 134042941, F23: -372320150, F24: 2212666009926881529, F26: -2.2718244e+09, F27: 5.1861e+08, F30: {}}, F13: {F4: \"defghij\", F21: 14761}}}",
 		Source: VList_VStructDepth2_All{
-			{
-				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{},
-			},
 			{
 				F0: VArray3_Any{
 					nil,
-					VMap_VInt16_VInt16{
-						-3171: -12820,
+					VList_VInt32(nil),
+					map[VString]struct{}{
+						"ΔΘΠΣΦ": struct{}{},
 					},
-					map[VEnumAbc]VEnumAbc(nil),
 				},
 				F1: VArray1_String{
-					"nop",
+					"bcdefghijklmnopΔΘ",
+				},
+				F3: VList_VInt32{
+					938903271,
+				},
+				F4: VSet_VString{
+					"": struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					16: 208,
+					20: 88,
+					73: 30,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdC: VEnumBcdC,
+					VEnumBcdD: VEnumBcdD,
+				},
+				F8: VStructDepth1_All{
+					F0: map[VStructEmpty]struct{}{
+						{}: struct{}{},
+					},
+					F1:  true,
+					F3:  "fghijklmnopΔ",
+					F4:  "ΔΘΠΣΦ王普澤世界",
+					F5:  vdl.TypeOf((*VUint32)(nil)),
+					F6:  241,
+					F7:  177,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdD,
+					F12: 47779,
+					F13: 42875,
+					F14: 2029389016,
+					F15: 2904109023,
+					F16: 16459413507593524110,
+					F17: 16353344988285253454,
+					F18: -35,
+					F19: -12,
+					F21: -7964,
+					F23: -259665583,
+					F24: -1338931562517998444,
+					F25: -670039189790201905,
+					F26: 2.673405e+09,
+					F27: -1.4632109e+07,
+					F28: 2.1534617647327882e+08,
+					F29: 1.618167384379011e+09,
+					F30: &VStructEmpty{},
+				},
+				F9: VStructDepth1_Rand1{
+					F7: 158,
+					F9: VEnumBcdC,
+				},
+				F10: VUnionDepth1_Rand0F16{},
+				F11: VUnionDepth1_Rand1F6{147},
+				F12: &VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F13: &VStructDepth1_Rand0{
+					F4:  "ij",
+					F15: 4172107035,
+					F21: -3998,
+				},
+			},
+			{
+				F0: VArray3_Any{
+					[]*VStructEmpty(nil),
+					[]bool{
+						true,
+						false,
+					},
+					nil,
+				},
+				F1: VArray1_String{
+					"lmnopΔΘΠΣ",
+				},
+				F2: VList_VBool{
+					false,
+					true,
+					false,
+				},
+				F3: VList_VInt32{
+					-53470879,
+					407444663,
+				},
+				F4: VSet_VString{
+					"efghijklmnopΔΘΠΣΦ王普澤世界": struct{}{},
+				},
+				F5: VSet_Float32{
+					1.8341453e+09: struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					196: 184,
+					250: 140,
+					78:  91,
+				},
+				F8: VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F9: VStructDepth1_Rand1{
+					F0: []error{
+						verror.FromWire(vdl.WireError{}),
+					},
+					F1:  true,
+					F7:  133,
+					F26: -4.8271664e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{9.20108040128041e+08},
+				F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+			},
+			{
+				F1: VArray1_String{
+					"cde",
 				},
 				F2: VList_VBool{
 					false,
 				},
 				F3: VList_VInt32{
-					-922375359,
-					-291429100,
+					590230257,
+					-420206767,
 				},
 				F4: VSet_VString{
-					"": struct{}{},
+					"":     struct{}{},
+					"pΔΘΠ": struct{}{},
 				},
 				F5: VSet_Float32{
-					-1.3150874e+09: struct{}{},
-					-1.734008e+09:  struct{}{},
-					-1.9959872e+09: struct{}{},
+					1.07074976e+09: struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					219: 0,
+					158: 104,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
+					VEnumBcdD: VEnumBcdD,
 				},
 				F8: VStructDepth1_All{
-					F0: VArray1_VList_VStructDepth1_All{
-						{
-							{
-								F0: VList_VBool{
-									false,
-									true,
-								},
-								F1: true,
-								F2: true,
-								F3: "defghijklmnopΔΘΠΣΦ王普澤世",
-								F5: vdl.TypeOf((*VList_VStructEmpty)(nil)),
-								F6: 6,
-								F7: 17,
-								F8: VEnumAbcB,
-								F11: verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-								}),
-								F12: 14137,
-								F13: 539,
-								F14: 67064449,
-								F15: 832599842,
-								F16: 14938577165673322602,
-								F17: 1093224975412848999,
-								F18: -61,
-								F19: -9,
-								F20: -6321,
-								F22: -285826347,
-								F23: 960160580,
-								F25: 238060495485167559,
-								F26: 1.2795723e+08,
-								F27: -7.656217e+08,
-								F28: -3.6343917969250166e+08,
-								F30: &VStructEmpty{},
-							},
-						},
+					F0: map[VBool]struct{}{
+						false: struct{}{},
 					},
-					F3: "def",
-					F4: "bcdefghijklmn",
-					F5: vdl.AnyType,
-					F6: 78,
-					F7: 46,
+					F1: true,
+					F2: true,
+					F3: "abcdefghijk",
+					F5: vdl.TypeOf((*[]interface{})(nil)),
+					F7: 32,
+					F9: VEnumBcdD,
 					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryBackoff,
-						Msg:       "ghijklm",
+						Id:  "pΔΘΠ",
+						Msg: "ghijklmnopΔΘ",
 					}),
-					F12: 19988,
-					F13: 12928,
-					F14: 747146914,
-					F16: 15046594242116098501,
-					F18: -42,
-					F19: 2,
-					F22: -117407618,
-					F23: -952968977,
-					F25: 2014611795630948830,
-					F26: -3.726601e+08,
-					F28: 1.0666524600348439e+09,
-					F29: 7.834294079292618e+07,
+					F12: 43613,
+					F15: 1940405721,
+					F16: 12529417034803210940,
+					F17: 11791211780177265784,
+					F19: 23,
+					F20: 9411,
+					F22: -804334462,
+					F24: -4124501530930399990,
+					F25: -144923103721623010,
+					F28: 2.8121074164207834e+08,
+					F29: -1.1109080576437273e+09,
+					F30: &VStructEmpty{},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_VUint32(nil),
-					F7:  91,
-					F9:  VEnumBcdD,
-					F26: -1.2869686e+08,
+					F0: VArray3_VBool{
+						false,
+						false,
+						true,
+					},
+					F7:  49,
+					F26: 2.8564147e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{63260},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+				F10: VUnionDepth1_Rand0F12{12834},
+				F11: VUnionDepth1_Rand1F6{134},
 				F12: &VStructDepth1_All{
-					F0:  []byte(">J\xa0"),
-					F1:  true,
-					F4:  "efghijklmnopΔΘΠΣ",
-					F5:  vdl.TypeOf((*VInt32)(nil)),
-					F6:  31,
-					F8:  VEnumAbcB,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 36329,
-					F13: 32155,
-					F14: 662162596,
-					F15: 2645045424,
-					F17: 2990527527079487032,
-					F18: 50,
-					F19: -35,
-					F20: 2994,
-					F21: -14553,
-					F22: -541310693,
-					F23: -1023511696,
-					F24: -601403991114981851,
-					F25: 3862758654704486901,
-					F28: 1.3558145952252014e+09,
-					F29: -1.3999479221066225e+08,
+					F0: VArray3_Map_String_String{
+						{
+							"cdefghijklmnop": "王普澤",
+							"jklmnopΔ":       "abcdefghijklmnopΔΘΠΣΦ",
+						},
+						{
+							"":              "",
+							"hijklmnopΔΘΠΣ": "efghijklmnopΔ",
+						},
+						{
+							"bcdefgh": "jklmnopΔΘ",
+							"世":       "efghijklmnopΔΘΠΣΦ王普澤",
+						},
+					},
+					F3: "c",
+					F4: "i",
+					F5: vdl.TypeOf((*VSet_Bool)(nil)),
+					F6: 166,
+					F7: 2,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘ",
+						RetryCode: vdl.WireRetryCodeRetryRefetch,
+						Msg:       "ijklm",
+					}),
+					F12: 41254,
+					F13: 59413,
+					F14: 2745767794,
+					F15: 1832032809,
+					F17: 4013984000384576030,
+					F18: 64,
+					F19: 24,
+					F20: 3859,
+					F22: 134042941,
+					F23: -372320150,
+					F24: 2212666009926881529,
+					F26: -2.2718244e+09,
+					F27: 5.1861e+08,
 					F30: &VStructEmpty{},
 				},
 				F13: &VStructDepth1_Rand0{
-					F15: 1190332237,
-					F21: -10412,
+					F4:  "defghij",
+					F21: 14761,
 				},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth2_All{{}, {F0: {nil, VMap_VInt16_VInt16{-3171: -12820}, map[VEnumAbc]VEnumAbc{}}, F1: {\"nop\"}, F2: {false}, F3: {-922375359, -291429100}, F4: {\"\"}, F5: {-1.3150874e+09, -1.734008e+09, -1.9959872e+09}, F6: {219: 0}, F8: {F0: VArray1_VList_VStructDepth1_All{{{F0: VList_VBool{false, true}, F1: true, F2: true, F3: \"defghijklmnopΔΘΠΣΦ王普澤世\", F5: typeobject(VList_VStructEmpty), F6: 6, F7: 17, F8: VEnumAbc.B, F11: {RetryCode: RetryConnection}, F12: 14137, F13: 539, F14: 67064449, F15: 832599842, F16: 14938577165673322602, F17: 1093224975412848999, F18: -61, F19: -9, F20: -6321, F22: -285826347, F23: 960160580, F25: 238060495485167559, F26: 1.2795723e+08, F27: -7.656217e+08, F28: -3.6343917969250166e+08, F30: {}}}}, F3: \"def\", F4: \"bcdefghijklmn\", F6: 78, F7: 46, F11: {RetryCode: RetryBackoff, Msg: \"ghijklm\"}, F12: 19988, F13: 12928, F14: 747146914, F16: 15046594242116098501, F18: -42, F19: 2, F22: -117407618, F23: -952968977, F25: 2014611795630948830, F26: -3.726601e+08, F28: 1.0666524600348439e+09, F29: 7.834294079292618e+07}, F9: {F0: VList_VUint32{}, F7: 91, F9: VEnumBcd.D, F26: -1.2869686e+08}, F10: {F12: 63260}, F11: {F8: VEnumAbc.C}, F12: {F0: []byte(\">J\\xa0\"), F1: true, F4: \"efghijklmnopΔΘΠΣ\", F5: typeobject(VInt32), F6: 31, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {}, F12: 36329, F13: 32155, F14: 662162596, F15: 2645045424, F17: 2990527527079487032, F18: 50, F19: -35, F20: 2994, F21: -14553, F22: -541310693, F23: -1023511696, F24: -601403991114981851, F25: 3862758654704486901, F28: 1.3558145952252014e+09, F29: -1.3999479221066225e+08, F30: {}}, F13: {F15: 1190332237, F21: -10412}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {nil, VList_VInt32{}, set[VString]{\"ΔΘΠΣΦ\"}}, F1: {\"bcdefghijklmnopΔΘ\"}, F3: {938903271}, F4: {\"\"}, F6: {16: 208, 20: 88, 73: 30}, F7: {C: C, D: D}, F8: {F0: set[VStructEmpty]{{}}, F1: true, F3: \"fghijklmnopΔ\", F4: \"ΔΘΠΣΦ王普澤世界\", F5: typeobject(VUint32), F6: 241, F7: 177, F8: C, F9: D, F12: 47779, F13: 42875, F14: 2029389016, F15: 2904109023, F16: 16459413507593524110, F17: 16353344988285253454, F18: -35, F19: -12, F21: -7964, F23: -259665583, F24: -1338931562517998444, F25: -670039189790201905, F26: 2.673405e+09, F27: -1.4632109e+07, F28: 2.1534617647327882e+08, F29: 1.618167384379011e+09, F30: {}}, F9: {F7: 158, F9: C}, F10: {F16: 0}, F11: {F6: 147}, F12: {}, F13: {F4: \"ij\", F15: 4172107035, F21: -3998}}, {F0: {[]?VStructEmpty{}, []bool{true, false}, nil}, F1: {\"lmnopΔΘΠΣ\"}, F2: {false, true, false}, F3: {-53470879, 407444663}, F4: {\"efghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.8341453e+09}, F6: {196: 184, 250: 140, 78: 91}, F9: {F0: []error{{}}, F1: true, F7: 133, F26: -4.8271664e+08}, F10: {F28: 9.20108040128041e+08}, F11: {F9: D}}, {F1: {\"cde\"}, F2: {false}, F3: {590230257, -420206767}, F4: {\"\", \"pΔΘΠ\"}, F5: {1.07074976e+09}, F6: {158: 104}, F7: {B: B, D: D}, F8: {F0: set[VBool]{false}, F1: true, F2: true, F3: \"abcdefghijk\", F5: typeobject([]any), F7: 32, F9: D, F11: {Id: \"pΔΘΠ\", Msg: \"ghijklmnopΔΘ\"}, F12: 43613, F15: 1940405721, F16: 12529417034803210940, F17: 11791211780177265784, F19: 23, F20: 9411, F22: -804334462, F24: -4124501530930399990, F25: -144923103721623010, F28: 2.8121074164207834e+08, F29: -1.1109080576437273e+09, F30: {}}, F9: {F0: VArray3_VBool{false, false, true}, F7: 49, F26: 2.8564147e+09}, F10: {F12: 12834}, F11: {F6: 134}, F12: {F0: VArray3_Map_String_String{{\"cdefghijklmnop\": \"王普澤\", \"jklmnopΔ\": \"abcdefghijklmnopΔΘΠΣΦ\"}, {\"\": \"\", \"hijklmnopΔΘΠΣ\": \"efghijklmnopΔ\"}, {\"bcdefgh\": \"jklmnopΔΘ\", \"世\": \"efghijklmnopΔΘΠΣΦ王普澤\"}}, F3: \"c\", F4: \"i\", F5: typeobject(VSet_Bool), F6: 166, F7: 2, F8: B, F11: {Id: \"ijklmnopΔΘ\", RetryCode: RetryRefetch, Msg: \"ijklm\"}, F12: 41254, F13: 59413, F14: 2745767794, F15: 1832032809, F17: 4013984000384576030, F18: 64, F19: 24, F20: 3859, F22: 134042941, F23: -372320150, F24: 2212666009926881529, F26: -2.2718244e+09, F27: 5.1861e+08, F30: {}}, F13: {F4: \"defghij\", F21: 14761}}}",
 		Target: VList_VStructDepth2_All{
-			{
-				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{},
-			},
 			{
 				F0: VArray3_Any{
 					nil,
-					VMap_VInt16_VInt16{
-						-3171: -12820,
+					VList_VInt32(nil),
+					map[VString]struct{}{
+						"ΔΘΠΣΦ": struct{}{},
 					},
-					map[VEnumAbc]VEnumAbc(nil),
 				},
 				F1: VArray1_String{
-					"nop",
+					"bcdefghijklmnopΔΘ",
+				},
+				F3: VList_VInt32{
+					938903271,
+				},
+				F4: VSet_VString{
+					"": struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					16: 208,
+					20: 88,
+					73: 30,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdC: VEnumBcdC,
+					VEnumBcdD: VEnumBcdD,
+				},
+				F8: VStructDepth1_All{
+					F0: map[VStructEmpty]struct{}{
+						{}: struct{}{},
+					},
+					F1:  true,
+					F3:  "fghijklmnopΔ",
+					F4:  "ΔΘΠΣΦ王普澤世界",
+					F5:  vdl.TypeOf((*VUint32)(nil)),
+					F6:  241,
+					F7:  177,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdD,
+					F12: 47779,
+					F13: 42875,
+					F14: 2029389016,
+					F15: 2904109023,
+					F16: 16459413507593524110,
+					F17: 16353344988285253454,
+					F18: -35,
+					F19: -12,
+					F21: -7964,
+					F23: -259665583,
+					F24: -1338931562517998444,
+					F25: -670039189790201905,
+					F26: 2.673405e+09,
+					F27: -1.4632109e+07,
+					F28: 2.1534617647327882e+08,
+					F29: 1.618167384379011e+09,
+					F30: &VStructEmpty{},
+				},
+				F9: VStructDepth1_Rand1{
+					F7: 158,
+					F9: VEnumBcdC,
+				},
+				F10: VUnionDepth1_Rand0F16{},
+				F11: VUnionDepth1_Rand1F6{147},
+				F12: &VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F13: &VStructDepth1_Rand0{
+					F4:  "ij",
+					F15: 4172107035,
+					F21: -3998,
+				},
+			},
+			{
+				F0: VArray3_Any{
+					[]*VStructEmpty(nil),
+					[]bool{
+						true,
+						false,
+					},
+					nil,
+				},
+				F1: VArray1_String{
+					"lmnopΔΘΠΣ",
+				},
+				F2: VList_VBool{
+					false,
+					true,
+					false,
+				},
+				F3: VList_VInt32{
+					-53470879,
+					407444663,
+				},
+				F4: VSet_VString{
+					"efghijklmnopΔΘΠΣΦ王普澤世界": struct{}{},
+				},
+				F5: VSet_Float32{
+					1.8341453e+09: struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					196: 184,
+					250: 140,
+					78:  91,
+				},
+				F8: VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F9: VStructDepth1_Rand1{
+					F0: []error{
+						verror.FromWire(vdl.WireError{}),
+					},
+					F1:  true,
+					F7:  133,
+					F26: -4.8271664e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{9.20108040128041e+08},
+				F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+			},
+			{
+				F1: VArray1_String{
+					"cde",
 				},
 				F2: VList_VBool{
 					false,
 				},
 				F3: VList_VInt32{
-					-922375359,
-					-291429100,
+					590230257,
+					-420206767,
 				},
 				F4: VSet_VString{
-					"": struct{}{},
+					"":     struct{}{},
+					"pΔΘΠ": struct{}{},
 				},
 				F5: VSet_Float32{
-					-1.3150874e+09: struct{}{},
-					-1.734008e+09:  struct{}{},
-					-1.9959872e+09: struct{}{},
+					1.07074976e+09: struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					219: 0,
+					158: 104,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
+					VEnumBcdD: VEnumBcdD,
 				},
 				F8: VStructDepth1_All{
-					F0: VArray1_VList_VStructDepth1_All{
-						{
-							{
-								F0: VList_VBool{
-									false,
-									true,
-								},
-								F1: true,
-								F2: true,
-								F3: "defghijklmnopΔΘΠΣΦ王普澤世",
-								F5: vdl.TypeOf((*VList_VStructEmpty)(nil)),
-								F6: 6,
-								F7: 17,
-								F8: VEnumAbcB,
-								F11: verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-								}),
-								F12: 14137,
-								F13: 539,
-								F14: 67064449,
-								F15: 832599842,
-								F16: 14938577165673322602,
-								F17: 1093224975412848999,
-								F18: -61,
-								F19: -9,
-								F20: -6321,
-								F22: -285826347,
-								F23: 960160580,
-								F25: 238060495485167559,
-								F26: 1.2795723e+08,
-								F27: -7.656217e+08,
-								F28: -3.6343917969250166e+08,
-								F30: &VStructEmpty{},
-							},
-						},
+					F0: map[VBool]struct{}{
+						false: struct{}{},
 					},
-					F3: "def",
-					F4: "bcdefghijklmn",
-					F5: vdl.AnyType,
-					F6: 78,
-					F7: 46,
+					F1: true,
+					F2: true,
+					F3: "abcdefghijk",
+					F5: vdl.TypeOf((*[]interface{})(nil)),
+					F7: 32,
+					F9: VEnumBcdD,
 					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryBackoff,
-						Msg:       "ghijklm",
+						Id:  "pΔΘΠ",
+						Msg: "ghijklmnopΔΘ",
 					}),
-					F12: 19988,
-					F13: 12928,
-					F14: 747146914,
-					F16: 15046594242116098501,
-					F18: -42,
-					F19: 2,
-					F22: -117407618,
-					F23: -952968977,
-					F25: 2014611795630948830,
-					F26: -3.726601e+08,
-					F28: 1.0666524600348439e+09,
-					F29: 7.834294079292618e+07,
+					F12: 43613,
+					F15: 1940405721,
+					F16: 12529417034803210940,
+					F17: 11791211780177265784,
+					F19: 23,
+					F20: 9411,
+					F22: -804334462,
+					F24: -4124501530930399990,
+					F25: -144923103721623010,
+					F28: 2.8121074164207834e+08,
+					F29: -1.1109080576437273e+09,
+					F30: &VStructEmpty{},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_VUint32(nil),
-					F7:  91,
-					F9:  VEnumBcdD,
-					F26: -1.2869686e+08,
+					F0: VArray3_VBool{
+						false,
+						false,
+						true,
+					},
+					F7:  49,
+					F26: 2.8564147e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{63260},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+				F10: VUnionDepth1_Rand0F12{12834},
+				F11: VUnionDepth1_Rand1F6{134},
 				F12: &VStructDepth1_All{
-					F0:  []byte(">J\xa0"),
-					F1:  true,
-					F4:  "efghijklmnopΔΘΠΣ",
-					F5:  vdl.TypeOf((*VInt32)(nil)),
-					F6:  31,
-					F8:  VEnumAbcB,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 36329,
-					F13: 32155,
-					F14: 662162596,
-					F15: 2645045424,
-					F17: 2990527527079487032,
-					F18: 50,
-					F19: -35,
-					F20: 2994,
-					F21: -14553,
-					F22: -541310693,
-					F23: -1023511696,
-					F24: -601403991114981851,
-					F25: 3862758654704486901,
-					F28: 1.3558145952252014e+09,
-					F29: -1.3999479221066225e+08,
+					F0: VArray3_Map_String_String{
+						{
+							"cdefghijklmnop": "王普澤",
+							"jklmnopΔ":       "abcdefghijklmnopΔΘΠΣΦ",
+						},
+						{
+							"":              "",
+							"hijklmnopΔΘΠΣ": "efghijklmnopΔ",
+						},
+						{
+							"bcdefgh": "jklmnopΔΘ",
+							"世":       "efghijklmnopΔΘΠΣΦ王普澤",
+						},
+					},
+					F3: "c",
+					F4: "i",
+					F5: vdl.TypeOf((*VSet_Bool)(nil)),
+					F6: 166,
+					F7: 2,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘ",
+						RetryCode: vdl.WireRetryCodeRetryRefetch,
+						Msg:       "ijklm",
+					}),
+					F12: 41254,
+					F13: 59413,
+					F14: 2745767794,
+					F15: 1832032809,
+					F17: 4013984000384576030,
+					F18: 64,
+					F19: 24,
+					F20: 3859,
+					F22: 134042941,
+					F23: -372320150,
+					F24: 2212666009926881529,
+					F26: -2.2718244e+09,
+					F27: 5.1861e+08,
 					F30: &VStructEmpty{},
 				},
 				F13: &VStructDepth1_Rand0{
-					F15: 1190332237,
-					F21: -10412,
+					F4:  "defghij",
+					F21: 14761,
 				},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_All{}, VStructDepth2_All{F0: {nil, VMap_VInt16_VInt16{-3171: -12820}, map[VEnumAbc]VEnumAbc{}}, F1: {\"nop\"}, F2: {false}, F3: {-922375359, -291429100}, F4: {\"\"}, F5: {-1.3150874e+09, -1.734008e+09, -1.9959872e+09}, F6: {219: 0}, F8: {F0: VArray1_VList_VStructDepth1_All{{{F0: VList_VBool{false, true}, F1: true, F2: true, F3: \"defghijklmnopΔΘΠΣΦ王普澤世\", F5: typeobject(VList_VStructEmpty), F6: 6, F7: 17, F8: VEnumAbc.B, F11: {RetryCode: RetryConnection}, F12: 14137, F13: 539, F14: 67064449, F15: 832599842, F16: 14938577165673322602, F17: 1093224975412848999, F18: -61, F19: -9, F20: -6321, F22: -285826347, F23: 960160580, F25: 238060495485167559, F26: 1.2795723e+08, F27: -7.656217e+08, F28: -3.6343917969250166e+08, F30: {}}}}, F3: \"def\", F4: \"bcdefghijklmn\", F6: 78, F7: 46, F11: {RetryCode: RetryBackoff, Msg: \"ghijklm\"}, F12: 19988, F13: 12928, F14: 747146914, F16: 15046594242116098501, F18: -42, F19: 2, F22: -117407618, F23: -952968977, F25: 2014611795630948830, F26: -3.726601e+08, F28: 1.0666524600348439e+09, F29: 7.834294079292618e+07}, F9: {F0: VList_VUint32{}, F7: 91, F9: VEnumBcd.D, F26: -1.2869686e+08}, F10: {F12: 63260}, F11: {F8: VEnumAbc.C}, F12: {F0: []byte(\">J\\xa0\"), F1: true, F4: \"efghijklmnopΔΘΠΣ\", F5: typeobject(VInt32), F6: 31, F8: VEnumAbc.B, F9: VEnumBcd.D, F11: {}, F12: 36329, F13: 32155, F14: 662162596, F15: 2645045424, F17: 2990527527079487032, F18: 50, F19: -35, F20: 2994, F21: -14553, F22: -541310693, F23: -1023511696, F24: -601403991114981851, F25: 3862758654704486901, F28: 1.3558145952252014e+09, F29: -1.3999479221066225e+08, F30: {}}, F13: {F15: 1190332237, F21: -10412}}}",
+		SourceLabel: "[]any{VStructDepth2_All{F0: {nil, VList_VInt32{}, set[VString]{\"ΔΘΠΣΦ\"}}, F1: {\"bcdefghijklmnopΔΘ\"}, F3: {938903271}, F4: {\"\"}, F6: {16: 208, 20: 88, 73: 30}, F7: {C: C, D: D}, F8: {F0: set[VStructEmpty]{{}}, F1: true, F3: \"fghijklmnopΔ\", F4: \"ΔΘΠΣΦ王普澤世界\", F5: typeobject(VUint32), F6: 241, F7: 177, F8: C, F9: D, F12: 47779, F13: 42875, F14: 2029389016, F15: 2904109023, F16: 16459413507593524110, F17: 16353344988285253454, F18: -35, F19: -12, F21: -7964, F23: -259665583, F24: -1338931562517998444, F25: -670039189790201905, F26: 2.673405e+09, F27: -1.4632109e+07, F28: 2.1534617647327882e+08, F29: 1.618167384379011e+09, F30: {}}, F9: {F7: 158, F9: C}, F10: {F16: 0}, F11: {F6: 147}, F12: {}, F13: {F4: \"ij\", F15: 4172107035, F21: -3998}}, VStructDepth2_All{F0: {[]?VStructEmpty{}, []bool{true, false}, nil}, F1: {\"lmnopΔΘΠΣ\"}, F2: {false, true, false}, F3: {-53470879, 407444663}, F4: {\"efghijklmnopΔΘΠΣΦ王普澤世界\"}, F5: {1.8341453e+09}, F6: {196: 184, 250: 140, 78: 91}, F9: {F0: []error{{}}, F1: true, F7: 133, F26: -4.8271664e+08}, F10: {F28: 9.20108040128041e+08}, F11: {F9: D}}, VStructDepth2_All{F1: {\"cde\"}, F2: {false}, F3: {590230257, -420206767}, F4: {\"\", \"pΔΘΠ\"}, F5: {1.07074976e+09}, F6: {158: 104}, F7: {B: B, D: D}, F8: {F0: set[VBool]{false}, F1: true, F2: true, F3: \"abcdefghijk\", F5: typeobject([]any), F7: 32, F9: D, F11: {Id: \"pΔΘΠ\", Msg: \"ghijklmnopΔΘ\"}, F12: 43613, F15: 1940405721, F16: 12529417034803210940, F17: 11791211780177265784, F19: 23, F20: 9411, F22: -804334462, F24: -4124501530930399990, F25: -144923103721623010, F28: 2.8121074164207834e+08, F29: -1.1109080576437273e+09, F30: {}}, F9: {F0: VArray3_VBool{false, false, true}, F7: 49, F26: 2.8564147e+09}, F10: {F12: 12834}, F11: {F6: 134}, F12: {F0: VArray3_Map_String_String{{\"cdefghijklmnop\": \"王普澤\", \"jklmnopΔ\": \"abcdefghijklmnopΔΘΠΣΦ\"}, {\"\": \"\", \"hijklmnopΔΘΠΣ\": \"efghijklmnopΔ\"}, {\"bcdefgh\": \"jklmnopΔΘ\", \"世\": \"efghijklmnopΔΘΠΣΦ王普澤\"}}, F3: \"c\", F4: \"i\", F5: typeobject(VSet_Bool), F6: 166, F7: 2, F8: B, F11: {Id: \"ijklmnopΔΘ\", RetryCode: RetryRefetch, Msg: \"ijklm\"}, F12: 41254, F13: 59413, F14: 2745767794, F15: 1832032809, F17: 4013984000384576030, F18: 64, F19: 24, F20: 3859, F22: 134042941, F23: -372320150, F24: 2212666009926881529, F26: -2.2718244e+09, F27: 5.1861e+08, F30: {}}, F13: {F4: \"defghij\", F21: 14761}}}",
 		Source: []interface{}{
-			VStructDepth2_All{
-				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{},
-			},
 			VStructDepth2_All{
 				F0: VArray3_Any{
 					nil,
-					VMap_VInt16_VInt16{
-						-3171: -12820,
+					VList_VInt32(nil),
+					map[VString]struct{}{
+						"ΔΘΠΣΦ": struct{}{},
 					},
-					map[VEnumAbc]VEnumAbc(nil),
 				},
 				F1: VArray1_String{
-					"nop",
+					"bcdefghijklmnopΔΘ",
+				},
+				F3: VList_VInt32{
+					938903271,
+				},
+				F4: VSet_VString{
+					"": struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					16: 208,
+					20: 88,
+					73: 30,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdC: VEnumBcdC,
+					VEnumBcdD: VEnumBcdD,
+				},
+				F8: VStructDepth1_All{
+					F0: map[VStructEmpty]struct{}{
+						{}: struct{}{},
+					},
+					F1:  true,
+					F3:  "fghijklmnopΔ",
+					F4:  "ΔΘΠΣΦ王普澤世界",
+					F5:  vdl.TypeOf((*VUint32)(nil)),
+					F6:  241,
+					F7:  177,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdD,
+					F12: 47779,
+					F13: 42875,
+					F14: 2029389016,
+					F15: 2904109023,
+					F16: 16459413507593524110,
+					F17: 16353344988285253454,
+					F18: -35,
+					F19: -12,
+					F21: -7964,
+					F23: -259665583,
+					F24: -1338931562517998444,
+					F25: -670039189790201905,
+					F26: 2.673405e+09,
+					F27: -1.4632109e+07,
+					F28: 2.1534617647327882e+08,
+					F29: 1.618167384379011e+09,
+					F30: &VStructEmpty{},
+				},
+				F9: VStructDepth1_Rand1{
+					F7: 158,
+					F9: VEnumBcdC,
+				},
+				F10: VUnionDepth1_Rand0F16{},
+				F11: VUnionDepth1_Rand1F6{147},
+				F12: &VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F13: &VStructDepth1_Rand0{
+					F4:  "ij",
+					F15: 4172107035,
+					F21: -3998,
+				},
+			},
+			VStructDepth2_All{
+				F0: VArray3_Any{
+					[]*VStructEmpty(nil),
+					[]bool{
+						true,
+						false,
+					},
+					nil,
+				},
+				F1: VArray1_String{
+					"lmnopΔΘΠΣ",
+				},
+				F2: VList_VBool{
+					false,
+					true,
+					false,
+				},
+				F3: VList_VInt32{
+					-53470879,
+					407444663,
+				},
+				F4: VSet_VString{
+					"efghijklmnopΔΘΠΣΦ王普澤世界": struct{}{},
+				},
+				F5: VSet_Float32{
+					1.8341453e+09: struct{}{},
+				},
+				F6: VMap_VByte_VByte{
+					196: 184,
+					250: 140,
+					78:  91,
+				},
+				F8: VStructDepth1_All{
+					F5: vdl.AnyType,
+				},
+				F9: VStructDepth1_Rand1{
+					F0: []error{
+						verror.FromWire(vdl.WireError{}),
+					},
+					F1:  true,
+					F7:  133,
+					F26: -4.8271664e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{9.20108040128041e+08},
+				F11: VUnionDepth1_Rand1F9{VEnumBcdD},
+			},
+			VStructDepth2_All{
+				F1: VArray1_String{
+					"cde",
 				},
 				F2: VList_VBool{
 					false,
 				},
 				F3: VList_VInt32{
-					-922375359,
-					-291429100,
+					590230257,
+					-420206767,
 				},
 				F4: VSet_VString{
-					"": struct{}{},
+					"":     struct{}{},
+					"pΔΘΠ": struct{}{},
 				},
 				F5: VSet_Float32{
-					-1.3150874e+09: struct{}{},
-					-1.734008e+09:  struct{}{},
-					-1.9959872e+09: struct{}{},
+					1.07074976e+09: struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					219: 0,
+					158: 104,
+				},
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
+					VEnumBcdD: VEnumBcdD,
 				},
 				F8: VStructDepth1_All{
-					F0: VArray1_VList_VStructDepth1_All{
-						{
-							{
-								F0: VList_VBool{
-									false,
-									true,
-								},
-								F1: true,
-								F2: true,
-								F3: "defghijklmnopΔΘΠΣΦ王普澤世",
-								F5: vdl.TypeOf((*VList_VStructEmpty)(nil)),
-								F6: 6,
-								F7: 17,
-								F8: VEnumAbcB,
-								F11: verror.FromWire(vdl.WireError{
-									RetryCode: vdl.WireRetryCodeRetryConnection,
-								}),
-								F12: 14137,
-								F13: 539,
-								F14: 67064449,
-								F15: 832599842,
-								F16: 14938577165673322602,
-								F17: 1093224975412848999,
-								F18: -61,
-								F19: -9,
-								F20: -6321,
-								F22: -285826347,
-								F23: 960160580,
-								F25: 238060495485167559,
-								F26: 1.2795723e+08,
-								F27: -7.656217e+08,
-								F28: -3.6343917969250166e+08,
-								F30: &VStructEmpty{},
-							},
-						},
+					F0: map[VBool]struct{}{
+						false: struct{}{},
 					},
-					F3: "def",
-					F4: "bcdefghijklmn",
-					F5: vdl.AnyType,
-					F6: 78,
-					F7: 46,
+					F1: true,
+					F2: true,
+					F3: "abcdefghijk",
+					F5: vdl.TypeOf((*[]interface{})(nil)),
+					F7: 32,
+					F9: VEnumBcdD,
 					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryBackoff,
-						Msg:       "ghijklm",
+						Id:  "pΔΘΠ",
+						Msg: "ghijklmnopΔΘ",
 					}),
-					F12: 19988,
-					F13: 12928,
-					F14: 747146914,
-					F16: 15046594242116098501,
-					F18: -42,
-					F19: 2,
-					F22: -117407618,
-					F23: -952968977,
-					F25: 2014611795630948830,
-					F26: -3.726601e+08,
-					F28: 1.0666524600348439e+09,
-					F29: 7.834294079292618e+07,
+					F12: 43613,
+					F15: 1940405721,
+					F16: 12529417034803210940,
+					F17: 11791211780177265784,
+					F19: 23,
+					F20: 9411,
+					F22: -804334462,
+					F24: -4124501530930399990,
+					F25: -144923103721623010,
+					F28: 2.8121074164207834e+08,
+					F29: -1.1109080576437273e+09,
+					F30: &VStructEmpty{},
 				},
 				F9: VStructDepth1_Rand1{
-					F0:  VList_VUint32(nil),
-					F7:  91,
-					F9:  VEnumBcdD,
-					F26: -1.2869686e+08,
+					F0: VArray3_VBool{
+						false,
+						false,
+						true,
+					},
+					F7:  49,
+					F26: 2.8564147e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{63260},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+				F10: VUnionDepth1_Rand0F12{12834},
+				F11: VUnionDepth1_Rand1F6{134},
 				F12: &VStructDepth1_All{
-					F0:  []byte(">J\xa0"),
-					F1:  true,
-					F4:  "efghijklmnopΔΘΠΣ",
-					F5:  vdl.TypeOf((*VInt32)(nil)),
-					F6:  31,
-					F8:  VEnumAbcB,
-					F9:  VEnumBcdD,
-					F11: verror.FromWire(vdl.WireError{}),
-					F12: 36329,
-					F13: 32155,
-					F14: 662162596,
-					F15: 2645045424,
-					F17: 2990527527079487032,
-					F18: 50,
-					F19: -35,
-					F20: 2994,
-					F21: -14553,
-					F22: -541310693,
-					F23: -1023511696,
-					F24: -601403991114981851,
-					F25: 3862758654704486901,
-					F28: 1.3558145952252014e+09,
-					F29: -1.3999479221066225e+08,
+					F0: VArray3_Map_String_String{
+						{
+							"cdefghijklmnop": "王普澤",
+							"jklmnopΔ":       "abcdefghijklmnopΔΘΠΣΦ",
+						},
+						{
+							"":              "",
+							"hijklmnopΔΘΠΣ": "efghijklmnopΔ",
+						},
+						{
+							"bcdefgh": "jklmnopΔΘ",
+							"世":       "efghijklmnopΔΘΠΣΦ王普澤",
+						},
+					},
+					F3: "c",
+					F4: "i",
+					F5: vdl.TypeOf((*VSet_Bool)(nil)),
+					F6: 166,
+					F7: 2,
+					F8: VEnumAbcB,
+					F11: verror.FromWire(vdl.WireError{
+						Id:        "ijklmnopΔΘ",
+						RetryCode: vdl.WireRetryCodeRetryRefetch,
+						Msg:       "ijklm",
+					}),
+					F12: 41254,
+					F13: 59413,
+					F14: 2745767794,
+					F15: 1832032809,
+					F17: 4013984000384576030,
+					F18: 64,
+					F19: 24,
+					F20: 3859,
+					F22: 134042941,
+					F23: -372320150,
+					F24: 2212666009926881529,
+					F26: -2.2718244e+09,
+					F27: 5.1861e+08,
 					F30: &VStructEmpty{},
 				},
 				F13: &VStructDepth1_Rand0{
-					F15: 1190332237,
-					F21: -10412,
+					F4:  "defghij",
+					F21: 14761,
 				},
 			},
 		},
@@ -40185,930 +40642,310 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth2_All{{F0: {nil, set[VArray1_VStructDepth1_Rand0]{{}}, VArray2_TypeObject{typeobject(any), typeobject(VArray3_VArray1_VStructDepth1_Rand0)}}, F1: {\"ΔΘΠ\"}, F4: {\"fghijklmn\", \"jkl\"}, F5: {0, 1.3405235e+09, 7.1763155e+08}, F6: {140: 0, 17: 151, 56: 62}, F8: {F0: []?VStructDepth2_Rand0{{F0: {?VStructDepth1_All{F1: true, F3: \"efghij\", F4: \"fghijklmn\", F5: typeobject(VArray3_VUnionDepth1_Rand1), F6: 75, F7: 248, F9: VEnumBcd.D, F12: 43499, F13: 1253, F14: 3974103741, F15: 1844281750, F17: 3375836576587270255, F19: 17, F20: -1460, F21: -10212, F22: -1060363355, F23: 514002776, F24: 2358438844140972467, F25: 1783180604927239055, F26: -2.4064853e+08, F27: 2.4226964e+09, F28: -1.434913756137727e+09, F29: -9.389382022665024e+07, F30: {}}, map[int16]int16{-13391: 5138, 0: 13027, 6463: 0}, nil}, F9: {F0: VMap_Bool_Bool{true: false}, F1: true, F7: 191, F9: VEnumBcd.D, F26: -4.9030512e+08}}, {}, {}}, F1: true, F3: \"defgh\", F4: \"pΔΘΠΣΦ\", F5: typeobject(set[VString]), F6: 211, F7: 21, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {RetryCode: RetryRefetch, Msg: \"op\"}, F13: 64458, F14: 2865316306, F15: 2053702854, F16: 16740828914000238118, F17: 5293184889864362510, F18: 1, F19: 57, F20: -7954, F21: -3943, F22: -932901480, F23: -465095132, F24: -3924391045309080943, F25: -1331226890133377473, F26: 6.126843e+08, F27: -1.1895084e+09, F28: 2.2126661592287548e+07, F29: 3.5083903308391464e+08, F30: {}}, F9: {F0: VSet_VBool{false, true}, F26: 3.2490583e+09}, F10: {F28: 0}, F11: {F8: VEnumAbc.A}, F12: {F3: \"ab\", F5: typeobject(VList_VEnumAbc), F6: 40, F7: 197, F11: {Id: \"世\", RetryCode: RetryConnection, Msg: \"pΔΘΠΣΦ王普澤世\"}, F12: 22297, F13: 52386, F15: 3907397382, F17: 15848064095276055989, F18: 5, F20: -6946, F21: 8250, F23: 1608510, F24: 4402833488076662654, F25: 508407465641320676, F26: 2.3330765e+09, F30: {}}, F13: {F4: \"lmn\", F15: 1365343091}}, {F1: {\"lmnopΔΘΠΣΦ王普澤世\"}, F2: {true, false, false}, F3: {-908690320}, F5: {1.1358843e+09}, F6: {107: 96, 177: 176, 249: 0}, F7: {VEnumBcd.B: VEnumBcd.B, VEnumBcd.D: VEnumBcd.B}, F9: {F0: VInt64(4142756024516204836), F9: VEnumBcd.C}, F10: {F16: 13196521275255537781}, F11: {F9: VEnumBcd.B}, F12: {F0: []VUint64{6817378842332462803, 317027385006403158, 8932283352251020403}, F1: true, F3: \"defghijklmno\", F4: \"fghijkl\", F5: typeobject(VArray3_VList_Any), F6: 161, F7: 119, F8: VEnumAbc.B, F11: {Id: \"g\", RetryCode: RetryConnection, Msg: \"efghijklmnopΔΘΠΣΦ王普澤世\"}, F12: 60426, F14: 1551396832, F16: 17092310798118877456, F17: 2131282759981294192, F19: -63, F20: 10352, F21: -14331, F22: -465497144, F23: 428765151, F24: -4402531179038808584, F25: 633981431411127459, F26: -1.9213248e+08, F27: 3.2490072e+07, F28: -1.774660226210965e+09, F29: 1.535512228377124e+08, F30: {}}, F13: {F4: \"efghijklmnopΔΘΠ\", F15: 2348563028, F21: 2450}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {VArray1_Byte(\"\\x00\"), []VUint64{}, nil}, F1: {\"jklmnopΔΘΠΣΦ\"}, F2: {false, true, false}, F3: {792247926, 690852989}, F4: {\"\", \"defghijklmnopΔ\"}, F5: {-2.0348338e+08, 6.0928154e+08, 6.7638803e+08}, F6: {230: 22}, F8: {F0: VArray2_TypeObject{}, F4: \"defghijklmnopΔΘΠΣΦ\", F6: 1, F7: 253, F8: C, F9: C, F11: {}, F12: 30128, F15: 1643230504, F16: 3960792174684445623, F19: 53, F20: -5781, F21: 3419, F22: -518276703, F23: 29573900, F24: -1598525314883032858, F25: 2311230435801133446, F26: 1.6671425e+09, F27: -3.510242e+08, F28: -1.9023779138032928e+09, F29: 1.5338860629222472e+09}, F9: {F0: VSet_VArray3_Bool{{}}, F7: 69, F9: C, F26: -6.3386605e+08}, F11: {F9: B}, F13: {F4: \"jklmnopΔΘΠΣΦ\", F15: 3766227341, F21: 11468}}}",
 		Target: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
+					VArray1_Byte{},
+					[]VUint64(nil),
 					nil,
-					map[VArray1_VStructDepth1_Rand0]struct{}{
-						{}: struct{}{},
-					},
-					VArray2_TypeObject{
-						vdl.AnyType,
-						vdl.TypeOf((*VArray3_VArray1_VStructDepth1_Rand0)(nil)),
-					},
 				},
 				F1: VArray1_String{
-					"ΔΘΠ",
-				},
-				F4: VSet_VString{
-					"fghijklmn": struct{}{},
-					"jkl":       struct{}{},
-				},
-				F5: VSet_Float32{
-					0:             struct{}{},
-					1.3405235e+09: struct{}{},
-					7.1763155e+08: struct{}{},
-				},
-				F6: VMap_VByte_VByte{
-					140: 0,
-					17:  151,
-					56:  62,
-				},
-				F8: VStructDepth1_All{
-					F0: []*VStructDepth2_Rand0{
-						{
-							F0: VArray3_Any{
-								&VStructDepth1_All{
-									F1:  true,
-									F3:  "efghij",
-									F4:  "fghijklmn",
-									F5:  vdl.TypeOf((*VArray3_VUnionDepth1_Rand1)(nil)),
-									F6:  75,
-									F7:  248,
-									F9:  VEnumBcdD,
-									F12: 43499,
-									F13: 1253,
-									F14: 3974103741,
-									F15: 1844281750,
-									F17: 3375836576587270255,
-									F19: 17,
-									F20: -1460,
-									F21: -10212,
-									F22: -1060363355,
-									F23: 514002776,
-									F24: 2358438844140972467,
-									F25: 1783180604927239055,
-									F26: -2.4064853e+08,
-									F27: 2.4226964e+09,
-									F28: -1.434913756137727e+09,
-									F29: -9.389382022665024e+07,
-									F30: &VStructEmpty{},
-								},
-								map[int16]int16{
-									-13391: 5138,
-									0:      13027,
-									6463:   0,
-								},
-								nil,
-							},
-							F9: VStructDepth1_Rand1{
-								F0: VMap_Bool_Bool{
-									true: false,
-								},
-								F1:  true,
-								F7:  191,
-								F9:  VEnumBcdD,
-								F26: -4.9030512e+08,
-							},
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-					},
-					F1: true,
-					F3: "defgh",
-					F4: "pΔΘΠΣΦ",
-					F5: vdl.TypeOf((*map[VString]struct{})(nil)),
-					F6: 211,
-					F7: 21,
-					F8: VEnumAbcC,
-					F9: VEnumBcdC,
-					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryRefetch,
-						Msg:       "op",
-					}),
-					F13: 64458,
-					F14: 2865316306,
-					F15: 2053702854,
-					F16: 16740828914000238118,
-					F17: 5293184889864362510,
-					F18: 1,
-					F19: 57,
-					F20: -7954,
-					F21: -3943,
-					F22: -932901480,
-					F23: -465095132,
-					F24: -3924391045309080943,
-					F25: -1331226890133377473,
-					F26: 6.126843e+08,
-					F27: -1.1895084e+09,
-					F28: 2.2126661592287548e+07,
-					F29: 3.5083903308391464e+08,
-					F30: &VStructEmpty{},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VSet_VBool{
-						false: struct{}{},
-						true:  struct{}{},
-					},
-					F26: 3.2490583e+09,
-				},
-				F10: VUnionDepth1_Rand0F28{},
-				F11: VUnionDepth1_Rand1F8{},
-				F12: &VStructDepth1_All{
-					F3: "ab",
-					F5: vdl.TypeOf((*VList_VEnumAbc)(nil)),
-					F6: 40,
-					F7: 197,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "世",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "pΔΘΠΣΦ王普澤世",
-					}),
-					F12: 22297,
-					F13: 52386,
-					F15: 3907397382,
-					F17: 15848064095276055989,
-					F18: 5,
-					F20: -6946,
-					F21: 8250,
-					F23: 1608510,
-					F24: 4402833488076662654,
-					F25: 508407465641320676,
-					F26: 2.3330765e+09,
-					F30: &VStructEmpty{},
-				},
-				F13: &VStructDepth1_Rand0{
-					F4:  "lmn",
-					F15: 1365343091,
-				},
-			},
-			{
-				F1: VArray1_String{
-					"lmnopΔΘΠΣΦ王普澤世",
+					"jklmnopΔΘΠΣΦ",
 				},
 				F2: VList_VBool{
-					true,
 					false,
+					true,
 					false,
 				},
 				F3: VList_VInt32{
-					-908690320,
+					792247926,
+					690852989,
+				},
+				F4: VSet_VString{
+					"":               struct{}{},
+					"defghijklmnopΔ": struct{}{},
 				},
 				F5: VSet_Float32{
-					1.1358843e+09: struct{}{},
+					-2.0348338e+08: struct{}{},
+					6.0928154e+08:  struct{}{},
+					6.7638803e+08:  struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					107: 96,
-					177: 176,
-					249: 0,
-				},
-				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdB,
-					VEnumBcdD: VEnumBcdB,
+					230: 22,
 				},
 				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
+					F0: VArray2_TypeObject{
+						vdl.AnyType,
+						vdl.AnyType,
+					},
+					F4:  "defghijklmnopΔΘΠΣΦ",
+					F5:  vdl.AnyType,
+					F6:  1,
+					F7:  253,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdC,
+					F11: verror.FromWire(vdl.WireError{}),
+					F12: 30128,
+					F15: 1643230504,
+					F16: 3960792174684445623,
+					F19: 53,
+					F20: -5781,
+					F21: 3419,
+					F22: -518276703,
+					F23: 29573900,
+					F24: -1598525314883032858,
+					F25: 2311230435801133446,
+					F26: 1.6671425e+09,
+					F27: -3.510242e+08,
+					F28: -1.9023779138032928e+09,
+					F29: 1.5338860629222472e+09,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VInt64(4142756024516204836),
-					F9: VEnumBcdC,
-				},
-				F10: VUnionDepth1_Rand0F16{13196521275255537781},
-				F11: VUnionDepth1_Rand1F9{},
-				F12: &VStructDepth1_All{
-					F0: []VUint64{
-						6817378842332462803,
-						317027385006403158,
-						8932283352251020403,
+					F0: VSet_VArray3_Bool{
+						{}: struct{}{},
 					},
-					F1: true,
-					F3: "defghijklmno",
-					F4: "fghijkl",
-					F5: vdl.TypeOf((*VArray3_VList_Any)(nil)),
-					F6: 161,
-					F7: 119,
-					F8: VEnumAbcB,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "g",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "efghijklmnopΔΘΠΣΦ王普澤世",
-					}),
-					F12: 60426,
-					F14: 1551396832,
-					F16: 17092310798118877456,
-					F17: 2131282759981294192,
-					F19: -63,
-					F20: 10352,
-					F21: -14331,
-					F22: -465497144,
-					F23: 428765151,
-					F24: -4402531179038808584,
-					F25: 633981431411127459,
-					F26: -1.9213248e+08,
-					F27: 3.2490072e+07,
-					F28: -1.774660226210965e+09,
-					F29: 1.535512228377124e+08,
-					F30: &VStructEmpty{},
+					F7:  69,
+					F9:  VEnumBcdC,
+					F26: -6.3386605e+08,
 				},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F9{},
 				F13: &VStructDepth1_Rand0{
-					F4:  "efghijklmnopΔΘΠ",
-					F15: 2348563028,
-					F21: 2450,
+					F4:  "jklmnopΔΘΠΣΦ",
+					F15: 3766227341,
+					F21: 11468,
 				},
 			},
 		},
-		SourceLabel: "VList_VStructDepth2_All{{F0: {nil, set[VArray1_VStructDepth1_Rand0]{{}}, VArray2_TypeObject{typeobject(any), typeobject(VArray3_VArray1_VStructDepth1_Rand0)}}, F1: {\"ΔΘΠ\"}, F4: {\"fghijklmn\", \"jkl\"}, F5: {0, 1.3405235e+09, 7.1763155e+08}, F6: {140: 0, 17: 151, 56: 62}, F8: {F0: []?VStructDepth2_Rand0{{F0: {?VStructDepth1_All{F1: true, F3: \"efghij\", F4: \"fghijklmn\", F5: typeobject(VArray3_VUnionDepth1_Rand1), F6: 75, F7: 248, F9: VEnumBcd.D, F12: 43499, F13: 1253, F14: 3974103741, F15: 1844281750, F17: 3375836576587270255, F19: 17, F20: -1460, F21: -10212, F22: -1060363355, F23: 514002776, F24: 2358438844140972467, F25: 1783180604927239055, F26: -2.4064853e+08, F27: 2.4226964e+09, F28: -1.434913756137727e+09, F29: -9.389382022665024e+07, F30: {}}, map[int16]int16{-13391: 5138, 0: 13027, 6463: 0}, nil}, F9: {F0: VMap_Bool_Bool{true: false}, F1: true, F7: 191, F9: VEnumBcd.D, F26: -4.9030512e+08}}, {}, {}}, F1: true, F3: \"defgh\", F4: \"pΔΘΠΣΦ\", F5: typeobject(set[VString]), F6: 211, F7: 21, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {RetryCode: RetryRefetch, Msg: \"op\"}, F13: 64458, F14: 2865316306, F15: 2053702854, F16: 16740828914000238118, F17: 5293184889864362510, F18: 1, F19: 57, F20: -7954, F21: -3943, F22: -932901480, F23: -465095132, F24: -3924391045309080943, F25: -1331226890133377473, F26: 6.126843e+08, F27: -1.1895084e+09, F28: 2.2126661592287548e+07, F29: 3.5083903308391464e+08, F30: {}}, F9: {F0: VSet_VBool{false, true}, F26: 3.2490583e+09}, F10: {F28: 0}, F11: {F8: VEnumAbc.A}, F12: {F3: \"ab\", F5: typeobject(VList_VEnumAbc), F6: 40, F7: 197, F11: {Id: \"世\", RetryCode: RetryConnection, Msg: \"pΔΘΠΣΦ王普澤世\"}, F12: 22297, F13: 52386, F15: 3907397382, F17: 15848064095276055989, F18: 5, F20: -6946, F21: 8250, F23: 1608510, F24: 4402833488076662654, F25: 508407465641320676, F26: 2.3330765e+09, F30: {}}, F13: {F4: \"lmn\", F15: 1365343091}}, {F1: {\"lmnopΔΘΠΣΦ王普澤世\"}, F2: {true, false, false}, F3: {-908690320}, F5: {1.1358843e+09}, F6: {107: 96, 177: 176, 249: 0}, F7: {VEnumBcd.B: VEnumBcd.B, VEnumBcd.D: VEnumBcd.B}, F9: {F0: VInt64(4142756024516204836), F9: VEnumBcd.C}, F10: {F16: 13196521275255537781}, F11: {F9: VEnumBcd.B}, F12: {F0: []VUint64{6817378842332462803, 317027385006403158, 8932283352251020403}, F1: true, F3: \"defghijklmno\", F4: \"fghijkl\", F5: typeobject(VArray3_VList_Any), F6: 161, F7: 119, F8: VEnumAbc.B, F11: {Id: \"g\", RetryCode: RetryConnection, Msg: \"efghijklmnopΔΘΠΣΦ王普澤世\"}, F12: 60426, F14: 1551396832, F16: 17092310798118877456, F17: 2131282759981294192, F19: -63, F20: 10352, F21: -14331, F22: -465497144, F23: 428765151, F24: -4402531179038808584, F25: 633981431411127459, F26: -1.9213248e+08, F27: 3.2490072e+07, F28: -1.774660226210965e+09, F29: 1.535512228377124e+08, F30: {}}, F13: {F4: \"efghijklmnopΔΘΠ\", F15: 2348563028, F21: 2450}}}",
+		SourceLabel: "VList_VStructDepth2_All{{F0: {VArray1_Byte(\"\\x00\"), []VUint64{}, nil}, F1: {\"jklmnopΔΘΠΣΦ\"}, F2: {false, true, false}, F3: {792247926, 690852989}, F4: {\"\", \"defghijklmnopΔ\"}, F5: {-2.0348338e+08, 6.0928154e+08, 6.7638803e+08}, F6: {230: 22}, F8: {F0: VArray2_TypeObject{}, F4: \"defghijklmnopΔΘΠΣΦ\", F6: 1, F7: 253, F8: C, F9: C, F11: {}, F12: 30128, F15: 1643230504, F16: 3960792174684445623, F19: 53, F20: -5781, F21: 3419, F22: -518276703, F23: 29573900, F24: -1598525314883032858, F25: 2311230435801133446, F26: 1.6671425e+09, F27: -3.510242e+08, F28: -1.9023779138032928e+09, F29: 1.5338860629222472e+09}, F9: {F0: VSet_VArray3_Bool{{}}, F7: 69, F9: C, F26: -6.3386605e+08}, F11: {F9: B}, F13: {F4: \"jklmnopΔΘΠΣΦ\", F15: 3766227341, F21: 11468}}}",
 		Source: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
+					VArray1_Byte{},
+					[]VUint64(nil),
 					nil,
-					map[VArray1_VStructDepth1_Rand0]struct{}{
-						{}: struct{}{},
-					},
-					VArray2_TypeObject{
-						vdl.AnyType,
-						vdl.TypeOf((*VArray3_VArray1_VStructDepth1_Rand0)(nil)),
-					},
 				},
 				F1: VArray1_String{
-					"ΔΘΠ",
-				},
-				F4: VSet_VString{
-					"fghijklmn": struct{}{},
-					"jkl":       struct{}{},
-				},
-				F5: VSet_Float32{
-					0:             struct{}{},
-					1.3405235e+09: struct{}{},
-					7.1763155e+08: struct{}{},
-				},
-				F6: VMap_VByte_VByte{
-					140: 0,
-					17:  151,
-					56:  62,
-				},
-				F8: VStructDepth1_All{
-					F0: []*VStructDepth2_Rand0{
-						{
-							F0: VArray3_Any{
-								&VStructDepth1_All{
-									F1:  true,
-									F3:  "efghij",
-									F4:  "fghijklmn",
-									F5:  vdl.TypeOf((*VArray3_VUnionDepth1_Rand1)(nil)),
-									F6:  75,
-									F7:  248,
-									F9:  VEnumBcdD,
-									F12: 43499,
-									F13: 1253,
-									F14: 3974103741,
-									F15: 1844281750,
-									F17: 3375836576587270255,
-									F19: 17,
-									F20: -1460,
-									F21: -10212,
-									F22: -1060363355,
-									F23: 514002776,
-									F24: 2358438844140972467,
-									F25: 1783180604927239055,
-									F26: -2.4064853e+08,
-									F27: 2.4226964e+09,
-									F28: -1.434913756137727e+09,
-									F29: -9.389382022665024e+07,
-									F30: &VStructEmpty{},
-								},
-								map[int16]int16{
-									-13391: 5138,
-									0:      13027,
-									6463:   0,
-								},
-								nil,
-							},
-							F9: VStructDepth1_Rand1{
-								F0: VMap_Bool_Bool{
-									true: false,
-								},
-								F1:  true,
-								F7:  191,
-								F9:  VEnumBcdD,
-								F26: -4.9030512e+08,
-							},
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-					},
-					F1: true,
-					F3: "defgh",
-					F4: "pΔΘΠΣΦ",
-					F5: vdl.TypeOf((*map[VString]struct{})(nil)),
-					F6: 211,
-					F7: 21,
-					F8: VEnumAbcC,
-					F9: VEnumBcdC,
-					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryRefetch,
-						Msg:       "op",
-					}),
-					F13: 64458,
-					F14: 2865316306,
-					F15: 2053702854,
-					F16: 16740828914000238118,
-					F17: 5293184889864362510,
-					F18: 1,
-					F19: 57,
-					F20: -7954,
-					F21: -3943,
-					F22: -932901480,
-					F23: -465095132,
-					F24: -3924391045309080943,
-					F25: -1331226890133377473,
-					F26: 6.126843e+08,
-					F27: -1.1895084e+09,
-					F28: 2.2126661592287548e+07,
-					F29: 3.5083903308391464e+08,
-					F30: &VStructEmpty{},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VSet_VBool{
-						false: struct{}{},
-						true:  struct{}{},
-					},
-					F26: 3.2490583e+09,
-				},
-				F10: VUnionDepth1_Rand0F28{},
-				F11: VUnionDepth1_Rand1F8{},
-				F12: &VStructDepth1_All{
-					F3: "ab",
-					F5: vdl.TypeOf((*VList_VEnumAbc)(nil)),
-					F6: 40,
-					F7: 197,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "世",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "pΔΘΠΣΦ王普澤世",
-					}),
-					F12: 22297,
-					F13: 52386,
-					F15: 3907397382,
-					F17: 15848064095276055989,
-					F18: 5,
-					F20: -6946,
-					F21: 8250,
-					F23: 1608510,
-					F24: 4402833488076662654,
-					F25: 508407465641320676,
-					F26: 2.3330765e+09,
-					F30: &VStructEmpty{},
-				},
-				F13: &VStructDepth1_Rand0{
-					F4:  "lmn",
-					F15: 1365343091,
-				},
-			},
-			{
-				F1: VArray1_String{
-					"lmnopΔΘΠΣΦ王普澤世",
+					"jklmnopΔΘΠΣΦ",
 				},
 				F2: VList_VBool{
-					true,
 					false,
+					true,
 					false,
 				},
 				F3: VList_VInt32{
-					-908690320,
+					792247926,
+					690852989,
+				},
+				F4: VSet_VString{
+					"":               struct{}{},
+					"defghijklmnopΔ": struct{}{},
 				},
 				F5: VSet_Float32{
-					1.1358843e+09: struct{}{},
+					-2.0348338e+08: struct{}{},
+					6.0928154e+08:  struct{}{},
+					6.7638803e+08:  struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					107: 96,
-					177: 176,
-					249: 0,
-				},
-				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdB,
-					VEnumBcdD: VEnumBcdB,
+					230: 22,
 				},
 				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
+					F0: VArray2_TypeObject{
+						vdl.AnyType,
+						vdl.AnyType,
+					},
+					F4:  "defghijklmnopΔΘΠΣΦ",
+					F5:  vdl.AnyType,
+					F6:  1,
+					F7:  253,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdC,
+					F11: verror.FromWire(vdl.WireError{}),
+					F12: 30128,
+					F15: 1643230504,
+					F16: 3960792174684445623,
+					F19: 53,
+					F20: -5781,
+					F21: 3419,
+					F22: -518276703,
+					F23: 29573900,
+					F24: -1598525314883032858,
+					F25: 2311230435801133446,
+					F26: 1.6671425e+09,
+					F27: -3.510242e+08,
+					F28: -1.9023779138032928e+09,
+					F29: 1.5338860629222472e+09,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VInt64(4142756024516204836),
-					F9: VEnumBcdC,
-				},
-				F10: VUnionDepth1_Rand0F16{13196521275255537781},
-				F11: VUnionDepth1_Rand1F9{},
-				F12: &VStructDepth1_All{
-					F0: []VUint64{
-						6817378842332462803,
-						317027385006403158,
-						8932283352251020403,
+					F0: VSet_VArray3_Bool{
+						{}: struct{}{},
 					},
-					F1: true,
-					F3: "defghijklmno",
-					F4: "fghijkl",
-					F5: vdl.TypeOf((*VArray3_VList_Any)(nil)),
-					F6: 161,
-					F7: 119,
-					F8: VEnumAbcB,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "g",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "efghijklmnopΔΘΠΣΦ王普澤世",
-					}),
-					F12: 60426,
-					F14: 1551396832,
-					F16: 17092310798118877456,
-					F17: 2131282759981294192,
-					F19: -63,
-					F20: 10352,
-					F21: -14331,
-					F22: -465497144,
-					F23: 428765151,
-					F24: -4402531179038808584,
-					F25: 633981431411127459,
-					F26: -1.9213248e+08,
-					F27: 3.2490072e+07,
-					F28: -1.774660226210965e+09,
-					F29: 1.535512228377124e+08,
-					F30: &VStructEmpty{},
+					F7:  69,
+					F9:  VEnumBcdC,
+					F26: -6.3386605e+08,
 				},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F9{},
 				F13: &VStructDepth1_Rand0{
-					F4:  "efghijklmnopΔΘΠ",
-					F15: 2348563028,
-					F21: 2450,
+					F4:  "jklmnopΔΘΠΣΦ",
+					F15: 3766227341,
+					F21: 11468,
 				},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VStructDepth2_All{{F0: {nil, set[VArray1_VStructDepth1_Rand0]{{}}, VArray2_TypeObject{typeobject(any), typeobject(VArray3_VArray1_VStructDepth1_Rand0)}}, F1: {\"ΔΘΠ\"}, F4: {\"fghijklmn\", \"jkl\"}, F5: {0, 1.3405235e+09, 7.1763155e+08}, F6: {140: 0, 17: 151, 56: 62}, F8: {F0: []?VStructDepth2_Rand0{{F0: {?VStructDepth1_All{F1: true, F3: \"efghij\", F4: \"fghijklmn\", F5: typeobject(VArray3_VUnionDepth1_Rand1), F6: 75, F7: 248, F9: VEnumBcd.D, F12: 43499, F13: 1253, F14: 3974103741, F15: 1844281750, F17: 3375836576587270255, F19: 17, F20: -1460, F21: -10212, F22: -1060363355, F23: 514002776, F24: 2358438844140972467, F25: 1783180604927239055, F26: -2.4064853e+08, F27: 2.4226964e+09, F28: -1.434913756137727e+09, F29: -9.389382022665024e+07, F30: {}}, map[int16]int16{-13391: 5138, 0: 13027, 6463: 0}, nil}, F9: {F0: VMap_Bool_Bool{true: false}, F1: true, F7: 191, F9: VEnumBcd.D, F26: -4.9030512e+08}}, {}, {}}, F1: true, F3: \"defgh\", F4: \"pΔΘΠΣΦ\", F5: typeobject(set[VString]), F6: 211, F7: 21, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {RetryCode: RetryRefetch, Msg: \"op\"}, F13: 64458, F14: 2865316306, F15: 2053702854, F16: 16740828914000238118, F17: 5293184889864362510, F18: 1, F19: 57, F20: -7954, F21: -3943, F22: -932901480, F23: -465095132, F24: -3924391045309080943, F25: -1331226890133377473, F26: 6.126843e+08, F27: -1.1895084e+09, F28: 2.2126661592287548e+07, F29: 3.5083903308391464e+08, F30: {}}, F9: {F0: VSet_VBool{false, true}, F26: 3.2490583e+09}, F10: {F28: 0}, F11: {F8: VEnumAbc.A}, F12: {F3: \"ab\", F5: typeobject(VList_VEnumAbc), F6: 40, F7: 197, F11: {Id: \"世\", RetryCode: RetryConnection, Msg: \"pΔΘΠΣΦ王普澤世\"}, F12: 22297, F13: 52386, F15: 3907397382, F17: 15848064095276055989, F18: 5, F20: -6946, F21: 8250, F23: 1608510, F24: 4402833488076662654, F25: 508407465641320676, F26: 2.3330765e+09, F30: {}}, F13: {F4: \"lmn\", F15: 1365343091}}, {F1: {\"lmnopΔΘΠΣΦ王普澤世\"}, F2: {true, false, false}, F3: {-908690320}, F5: {1.1358843e+09}, F6: {107: 96, 177: 176, 249: 0}, F7: {VEnumBcd.B: VEnumBcd.B, VEnumBcd.D: VEnumBcd.B}, F9: {F0: VInt64(4142756024516204836), F9: VEnumBcd.C}, F10: {F16: 13196521275255537781}, F11: {F9: VEnumBcd.B}, F12: {F0: []VUint64{6817378842332462803, 317027385006403158, 8932283352251020403}, F1: true, F3: \"defghijklmno\", F4: \"fghijkl\", F5: typeobject(VArray3_VList_Any), F6: 161, F7: 119, F8: VEnumAbc.B, F11: {Id: \"g\", RetryCode: RetryConnection, Msg: \"efghijklmnopΔΘΠΣΦ王普澤世\"}, F12: 60426, F14: 1551396832, F16: 17092310798118877456, F17: 2131282759981294192, F19: -63, F20: 10352, F21: -14331, F22: -465497144, F23: 428765151, F24: -4402531179038808584, F25: 633981431411127459, F26: -1.9213248e+08, F27: 3.2490072e+07, F28: -1.774660226210965e+09, F29: 1.535512228377124e+08, F30: {}}, F13: {F4: \"efghijklmnopΔΘΠ\", F15: 2348563028, F21: 2450}}}",
+		TargetLabel: "VList_VStructDepth2_All{{F0: {VArray1_Byte(\"\\x00\"), []VUint64{}, nil}, F1: {\"jklmnopΔΘΠΣΦ\"}, F2: {false, true, false}, F3: {792247926, 690852989}, F4: {\"\", \"defghijklmnopΔ\"}, F5: {-2.0348338e+08, 6.0928154e+08, 6.7638803e+08}, F6: {230: 22}, F8: {F0: VArray2_TypeObject{}, F4: \"defghijklmnopΔΘΠΣΦ\", F6: 1, F7: 253, F8: C, F9: C, F11: {}, F12: 30128, F15: 1643230504, F16: 3960792174684445623, F19: 53, F20: -5781, F21: 3419, F22: -518276703, F23: 29573900, F24: -1598525314883032858, F25: 2311230435801133446, F26: 1.6671425e+09, F27: -3.510242e+08, F28: -1.9023779138032928e+09, F29: 1.5338860629222472e+09}, F9: {F0: VSet_VArray3_Bool{{}}, F7: 69, F9: C, F26: -6.3386605e+08}, F11: {F9: B}, F13: {F4: \"jklmnopΔΘΠΣΦ\", F15: 3766227341, F21: 11468}}}",
 		Target: VList_VStructDepth2_All{
 			{
 				F0: VArray3_Any{
+					VArray1_Byte{},
+					[]VUint64(nil),
 					nil,
-					map[VArray1_VStructDepth1_Rand0]struct{}{
-						{}: struct{}{},
-					},
-					VArray2_TypeObject{
-						vdl.AnyType,
-						vdl.TypeOf((*VArray3_VArray1_VStructDepth1_Rand0)(nil)),
-					},
 				},
 				F1: VArray1_String{
-					"ΔΘΠ",
-				},
-				F4: VSet_VString{
-					"fghijklmn": struct{}{},
-					"jkl":       struct{}{},
-				},
-				F5: VSet_Float32{
-					0:             struct{}{},
-					1.3405235e+09: struct{}{},
-					7.1763155e+08: struct{}{},
-				},
-				F6: VMap_VByte_VByte{
-					140: 0,
-					17:  151,
-					56:  62,
-				},
-				F8: VStructDepth1_All{
-					F0: []*VStructDepth2_Rand0{
-						{
-							F0: VArray3_Any{
-								&VStructDepth1_All{
-									F1:  true,
-									F3:  "efghij",
-									F4:  "fghijklmn",
-									F5:  vdl.TypeOf((*VArray3_VUnionDepth1_Rand1)(nil)),
-									F6:  75,
-									F7:  248,
-									F9:  VEnumBcdD,
-									F12: 43499,
-									F13: 1253,
-									F14: 3974103741,
-									F15: 1844281750,
-									F17: 3375836576587270255,
-									F19: 17,
-									F20: -1460,
-									F21: -10212,
-									F22: -1060363355,
-									F23: 514002776,
-									F24: 2358438844140972467,
-									F25: 1783180604927239055,
-									F26: -2.4064853e+08,
-									F27: 2.4226964e+09,
-									F28: -1.434913756137727e+09,
-									F29: -9.389382022665024e+07,
-									F30: &VStructEmpty{},
-								},
-								map[int16]int16{
-									-13391: 5138,
-									0:      13027,
-									6463:   0,
-								},
-								nil,
-							},
-							F9: VStructDepth1_Rand1{
-								F0: VMap_Bool_Bool{
-									true: false,
-								},
-								F1:  true,
-								F7:  191,
-								F9:  VEnumBcdD,
-								F26: -4.9030512e+08,
-							},
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-					},
-					F1: true,
-					F3: "defgh",
-					F4: "pΔΘΠΣΦ",
-					F5: vdl.TypeOf((*map[VString]struct{})(nil)),
-					F6: 211,
-					F7: 21,
-					F8: VEnumAbcC,
-					F9: VEnumBcdC,
-					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryRefetch,
-						Msg:       "op",
-					}),
-					F13: 64458,
-					F14: 2865316306,
-					F15: 2053702854,
-					F16: 16740828914000238118,
-					F17: 5293184889864362510,
-					F18: 1,
-					F19: 57,
-					F20: -7954,
-					F21: -3943,
-					F22: -932901480,
-					F23: -465095132,
-					F24: -3924391045309080943,
-					F25: -1331226890133377473,
-					F26: 6.126843e+08,
-					F27: -1.1895084e+09,
-					F28: 2.2126661592287548e+07,
-					F29: 3.5083903308391464e+08,
-					F30: &VStructEmpty{},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VSet_VBool{
-						false: struct{}{},
-						true:  struct{}{},
-					},
-					F26: 3.2490583e+09,
-				},
-				F10: VUnionDepth1_Rand0F28{},
-				F11: VUnionDepth1_Rand1F8{},
-				F12: &VStructDepth1_All{
-					F3: "ab",
-					F5: vdl.TypeOf((*VList_VEnumAbc)(nil)),
-					F6: 40,
-					F7: 197,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "世",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "pΔΘΠΣΦ王普澤世",
-					}),
-					F12: 22297,
-					F13: 52386,
-					F15: 3907397382,
-					F17: 15848064095276055989,
-					F18: 5,
-					F20: -6946,
-					F21: 8250,
-					F23: 1608510,
-					F24: 4402833488076662654,
-					F25: 508407465641320676,
-					F26: 2.3330765e+09,
-					F30: &VStructEmpty{},
-				},
-				F13: &VStructDepth1_Rand0{
-					F4:  "lmn",
-					F15: 1365343091,
-				},
-			},
-			{
-				F1: VArray1_String{
-					"lmnopΔΘΠΣΦ王普澤世",
+					"jklmnopΔΘΠΣΦ",
 				},
 				F2: VList_VBool{
-					true,
 					false,
+					true,
 					false,
 				},
 				F3: VList_VInt32{
-					-908690320,
+					792247926,
+					690852989,
+				},
+				F4: VSet_VString{
+					"":               struct{}{},
+					"defghijklmnopΔ": struct{}{},
 				},
 				F5: VSet_Float32{
-					1.1358843e+09: struct{}{},
+					-2.0348338e+08: struct{}{},
+					6.0928154e+08:  struct{}{},
+					6.7638803e+08:  struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					107: 96,
-					177: 176,
-					249: 0,
-				},
-				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdB,
-					VEnumBcdD: VEnumBcdB,
+					230: 22,
 				},
 				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
+					F0: VArray2_TypeObject{
+						vdl.AnyType,
+						vdl.AnyType,
+					},
+					F4:  "defghijklmnopΔΘΠΣΦ",
+					F5:  vdl.AnyType,
+					F6:  1,
+					F7:  253,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdC,
+					F11: verror.FromWire(vdl.WireError{}),
+					F12: 30128,
+					F15: 1643230504,
+					F16: 3960792174684445623,
+					F19: 53,
+					F20: -5781,
+					F21: 3419,
+					F22: -518276703,
+					F23: 29573900,
+					F24: -1598525314883032858,
+					F25: 2311230435801133446,
+					F26: 1.6671425e+09,
+					F27: -3.510242e+08,
+					F28: -1.9023779138032928e+09,
+					F29: 1.5338860629222472e+09,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VInt64(4142756024516204836),
-					F9: VEnumBcdC,
-				},
-				F10: VUnionDepth1_Rand0F16{13196521275255537781},
-				F11: VUnionDepth1_Rand1F9{},
-				F12: &VStructDepth1_All{
-					F0: []VUint64{
-						6817378842332462803,
-						317027385006403158,
-						8932283352251020403,
+					F0: VSet_VArray3_Bool{
+						{}: struct{}{},
 					},
-					F1: true,
-					F3: "defghijklmno",
-					F4: "fghijkl",
-					F5: vdl.TypeOf((*VArray3_VList_Any)(nil)),
-					F6: 161,
-					F7: 119,
-					F8: VEnumAbcB,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "g",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "efghijklmnopΔΘΠΣΦ王普澤世",
-					}),
-					F12: 60426,
-					F14: 1551396832,
-					F16: 17092310798118877456,
-					F17: 2131282759981294192,
-					F19: -63,
-					F20: 10352,
-					F21: -14331,
-					F22: -465497144,
-					F23: 428765151,
-					F24: -4402531179038808584,
-					F25: 633981431411127459,
-					F26: -1.9213248e+08,
-					F27: 3.2490072e+07,
-					F28: -1.774660226210965e+09,
-					F29: 1.535512228377124e+08,
-					F30: &VStructEmpty{},
+					F7:  69,
+					F9:  VEnumBcdC,
+					F26: -6.3386605e+08,
 				},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F9{},
 				F13: &VStructDepth1_Rand0{
-					F4:  "efghijklmnopΔΘΠ",
-					F15: 2348563028,
-					F21: 2450,
+					F4:  "jklmnopΔΘΠΣΦ",
+					F15: 3766227341,
+					F21: 11468,
 				},
 			},
 		},
-		SourceLabel: "[]any{VStructDepth2_All{F0: {nil, set[VArray1_VStructDepth1_Rand0]{{}}, VArray2_TypeObject{typeobject(any), typeobject(VArray3_VArray1_VStructDepth1_Rand0)}}, F1: {\"ΔΘΠ\"}, F4: {\"fghijklmn\", \"jkl\"}, F5: {0, 1.3405235e+09, 7.1763155e+08}, F6: {140: 0, 17: 151, 56: 62}, F8: {F0: []?VStructDepth2_Rand0{{F0: {VStructDepth1_All{F1: true, F3: \"efghij\", F4: \"fghijklmn\", F5: typeobject(VArray3_VUnionDepth1_Rand1), F6: 75, F7: 248, F9: VEnumBcd.D, F12: 43499, F13: 1253, F14: 3974103741, F15: 1844281750, F17: 3375836576587270255, F19: 17, F20: -1460, F21: -10212, F22: -1060363355, F23: 514002776, F24: 2358438844140972467, F25: 1783180604927239055, F26: -2.4064853e+08, F27: 2.4226964e+09, F28: -1.434913756137727e+09, F29: -9.389382022665024e+07, F30: {}}, map[int16]int16{-13391: 5138, 0: 13027, 6463: 0}, nil}, F9: {F0: VMap_Bool_Bool{true: false}, F1: true, F7: 191, F9: VEnumBcd.D, F26: -4.9030512e+08}}, {}, {}}, F1: true, F3: \"defgh\", F4: \"pΔΘΠΣΦ\", F5: typeobject(set[VString]), F6: 211, F7: 21, F8: VEnumAbc.C, F9: VEnumBcd.C, F11: {RetryCode: RetryRefetch, Msg: \"op\"}, F13: 64458, F14: 2865316306, F15: 2053702854, F16: 16740828914000238118, F17: 5293184889864362510, F18: 1, F19: 57, F20: -7954, F21: -3943, F22: -932901480, F23: -465095132, F24: -3924391045309080943, F25: -1331226890133377473, F26: 6.126843e+08, F27: -1.1895084e+09, F28: 2.2126661592287548e+07, F29: 3.5083903308391464e+08, F30: {}}, F9: {F0: VSet_VBool{false, true}, F26: 3.2490583e+09}, F10: {F28: 0}, F11: {F8: VEnumAbc.A}, F12: {F3: \"ab\", F5: typeobject(VList_VEnumAbc), F6: 40, F7: 197, F11: {Id: \"世\", RetryCode: RetryConnection, Msg: \"pΔΘΠΣΦ王普澤世\"}, F12: 22297, F13: 52386, F15: 3907397382, F17: 15848064095276055989, F18: 5, F20: -6946, F21: 8250, F23: 1608510, F24: 4402833488076662654, F25: 508407465641320676, F26: 2.3330765e+09, F30: {}}, F13: {F4: \"lmn\", F15: 1365343091}}, VStructDepth2_All{F1: {\"lmnopΔΘΠΣΦ王普澤世\"}, F2: {true, false, false}, F3: {-908690320}, F5: {1.1358843e+09}, F6: {107: 96, 177: 176, 249: 0}, F7: {VEnumBcd.B: VEnumBcd.B, VEnumBcd.D: VEnumBcd.B}, F9: {F0: VInt64(4142756024516204836), F9: VEnumBcd.C}, F10: {F16: 13196521275255537781}, F11: {F9: VEnumBcd.B}, F12: {F0: []VUint64{6817378842332462803, 317027385006403158, 8932283352251020403}, F1: true, F3: \"defghijklmno\", F4: \"fghijkl\", F5: typeobject(VArray3_VList_Any), F6: 161, F7: 119, F8: VEnumAbc.B, F11: {Id: \"g\", RetryCode: RetryConnection, Msg: \"efghijklmnopΔΘΠΣΦ王普澤世\"}, F12: 60426, F14: 1551396832, F16: 17092310798118877456, F17: 2131282759981294192, F19: -63, F20: 10352, F21: -14331, F22: -465497144, F23: 428765151, F24: -4402531179038808584, F25: 633981431411127459, F26: -1.9213248e+08, F27: 3.2490072e+07, F28: -1.774660226210965e+09, F29: 1.535512228377124e+08, F30: {}}, F13: {F4: \"efghijklmnopΔΘΠ\", F15: 2348563028, F21: 2450}}}",
+		SourceLabel: "[]any{VStructDepth2_All{F0: {VArray1_Byte(\"\\x00\"), []VUint64{}, nil}, F1: {\"jklmnopΔΘΠΣΦ\"}, F2: {false, true, false}, F3: {792247926, 690852989}, F4: {\"\", \"defghijklmnopΔ\"}, F5: {-2.0348338e+08, 6.0928154e+08, 6.7638803e+08}, F6: {230: 22}, F8: {F0: VArray2_TypeObject{}, F4: \"defghijklmnopΔΘΠΣΦ\", F6: 1, F7: 253, F8: C, F9: C, F11: {}, F12: 30128, F15: 1643230504, F16: 3960792174684445623, F19: 53, F20: -5781, F21: 3419, F22: -518276703, F23: 29573900, F24: -1598525314883032858, F25: 2311230435801133446, F26: 1.6671425e+09, F27: -3.510242e+08, F28: -1.9023779138032928e+09, F29: 1.5338860629222472e+09}, F9: {F0: VSet_VArray3_Bool{{}}, F7: 69, F9: C, F26: -6.3386605e+08}, F11: {F9: B}, F13: {F4: \"jklmnopΔΘΠΣΦ\", F15: 3766227341, F21: 11468}}}",
 		Source: []interface{}{
 			VStructDepth2_All{
 				F0: VArray3_Any{
+					VArray1_Byte{},
+					[]VUint64(nil),
 					nil,
-					map[VArray1_VStructDepth1_Rand0]struct{}{
-						{}: struct{}{},
-					},
-					VArray2_TypeObject{
-						vdl.AnyType,
-						vdl.TypeOf((*VArray3_VArray1_VStructDepth1_Rand0)(nil)),
-					},
 				},
 				F1: VArray1_String{
-					"ΔΘΠ",
-				},
-				F4: VSet_VString{
-					"fghijklmn": struct{}{},
-					"jkl":       struct{}{},
-				},
-				F5: VSet_Float32{
-					0:             struct{}{},
-					1.3405235e+09: struct{}{},
-					7.1763155e+08: struct{}{},
-				},
-				F6: VMap_VByte_VByte{
-					140: 0,
-					17:  151,
-					56:  62,
-				},
-				F8: VStructDepth1_All{
-					F0: []*VStructDepth2_Rand0{
-						{
-							F0: VArray3_Any{
-								VStructDepth1_All{
-									F1:  true,
-									F3:  "efghij",
-									F4:  "fghijklmn",
-									F5:  vdl.TypeOf((*VArray3_VUnionDepth1_Rand1)(nil)),
-									F6:  75,
-									F7:  248,
-									F9:  VEnumBcdD,
-									F12: 43499,
-									F13: 1253,
-									F14: 3974103741,
-									F15: 1844281750,
-									F17: 3375836576587270255,
-									F19: 17,
-									F20: -1460,
-									F21: -10212,
-									F22: -1060363355,
-									F23: 514002776,
-									F24: 2358438844140972467,
-									F25: 1783180604927239055,
-									F26: -2.4064853e+08,
-									F27: 2.4226964e+09,
-									F28: -1.434913756137727e+09,
-									F29: -9.389382022665024e+07,
-									F30: &VStructEmpty{},
-								},
-								map[int16]int16{
-									-13391: 5138,
-									0:      13027,
-									6463:   0,
-								},
-								nil,
-							},
-							F9: VStructDepth1_Rand1{
-								F0: VMap_Bool_Bool{
-									true: false,
-								},
-								F1:  true,
-								F7:  191,
-								F9:  VEnumBcdD,
-								F26: -4.9030512e+08,
-							},
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-						{
-							F10: VUnionDepth1_Rand0F8{},
-							F11: VUnionDepth1_Rand1F6{},
-						},
-					},
-					F1: true,
-					F3: "defgh",
-					F4: "pΔΘΠΣΦ",
-					F5: vdl.TypeOf((*map[VString]struct{})(nil)),
-					F6: 211,
-					F7: 21,
-					F8: VEnumAbcC,
-					F9: VEnumBcdC,
-					F11: verror.FromWire(vdl.WireError{
-						RetryCode: vdl.WireRetryCodeRetryRefetch,
-						Msg:       "op",
-					}),
-					F13: 64458,
-					F14: 2865316306,
-					F15: 2053702854,
-					F16: 16740828914000238118,
-					F17: 5293184889864362510,
-					F18: 1,
-					F19: 57,
-					F20: -7954,
-					F21: -3943,
-					F22: -932901480,
-					F23: -465095132,
-					F24: -3924391045309080943,
-					F25: -1331226890133377473,
-					F26: 6.126843e+08,
-					F27: -1.1895084e+09,
-					F28: 2.2126661592287548e+07,
-					F29: 3.5083903308391464e+08,
-					F30: &VStructEmpty{},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VSet_VBool{
-						false: struct{}{},
-						true:  struct{}{},
-					},
-					F26: 3.2490583e+09,
-				},
-				F10: VUnionDepth1_Rand0F28{},
-				F11: VUnionDepth1_Rand1F8{},
-				F12: &VStructDepth1_All{
-					F3: "ab",
-					F5: vdl.TypeOf((*VList_VEnumAbc)(nil)),
-					F6: 40,
-					F7: 197,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "世",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "pΔΘΠΣΦ王普澤世",
-					}),
-					F12: 22297,
-					F13: 52386,
-					F15: 3907397382,
-					F17: 15848064095276055989,
-					F18: 5,
-					F20: -6946,
-					F21: 8250,
-					F23: 1608510,
-					F24: 4402833488076662654,
-					F25: 508407465641320676,
-					F26: 2.3330765e+09,
-					F30: &VStructEmpty{},
-				},
-				F13: &VStructDepth1_Rand0{
-					F4:  "lmn",
-					F15: 1365343091,
-				},
-			},
-			VStructDepth2_All{
-				F1: VArray1_String{
-					"lmnopΔΘΠΣΦ王普澤世",
+					"jklmnopΔΘΠΣΦ",
 				},
 				F2: VList_VBool{
-					true,
 					false,
+					true,
 					false,
 				},
 				F3: VList_VInt32{
-					-908690320,
+					792247926,
+					690852989,
+				},
+				F4: VSet_VString{
+					"":               struct{}{},
+					"defghijklmnopΔ": struct{}{},
 				},
 				F5: VSet_Float32{
-					1.1358843e+09: struct{}{},
+					-2.0348338e+08: struct{}{},
+					6.0928154e+08:  struct{}{},
+					6.7638803e+08:  struct{}{},
 				},
 				F6: VMap_VByte_VByte{
-					107: 96,
-					177: 176,
-					249: 0,
-				},
-				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdB,
-					VEnumBcdD: VEnumBcdB,
+					230: 22,
 				},
 				F8: VStructDepth1_All{
-					F5: vdl.AnyType,
+					F0: VArray2_TypeObject{
+						vdl.AnyType,
+						vdl.AnyType,
+					},
+					F4:  "defghijklmnopΔΘΠΣΦ",
+					F5:  vdl.AnyType,
+					F6:  1,
+					F7:  253,
+					F8:  VEnumAbcC,
+					F9:  VEnumBcdC,
+					F11: verror.FromWire(vdl.WireError{}),
+					F12: 30128,
+					F15: 1643230504,
+					F16: 3960792174684445623,
+					F19: 53,
+					F20: -5781,
+					F21: 3419,
+					F22: -518276703,
+					F23: 29573900,
+					F24: -1598525314883032858,
+					F25: 2311230435801133446,
+					F26: 1.6671425e+09,
+					F27: -3.510242e+08,
+					F28: -1.9023779138032928e+09,
+					F29: 1.5338860629222472e+09,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VInt64(4142756024516204836),
-					F9: VEnumBcdC,
-				},
-				F10: VUnionDepth1_Rand0F16{13196521275255537781},
-				F11: VUnionDepth1_Rand1F9{},
-				F12: &VStructDepth1_All{
-					F0: []VUint64{
-						6817378842332462803,
-						317027385006403158,
-						8932283352251020403,
+					F0: VSet_VArray3_Bool{
+						{}: struct{}{},
 					},
-					F1: true,
-					F3: "defghijklmno",
-					F4: "fghijkl",
-					F5: vdl.TypeOf((*VArray3_VList_Any)(nil)),
-					F6: 161,
-					F7: 119,
-					F8: VEnumAbcB,
-					F11: verror.FromWire(vdl.WireError{
-						Id:        "g",
-						RetryCode: vdl.WireRetryCodeRetryConnection,
-						Msg:       "efghijklmnopΔΘΠΣΦ王普澤世",
-					}),
-					F12: 60426,
-					F14: 1551396832,
-					F16: 17092310798118877456,
-					F17: 2131282759981294192,
-					F19: -63,
-					F20: 10352,
-					F21: -14331,
-					F22: -465497144,
-					F23: 428765151,
-					F24: -4402531179038808584,
-					F25: 633981431411127459,
-					F26: -1.9213248e+08,
-					F27: 3.2490072e+07,
-					F28: -1.774660226210965e+09,
-					F29: 1.535512228377124e+08,
-					F30: &VStructEmpty{},
+					F7:  69,
+					F9:  VEnumBcdC,
+					F26: -6.3386605e+08,
 				},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F9{},
 				F13: &VStructDepth1_Rand0{
-					F4:  "efghijklmnopΔΘΠ",
-					F15: 2348563028,
-					F21: 2450,
+					F4:  "jklmnopΔΘΠΣΦ",
+					F15: 3766227341,
+					F21: 11468,
 				},
 			},
 		},
@@ -41138,7 +40975,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Target: VList_VUnionDepth2_All{
 			VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 				F0:  int64(-123),
@@ -41148,7 +40985,7 @@ var vAllPass = []Entry{
 				F26: 1.23,
 			}},
 		},
-		SourceLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		SourceLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Source: VList_VUnionDepth2_All{
 			VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 				F0:  int64(-123),
@@ -41161,7 +40998,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Target: VList_VUnionDepth2_All{
 			VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 				F0:  int64(-123),
@@ -41171,7 +41008,7 @@ var vAllPass = []Entry{
 				F26: 1.23,
 			}},
 		},
-		SourceLabel: "VList_Any{VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		SourceLabel: "VList_Any{VUnionDepth2_All{F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Source: VList_Any{
 			VUnionDepth2_All(VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 				F0:  int64(-123),
@@ -41185,47 +41022,95 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth2_All{{F0: {}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F12: {}}, {F6: {}}, {F4: {4439292284580909895}}}",
 		Target: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF0{},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_AllF6{},
+			VUnionDepth2_AllF4{map[int64]struct{}{
+				4439292284580909895: struct{}{},
+			}},
 		},
-		SourceLabel: "VList_VUnionDepth2_All{{F0: {}}}",
+		SourceLabel: "VList_VUnionDepth2_All{{F12: {}}, {F6: {}}, {F4: {4439292284580909895}}}",
 		Source: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF0{},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_AllF6{},
+			VUnionDepth2_AllF4{map[int64]struct{}{
+				4439292284580909895: struct{}{},
+			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth2_All{{F0: {}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F12: {}}, {F6: {}}, {F4: {4439292284580909895}}}",
 		Target: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF0{},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{}},
+			VUnionDepth2_AllF6{},
+			VUnionDepth2_AllF4{map[int64]struct{}{
+				4439292284580909895: struct{}{},
+			}},
 		},
-		SourceLabel: "[]any{VUnionDepth2_All{F0: {}}}",
+		SourceLabel: "[]any{VUnionDepth2_All{F12: {}}, VUnionDepth2_All{F6: {}}, VUnionDepth2_All{F4: {4439292284580909895}}}",
 		Source: []interface{}{
-			VUnionDepth2_All(VUnionDepth2_AllF0{}),
+			VUnionDepth2_All(VUnionDepth2_AllF12{&VStructDepth1_Rand0{}}),
+			VUnionDepth2_All(VUnionDepth2_AllF6{}),
+			VUnionDepth2_All(VUnionDepth2_AllF4{map[int64]struct{}{
+				4439292284580909895: struct{}{},
+			}}),
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth2_All{{F11: {F28: -3.2479133937761946e+09}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F12: {F4: \"nopΔΘΠΣΦ王\", F21: 11723}}, {F11: {F8: A}}, {F9: {F4: \"bcdefgh\", F15: 717546421}}}",
 		Target: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF11{VUnionDepth1_Rand0F28{-3.2479133937761946e+09}},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{
+				F4:  "nopΔΘΠΣΦ王",
+				F21: 11723,
+			}},
+			VUnionDepth2_AllF11{VUnionDepth1_Rand0F8{}},
+			VUnionDepth2_AllF9{VStructDepth1_Rand0{
+				F4:  "bcdefgh",
+				F15: 717546421,
+			}},
 		},
-		SourceLabel: "VList_VUnionDepth2_All{{F11: {F28: -3.2479133937761946e+09}}}",
+		SourceLabel: "VList_VUnionDepth2_All{{F12: {F4: \"nopΔΘΠΣΦ王\", F21: 11723}}, {F11: {F8: A}}, {F9: {F4: \"bcdefgh\", F15: 717546421}}}",
 		Source: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF11{VUnionDepth1_Rand0F28{-3.2479133937761946e+09}},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{
+				F4:  "nopΔΘΠΣΦ王",
+				F21: 11723,
+			}},
+			VUnionDepth2_AllF11{VUnionDepth1_Rand0F8{}},
+			VUnionDepth2_AllF9{VStructDepth1_Rand0{
+				F4:  "bcdefgh",
+				F15: 717546421,
+			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_VUnionDepth2_All{{F11: {F28: -3.2479133937761946e+09}}}",
+		TargetLabel: "VList_VUnionDepth2_All{{F12: {F4: \"nopΔΘΠΣΦ王\", F21: 11723}}, {F11: {F8: A}}, {F9: {F4: \"bcdefgh\", F15: 717546421}}}",
 		Target: VList_VUnionDepth2_All{
-			VUnionDepth2_AllF11{VUnionDepth1_Rand0F28{-3.2479133937761946e+09}},
+			VUnionDepth2_AllF12{&VStructDepth1_Rand0{
+				F4:  "nopΔΘΠΣΦ王",
+				F21: 11723,
+			}},
+			VUnionDepth2_AllF11{VUnionDepth1_Rand0F8{}},
+			VUnionDepth2_AllF9{VStructDepth1_Rand0{
+				F4:  "bcdefgh",
+				F15: 717546421,
+			}},
 		},
-		SourceLabel: "[]any{VUnionDepth2_All{F11: {F28: -3.2479133937761946e+09}}}",
+		SourceLabel: "[]any{VUnionDepth2_All{F12: {F4: \"nopΔΘΠΣΦ王\", F21: 11723}}, VUnionDepth2_All{F11: {F8: A}}, VUnionDepth2_All{F9: {F4: \"bcdefgh\", F15: 717546421}}}",
 		Source: []interface{}{
-			VUnionDepth2_All(VUnionDepth2_AllF11{VUnionDepth1_Rand0F28{-3.2479133937761946e+09}}),
+			VUnionDepth2_All(VUnionDepth2_AllF12{&VStructDepth1_Rand0{
+				F4:  "nopΔΘΠΣΦ王",
+				F21: 11723,
+			}}),
+			VUnionDepth2_All(VUnionDepth2_AllF11{VUnionDepth1_Rand0F8{}}),
+			VUnionDepth2_All(VUnionDepth2_AllF9{VStructDepth1_Rand0{
+				F4:  "bcdefgh",
+				F15: 717546421,
+			}}),
 		},
 	},
 	{
@@ -41253,7 +41138,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -41272,7 +41157,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -41294,7 +41179,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -41313,7 +41198,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "[]?VStructDepth2_Rand0{{F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: []*VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
@@ -41336,262 +41221,446 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{nil, {F0: {VMap_VArray2_Uint32_VArray2_Uint32{}, VUnionDepth3_Rand1{F5: {{false, true, true}, {true, true, false}}}, VMap_Bool_Bool{true: true}}, F11: {F6: 109}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {VList_VStructDepth1_All{{F0: VSet_Int64{-142983328942982573, 0}, F1: true, F2: true, F3: \"mnopΔ\", F4: \"defghijkl\", F6: 129, F7: 195, F8: B, F11: {Id: \"bcdefghijklmno\", Msg: \"opΔΘΠΣΦ王普\"}, F12: 58791, F13: 25457, F14: 2961929109, F15: 3120902661, F16: 1046591979970691293, F17: 6035619393906677852, F18: 44, F19: -35, F20: 13229, F21: -9922, F22: 110044048, F23: -274670656, F24: -569093003380207757, F25: 1123194318418397082, F26: -2.3901263e+09, F27: 8.364022e+08, F28: 2.7867172951107295e+06, F29: -1.6993258794887742e+08, F30: {}}}, typeobject(any), VMap_VEnumAbc_VEnumAbc{B: A, C: C}}, F9: {F0: []VUnionDepth1_All{{F16: 16089353212084617993}, {F27: -5.3364102e+08}, {F16: 12603105066678282968}}, F7: 6, F26: -4.3563632e+08}, F10: {F12: 52300}, F11: {F8: A}}, {}}",
 		Target: VList_OptVStructDepth2_Rand0{
-			nil,
 			{
 				F0: VArray3_Any{
-					VMap_VArray2_Uint32_VArray2_Uint32(nil),
-					VUnionDepth3_Rand1(VUnionDepth3_Rand1F5{VSet_VArray3_Bool{
+					VList_VStructDepth1_All{
 						{
-							false,
-							true,
-							true,
-						}: struct{}{},
-						{
-							true,
-							true,
-							false,
-						}: struct{}{},
-					}}),
-					VMap_Bool_Bool{
-						true: true,
+							F0: VSet_Int64{
+								-142983328942982573: struct{}{},
+								0:                   struct{}{},
+							},
+							F1: true,
+							F2: true,
+							F3: "mnopΔ",
+							F4: "defghijkl",
+							F5: vdl.AnyType,
+							F6: 129,
+							F7: 195,
+							F8: VEnumAbcB,
+							F11: verror.FromWire(vdl.WireError{
+								Id:  "bcdefghijklmno",
+								Msg: "opΔΘΠΣΦ王普",
+							}),
+							F12: 58791,
+							F13: 25457,
+							F14: 2961929109,
+							F15: 3120902661,
+							F16: 1046591979970691293,
+							F17: 6035619393906677852,
+							F18: 44,
+							F19: -35,
+							F20: 13229,
+							F21: -9922,
+							F22: 110044048,
+							F23: -274670656,
+							F24: -569093003380207757,
+							F25: 1123194318418397082,
+							F26: -2.3901263e+09,
+							F27: 8.364022e+08,
+							F28: 2.7867172951107295e+06,
+							F29: -1.6993258794887742e+08,
+							F30: &VStructEmpty{},
+						},
+					},
+					vdl.AnyType,
+					VMap_VEnumAbc_VEnumAbc{
+						VEnumAbcB: VEnumAbcA,
+						VEnumAbcC: VEnumAbcC,
 					},
 				},
+				F9: VStructDepth1_Rand1{
+					F0: []VUnionDepth1_All{
+						VUnionDepth1_AllF16{16089353212084617993},
+						VUnionDepth1_AllF27{-5.3364102e+08},
+						VUnionDepth1_AllF16{12603105066678282968},
+					},
+					F7:  6,
+					F26: -4.3563632e+08,
+				},
+				F10: VUnionDepth1_Rand0F12{52300},
+				F11: VUnionDepth1_Rand1F8{},
+			},
+			{
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{109},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VList_OptVStructDepth2_Rand0{nil, {F0: {VMap_VArray2_Uint32_VArray2_Uint32{}, VUnionDepth3_Rand1{F5: {{false, true, true}, {true, true, false}}}, VMap_Bool_Bool{true: true}}, F11: {F6: 109}}}",
+		SourceLabel: "VList_OptVStructDepth2_Rand0{{F0: {VList_VStructDepth1_All{{F0: VSet_Int64{-142983328942982573, 0}, F1: true, F2: true, F3: \"mnopΔ\", F4: \"defghijkl\", F6: 129, F7: 195, F8: B, F11: {Id: \"bcdefghijklmno\", Msg: \"opΔΘΠΣΦ王普\"}, F12: 58791, F13: 25457, F14: 2961929109, F15: 3120902661, F16: 1046591979970691293, F17: 6035619393906677852, F18: 44, F19: -35, F20: 13229, F21: -9922, F22: 110044048, F23: -274670656, F24: -569093003380207757, F25: 1123194318418397082, F26: -2.3901263e+09, F27: 8.364022e+08, F28: 2.7867172951107295e+06, F29: -1.6993258794887742e+08, F30: {}}}, typeobject(any), VMap_VEnumAbc_VEnumAbc{B: A, C: C}}, F9: {F0: []VUnionDepth1_All{{F16: 16089353212084617993}, {F27: -5.3364102e+08}, {F16: 12603105066678282968}}, F7: 6, F26: -4.3563632e+08}, F10: {F12: 52300}, F11: {F8: A}}, {}}",
 		Source: VList_OptVStructDepth2_Rand0{
-			nil,
 			{
 				F0: VArray3_Any{
-					VMap_VArray2_Uint32_VArray2_Uint32(nil),
-					VUnionDepth3_Rand1(VUnionDepth3_Rand1F5{VSet_VArray3_Bool{
+					VList_VStructDepth1_All{
 						{
-							false,
-							true,
-							true,
-						}: struct{}{},
-						{
-							true,
-							true,
-							false,
-						}: struct{}{},
-					}}),
-					VMap_Bool_Bool{
-						true: true,
+							F0: VSet_Int64{
+								-142983328942982573: struct{}{},
+								0:                   struct{}{},
+							},
+							F1: true,
+							F2: true,
+							F3: "mnopΔ",
+							F4: "defghijkl",
+							F5: vdl.AnyType,
+							F6: 129,
+							F7: 195,
+							F8: VEnumAbcB,
+							F11: verror.FromWire(vdl.WireError{
+								Id:  "bcdefghijklmno",
+								Msg: "opΔΘΠΣΦ王普",
+							}),
+							F12: 58791,
+							F13: 25457,
+							F14: 2961929109,
+							F15: 3120902661,
+							F16: 1046591979970691293,
+							F17: 6035619393906677852,
+							F18: 44,
+							F19: -35,
+							F20: 13229,
+							F21: -9922,
+							F22: 110044048,
+							F23: -274670656,
+							F24: -569093003380207757,
+							F25: 1123194318418397082,
+							F26: -2.3901263e+09,
+							F27: 8.364022e+08,
+							F28: 2.7867172951107295e+06,
+							F29: -1.6993258794887742e+08,
+							F30: &VStructEmpty{},
+						},
+					},
+					vdl.AnyType,
+					VMap_VEnumAbc_VEnumAbc{
+						VEnumAbcB: VEnumAbcA,
+						VEnumAbcC: VEnumAbcC,
 					},
 				},
+				F9: VStructDepth1_Rand1{
+					F0: []VUnionDepth1_All{
+						VUnionDepth1_AllF16{16089353212084617993},
+						VUnionDepth1_AllF27{-5.3364102e+08},
+						VUnionDepth1_AllF16{12603105066678282968},
+					},
+					F7:  6,
+					F26: -4.3563632e+08,
+				},
+				F10: VUnionDepth1_Rand0F12{52300},
+				F11: VUnionDepth1_Rand1F8{},
+			},
+			{
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{109},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{nil, {F0: {VMap_VArray2_Uint32_VArray2_Uint32{}, VUnionDepth3_Rand1{F5: {{false, true, true}, {true, true, false}}}, VMap_Bool_Bool{true: true}}, F11: {F6: 109}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {VList_VStructDepth1_All{{F0: VSet_Int64{-142983328942982573, 0}, F1: true, F2: true, F3: \"mnopΔ\", F4: \"defghijkl\", F6: 129, F7: 195, F8: B, F11: {Id: \"bcdefghijklmno\", Msg: \"opΔΘΠΣΦ王普\"}, F12: 58791, F13: 25457, F14: 2961929109, F15: 3120902661, F16: 1046591979970691293, F17: 6035619393906677852, F18: 44, F19: -35, F20: 13229, F21: -9922, F22: 110044048, F23: -274670656, F24: -569093003380207757, F25: 1123194318418397082, F26: -2.3901263e+09, F27: 8.364022e+08, F28: 2.7867172951107295e+06, F29: -1.6993258794887742e+08, F30: {}}}, typeobject(any), VMap_VEnumAbc_VEnumAbc{B: A, C: C}}, F9: {F0: []VUnionDepth1_All{{F16: 16089353212084617993}, {F27: -5.3364102e+08}, {F16: 12603105066678282968}}, F7: 6, F26: -4.3563632e+08}, F10: {F12: 52300}, F11: {F8: A}}, {}}",
 		Target: VList_OptVStructDepth2_Rand0{
-			nil,
 			{
 				F0: VArray3_Any{
-					VMap_VArray2_Uint32_VArray2_Uint32(nil),
-					VUnionDepth3_Rand1(VUnionDepth3_Rand1F5{VSet_VArray3_Bool{
+					VList_VStructDepth1_All{
 						{
-							false,
-							true,
-							true,
-						}: struct{}{},
-						{
-							true,
-							true,
-							false,
-						}: struct{}{},
-					}}),
-					VMap_Bool_Bool{
-						true: true,
+							F0: VSet_Int64{
+								-142983328942982573: struct{}{},
+								0:                   struct{}{},
+							},
+							F1: true,
+							F2: true,
+							F3: "mnopΔ",
+							F4: "defghijkl",
+							F5: vdl.AnyType,
+							F6: 129,
+							F7: 195,
+							F8: VEnumAbcB,
+							F11: verror.FromWire(vdl.WireError{
+								Id:  "bcdefghijklmno",
+								Msg: "opΔΘΠΣΦ王普",
+							}),
+							F12: 58791,
+							F13: 25457,
+							F14: 2961929109,
+							F15: 3120902661,
+							F16: 1046591979970691293,
+							F17: 6035619393906677852,
+							F18: 44,
+							F19: -35,
+							F20: 13229,
+							F21: -9922,
+							F22: 110044048,
+							F23: -274670656,
+							F24: -569093003380207757,
+							F25: 1123194318418397082,
+							F26: -2.3901263e+09,
+							F27: 8.364022e+08,
+							F28: 2.7867172951107295e+06,
+							F29: -1.6993258794887742e+08,
+							F30: &VStructEmpty{},
+						},
+					},
+					vdl.AnyType,
+					VMap_VEnumAbc_VEnumAbc{
+						VEnumAbcB: VEnumAbcA,
+						VEnumAbcC: VEnumAbcC,
 					},
 				},
+				F9: VStructDepth1_Rand1{
+					F0: []VUnionDepth1_All{
+						VUnionDepth1_AllF16{16089353212084617993},
+						VUnionDepth1_AllF27{-5.3364102e+08},
+						VUnionDepth1_AllF16{12603105066678282968},
+					},
+					F7:  6,
+					F26: -4.3563632e+08,
+				},
+				F10: VUnionDepth1_Rand0F12{52300},
+				F11: VUnionDepth1_Rand1F8{},
+			},
+			{
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{109},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "[]any{nil, VStructDepth2_Rand0{F0: {VMap_VArray2_Uint32_VArray2_Uint32{}, VUnionDepth3_Rand1{F5: {{false, true, true}, {true, true, false}}}, VMap_Bool_Bool{true: true}}, F11: {F6: 109}}}",
+		SourceLabel: "[]any{?VStructDepth2_Rand0{F0: {VList_VStructDepth1_All{{F0: VSet_Int64{-142983328942982573, 0}, F1: true, F2: true, F3: \"mnopΔ\", F4: \"defghijkl\", F6: 129, F7: 195, F8: B, F11: {Id: \"bcdefghijklmno\", Msg: \"opΔΘΠΣΦ王普\"}, F12: 58791, F13: 25457, F14: 2961929109, F15: 3120902661, F16: 1046591979970691293, F17: 6035619393906677852, F18: 44, F19: -35, F20: 13229, F21: -9922, F22: 110044048, F23: -274670656, F24: -569093003380207757, F25: 1123194318418397082, F26: -2.3901263e+09, F27: 8.364022e+08, F28: 2.7867172951107295e+06, F29: -1.6993258794887742e+08, F30: {}}}, typeobject(any), VMap_VEnumAbc_VEnumAbc{B: A, C: C}}, F9: {F0: []VUnionDepth1_All{{F16: 16089353212084617993}, {F27: -5.3364102e+08}, {F16: 12603105066678282968}}, F7: 6, F26: -4.3563632e+08}, F10: {F12: 52300}, F11: {F8: A}}, ?VStructDepth2_Rand0{}}",
 		Source: []interface{}{
-			nil,
-			VStructDepth2_Rand0{
+			&VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					VMap_VArray2_Uint32_VArray2_Uint32(nil),
-					VUnionDepth3_Rand1(VUnionDepth3_Rand1F5{VSet_VArray3_Bool{
+					VList_VStructDepth1_All{
 						{
-							false,
-							true,
-							true,
-						}: struct{}{},
-						{
-							true,
-							true,
-							false,
-						}: struct{}{},
-					}}),
-					VMap_Bool_Bool{
-						true: true,
+							F0: VSet_Int64{
+								-142983328942982573: struct{}{},
+								0:                   struct{}{},
+							},
+							F1: true,
+							F2: true,
+							F3: "mnopΔ",
+							F4: "defghijkl",
+							F5: vdl.AnyType,
+							F6: 129,
+							F7: 195,
+							F8: VEnumAbcB,
+							F11: verror.FromWire(vdl.WireError{
+								Id:  "bcdefghijklmno",
+								Msg: "opΔΘΠΣΦ王普",
+							}),
+							F12: 58791,
+							F13: 25457,
+							F14: 2961929109,
+							F15: 3120902661,
+							F16: 1046591979970691293,
+							F17: 6035619393906677852,
+							F18: 44,
+							F19: -35,
+							F20: 13229,
+							F21: -9922,
+							F22: 110044048,
+							F23: -274670656,
+							F24: -569093003380207757,
+							F25: 1123194318418397082,
+							F26: -2.3901263e+09,
+							F27: 8.364022e+08,
+							F28: 2.7867172951107295e+06,
+							F29: -1.6993258794887742e+08,
+							F30: &VStructEmpty{},
+						},
+					},
+					vdl.AnyType,
+					VMap_VEnumAbc_VEnumAbc{
+						VEnumAbcB: VEnumAbcA,
+						VEnumAbcC: VEnumAbcC,
 					},
 				},
+				F9: VStructDepth1_Rand1{
+					F0: []VUnionDepth1_All{
+						VUnionDepth1_AllF16{16089353212084617993},
+						VUnionDepth1_AllF27{-5.3364102e+08},
+						VUnionDepth1_AllF16{12603105066678282968},
+					},
+					F7:  6,
+					F26: -4.3563632e+08,
+				},
+				F10: VUnionDepth1_Rand0F12{52300},
+				F11: VUnionDepth1_Rand1F8{},
+			},
+			&VStructDepth2_Rand0{
 				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F6{109},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {nil, VInt8(58), VList_Error{{}, {Id: \"defghi\", RetryCode: RetryConnection}}}, F9: {F0: VArray3_Map_String_String{{\"\": \"Φ王普\"}, {\"\": \"cdefghijklm\", \"def\": \"\", \"lmnopΔΘΠΣΦ王普\": \"Θ\"}, {\"ijklmno\": \"nopΔ\"}}, F1: true, F7: 62, F26: -2.4782141e+09}, F11: {F9: VEnumBcd.B}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {VArray3_VString{\"普\", \"ghijklmnopΔΘΠΣ\", \"\"}, nil, VSet_VBool{false, true}}, F10: {F16: 17060164968669376726}, F11: {F11: {RetryCode: RetryRefetch, Msg: \"b\"}}}, {F0: {VArray3_VList_Any{}, map[VStructEmpty]VStructEmpty{{}: {}}, nil}, F9: {F7: 64, F9: C, F26: -2.9383488e+09}, F10: {F28: 8.978821982111119e+08}, F11: {F11: {Id: \"nopΔΘΠΣΦ王\", RetryCode: RetryRefetch, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}}}}",
 		Target: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					nil,
-					VInt8(58),
-					VList_Error{
-						verror.FromWire(vdl.WireError{}),
-						verror.FromWire(vdl.WireError{
-							Id:        "defghi",
-							RetryCode: vdl.WireRetryCodeRetryConnection,
-						}),
+					VArray3_VString{
+						"普",
+						"ghijklmnopΔΘΠΣ",
+						"",
 					},
+					nil,
+					VSet_VBool{
+						false: struct{}{},
+						true:  struct{}{},
+					},
+				},
+				F10: VUnionDepth1_Rand0F16{17060164968669376726},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "b",
+				})},
+			},
+			{
+				F0: VArray3_Any{
+					VArray3_VList_Any{},
+					map[VStructEmpty]VStructEmpty{
+						{}: {},
+					},
+					nil,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VArray3_Map_String_String{
-						{
-							"": "Φ王普",
-						},
-						{
-							"":    "cdefghijklm",
-							"def": "",
-							"lmnopΔΘΠΣΦ王普": "Θ",
-						},
-						{
-							"ijklmno": "nopΔ",
-						},
-					},
-					F1:  true,
-					F7:  62,
-					F26: -2.4782141e+09,
+					F7:  64,
+					F9:  VEnumBcdC,
+					F26: -2.9383488e+09,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F9{},
+				F10: VUnionDepth1_Rand0F28{8.978821982111119e+08},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:        "nopΔΘΠΣΦ王",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
+				})},
 			},
 		},
-		SourceLabel: "VList_OptVStructDepth2_Rand0{{F0: {nil, VInt8(58), VList_Error{{}, {Id: \"defghi\", RetryCode: RetryConnection}}}, F9: {F0: VArray3_Map_String_String{{\"\": \"Φ王普\"}, {\"\": \"cdefghijklm\", \"def\": \"\", \"lmnopΔΘΠΣΦ王普\": \"Θ\"}, {\"ijklmno\": \"nopΔ\"}}, F1: true, F7: 62, F26: -2.4782141e+09}, F11: {F9: VEnumBcd.B}}}",
+		SourceLabel: "VList_OptVStructDepth2_Rand0{{F0: {VArray3_VString{\"普\", \"ghijklmnopΔΘΠΣ\", \"\"}, nil, VSet_VBool{false, true}}, F10: {F16: 17060164968669376726}, F11: {F11: {RetryCode: RetryRefetch, Msg: \"b\"}}}, {F0: {VArray3_VList_Any{}, map[VStructEmpty]VStructEmpty{{}: {}}, nil}, F9: {F7: 64, F9: C, F26: -2.9383488e+09}, F10: {F28: 8.978821982111119e+08}, F11: {F11: {Id: \"nopΔΘΠΣΦ王\", RetryCode: RetryRefetch, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}}}}",
 		Source: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					nil,
-					VInt8(58),
-					VList_Error{
-						verror.FromWire(vdl.WireError{}),
-						verror.FromWire(vdl.WireError{
-							Id:        "defghi",
-							RetryCode: vdl.WireRetryCodeRetryConnection,
-						}),
+					VArray3_VString{
+						"普",
+						"ghijklmnopΔΘΠΣ",
+						"",
 					},
+					nil,
+					VSet_VBool{
+						false: struct{}{},
+						true:  struct{}{},
+					},
+				},
+				F10: VUnionDepth1_Rand0F16{17060164968669376726},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "b",
+				})},
+			},
+			{
+				F0: VArray3_Any{
+					VArray3_VList_Any{},
+					map[VStructEmpty]VStructEmpty{
+						{}: {},
+					},
+					nil,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VArray3_Map_String_String{
-						{
-							"": "Φ王普",
-						},
-						{
-							"":    "cdefghijklm",
-							"def": "",
-							"lmnopΔΘΠΣΦ王普": "Θ",
-						},
-						{
-							"ijklmno": "nopΔ",
-						},
-					},
-					F1:  true,
-					F7:  62,
-					F26: -2.4782141e+09,
+					F7:  64,
+					F9:  VEnumBcdC,
+					F26: -2.9383488e+09,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F9{},
+				F10: VUnionDepth1_Rand0F28{8.978821982111119e+08},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:        "nopΔΘΠΣΦ王",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
+				})},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {nil, VInt8(58), VList_Error{{}, {Id: \"defghi\", RetryCode: RetryConnection}}}, F9: {F0: VArray3_Map_String_String{{\"\": \"Φ王普\"}, {\"\": \"cdefghijklm\", \"def\": \"\", \"lmnopΔΘΠΣΦ王普\": \"Θ\"}, {\"ijklmno\": \"nopΔ\"}}, F1: true, F7: 62, F26: -2.4782141e+09}, F11: {F9: VEnumBcd.B}}}",
+		TargetLabel: "VList_OptVStructDepth2_Rand0{{F0: {VArray3_VString{\"普\", \"ghijklmnopΔΘΠΣ\", \"\"}, nil, VSet_VBool{false, true}}, F10: {F16: 17060164968669376726}, F11: {F11: {RetryCode: RetryRefetch, Msg: \"b\"}}}, {F0: {VArray3_VList_Any{}, map[VStructEmpty]VStructEmpty{{}: {}}, nil}, F9: {F7: 64, F9: C, F26: -2.9383488e+09}, F10: {F28: 8.978821982111119e+08}, F11: {F11: {Id: \"nopΔΘΠΣΦ王\", RetryCode: RetryRefetch, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}}}}",
 		Target: VList_OptVStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
+					VArray3_VString{
+						"普",
+						"ghijklmnopΔΘΠΣ",
+						"",
+					},
 					nil,
-					VInt8(58),
-					VList_Error{
-						verror.FromWire(vdl.WireError{}),
-						verror.FromWire(vdl.WireError{
-							Id:        "defghi",
-							RetryCode: vdl.WireRetryCodeRetryConnection,
-						}),
+					VSet_VBool{
+						false: struct{}{},
+						true:  struct{}{},
 					},
 				},
-				F9: VStructDepth1_Rand1{
-					F0: VArray3_Map_String_String{
-						{
-							"": "Φ王普",
-						},
-						{
-							"":    "cdefghijklm",
-							"def": "",
-							"lmnopΔΘΠΣΦ王普": "Θ",
-						},
-						{
-							"ijklmno": "nopΔ",
-						},
-					},
-					F1:  true,
-					F7:  62,
-					F26: -2.4782141e+09,
-				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F9{},
+				F10: VUnionDepth1_Rand0F16{17060164968669376726},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "b",
+				})},
 			},
-		},
-		SourceLabel: "VArray1_VStructDepth2_Rand0{{F0: {nil, VInt8(58), VList_Error{{}, {Id: \"defghi\", RetryCode: RetryConnection}}}, F9: {F0: VArray3_Map_String_String{{\"\": \"Φ王普\"}, {\"\": \"cdefghijklm\", \"def\": \"\", \"lmnopΔΘΠΣΦ王普\": \"Θ\"}, {\"ijklmno\": \"nopΔ\"}}, F1: true, F7: 62, F26: -2.4782141e+09}, F11: {F9: VEnumBcd.B}}}",
-		Source: VArray1_VStructDepth2_Rand0{
 			{
 				F0: VArray3_Any{
-					nil,
-					VInt8(58),
-					VList_Error{
-						verror.FromWire(vdl.WireError{}),
-						verror.FromWire(vdl.WireError{
-							Id:        "defghi",
-							RetryCode: vdl.WireRetryCodeRetryConnection,
-						}),
+					VArray3_VList_Any{},
+					map[VStructEmpty]VStructEmpty{
+						{}: {},
 					},
+					nil,
 				},
 				F9: VStructDepth1_Rand1{
-					F0: VArray3_Map_String_String{
-						{
-							"": "Φ王普",
-						},
-						{
-							"":    "cdefghijklm",
-							"def": "",
-							"lmnopΔΘΠΣΦ王普": "Θ",
-						},
-						{
-							"ijklmno": "nopΔ",
-						},
-					},
-					F1:  true,
-					F7:  62,
-					F26: -2.4782141e+09,
+					F7:  64,
+					F9:  VEnumBcdC,
+					F26: -2.9383488e+09,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F9{},
+				F10: VUnionDepth1_Rand0F28{8.978821982111119e+08},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:        "nopΔΘΠΣΦ王",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
+				})},
+			},
+		},
+		SourceLabel: "[]any{?VStructDepth2_Rand0{F0: {VArray3_VString{\"普\", \"ghijklmnopΔΘΠΣ\", \"\"}, nil, VSet_VBool{false, true}}, F10: {F16: 17060164968669376726}, F11: {F11: {RetryCode: RetryRefetch, Msg: \"b\"}}}, ?VStructDepth2_Rand0{F0: {VArray3_VList_Any{}, map[VStructEmpty]VStructEmpty{{}: {}}, nil}, F9: {F7: 64, F9: C, F26: -2.9383488e+09}, F10: {F28: 8.978821982111119e+08}, F11: {F11: {Id: \"nopΔΘΠΣΦ王\", RetryCode: RetryRefetch, Msg: \"bcdefghijklmnopΔΘΠΣΦ王普澤世\"}}}}",
+		Source: []interface{}{
+			&VStructDepth2_Rand0{
+				F0: VArray3_Any{
+					VArray3_VString{
+						"普",
+						"ghijklmnopΔΘΠΣ",
+						"",
+					},
+					nil,
+					VSet_VBool{
+						false: struct{}{},
+						true:  struct{}{},
+					},
+				},
+				F10: VUnionDepth1_Rand0F16{17060164968669376726},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "b",
+				})},
+			},
+			&VStructDepth2_Rand0{
+				F0: VArray3_Any{
+					VArray3_VList_Any{},
+					map[VStructEmpty]VStructEmpty{
+						{}: {},
+					},
+					nil,
+				},
+				F9: VStructDepth1_Rand1{
+					F7:  64,
+					F9:  VEnumBcdC,
+					F26: -2.9383488e+09,
+				},
+				F10: VUnionDepth1_Rand0F28{8.978821982111119e+08},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{
+					Id:        "nopΔΘΠΣΦ王",
+					RetryCode: vdl.WireRetryCodeRetryRefetch,
+					Msg:       "bcdefghijklmnopΔΘΠΣΦ王普澤世",
+				})},
 			},
 		},
 	},
@@ -41928,7 +41997,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth3_All{F0: {{\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}}, F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F2: {{123}}, F3: {{true}}, F4: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F6: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, F9: {F7: {VEnumBcd.D: VEnumBcd.D}}, F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}, F11: {F12: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VStructDepth3_All{F0: {{\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}}, F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F2: {{123}}, F3: {{true}}, F4: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F6: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, F9: {F7: {D: D}}, F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}, F11: {F12: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VStructDepth3_All{
 			F0: VArray3_Map_String_String{
 				{
@@ -42032,7 +42101,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F0: {{\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}}, F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F2: {{123}}, F3: {{true}}, F4: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F6: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, F9: {F7: {VEnumBcd.D: VEnumBcd.D}}, F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}, F11: {F12: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VStructDepth3_All{F0: {{\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}, {\"abcdefghijklmnopΔΘΠΣΦ王普澤世界\": \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\"}}, F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F2: {{123}}, F3: {{true}}, F4: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F6: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}, F9: {F7: {D: D}}, F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}, F11: {F12: {F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VStructDepth3_All{
 			F0: VArray3_Map_String_String{
 				{
@@ -42140,557 +42209,309 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_All{F0: {{\"ijklmnopΔΘΠΣΦ王\": \"defghijklmnopΔΘΠΣ\"}, {\"\": \"cdefghijklmnopΔΘΠΣΦ\", \"jklmnopΔΘ\": \"nopΔΘΠ\"}, {\"bcdefghijklmnopΔΘΠΣΦ王普澤世\": \"\", \"ΣΦ王普\": \"nopΔΘΠΣΦ\"}}, F1: {{}}, F2: {{107, 128, 89}, {}, {0, 133, 37}}, F3: {{true}}, F4: {{F4: \"ijk\", F15: 2520027635}, {F4: \"no\", F15: 661627822, F21: -14093}}, F5: {{F12: 1404}, {F28: -4.843734225929519e+08}}, F6: {{F4: \"abcdef\", F15: 388152645, F21: -14547}: {F4: \"bcdefgh\", F15: 811603317, F21: -12821}, {F4: \"abcdefghijklmnopΔΘ\", F15: 2543262458, F21: -3453}: {F4: \"lmnopΔ\", F21: -67}, {F4: \"jklmnop\", F15: 241748021, F21: 2074}: {F15: 3695330071, F21: 9936}}, F7: {{F8: VEnumAbc.A}: {F8: VEnumAbc.C}}, F8: {F0: {VList_VUnionDepth1_Rand0{}, uint16(11690), VArray1_OptVStructDepth1_Rand0{{F4: \"pΔΘ\", F15: 2307490724, F21: 6270}}}, F10: {F12: 51950}, F11: {F9: VEnumBcd.C}}, F9: {F7: {VEnumBcd.B: VEnumBcd.C, VEnumBcd.C: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F12: {F0: {VInt8(0), VStructDepth1_Rand0{F4: \"defghijklm\", F15: 224613276, F21: 628}, []any{VUint16(0), []?VStructDepth2_Rand0{{F9: {F0: VList_TypeObject{typeobject(VList_VStructEmpty), typeobject(VUint64), typeobject([]VEnumAbc)}, F7: 23, F9: VEnumBcd.C}, F11: {F9: VEnumBcd.D}}, {F9: {F0: []VUint64{100145223956358900}, F9: VEnumBcd.C, F26: 1.00704416e+09}, F10: {F16: 8473568284230405126}, F11: {F20: 8612}}}, map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F16: 5775483604142120355}: {F16: 0}}}}, F9: {F1: true, F7: 37, F26: -5.9550284e+07}, F11: {F8: VEnumAbc.A}}}",
+		TargetLabel: "VStructDepth3_All{F1: {{F21: 5963}}, F2: {{63}, {13, 173}}, F5: {{F16: 0}}, F6: {{F4: \"jklmnopΔΘΠ\", F15: 2001074335, F21: -11055}: {}, {F4: \"pΔΘΠ\", F15: 2601421373, F21: 4881}: {}}, F7: {{F28: 0}: {F28: -1.2233529086968143e+08}}, F8: {F9: {F0: []VUint64{}, F7: 209, F26: 1.1579731e+09}, F11: {F9: C}}, F9: {F7: {C: C, D: B}}, F11: {F2: {0, -1.5822282835641083e+08}}, F12: {F0: {[]typeobject{typeobject(error), typeobject(any), typeobject(VUnionDepth2_Rand0)}, nil, VMap_VByte_VByte{0: 27, 130: 217, 37: 0}}, F9: {F0: map[VStructEmpty]VStructEmpty{{}: {}}, F7: 223, F9: C}, F10: {F10: {}}, F11: {F11: {}}}}",
 		Target: VStructDepth3_All{
-			F0: VArray3_Map_String_String{
-				{
-					"ijklmnopΔΘΠΣΦ王": "defghijklmnopΔΘΠΣ",
-				},
-				{
-					"":          "cdefghijklmnopΔΘΠΣΦ",
-					"jklmnopΔΘ": "nopΔΘΠ",
-				},
-				{
-					"bcdefghijklmnopΔΘΠΣΦ王普澤世": "",
-					"ΣΦ王普":                     "nopΔΘΠΣΦ",
-				},
-			},
 			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
+				{
+					F21: 5963,
+				},
 			},
 			F2: []VSet_Byte{
 				{
-					107: struct{}{},
-					128: struct{}{},
-					89:  struct{}{},
+					63: struct{}{},
 				},
-				nil,
 				{
-					0:   struct{}{},
-					133: struct{}{},
-					37:  struct{}{},
+					13:  struct{}{},
+					173: struct{}{},
 				},
-			},
-			F3: VList_List_VBool{
-				{
-					true,
-				},
-			},
-			F4: VSet_VStructDepth1_Rand0{
-				{
-					F4:  "ijk",
-					F15: 2520027635,
-				}: struct{}{},
-				{
-					F4:  "no",
-					F15: 661627822,
-					F21: -14093,
-				}: struct{}{},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{1404}:                   struct{}{},
-				VUnionDepth1_Rand0F28{-4.843734225929519e+08}: struct{}{},
+				VUnionDepth1_Rand0F16{}: struct{}{},
 			},
 			F6: map[VStructDepth1_Rand0]VStructDepth1_Rand0{
 				{
-					F4:  "abcdef",
-					F15: 388152645,
-					F21: -14547,
-				}: {
-					F4:  "bcdefgh",
-					F15: 811603317,
-					F21: -12821,
-				},
+					F4:  "jklmnopΔΘΠ",
+					F15: 2001074335,
+					F21: -11055,
+				}: {},
 				{
-					F4:  "abcdefghijklmnopΔΘ",
-					F15: 2543262458,
-					F21: -3453,
-				}: {
-					F4:  "lmnopΔ",
-					F21: -67,
-				},
-				{
-					F4:  "jklmnop",
-					F15: 241748021,
-					F21: 2074,
-				}: {
-					F15: 3695330071,
-					F21: 9936,
-				},
+					F4:  "pΔΘΠ",
+					F15: 2601421373,
+					F21: 4881,
+				}: {},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F8{VEnumAbcC},
+				VUnionDepth1_Rand0F28{}: VUnionDepth1_Rand0F28{-1.2233529086968143e+08},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VList_VUnionDepth1_Rand0(nil),
-					uint16(11690),
-					VArray1_OptVStructDepth1_Rand0{
-						{
-							F4:  "pΔΘ",
-							F15: 2307490724,
-							F21: 6270,
-						},
-					},
+				F9: VStructDepth1_Rand1{
+					F0:  []VUint64(nil),
+					F7:  209,
+					F26: 1.1579731e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{51950},
+				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
 			},
 			F9: VStructDepth2_Rand1{
 				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdC,
-					VEnumBcdC: VEnumBcdD,
+					VEnumBcdC: VEnumBcdC,
 					VEnumBcdD: VEnumBcdB,
 				},
 			},
 			F10: VUnionDepth2_AllF0{},
-			F11: VUnionDepth2_Rand0F2{},
+			F11: VUnionDepth2_Rand0F2{[]float64{
+				0,
+				-1.5822282835641083e+08,
+			}},
 			F12: &VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					VInt8(0),
-					VStructDepth1_Rand0{
-						F4:  "defghijklm",
-						F15: 224613276,
-						F21: 628,
+					[]*vdl.Type{
+						vdl.ErrorType,
+						vdl.AnyType,
+						vdl.TypeOf((*VUnionDepth2_Rand0)(nil)),
 					},
-					[]interface{}{
-						VUint16(0),
-						[]*VStructDepth2_Rand0{
-							{
-								F9: VStructDepth1_Rand1{
-									F0: VList_TypeObject{
-										vdl.TypeOf((*VList_VStructEmpty)(nil)),
-										vdl.TypeOf((*VUint64)(nil)),
-										vdl.TypeOf((*[]VEnumAbc)(nil)),
-									},
-									F7: 23,
-									F9: VEnumBcdC,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F9{VEnumBcdD},
-							},
-							{
-								F9: VStructDepth1_Rand1{
-									F0: []VUint64{
-										100145223956358900,
-									},
-									F9:  VEnumBcdC,
-									F26: 1.00704416e+09,
-								},
-								F10: VUnionDepth1_Rand0F16{8473568284230405126},
-								F11: VUnionDepth1_Rand1F20{8612},
-							},
-						},
-						map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-							VUnionDepth1_Rand0F16{5775483604142120355}: VUnionDepth1_Rand0F16{},
-						},
+					nil,
+					VMap_VByte_VByte{
+						0:   27,
+						130: 217,
+						37:  0,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  37,
-					F26: -5.9550284e+07,
+					F0: map[VStructEmpty]VStructEmpty{
+						{}: {},
+					},
+					F7: 223,
+					F9: VEnumBcdC,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F0: {{\"ijklmnopΔΘΠΣΦ王\": \"defghijklmnopΔΘΠΣ\"}, {\"\": \"cdefghijklmnopΔΘΠΣΦ\", \"jklmnopΔΘ\": \"nopΔΘΠ\"}, {\"bcdefghijklmnopΔΘΠΣΦ王普澤世\": \"\", \"ΣΦ王普\": \"nopΔΘΠΣΦ\"}}, F1: {{}}, F2: {{107, 128, 89}, {}, {0, 133, 37}}, F3: {{true}}, F4: {{F4: \"ijk\", F15: 2520027635}, {F4: \"no\", F15: 661627822, F21: -14093}}, F5: {{F12: 1404}, {F28: -4.843734225929519e+08}}, F6: {{F4: \"abcdef\", F15: 388152645, F21: -14547}: {F4: \"bcdefgh\", F15: 811603317, F21: -12821}, {F4: \"abcdefghijklmnopΔΘ\", F15: 2543262458, F21: -3453}: {F4: \"lmnopΔ\", F21: -67}, {F4: \"jklmnop\", F15: 241748021, F21: 2074}: {F15: 3695330071, F21: 9936}}, F7: {{F8: VEnumAbc.A}: {F8: VEnumAbc.C}}, F8: {F0: {VList_VUnionDepth1_Rand0{}, uint16(11690), VArray1_OptVStructDepth1_Rand0{{F4: \"pΔΘ\", F15: 2307490724, F21: 6270}}}, F10: {F12: 51950}, F11: {F9: VEnumBcd.C}}, F9: {F7: {VEnumBcd.B: VEnumBcd.C, VEnumBcd.C: VEnumBcd.D, VEnumBcd.D: VEnumBcd.B}}, F12: {F0: {VInt8(0), VStructDepth1_Rand0{F4: \"defghijklm\", F15: 224613276, F21: 628}, []any{VUint16(0), []?VStructDepth2_Rand0{{F9: {F0: VList_TypeObject{typeobject(VList_VStructEmpty), typeobject(VUint64), typeobject([]VEnumAbc)}, F7: 23, F9: VEnumBcd.C}, F11: {F9: VEnumBcd.D}}, {F9: {F0: []VUint64{100145223956358900}, F9: VEnumBcd.C, F26: 1.00704416e+09}, F10: {F16: 8473568284230405126}, F11: {F20: 8612}}}, map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F16: 5775483604142120355}: {F16: 0}}}}, F9: {F1: true, F7: 37, F26: -5.9550284e+07}, F11: {F8: VEnumAbc.A}}}",
+		SourceLabel: "VStructDepth3_All{F1: {{F21: 5963}}, F2: {{63}, {13, 173}}, F5: {{F16: 0}}, F6: {{F4: \"jklmnopΔΘΠ\", F15: 2001074335, F21: -11055}: {}, {F4: \"pΔΘΠ\", F15: 2601421373, F21: 4881}: {}}, F7: {{F28: 0}: {F28: -1.2233529086968143e+08}}, F8: {F9: {F0: []VUint64{}, F7: 209, F26: 1.1579731e+09}, F11: {F9: C}}, F9: {F7: {C: C, D: B}}, F11: {F2: {0, -1.5822282835641083e+08}}, F12: {F0: {[]typeobject{typeobject(error), typeobject(any), typeobject(VUnionDepth2_Rand0)}, nil, VMap_VByte_VByte{0: 27, 130: 217, 37: 0}}, F9: {F0: map[VStructEmpty]VStructEmpty{{}: {}}, F7: 223, F9: C}, F10: {F10: {}}, F11: {F11: {}}}}",
 		Source: VStructDepth3_All{
-			F0: VArray3_Map_String_String{
-				{
-					"ijklmnopΔΘΠΣΦ王": "defghijklmnopΔΘΠΣ",
-				},
-				{
-					"":          "cdefghijklmnopΔΘΠΣΦ",
-					"jklmnopΔΘ": "nopΔΘΠ",
-				},
-				{
-					"bcdefghijklmnopΔΘΠΣΦ王普澤世": "",
-					"ΣΦ王普":                     "nopΔΘΠΣΦ",
-				},
-			},
 			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
+				{
+					F21: 5963,
+				},
 			},
 			F2: []VSet_Byte{
 				{
-					107: struct{}{},
-					128: struct{}{},
-					89:  struct{}{},
+					63: struct{}{},
 				},
-				nil,
 				{
-					0:   struct{}{},
-					133: struct{}{},
-					37:  struct{}{},
+					13:  struct{}{},
+					173: struct{}{},
 				},
-			},
-			F3: VList_List_VBool{
-				{
-					true,
-				},
-			},
-			F4: VSet_VStructDepth1_Rand0{
-				{
-					F4:  "ijk",
-					F15: 2520027635,
-				}: struct{}{},
-				{
-					F4:  "no",
-					F15: 661627822,
-					F21: -14093,
-				}: struct{}{},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{1404}:                   struct{}{},
-				VUnionDepth1_Rand0F28{-4.843734225929519e+08}: struct{}{},
+				VUnionDepth1_Rand0F16{}: struct{}{},
 			},
 			F6: map[VStructDepth1_Rand0]VStructDepth1_Rand0{
 				{
-					F4:  "abcdef",
-					F15: 388152645,
-					F21: -14547,
-				}: {
-					F4:  "bcdefgh",
-					F15: 811603317,
-					F21: -12821,
-				},
+					F4:  "jklmnopΔΘΠ",
+					F15: 2001074335,
+					F21: -11055,
+				}: {},
 				{
-					F4:  "abcdefghijklmnopΔΘ",
-					F15: 2543262458,
-					F21: -3453,
-				}: {
-					F4:  "lmnopΔ",
-					F21: -67,
-				},
-				{
-					F4:  "jklmnop",
-					F15: 241748021,
-					F21: 2074,
-				}: {
-					F15: 3695330071,
-					F21: 9936,
-				},
+					F4:  "pΔΘΠ",
+					F15: 2601421373,
+					F21: 4881,
+				}: {},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: VUnionDepth1_Rand0F8{VEnumAbcC},
+				VUnionDepth1_Rand0F28{}: VUnionDepth1_Rand0F28{-1.2233529086968143e+08},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VList_VUnionDepth1_Rand0(nil),
-					uint16(11690),
-					VArray1_OptVStructDepth1_Rand0{
-						{
-							F4:  "pΔΘ",
-							F15: 2307490724,
-							F21: 6270,
-						},
-					},
+				F9: VStructDepth1_Rand1{
+					F0:  []VUint64(nil),
+					F7:  209,
+					F26: 1.1579731e+09,
 				},
-				F10: VUnionDepth1_Rand0F12{51950},
+				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
 			},
 			F9: VStructDepth2_Rand1{
 				F7: VMap_VEnumBcd_VEnumBcd{
-					VEnumBcdB: VEnumBcdC,
-					VEnumBcdC: VEnumBcdD,
+					VEnumBcdC: VEnumBcdC,
 					VEnumBcdD: VEnumBcdB,
 				},
 			},
 			F10: VUnionDepth2_AllF0{},
-			F11: VUnionDepth2_Rand0F2{},
+			F11: VUnionDepth2_Rand0F2{[]float64{
+				0,
+				-1.5822282835641083e+08,
+			}},
 			F12: &VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					VInt8(0),
-					VStructDepth1_Rand0{
-						F4:  "defghijklm",
-						F15: 224613276,
-						F21: 628,
+					[]*vdl.Type{
+						vdl.ErrorType,
+						vdl.AnyType,
+						vdl.TypeOf((*VUnionDepth2_Rand0)(nil)),
 					},
-					[]interface{}{
-						VUint16(0),
-						[]*VStructDepth2_Rand0{
-							{
-								F9: VStructDepth1_Rand1{
-									F0: VList_TypeObject{
-										vdl.TypeOf((*VList_VStructEmpty)(nil)),
-										vdl.TypeOf((*VUint64)(nil)),
-										vdl.TypeOf((*[]VEnumAbc)(nil)),
-									},
-									F7: 23,
-									F9: VEnumBcdC,
-								},
-								F10: VUnionDepth1_Rand0F8{},
-								F11: VUnionDepth1_Rand1F9{VEnumBcdD},
-							},
-							{
-								F9: VStructDepth1_Rand1{
-									F0: []VUint64{
-										100145223956358900,
-									},
-									F9:  VEnumBcdC,
-									F26: 1.00704416e+09,
-								},
-								F10: VUnionDepth1_Rand0F16{8473568284230405126},
-								F11: VUnionDepth1_Rand1F20{8612},
-							},
-						},
-						map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-							VUnionDepth1_Rand0F16{5775483604142120355}: VUnionDepth1_Rand0F16{},
-						},
+					nil,
+					VMap_VByte_VByte{
+						0:   27,
+						130: 217,
+						37:  0,
 					},
 				},
 				F9: VStructDepth1_Rand1{
-					F1:  true,
-					F7:  37,
-					F26: -5.9550284e+07,
+					F0: map[VStructEmpty]VStructEmpty{
+						{}: {},
+					},
+					F7: 223,
+					F9: VEnumBcdC,
 				},
-				F10: VUnionDepth1_Rand0F8{},
-				F11: VUnionDepth1_Rand1F8{},
+				F10: VUnionDepth1_Rand0F10{},
+				F11: VUnionDepth1_Rand1F11{verror.FromWire(vdl.WireError{})},
 			},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_All{F1: {{F4: \"cdefghijklmnop\", F21: 1776}}, F2: {{161, 50, 99}, {0, 209, 250}, {137}}, F3: {{true, false}, {false, false, true}, {}}, F5: {{F12: 36735}, {F16: 12273211537912503083}, {F28: -2.2579210503984504e+09}}, F6: {{F4: \"ghi\", F15: 4077837594}: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F15: 234797365, F21: 14219}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 4270173188, F21: 3559}: {F15: 866936409, F21: -15777}, {F4: \"mn\"}: {F21: -10311}}, F7: {{F12: 0}: {F28: 0}, {F28: -1.021690441658703e+09}: {F8: VEnumAbc.C}}, F8: {F0: {VSet_VUnionDepth1_Rand0{{F8: VEnumAbc.C}}, VArray3_Int64{}, VList_VStructEmpty{{}, {}}}, F9: {F0: VArray2_Uint32{1202796966, 227471322}, F7: 130, F26: -5.699319e+06}, F10: {F10: {}}, F11: {F6: 158}}, F10: {F5: {0, 230}}, F11: {F2: {-2.508166942031412e+08}}, F12: {F0: {map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D}, map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.B}, {F12: 46603}: {F12: 0}}, VMap_VInt32_VInt32{0: 533889670, 211826896: 537811395}}, F9: {F0: set[uint16]{}, F7: 203, F26: 9.8148076e+08}, F10: {F28: -1.3466595075899231e+09}, F11: {F8: VEnumAbc.C}}}",
+		TargetLabel: "VStructDepth3_All{F0: {{}, {\"cd\": \"\", \"j\": \"defg\"}, {\"\": \"ΔΘΠΣΦ\", \"cdefghijklmnopΔ\": \"ijklmnopΔΘΠΣ\"}}, F2: {{93}}, F4: {{F15: 996076780, F21: 9201}, {F4: \"abcdefg\", F15: 2297805629}, {F4: \"jklmnopΔΘΠΣΦ王普澤世\", F15: 2011160469, F21: -16009}}, F5: {{F8: A}}, F6: {{}: {F4: \"pΔΘΠΣ\", F15: 1844006525, F21: 4507}, {F4: \"ijklmnopΔ\"}: {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 306107405, F21: 9563}}, F8: {F9: {F1: true, F7: 97, F26: 3.0552422e+09}, F11: {F20: -2954}}, F9: {F7: {B: B}}, F11: {F12: {F4: \"cde\", F15: 2264977470, F21: -1931}}}",
 		Target: VStructDepth3_All{
-			F1: VArray1_OptVStructDepth1_Rand0{
+			F0: VArray3_Map_String_String{
+				nil,
 				{
-					F4:  "cdefghijklmnop",
-					F21: 1776,
+					"cd": "",
+					"j":  "defg",
+				},
+				{
+					"":                "ΔΘΠΣΦ",
+					"cdefghijklmnopΔ": "ijklmnopΔΘΠΣ",
 				},
 			},
 			F2: []VSet_Byte{
 				{
-					161: struct{}{},
-					50:  struct{}{},
-					99:  struct{}{},
-				},
-				{
-					0:   struct{}{},
-					209: struct{}{},
-					250: struct{}{},
-				},
-				{
-					137: struct{}{},
+					93: struct{}{},
 				},
 			},
-			F3: VList_List_VBool{
+			F4: VSet_VStructDepth1_Rand0{
 				{
-					true,
-					false,
-				},
+					F15: 996076780,
+					F21: 9201,
+				}: struct{}{},
 				{
-					false,
-					false,
-					true,
-				},
-				nil,
+					F4:  "abcdefg",
+					F15: 2297805629,
+				}: struct{}{},
+				{
+					F4:  "jklmnopΔΘΠΣΦ王普澤世",
+					F15: 2011160469,
+					F21: -16009,
+				}: struct{}{},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{36735}:                   struct{}{},
-				VUnionDepth1_Rand0F16{12273211537912503083}:    struct{}{},
-				VUnionDepth1_Rand0F28{-2.2579210503984504e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{}: struct{}{},
 			},
 			F6: map[VStructDepth1_Rand0]VStructDepth1_Rand0{
-				{
-					F4:  "ghi",
-					F15: 4077837594,
-				}: {
-					F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
-					F15: 234797365,
-					F21: 14219,
+				{}: {
+					F4:  "pΔΘΠΣ",
+					F15: 1844006525,
+					F21: 4507,
 				},
 				{
-					F4:  "ijklmnopΔΘΠΣΦ王普",
-					F15: 4270173188,
-					F21: 3559,
+					F4: "ijklmnopΔ",
 				}: {
-					F15: 866936409,
-					F21: -15777,
+					F4:  "efghijklmnopΔΘΠΣΦ王普",
+					F15: 306107405,
+					F21: 9563,
 				},
-				{
-					F4: "mn",
-				}: {
-					F21: -10311,
-				},
-			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{}:                       VUnionDepth1_Rand0F28{},
-				VUnionDepth1_Rand0F28{-1.021690441658703e+09}: VUnionDepth1_Rand0F8{VEnumAbcC},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VSet_VUnionDepth1_Rand0{
-						VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
-					},
-					VArray3_Int64{},
-					VList_VStructEmpty{
-						{},
-						{},
-					},
-				},
 				F9: VStructDepth1_Rand1{
-					F0: VArray2_Uint32{
-						1202796966,
-						227471322,
-					},
-					F7:  130,
-					F26: -5.699319e+06,
+					F1:  true,
+					F7:  97,
+					F26: 3.0552422e+09,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F6{158},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F20{-2954},
 			},
-			F10: VUnionDepth2_AllF5{VSet_Byte{
-				0:   struct{}{},
-				230: struct{}{},
-			}},
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				-2.508166942031412e+08,
-			}},
-			F12: &VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-					},
-					map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-						VUnionDepth1_Rand0F10{}:      VUnionDepth1_Rand0F8{VEnumAbcB},
-						VUnionDepth1_Rand0F12{46603}: VUnionDepth1_Rand0F12{},
-					},
-					VMap_VInt32_VInt32{
-						0:         533889670,
-						211826896: 537811395,
-					},
+			F9: VStructDepth2_Rand1{
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
 				},
-				F9: VStructDepth1_Rand1{
-					F0:  map[uint16]struct{}(nil),
-					F7:  203,
-					F26: 9.8148076e+08,
-				},
-				F10: VUnionDepth1_Rand0F28{-1.3466595075899231e+09},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
 			},
+			F10: VUnionDepth2_AllF0{},
+			F11: VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "cde",
+				F15: 2264977470,
+				F21: -1931,
+			}},
 		},
-		SourceLabel: "VStructDepth3_All{F1: {{F4: \"cdefghijklmnop\", F21: 1776}}, F2: {{161, 50, 99}, {0, 209, 250}, {137}}, F3: {{true, false}, {false, false, true}, {}}, F5: {{F12: 36735}, {F16: 12273211537912503083}, {F28: -2.2579210503984504e+09}}, F6: {{F4: \"ghi\", F15: 4077837594}: {F4: \"ghijklmnopΔΘΠΣΦ王普澤世\", F15: 234797365, F21: 14219}, {F4: \"ijklmnopΔΘΠΣΦ王普\", F15: 4270173188, F21: 3559}: {F15: 866936409, F21: -15777}, {F4: \"mn\"}: {F21: -10311}}, F7: {{F12: 0}: {F28: 0}, {F28: -1.021690441658703e+09}: {F8: VEnumAbc.C}}, F8: {F0: {VSet_VUnionDepth1_Rand0{{F8: VEnumAbc.C}}, VArray3_Int64{}, VList_VStructEmpty{{}, {}}}, F9: {F0: VArray2_Uint32{1202796966, 227471322}, F7: 130, F26: -5.699319e+06}, F10: {F10: {}}, F11: {F6: 158}}, F10: {F5: {0, 230}}, F11: {F2: {-2.508166942031412e+08}}, F12: {F0: {map[VEnumBcd]VEnumBcd{VEnumBcd.B: VEnumBcd.D}, map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{{F10: {}}: {F8: VEnumAbc.B}, {F12: 46603}: {F12: 0}}, VMap_VInt32_VInt32{0: 533889670, 211826896: 537811395}}, F9: {F0: set[uint16]{}, F7: 203, F26: 9.8148076e+08}, F10: {F28: -1.3466595075899231e+09}, F11: {F8: VEnumAbc.C}}}",
+		SourceLabel: "VStructDepth3_All{F0: {{}, {\"cd\": \"\", \"j\": \"defg\"}, {\"\": \"ΔΘΠΣΦ\", \"cdefghijklmnopΔ\": \"ijklmnopΔΘΠΣ\"}}, F2: {{93}}, F4: {{F15: 996076780, F21: 9201}, {F4: \"abcdefg\", F15: 2297805629}, {F4: \"jklmnopΔΘΠΣΦ王普澤世\", F15: 2011160469, F21: -16009}}, F5: {{F8: A}}, F6: {{}: {F4: \"pΔΘΠΣ\", F15: 1844006525, F21: 4507}, {F4: \"ijklmnopΔ\"}: {F4: \"efghijklmnopΔΘΠΣΦ王普\", F15: 306107405, F21: 9563}}, F8: {F9: {F1: true, F7: 97, F26: 3.0552422e+09}, F11: {F20: -2954}}, F9: {F7: {B: B}}, F11: {F12: {F4: \"cde\", F15: 2264977470, F21: -1931}}}",
 		Source: VStructDepth3_All{
-			F1: VArray1_OptVStructDepth1_Rand0{
+			F0: VArray3_Map_String_String{
+				nil,
 				{
-					F4:  "cdefghijklmnop",
-					F21: 1776,
+					"cd": "",
+					"j":  "defg",
+				},
+				{
+					"":                "ΔΘΠΣΦ",
+					"cdefghijklmnopΔ": "ijklmnopΔΘΠΣ",
 				},
 			},
 			F2: []VSet_Byte{
 				{
-					161: struct{}{},
-					50:  struct{}{},
-					99:  struct{}{},
-				},
-				{
-					0:   struct{}{},
-					209: struct{}{},
-					250: struct{}{},
-				},
-				{
-					137: struct{}{},
+					93: struct{}{},
 				},
 			},
-			F3: VList_List_VBool{
+			F4: VSet_VStructDepth1_Rand0{
 				{
-					true,
-					false,
-				},
+					F15: 996076780,
+					F21: 9201,
+				}: struct{}{},
 				{
-					false,
-					false,
-					true,
-				},
-				nil,
+					F4:  "abcdefg",
+					F15: 2297805629,
+				}: struct{}{},
+				{
+					F4:  "jklmnopΔΘΠΣΦ王普澤世",
+					F15: 2011160469,
+					F21: -16009,
+				}: struct{}{},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{36735}:                   struct{}{},
-				VUnionDepth1_Rand0F16{12273211537912503083}:    struct{}{},
-				VUnionDepth1_Rand0F28{-2.2579210503984504e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{}: struct{}{},
 			},
 			F6: map[VStructDepth1_Rand0]VStructDepth1_Rand0{
-				{
-					F4:  "ghi",
-					F15: 4077837594,
-				}: {
-					F4:  "ghijklmnopΔΘΠΣΦ王普澤世",
-					F15: 234797365,
-					F21: 14219,
+				{}: {
+					F4:  "pΔΘΠΣ",
+					F15: 1844006525,
+					F21: 4507,
 				},
 				{
-					F4:  "ijklmnopΔΘΠΣΦ王普",
-					F15: 4270173188,
-					F21: 3559,
+					F4: "ijklmnopΔ",
 				}: {
-					F15: 866936409,
-					F21: -15777,
+					F4:  "efghijklmnopΔΘΠΣΦ王普",
+					F15: 306107405,
+					F21: 9563,
 				},
-				{
-					F4: "mn",
-				}: {
-					F21: -10311,
-				},
-			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{}:                       VUnionDepth1_Rand0F28{},
-				VUnionDepth1_Rand0F28{-1.021690441658703e+09}: VUnionDepth1_Rand0F8{VEnumAbcC},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VSet_VUnionDepth1_Rand0{
-						VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
-					},
-					VArray3_Int64{},
-					VList_VStructEmpty{
-						{},
-						{},
-					},
-				},
 				F9: VStructDepth1_Rand1{
-					F0: VArray2_Uint32{
-						1202796966,
-						227471322,
-					},
-					F7:  130,
-					F26: -5.699319e+06,
+					F1:  true,
+					F7:  97,
+					F26: 3.0552422e+09,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F6{158},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F20{-2954},
 			},
-			F10: VUnionDepth2_AllF5{VSet_Byte{
-				0:   struct{}{},
-				230: struct{}{},
-			}},
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				-2.508166942031412e+08,
-			}},
-			F12: &VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					map[VEnumBcd]VEnumBcd{
-						VEnumBcdB: VEnumBcdD,
-					},
-					map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-						VUnionDepth1_Rand0F10{}:      VUnionDepth1_Rand0F8{VEnumAbcB},
-						VUnionDepth1_Rand0F12{46603}: VUnionDepth1_Rand0F12{},
-					},
-					VMap_VInt32_VInt32{
-						0:         533889670,
-						211826896: 537811395,
-					},
+			F9: VStructDepth2_Rand1{
+				F7: VMap_VEnumBcd_VEnumBcd{
+					VEnumBcdB: VEnumBcdB,
 				},
-				F9: VStructDepth1_Rand1{
-					F0:  map[uint16]struct{}(nil),
-					F7:  203,
-					F26: 9.8148076e+08,
-				},
-				F10: VUnionDepth1_Rand0F28{-1.3466595075899231e+09},
-				F11: VUnionDepth1_Rand1F8{VEnumAbcC},
 			},
+			F10: VUnionDepth2_AllF0{},
+			F11: VUnionDepth2_Rand0F12{&VStructDepth1_Rand0{
+				F4:  "cde",
+				F15: 2264977470,
+				F21: -1931,
+			}},
 		},
 	},
 	{
@@ -42747,7 +42568,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -42779,7 +42600,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -42814,7 +42635,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -42846,7 +42667,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: &VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -42882,131 +42703,199 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand0{F1: {{F15: 1338580713, F21: -15535}}, F5: {{F8: VEnumAbc.A}}, F7: {{F16: 0}: {F8: VEnumAbc.A}, {F16: 7779208654243653262}: {F8: VEnumAbc.A}, {F8: VEnumAbc.A}: {F8: VEnumAbc.A}}, F8: {F9: {F0: VList_VFloat64{-3.1733713409600717e+08, 0, 2.734984825406405e+09}, F7: 12, F9: VEnumBcd.C, F26: 3.2446896e+08}, F10: {F10: {}}, F11: {F20: -3787}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"pΔΘΠΣΦ王\", F15: 1596499299, F21: -2886}}, F5: {{F12: 15506}, {F12: 43858}}, F7: {{F10: {}}: {F8: A}, {F8: C}: {F16: 14166404087419230011}}, F8: {F0: {VFloat32(-2.5832847e+09), ?VStructDepth2_Rand0{F0: {set[VString]{}, VFloat64(-2.8717764090969205e+09), VArray2_VEnumBcd{}}, F9: {F0: VArray2_VEnumBcd{}, F9: D, F26: 1.7650328e+09}, F10: {F16: 8245883299685252923}}, nil}, F9: {F0: VMap_VInt16_VInt16{-2672: 4980}, F1: true, F9: C, F26: -9.091379e+07}, F10: {F8: B}, F11: {F9: B}}}",
 		Target: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
-					F15: 1338580713,
-					F21: -15535,
+					F4:  "pΔΘΠΣΦ王",
+					F15: 1596499299,
+					F21: -2886,
 				},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: struct{}{},
+				VUnionDepth1_Rand0F12{15506}: struct{}{},
+				VUnionDepth1_Rand0F12{43858}: struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                    VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F16{7779208654243653262}: VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{}:                     VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F10{}:         VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{14166404087419230011},
 			},
 			F8: VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F0: VList_VFloat64{
-						-3.1733713409600717e+08,
-						0,
-						2.734984825406405e+09,
+				F0: VArray3_Any{
+					VFloat32(-2.5832847e+09),
+					&VStructDepth2_Rand0{
+						F0: VArray3_Any{
+							map[VString]struct{}(nil),
+							VFloat64(-2.8717764090969205e+09),
+							VArray2_VEnumBcd{},
+						},
+						F9: VStructDepth1_Rand1{
+							F0:  VArray2_VEnumBcd{},
+							F9:  VEnumBcdD,
+							F26: 1.7650328e+09,
+						},
+						F10: VUnionDepth1_Rand0F16{8245883299685252923},
+						F11: VUnionDepth1_Rand1F6{},
 					},
-					F7:  12,
-					F9:  VEnumBcdC,
-					F26: 3.2446896e+08,
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F20{-3787},
+				F9: VStructDepth1_Rand1{
+					F0: VMap_VInt16_VInt16{
+						-2672: 4980,
+					},
+					F1:  true,
+					F9:  VEnumBcdC,
+					F26: -9.091379e+07,
+				},
+				F10: VUnionDepth1_Rand0F8{VEnumAbcB},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
-		SourceLabel: "VStructDepth3_Rand0{F1: {{F15: 1338580713, F21: -15535}}, F5: {{F8: VEnumAbc.A}}, F7: {{F16: 0}: {F8: VEnumAbc.A}, {F16: 7779208654243653262}: {F8: VEnumAbc.A}, {F8: VEnumAbc.A}: {F8: VEnumAbc.A}}, F8: {F9: {F0: VList_VFloat64{-3.1733713409600717e+08, 0, 2.734984825406405e+09}, F7: 12, F9: VEnumBcd.C, F26: 3.2446896e+08}, F10: {F10: {}}, F11: {F20: -3787}}}",
+		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"pΔΘΠΣΦ王\", F15: 1596499299, F21: -2886}}, F5: {{F12: 15506}, {F12: 43858}}, F7: {{F10: {}}: {F8: A}, {F8: C}: {F16: 14166404087419230011}}, F8: {F0: {VFloat32(-2.5832847e+09), ?VStructDepth2_Rand0{F0: {set[VString]{}, VFloat64(-2.8717764090969205e+09), VArray2_VEnumBcd{}}, F9: {F0: VArray2_VEnumBcd{}, F9: D, F26: 1.7650328e+09}, F10: {F16: 8245883299685252923}}, nil}, F9: {F0: VMap_VInt16_VInt16{-2672: 4980}, F1: true, F9: C, F26: -9.091379e+07}, F10: {F8: B}, F11: {F9: B}}}",
 		Source: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
-					F15: 1338580713,
-					F21: -15535,
+					F4:  "pΔΘΠΣΦ王",
+					F15: 1596499299,
+					F21: -2886,
 				},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: struct{}{},
+				VUnionDepth1_Rand0F12{15506}: struct{}{},
+				VUnionDepth1_Rand0F12{43858}: struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                    VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F16{7779208654243653262}: VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{}:                     VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F10{}:         VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{14166404087419230011},
 			},
 			F8: VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F0: VList_VFloat64{
-						-3.1733713409600717e+08,
-						0,
-						2.734984825406405e+09,
+				F0: VArray3_Any{
+					VFloat32(-2.5832847e+09),
+					&VStructDepth2_Rand0{
+						F0: VArray3_Any{
+							map[VString]struct{}(nil),
+							VFloat64(-2.8717764090969205e+09),
+							VArray2_VEnumBcd{},
+						},
+						F9: VStructDepth1_Rand1{
+							F0:  VArray2_VEnumBcd{},
+							F9:  VEnumBcdD,
+							F26: 1.7650328e+09,
+						},
+						F10: VUnionDepth1_Rand0F16{8245883299685252923},
+						F11: VUnionDepth1_Rand1F6{},
 					},
-					F7:  12,
-					F9:  VEnumBcdC,
-					F26: 3.2446896e+08,
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F20{-3787},
+				F9: VStructDepth1_Rand1{
+					F0: VMap_VInt16_VInt16{
+						-2672: 4980,
+					},
+					F1:  true,
+					F9:  VEnumBcdC,
+					F26: -9.091379e+07,
+				},
+				F10: VUnionDepth1_Rand0F8{VEnumAbcB},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand0{F1: {{F15: 1338580713, F21: -15535}}, F5: {{F8: VEnumAbc.A}}, F7: {{F16: 0}: {F8: VEnumAbc.A}, {F16: 7779208654243653262}: {F8: VEnumAbc.A}, {F8: VEnumAbc.A}: {F8: VEnumAbc.A}}, F8: {F9: {F0: VList_VFloat64{-3.1733713409600717e+08, 0, 2.734984825406405e+09}, F7: 12, F9: VEnumBcd.C, F26: 3.2446896e+08}, F10: {F10: {}}, F11: {F20: -3787}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"pΔΘΠΣΦ王\", F15: 1596499299, F21: -2886}}, F5: {{F12: 15506}, {F12: 43858}}, F7: {{F10: {}}: {F8: A}, {F8: C}: {F16: 14166404087419230011}}, F8: {F0: {VFloat32(-2.5832847e+09), ?VStructDepth2_Rand0{F0: {set[VString]{}, VFloat64(-2.8717764090969205e+09), VArray2_VEnumBcd{}}, F9: {F0: VArray2_VEnumBcd{}, F9: D, F26: 1.7650328e+09}, F10: {F16: 8245883299685252923}}, nil}, F9: {F0: VMap_VInt16_VInt16{-2672: 4980}, F1: true, F9: C, F26: -9.091379e+07}, F10: {F8: B}, F11: {F9: B}}}",
 		Target: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
-					F15: 1338580713,
-					F21: -15535,
+					F4:  "pΔΘΠΣΦ王",
+					F15: 1596499299,
+					F21: -2886,
 				},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: struct{}{},
+				VUnionDepth1_Rand0F12{15506}: struct{}{},
+				VUnionDepth1_Rand0F12{43858}: struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                    VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F16{7779208654243653262}: VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{}:                     VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F10{}:         VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{14166404087419230011},
 			},
 			F8: VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F0: VList_VFloat64{
-						-3.1733713409600717e+08,
-						0,
-						2.734984825406405e+09,
+				F0: VArray3_Any{
+					VFloat32(-2.5832847e+09),
+					&VStructDepth2_Rand0{
+						F0: VArray3_Any{
+							map[VString]struct{}(nil),
+							VFloat64(-2.8717764090969205e+09),
+							VArray2_VEnumBcd{},
+						},
+						F9: VStructDepth1_Rand1{
+							F0:  VArray2_VEnumBcd{},
+							F9:  VEnumBcdD,
+							F26: 1.7650328e+09,
+						},
+						F10: VUnionDepth1_Rand0F16{8245883299685252923},
+						F11: VUnionDepth1_Rand1F6{},
 					},
-					F7:  12,
-					F9:  VEnumBcdC,
-					F26: 3.2446896e+08,
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F20{-3787},
+				F9: VStructDepth1_Rand1{
+					F0: VMap_VInt16_VInt16{
+						-2672: 4980,
+					},
+					F1:  true,
+					F9:  VEnumBcdC,
+					F26: -9.091379e+07,
+				},
+				F10: VUnionDepth1_Rand0F8{VEnumAbcB},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F1: {{F15: 1338580713, F21: -15535}}, F5: {{F8: VEnumAbc.A}}, F7: {{F16: 0}: {F8: VEnumAbc.A}, {F16: 7779208654243653262}: {F8: VEnumAbc.A}, {F8: VEnumAbc.A}: {F8: VEnumAbc.A}}, F8: {F9: {F0: VList_VFloat64{-3.1733713409600717e+08, 0, 2.734984825406405e+09}, F7: 12, F9: VEnumBcd.C, F26: 3.2446896e+08}, F10: {F10: {}}, F11: {F20: -3787}}}",
+		SourceLabel: "VStructDepth3_All{F1: {{F4: \"pΔΘΠΣΦ王\", F15: 1596499299, F21: -2886}}, F5: {{F12: 15506}, {F12: 43858}}, F7: {{F10: {}}: {F8: A}, {F8: C}: {F16: 14166404087419230011}}, F8: {F0: {VFloat32(-2.5832847e+09), ?VStructDepth2_Rand0{F0: {set[VString]{}, VFloat64(-2.8717764090969205e+09), VArray2_VEnumBcd{}}, F9: {F0: VArray2_VEnumBcd{}, F9: D, F26: 1.7650328e+09}, F10: {F16: 8245883299685252923}}, nil}, F9: {F0: VMap_VInt16_VInt16{-2672: 4980}, F1: true, F9: C, F26: -9.091379e+07}, F10: {F8: B}, F11: {F9: B}}}",
 		Source: VStructDepth3_All{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
-					F15: 1338580713,
-					F21: -15535,
+					F4:  "pΔΘΠΣΦ王",
+					F15: 1596499299,
+					F21: -2886,
 				},
 			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{}: struct{}{},
+				VUnionDepth1_Rand0F12{15506}: struct{}{},
+				VUnionDepth1_Rand0F12{43858}: struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                    VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F16{7779208654243653262}: VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{}:                     VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F10{}:         VUnionDepth1_Rand0F8{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{14166404087419230011},
 			},
 			F8: VStructDepth2_Rand0{
-				F9: VStructDepth1_Rand1{
-					F0: VList_VFloat64{
-						-3.1733713409600717e+08,
-						0,
-						2.734984825406405e+09,
+				F0: VArray3_Any{
+					VFloat32(-2.5832847e+09),
+					&VStructDepth2_Rand0{
+						F0: VArray3_Any{
+							map[VString]struct{}(nil),
+							VFloat64(-2.8717764090969205e+09),
+							VArray2_VEnumBcd{},
+						},
+						F9: VStructDepth1_Rand1{
+							F0:  VArray2_VEnumBcd{},
+							F9:  VEnumBcdD,
+							F26: 1.7650328e+09,
+						},
+						F10: VUnionDepth1_Rand0F16{8245883299685252923},
+						F11: VUnionDepth1_Rand1F6{},
 					},
-					F7:  12,
-					F9:  VEnumBcdC,
-					F26: 3.2446896e+08,
+					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F20{-3787},
+				F9: VStructDepth1_Rand1{
+					F0: VMap_VInt16_VInt16{
+						-2672: 4980,
+					},
+					F1:  true,
+					F9:  VEnumBcdC,
+					F26: -9.091379e+07,
+				},
+				F10: VUnionDepth1_Rand0F8{VEnumAbcB},
+				F11: VUnionDepth1_Rand1F9{},
 			},
 			F10: VUnionDepth2_AllF0{},
 			F11: VUnionDepth2_Rand0F2{},
@@ -43015,95 +42904,215 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand0{F5: {{F8: VEnumAbc.B}, {F8: VEnumAbc.C}}, F7: {{F10: {}}: {F8: VEnumAbc.A}}, F8: {F0: {set[uint16]{}, []float64{0, 3.3846002281536584e+09}, nil}, F10: {F10: {}}, F11: {F9: VEnumBcd.B}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"ΔΘΠΣΦ王普澤\", F15: 1262551243, F21: 1442}}, F5: {{F28: -2.915714154858796e+08}}, F8: {F0: {VStructDepth3_Rand0{F1: {{F4: \"h\", F15: 1305941959}}, F5: {{F28: -2.542972875244285e+08}, {F8: A}}, F7: {{F28: -2.641581944689649e+07}: {F8: A}, {F8: A}: {F10: {}}, {F8: B}: {F10: {}}}, F8: {F9: {F0: VFloat32(1.7031676e+09), F7: 129, F9: D, F26: -5.4684474e+08}, F11: {F8: C}}}, VString(\"p\"), nil}, F9: {F0: VArray2_VEnumBcd{}, F26: 1.0073211e+09}, F10: {F28: 4.8206917024954736e+08}}}",
 		Target: VStructDepth3_Rand0{
-			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ΔΘΠΣΦ王普澤",
+					F15: 1262551243,
+					F21: 1442,
+				},
 			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
+			F5: VSet_VUnionDepth1_Rand0{
+				VUnionDepth1_Rand0F28{-2.915714154858796e+08}: struct{}{},
 			},
 			F8: VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					map[uint16]struct{}(nil),
-					[]float64{
-						0,
-						3.3846002281536584e+09,
+					VStructDepth3_Rand0{
+						F1: VArray1_OptVStructDepth1_Rand0{
+							{
+								F4:  "h",
+								F15: 1305941959,
+							},
+						},
+						F5: VSet_VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.542972875244285e+08}: struct{}{},
+							VUnionDepth1_Rand0F8{}:                        struct{}{},
+						},
+						F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.641581944689649e+07}: VUnionDepth1_Rand0F8{},
+							VUnionDepth1_Rand0F8{}:                        VUnionDepth1_Rand0F10{},
+							VUnionDepth1_Rand0F8{VEnumAbcB}:               VUnionDepth1_Rand0F10{},
+						},
+						F8: VStructDepth2_Rand0{
+							F9: VStructDepth1_Rand1{
+								F0:  VFloat32(1.7031676e+09),
+								F7:  129,
+								F9:  VEnumBcdD,
+								F26: -5.4684474e+08,
+							},
+							F10: VUnionDepth1_Rand0F8{},
+							F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+						},
 					},
+					VString("p"),
 					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{},
+				F9: VStructDepth1_Rand1{
+					F0:  VArray2_VEnumBcd{},
+					F26: 1.0073211e+09,
+				},
+				F10: VUnionDepth1_Rand0F28{4.8206917024954736e+08},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VStructDepth3_Rand0{F5: {{F8: VEnumAbc.B}, {F8: VEnumAbc.C}}, F7: {{F10: {}}: {F8: VEnumAbc.A}}, F8: {F0: {set[uint16]{}, []float64{0, 3.3846002281536584e+09}, nil}, F10: {F10: {}}, F11: {F9: VEnumBcd.B}}}",
+		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"ΔΘΠΣΦ王普澤\", F15: 1262551243, F21: 1442}}, F5: {{F28: -2.915714154858796e+08}}, F8: {F0: {VStructDepth3_Rand0{F1: {{F4: \"h\", F15: 1305941959}}, F5: {{F28: -2.542972875244285e+08}, {F8: A}}, F7: {{F28: -2.641581944689649e+07}: {F8: A}, {F8: A}: {F10: {}}, {F8: B}: {F10: {}}}, F8: {F9: {F0: VFloat32(1.7031676e+09), F7: 129, F9: D, F26: -5.4684474e+08}, F11: {F8: C}}}, VString(\"p\"), nil}, F9: {F0: VArray2_VEnumBcd{}, F26: 1.0073211e+09}, F10: {F28: 4.8206917024954736e+08}}}",
 		Source: VStructDepth3_Rand0{
-			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ΔΘΠΣΦ王普澤",
+					F15: 1262551243,
+					F21: 1442,
+				},
 			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
+			F5: VSet_VUnionDepth1_Rand0{
+				VUnionDepth1_Rand0F28{-2.915714154858796e+08}: struct{}{},
 			},
 			F8: VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					map[uint16]struct{}(nil),
-					[]float64{
-						0,
-						3.3846002281536584e+09,
+					VStructDepth3_Rand0{
+						F1: VArray1_OptVStructDepth1_Rand0{
+							{
+								F4:  "h",
+								F15: 1305941959,
+							},
+						},
+						F5: VSet_VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.542972875244285e+08}: struct{}{},
+							VUnionDepth1_Rand0F8{}:                        struct{}{},
+						},
+						F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.641581944689649e+07}: VUnionDepth1_Rand0F8{},
+							VUnionDepth1_Rand0F8{}:                        VUnionDepth1_Rand0F10{},
+							VUnionDepth1_Rand0F8{VEnumAbcB}:               VUnionDepth1_Rand0F10{},
+						},
+						F8: VStructDepth2_Rand0{
+							F9: VStructDepth1_Rand1{
+								F0:  VFloat32(1.7031676e+09),
+								F7:  129,
+								F9:  VEnumBcdD,
+								F26: -5.4684474e+08,
+							},
+							F10: VUnionDepth1_Rand0F8{},
+							F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+						},
 					},
+					VString("p"),
 					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{},
+				F9: VStructDepth1_Rand1{
+					F0:  VArray2_VEnumBcd{},
+					F26: 1.0073211e+09,
+				},
+				F10: VUnionDepth1_Rand0F28{4.8206917024954736e+08},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand0{F5: {{F8: VEnumAbc.B}, {F8: VEnumAbc.C}}, F7: {{F10: {}}: {F8: VEnumAbc.A}}, F8: {F0: {set[uint16]{}, []float64{0, 3.3846002281536584e+09}, nil}, F10: {F10: {}}, F11: {F9: VEnumBcd.B}}}",
+		TargetLabel: "VStructDepth3_Rand0{F1: {{F4: \"ΔΘΠΣΦ王普澤\", F15: 1262551243, F21: 1442}}, F5: {{F28: -2.915714154858796e+08}}, F8: {F0: {VStructDepth3_Rand0{F1: {{F4: \"h\", F15: 1305941959}}, F5: {{F28: -2.542972875244285e+08}, {F8: A}}, F7: {{F28: -2.641581944689649e+07}: {F8: A}, {F8: A}: {F10: {}}, {F8: B}: {F10: {}}}, F8: {F9: {F0: VFloat32(1.7031676e+09), F7: 129, F9: D, F26: -5.4684474e+08}, F11: {F8: C}}}, VString(\"p\"), nil}, F9: {F0: VArray2_VEnumBcd{}, F26: 1.0073211e+09}, F10: {F28: 4.8206917024954736e+08}}}",
 		Target: VStructDepth3_Rand0{
-			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ΔΘΠΣΦ王普澤",
+					F15: 1262551243,
+					F21: 1442,
+				},
 			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
+			F5: VSet_VUnionDepth1_Rand0{
+				VUnionDepth1_Rand0F28{-2.915714154858796e+08}: struct{}{},
 			},
 			F8: VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					map[uint16]struct{}(nil),
-					[]float64{
-						0,
-						3.3846002281536584e+09,
+					VStructDepth3_Rand0{
+						F1: VArray1_OptVStructDepth1_Rand0{
+							{
+								F4:  "h",
+								F15: 1305941959,
+							},
+						},
+						F5: VSet_VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.542972875244285e+08}: struct{}{},
+							VUnionDepth1_Rand0F8{}:                        struct{}{},
+						},
+						F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.641581944689649e+07}: VUnionDepth1_Rand0F8{},
+							VUnionDepth1_Rand0F8{}:                        VUnionDepth1_Rand0F10{},
+							VUnionDepth1_Rand0F8{VEnumAbcB}:               VUnionDepth1_Rand0F10{},
+						},
+						F8: VStructDepth2_Rand0{
+							F9: VStructDepth1_Rand1{
+								F0:  VFloat32(1.7031676e+09),
+								F7:  129,
+								F9:  VEnumBcdD,
+								F26: -5.4684474e+08,
+							},
+							F10: VUnionDepth1_Rand0F8{},
+							F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+						},
 					},
+					VString("p"),
 					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{},
+				F9: VStructDepth1_Rand1{
+					F0:  VArray2_VEnumBcd{},
+					F26: 1.0073211e+09,
+				},
+				F10: VUnionDepth1_Rand0F28{4.8206917024954736e+08},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F5: {{F8: VEnumAbc.B}, {F8: VEnumAbc.C}}, F7: {{F10: {}}: {F8: VEnumAbc.A}}, F8: {F0: {set[uint16]{}, []float64{0, 3.3846002281536584e+09}, nil}, F10: {F10: {}}, F11: {F9: VEnumBcd.B}}}",
+		SourceLabel: "VStructDepth3_All{F1: {{F4: \"ΔΘΠΣΦ王普澤\", F15: 1262551243, F21: 1442}}, F5: {{F28: -2.915714154858796e+08}}, F8: {F0: {VStructDepth3_Rand0{F1: {{F4: \"h\", F15: 1305941959}}, F5: {{F28: -2.542972875244285e+08}, {F8: A}}, F7: {{F28: -2.641581944689649e+07}: {F8: A}, {F8: A}: {F10: {}}, {F8: B}: {F10: {}}}, F8: {F9: {F0: VFloat32(1.7031676e+09), F7: 129, F9: D, F26: -5.4684474e+08}, F11: {F8: C}}}, VString(\"p\"), nil}, F9: {F0: VArray2_VEnumBcd{}, F26: 1.0073211e+09}, F10: {F28: 4.8206917024954736e+08}}}",
 		Source: VStructDepth3_All{
-			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F8{VEnumAbcB}: struct{}{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: struct{}{},
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ΔΘΠΣΦ王普澤",
+					F15: 1262551243,
+					F21: 1442,
+				},
 			},
-			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
+			F5: VSet_VUnionDepth1_Rand0{
+				VUnionDepth1_Rand0F28{-2.915714154858796e+08}: struct{}{},
 			},
 			F8: VStructDepth2_Rand0{
 				F0: VArray3_Any{
-					map[uint16]struct{}(nil),
-					[]float64{
-						0,
-						3.3846002281536584e+09,
+					VStructDepth3_Rand0{
+						F1: VArray1_OptVStructDepth1_Rand0{
+							{
+								F4:  "h",
+								F15: 1305941959,
+							},
+						},
+						F5: VSet_VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.542972875244285e+08}: struct{}{},
+							VUnionDepth1_Rand0F8{}:                        struct{}{},
+						},
+						F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
+							VUnionDepth1_Rand0F28{-2.641581944689649e+07}: VUnionDepth1_Rand0F8{},
+							VUnionDepth1_Rand0F8{}:                        VUnionDepth1_Rand0F10{},
+							VUnionDepth1_Rand0F8{VEnumAbcB}:               VUnionDepth1_Rand0F10{},
+						},
+						F8: VStructDepth2_Rand0{
+							F9: VStructDepth1_Rand1{
+								F0:  VFloat32(1.7031676e+09),
+								F7:  129,
+								F9:  VEnumBcdD,
+								F26: -5.4684474e+08,
+							},
+							F10: VUnionDepth1_Rand0F8{},
+							F11: VUnionDepth1_Rand1F8{VEnumAbcC},
+						},
 					},
+					VString("p"),
 					nil,
 				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{},
+				F9: VStructDepth1_Rand1{
+					F0:  VArray2_VEnumBcd{},
+					F26: 1.0073211e+09,
+				},
+				F10: VUnionDepth1_Rand0F28{4.8206917024954736e+08},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 			F10: VUnionDepth2_AllF0{},
 			F11: VUnionDepth2_Rand0F2{},
@@ -43241,70 +43250,67 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand1{F2: {{0, 18, 244}, {75}}, F11: {F2: {-1.0443559380967396e+08, 1.0236401259087074e+09}}}",
+		TargetLabel: "VStructDepth3_Rand1{F1: {{}}, F2: {{0, 164, 209}}, F11: {F2: {-3.533790996615131e+09}}}",
 		Target: VStructDepth3_Rand1{
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{},
+			},
 			F2: []VSet_Byte{
 				{
 					0:   struct{}{},
-					18:  struct{}{},
-					244: struct{}{},
-				},
-				{
-					75: struct{}{},
+					164: struct{}{},
+					209: struct{}{},
 				},
 			},
 			F11: VUnionDepth2_Rand0F2{[]float64{
-				-1.0443559380967396e+08,
-				1.0236401259087074e+09,
+				-3.533790996615131e+09,
 			}},
 		},
-		SourceLabel: "VStructDepth3_Rand1{F2: {{0, 18, 244}, {75}}, F11: {F2: {-1.0443559380967396e+08, 1.0236401259087074e+09}}}",
+		SourceLabel: "VStructDepth3_Rand1{F1: {{}}, F2: {{0, 164, 209}}, F11: {F2: {-3.533790996615131e+09}}}",
 		Source: VStructDepth3_Rand1{
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{},
+			},
 			F2: []VSet_Byte{
 				{
 					0:   struct{}{},
-					18:  struct{}{},
-					244: struct{}{},
-				},
-				{
-					75: struct{}{},
+					164: struct{}{},
+					209: struct{}{},
 				},
 			},
 			F11: VUnionDepth2_Rand0F2{[]float64{
-				-1.0443559380967396e+08,
-				1.0236401259087074e+09,
+				-3.533790996615131e+09,
 			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand1{F2: {{0, 18, 244}, {75}}, F11: {F2: {-1.0443559380967396e+08, 1.0236401259087074e+09}}}",
+		TargetLabel: "VStructDepth3_Rand1{F1: {{}}, F2: {{0, 164, 209}}, F11: {F2: {-3.533790996615131e+09}}}",
 		Target: VStructDepth3_Rand1{
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{},
+			},
 			F2: []VSet_Byte{
 				{
 					0:   struct{}{},
-					18:  struct{}{},
-					244: struct{}{},
-				},
-				{
-					75: struct{}{},
+					164: struct{}{},
+					209: struct{}{},
 				},
 			},
 			F11: VUnionDepth2_Rand0F2{[]float64{
-				-1.0443559380967396e+08,
-				1.0236401259087074e+09,
+				-3.533790996615131e+09,
 			}},
 		},
-		SourceLabel: "VStructDepth3_All{F2: {{0, 18, 244}, {75}}, F11: {F2: {-1.0443559380967396e+08, 1.0236401259087074e+09}}}",
+		SourceLabel: "VStructDepth3_All{F1: {{}}, F2: {{0, 164, 209}}, F11: {F2: {-3.533790996615131e+09}}}",
 		Source: VStructDepth3_All{
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{},
+			},
 			F2: []VSet_Byte{
 				{
 					0:   struct{}{},
-					18:  struct{}{},
-					244: struct{}{},
-				},
-				{
-					75: struct{}{},
+					164: struct{}{},
+					209: struct{}{},
 				},
 			},
 			F8: VStructDepth2_Rand0{
@@ -43313,52 +43319,347 @@ var vAllPass = []Entry{
 			},
 			F10: VUnionDepth2_AllF0{},
 			F11: VUnionDepth2_Rand0F2{[]float64{
-				-1.0443559380967396e+08,
-				1.0236401259087074e+09,
+				-3.533790996615131e+09,
 			}},
 		},
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand1{F11: {F2: {3.9370881217191663e+09, 3.657082561620334e+09, 1.1962011948359613e+09}}}",
+		TargetLabel: "VStructDepth3_Rand1{F1: {{F4: \"ghij\", F15: 80996295, F21: -5309}}, F2: {{0, 20, 251}, {0, 149}}, F11: {F8: {F0: VList_VStructDepth1_All{{}, {F0: set[VInt16]{0}, F1: true, F2: true, F3: \"c\", F5: typeobject(map[VStructEmpty]VStructEmpty), F6: 138, F7: 163, F9: D, F11: {}, F13: 30937, F14: 4155677196, F15: 3955525049, F16: 13679873392269893151, F17: 170251795262137316, F18: 58, F19: 31, F21: -8650, F23: 644771894, F24: -1523315482545761606, F25: 1896955378938196776, F27: -4.857471e+08, F28: -1.1037972867594013e+09, F29: 7.619924770321474e+08, F30: {}}}, F1: true, F3: \"f\", F7: 164, F9: D, F11: {RetryCode: RetryConnection, Msg: \"澤世\"}, F12: 45934, F13: 8064, F14: 3005475201, F15: 3425237137, F16: 8121153969766534976, F18: -50, F19: 41, F20: -12830, F21: 13483, F22: -849006944, F23: 77576641, F25: -4578627630527119507, F26: -3.2894675e+08, F27: -1.7948606e+08, F28: -1.2780311895176792e+09, F29: -1.5072935547036042e+09, F30: {}}}}",
 		Target: VStructDepth3_Rand1{
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				3.9370881217191663e+09,
-				3.657082561620334e+09,
-				1.1962011948359613e+09,
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ghij",
+					F15: 80996295,
+					F21: -5309,
+				},
+			},
+			F2: []VSet_Byte{
+				{
+					0:   struct{}{},
+					20:  struct{}{},
+					251: struct{}{},
+				},
+				{
+					0:   struct{}{},
+					149: struct{}{},
+				},
+			},
+			F11: VUnionDepth2_Rand0F8{VStructDepth1_All{
+				F0: VList_VStructDepth1_All{
+					{
+						F5: vdl.AnyType,
+					},
+					{
+						F0: map[VInt16]struct{}{
+							0: struct{}{},
+						},
+						F1:  true,
+						F2:  true,
+						F3:  "c",
+						F5:  vdl.TypeOf((*map[VStructEmpty]VStructEmpty)(nil)),
+						F6:  138,
+						F7:  163,
+						F9:  VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{}),
+						F13: 30937,
+						F14: 4155677196,
+						F15: 3955525049,
+						F16: 13679873392269893151,
+						F17: 170251795262137316,
+						F18: 58,
+						F19: 31,
+						F21: -8650,
+						F23: 644771894,
+						F24: -1523315482545761606,
+						F25: 1896955378938196776,
+						F27: -4.857471e+08,
+						F28: -1.1037972867594013e+09,
+						F29: 7.619924770321474e+08,
+						F30: &VStructEmpty{},
+					},
+				},
+				F1: true,
+				F3: "f",
+				F5: vdl.AnyType,
+				F7: 164,
+				F9: VEnumBcdD,
+				F11: verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryConnection,
+					Msg:       "澤世",
+				}),
+				F12: 45934,
+				F13: 8064,
+				F14: 3005475201,
+				F15: 3425237137,
+				F16: 8121153969766534976,
+				F18: -50,
+				F19: 41,
+				F20: -12830,
+				F21: 13483,
+				F22: -849006944,
+				F23: 77576641,
+				F25: -4578627630527119507,
+				F26: -3.2894675e+08,
+				F27: -1.7948606e+08,
+				F28: -1.2780311895176792e+09,
+				F29: -1.5072935547036042e+09,
+				F30: &VStructEmpty{},
 			}},
 		},
-		SourceLabel: "VStructDepth3_Rand1{F11: {F2: {3.9370881217191663e+09, 3.657082561620334e+09, 1.1962011948359613e+09}}}",
+		SourceLabel: "VStructDepth3_Rand1{F1: {{F4: \"ghij\", F15: 80996295, F21: -5309}}, F2: {{0, 20, 251}, {0, 149}}, F11: {F8: {F0: VList_VStructDepth1_All{{}, {F0: set[VInt16]{0}, F1: true, F2: true, F3: \"c\", F5: typeobject(map[VStructEmpty]VStructEmpty), F6: 138, F7: 163, F9: D, F11: {}, F13: 30937, F14: 4155677196, F15: 3955525049, F16: 13679873392269893151, F17: 170251795262137316, F18: 58, F19: 31, F21: -8650, F23: 644771894, F24: -1523315482545761606, F25: 1896955378938196776, F27: -4.857471e+08, F28: -1.1037972867594013e+09, F29: 7.619924770321474e+08, F30: {}}}, F1: true, F3: \"f\", F7: 164, F9: D, F11: {RetryCode: RetryConnection, Msg: \"澤世\"}, F12: 45934, F13: 8064, F14: 3005475201, F15: 3425237137, F16: 8121153969766534976, F18: -50, F19: 41, F20: -12830, F21: 13483, F22: -849006944, F23: 77576641, F25: -4578627630527119507, F26: -3.2894675e+08, F27: -1.7948606e+08, F28: -1.2780311895176792e+09, F29: -1.5072935547036042e+09, F30: {}}}}",
 		Source: VStructDepth3_Rand1{
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				3.9370881217191663e+09,
-				3.657082561620334e+09,
-				1.1962011948359613e+09,
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ghij",
+					F15: 80996295,
+					F21: -5309,
+				},
+			},
+			F2: []VSet_Byte{
+				{
+					0:   struct{}{},
+					20:  struct{}{},
+					251: struct{}{},
+				},
+				{
+					0:   struct{}{},
+					149: struct{}{},
+				},
+			},
+			F11: VUnionDepth2_Rand0F8{VStructDepth1_All{
+				F0: VList_VStructDepth1_All{
+					{
+						F5: vdl.AnyType,
+					},
+					{
+						F0: map[VInt16]struct{}{
+							0: struct{}{},
+						},
+						F1:  true,
+						F2:  true,
+						F3:  "c",
+						F5:  vdl.TypeOf((*map[VStructEmpty]VStructEmpty)(nil)),
+						F6:  138,
+						F7:  163,
+						F9:  VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{}),
+						F13: 30937,
+						F14: 4155677196,
+						F15: 3955525049,
+						F16: 13679873392269893151,
+						F17: 170251795262137316,
+						F18: 58,
+						F19: 31,
+						F21: -8650,
+						F23: 644771894,
+						F24: -1523315482545761606,
+						F25: 1896955378938196776,
+						F27: -4.857471e+08,
+						F28: -1.1037972867594013e+09,
+						F29: 7.619924770321474e+08,
+						F30: &VStructEmpty{},
+					},
+				},
+				F1: true,
+				F3: "f",
+				F5: vdl.AnyType,
+				F7: 164,
+				F9: VEnumBcdD,
+				F11: verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryConnection,
+					Msg:       "澤世",
+				}),
+				F12: 45934,
+				F13: 8064,
+				F14: 3005475201,
+				F15: 3425237137,
+				F16: 8121153969766534976,
+				F18: -50,
+				F19: 41,
+				F20: -12830,
+				F21: 13483,
+				F22: -849006944,
+				F23: 77576641,
+				F25: -4578627630527119507,
+				F26: -3.2894675e+08,
+				F27: -1.7948606e+08,
+				F28: -1.2780311895176792e+09,
+				F29: -1.5072935547036042e+09,
+				F30: &VStructEmpty{},
 			}},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VStructDepth3_Rand1{F11: {F2: {3.9370881217191663e+09, 3.657082561620334e+09, 1.1962011948359613e+09}}}",
+		TargetLabel: "VStructDepth3_Rand1{F1: {{F4: \"ghij\", F15: 80996295, F21: -5309}}, F2: {{0, 20, 251}, {0, 149}}, F11: {F8: {F0: VList_VStructDepth1_All{{}, {F0: set[VInt16]{0}, F1: true, F2: true, F3: \"c\", F5: typeobject(map[VStructEmpty]VStructEmpty), F6: 138, F7: 163, F9: D, F11: {}, F13: 30937, F14: 4155677196, F15: 3955525049, F16: 13679873392269893151, F17: 170251795262137316, F18: 58, F19: 31, F21: -8650, F23: 644771894, F24: -1523315482545761606, F25: 1896955378938196776, F27: -4.857471e+08, F28: -1.1037972867594013e+09, F29: 7.619924770321474e+08, F30: {}}}, F1: true, F3: \"f\", F7: 164, F9: D, F11: {RetryCode: RetryConnection, Msg: \"澤世\"}, F12: 45934, F13: 8064, F14: 3005475201, F15: 3425237137, F16: 8121153969766534976, F18: -50, F19: 41, F20: -12830, F21: 13483, F22: -849006944, F23: 77576641, F25: -4578627630527119507, F26: -3.2894675e+08, F27: -1.7948606e+08, F28: -1.2780311895176792e+09, F29: -1.5072935547036042e+09, F30: {}}}}",
 		Target: VStructDepth3_Rand1{
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				3.9370881217191663e+09,
-				3.657082561620334e+09,
-				1.1962011948359613e+09,
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ghij",
+					F15: 80996295,
+					F21: -5309,
+				},
+			},
+			F2: []VSet_Byte{
+				{
+					0:   struct{}{},
+					20:  struct{}{},
+					251: struct{}{},
+				},
+				{
+					0:   struct{}{},
+					149: struct{}{},
+				},
+			},
+			F11: VUnionDepth2_Rand0F8{VStructDepth1_All{
+				F0: VList_VStructDepth1_All{
+					{
+						F5: vdl.AnyType,
+					},
+					{
+						F0: map[VInt16]struct{}{
+							0: struct{}{},
+						},
+						F1:  true,
+						F2:  true,
+						F3:  "c",
+						F5:  vdl.TypeOf((*map[VStructEmpty]VStructEmpty)(nil)),
+						F6:  138,
+						F7:  163,
+						F9:  VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{}),
+						F13: 30937,
+						F14: 4155677196,
+						F15: 3955525049,
+						F16: 13679873392269893151,
+						F17: 170251795262137316,
+						F18: 58,
+						F19: 31,
+						F21: -8650,
+						F23: 644771894,
+						F24: -1523315482545761606,
+						F25: 1896955378938196776,
+						F27: -4.857471e+08,
+						F28: -1.1037972867594013e+09,
+						F29: 7.619924770321474e+08,
+						F30: &VStructEmpty{},
+					},
+				},
+				F1: true,
+				F3: "f",
+				F5: vdl.AnyType,
+				F7: 164,
+				F9: VEnumBcdD,
+				F11: verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryConnection,
+					Msg:       "澤世",
+				}),
+				F12: 45934,
+				F13: 8064,
+				F14: 3005475201,
+				F15: 3425237137,
+				F16: 8121153969766534976,
+				F18: -50,
+				F19: 41,
+				F20: -12830,
+				F21: 13483,
+				F22: -849006944,
+				F23: 77576641,
+				F25: -4578627630527119507,
+				F26: -3.2894675e+08,
+				F27: -1.7948606e+08,
+				F28: -1.2780311895176792e+09,
+				F29: -1.5072935547036042e+09,
+				F30: &VStructEmpty{},
 			}},
 		},
-		SourceLabel: "VStructDepth3_All{F11: {F2: {3.9370881217191663e+09, 3.657082561620334e+09, 1.1962011948359613e+09}}}",
+		SourceLabel: "VStructDepth3_All{F1: {{F4: \"ghij\", F15: 80996295, F21: -5309}}, F2: {{0, 20, 251}, {0, 149}}, F11: {F8: {F0: VList_VStructDepth1_All{{}, {F0: set[VInt16]{0}, F1: true, F2: true, F3: \"c\", F5: typeobject(map[VStructEmpty]VStructEmpty), F6: 138, F7: 163, F9: D, F11: {}, F13: 30937, F14: 4155677196, F15: 3955525049, F16: 13679873392269893151, F17: 170251795262137316, F18: 58, F19: 31, F21: -8650, F23: 644771894, F24: -1523315482545761606, F25: 1896955378938196776, F27: -4.857471e+08, F28: -1.1037972867594013e+09, F29: 7.619924770321474e+08, F30: {}}}, F1: true, F3: \"f\", F7: 164, F9: D, F11: {RetryCode: RetryConnection, Msg: \"澤世\"}, F12: 45934, F13: 8064, F14: 3005475201, F15: 3425237137, F16: 8121153969766534976, F18: -50, F19: 41, F20: -12830, F21: 13483, F22: -849006944, F23: 77576641, F25: -4578627630527119507, F26: -3.2894675e+08, F27: -1.7948606e+08, F28: -1.2780311895176792e+09, F29: -1.5072935547036042e+09, F30: {}}}}",
 		Source: VStructDepth3_All{
+			F1: VArray1_OptVStructDepth1_Rand0{
+				{
+					F4:  "ghij",
+					F15: 80996295,
+					F21: -5309,
+				},
+			},
+			F2: []VSet_Byte{
+				{
+					0:   struct{}{},
+					20:  struct{}{},
+					251: struct{}{},
+				},
+				{
+					0:   struct{}{},
+					149: struct{}{},
+				},
+			},
 			F8: VStructDepth2_Rand0{
 				F10: VUnionDepth1_Rand0F8{},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 			F10: VUnionDepth2_AllF0{},
-			F11: VUnionDepth2_Rand0F2{[]float64{
-				3.9370881217191663e+09,
-				3.657082561620334e+09,
-				1.1962011948359613e+09,
+			F11: VUnionDepth2_Rand0F8{VStructDepth1_All{
+				F0: VList_VStructDepth1_All{
+					{
+						F5: vdl.AnyType,
+					},
+					{
+						F0: map[VInt16]struct{}{
+							0: struct{}{},
+						},
+						F1:  true,
+						F2:  true,
+						F3:  "c",
+						F5:  vdl.TypeOf((*map[VStructEmpty]VStructEmpty)(nil)),
+						F6:  138,
+						F7:  163,
+						F9:  VEnumBcdD,
+						F11: verror.FromWire(vdl.WireError{}),
+						F13: 30937,
+						F14: 4155677196,
+						F15: 3955525049,
+						F16: 13679873392269893151,
+						F17: 170251795262137316,
+						F18: 58,
+						F19: 31,
+						F21: -8650,
+						F23: 644771894,
+						F24: -1523315482545761606,
+						F25: 1896955378938196776,
+						F27: -4.857471e+08,
+						F28: -1.1037972867594013e+09,
+						F29: 7.619924770321474e+08,
+						F30: &VStructEmpty{},
+					},
+				},
+				F1: true,
+				F3: "f",
+				F5: vdl.AnyType,
+				F7: 164,
+				F9: VEnumBcdD,
+				F11: verror.FromWire(vdl.WireError{
+					RetryCode: vdl.WireRetryCodeRetryConnection,
+					Msg:       "澤世",
+				}),
+				F12: 45934,
+				F13: 8064,
+				F14: 3005475201,
+				F15: 3425237137,
+				F16: 8121153969766534976,
+				F18: -50,
+				F19: 41,
+				F20: -12830,
+				F21: 13483,
+				F22: -849006944,
+				F23: 77576641,
+				F25: -4578627630527119507,
+				F26: -3.2894675e+08,
+				F27: -1.7948606e+08,
+				F28: -1.2780311895176792e+09,
+				F29: -1.5072935547036042e+09,
+				F30: &VStructEmpty{},
 			}},
 		},
 	},
@@ -43373,7 +43674,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VUnionDepth3_All{F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "VUnionDepth3_All{F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: VUnionDepth3_All(VUnionDepth3_AllF12{&VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -43390,7 +43691,7 @@ var vAllPass = []Entry{
 			F10: VUnionDepth1_Rand0F28{1.23},
 			F11: VUnionDepth1_Rand1F20{-123},
 		}}),
-		SourceLabel: "VUnionDepth3_All{F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VUnionDepth3_All{F12: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VUnionDepth3_All(VUnionDepth3_AllF12{&VStructDepth2_Rand0{
 			F0: VArray3_Any{
 				int64(-123),
@@ -43411,182 +43712,32 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_All{F11: {F2: {0, 2.9294198781392317e+09, 0}}}",
-		Target: VUnionDepth3_All(VUnionDepth3_AllF11{VUnionDepth2_Rand0F2{[]float64{
-			0,
-			2.9294198781392317e+09,
-			0,
-		}}}),
-		SourceLabel: "VUnionDepth3_All{F11: {F2: {0, 2.9294198781392317e+09, 0}}}",
-		Source: VUnionDepth3_All(VUnionDepth3_AllF11{VUnionDepth2_Rand0F2{[]float64{
-			0,
-			2.9294198781392317e+09,
-			0,
-		}}}),
+		TargetLabel: "VUnionDepth3_All{F10: {F3: {}}}",
+		Target:      VUnionDepth3_All(VUnionDepth3_AllF10{VUnionDepth2_AllF3{}}),
+		SourceLabel: "VUnionDepth3_All{F10: {F3: {}}}",
+		Source:      VUnionDepth3_All(VUnionDepth3_AllF10{VUnionDepth2_AllF3{}}),
+	},
+	{
+		Label:       "Random",
+		TargetLabel: "VUnionDepth3_All{F10: {F3: {}}}",
+		Target:      VUnionDepth3_All(VUnionDepth3_AllF10{VUnionDepth2_AllF3{}}),
+		SourceLabel: "VUnionDepth3_Rand1{F10: {F3: {}}}",
+		Source:      VUnionDepth3_Rand1(VUnionDepth3_Rand1F10{VUnionDepth2_AllF3{}}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_All{F8: {F0: {VArray1_VStructDepth2_Rand0{{F0: {VSet_VStructDepth1_Rand0{{F4: \"cdefghijk\", F15: 1123698897, F21: -2319}}, VList_VByte(\"\\xf9\\xe1L\"), VUnionDepth2_Rand0{F2: {0}}}, F9: {F7: 16, F26: -4.0797693e+09}, F11: {F20: -15515}}}, ?VStructDepth1_All{F0: VMap_String_String{}, F1: true, F3: \"opΔΘΠ\", F4: \"defgh\", F6: 92, F7: 66, F8: VEnumAbc.C, F9: VEnumBcd.C, F12: 51714, F13: 36448, F14: 3725870100, F15: 2696384927, F16: 11276684520345857907, F17: 12349018641214440067, F19: 7, F20: 12672, F21: -9508, F22: 439676188, F23: -778293312, F24: 2954416693005584660, F25: 3892662814947648720, F26: -1.5353823e+09, F27: 1.8501643e+08, F28: -2.8418916504849386e+09, F29: -1.1063216312058423e+09, F30: {}}, []VList_VArray1_String{{{\"王普\"}, {\"ghijklmnopΔΘΠΣΦ王普澤世\"}}, {{\"hijklmnopΔΘΠΣ\"}, {}}}}, F9: {F7: 192, F9: VEnumBcd.C, F26: -1.9806081e+09}, F10: {F16: 18438502704496104546}}}",
-		Target: VUnionDepth3_All(VUnionDepth3_AllF8{VStructDepth2_Rand0{
-			F0: VArray3_Any{
-				VArray1_VStructDepth2_Rand0{
-					{
-						F0: VArray3_Any{
-							VSet_VStructDepth1_Rand0{
-								{
-									F4:  "cdefghijk",
-									F15: 1123698897,
-									F21: -2319,
-								}: struct{}{},
-							},
-							VList_VByte("\xf9\xe1L"),
-							VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{[]float64{
-								0,
-							}}),
-						},
-						F9: VStructDepth1_Rand1{
-							F7:  16,
-							F26: -4.0797693e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F20{-15515},
-					},
-				},
-				&VStructDepth1_All{
-					F0:  VMap_String_String(nil),
-					F1:  true,
-					F3:  "opΔΘΠ",
-					F4:  "defgh",
-					F5:  vdl.AnyType,
-					F6:  92,
-					F7:  66,
-					F8:  VEnumAbcC,
-					F9:  VEnumBcdC,
-					F12: 51714,
-					F13: 36448,
-					F14: 3725870100,
-					F15: 2696384927,
-					F16: 11276684520345857907,
-					F17: 12349018641214440067,
-					F19: 7,
-					F20: 12672,
-					F21: -9508,
-					F22: 439676188,
-					F23: -778293312,
-					F24: 2954416693005584660,
-					F25: 3892662814947648720,
-					F26: -1.5353823e+09,
-					F27: 1.8501643e+08,
-					F28: -2.8418916504849386e+09,
-					F29: -1.1063216312058423e+09,
-					F30: &VStructEmpty{},
-				},
-				[]VList_VArray1_String{
-					{
-						{
-							"王普",
-						},
-						{
-							"ghijklmnopΔΘΠΣΦ王普澤世",
-						},
-					},
-					{
-						{
-							"hijklmnopΔΘΠΣ",
-						},
-						{},
-					},
-				},
-			},
-			F9: VStructDepth1_Rand1{
-				F7:  192,
-				F9:  VEnumBcdC,
-				F26: -1.9806081e+09,
-			},
-			F10: VUnionDepth1_Rand0F16{18438502704496104546},
-			F11: VUnionDepth1_Rand1F6{},
-		}}),
-		SourceLabel: "VUnionDepth3_All{F8: {F0: {VArray1_VStructDepth2_Rand0{{F0: {VSet_VStructDepth1_Rand0{{F4: \"cdefghijk\", F15: 1123698897, F21: -2319}}, VList_VByte(\"\\xf9\\xe1L\"), VUnionDepth2_Rand0{F2: {0}}}, F9: {F7: 16, F26: -4.0797693e+09}, F11: {F20: -15515}}}, ?VStructDepth1_All{F0: VMap_String_String{}, F1: true, F3: \"opΔΘΠ\", F4: \"defgh\", F6: 92, F7: 66, F8: VEnumAbc.C, F9: VEnumBcd.C, F12: 51714, F13: 36448, F14: 3725870100, F15: 2696384927, F16: 11276684520345857907, F17: 12349018641214440067, F19: 7, F20: 12672, F21: -9508, F22: 439676188, F23: -778293312, F24: 2954416693005584660, F25: 3892662814947648720, F26: -1.5353823e+09, F27: 1.8501643e+08, F28: -2.8418916504849386e+09, F29: -1.1063216312058423e+09, F30: {}}, []VList_VArray1_String{{{\"王普\"}, {\"ghijklmnopΔΘΠΣΦ王普澤世\"}}, {{\"hijklmnopΔΘΠΣ\"}, {}}}}, F9: {F7: 192, F9: VEnumBcd.C, F26: -1.9806081e+09}, F10: {F16: 18438502704496104546}}}",
-		Source: VUnionDepth3_All(VUnionDepth3_AllF8{VStructDepth2_Rand0{
-			F0: VArray3_Any{
-				VArray1_VStructDepth2_Rand0{
-					{
-						F0: VArray3_Any{
-							VSet_VStructDepth1_Rand0{
-								{
-									F4:  "cdefghijk",
-									F15: 1123698897,
-									F21: -2319,
-								}: struct{}{},
-							},
-							VList_VByte("\xf9\xe1L"),
-							VUnionDepth2_Rand0(VUnionDepth2_Rand0F2{[]float64{
-								0,
-							}}),
-						},
-						F9: VStructDepth1_Rand1{
-							F7:  16,
-							F26: -4.0797693e+09,
-						},
-						F10: VUnionDepth1_Rand0F8{},
-						F11: VUnionDepth1_Rand1F20{-15515},
-					},
-				},
-				&VStructDepth1_All{
-					F0:  VMap_String_String(nil),
-					F1:  true,
-					F3:  "opΔΘΠ",
-					F4:  "defgh",
-					F5:  vdl.AnyType,
-					F6:  92,
-					F7:  66,
-					F8:  VEnumAbcC,
-					F9:  VEnumBcdC,
-					F12: 51714,
-					F13: 36448,
-					F14: 3725870100,
-					F15: 2696384927,
-					F16: 11276684520345857907,
-					F17: 12349018641214440067,
-					F19: 7,
-					F20: 12672,
-					F21: -9508,
-					F22: 439676188,
-					F23: -778293312,
-					F24: 2954416693005584660,
-					F25: 3892662814947648720,
-					F26: -1.5353823e+09,
-					F27: 1.8501643e+08,
-					F28: -2.8418916504849386e+09,
-					F29: -1.1063216312058423e+09,
-					F30: &VStructEmpty{},
-				},
-				[]VList_VArray1_String{
-					{
-						{
-							"王普",
-						},
-						{
-							"ghijklmnopΔΘΠΣΦ王普澤世",
-						},
-					},
-					{
-						{
-							"hijklmnopΔΘΠΣ",
-						},
-						{},
-					},
-				},
-			},
-			F9: VStructDepth1_Rand1{
-				F7:  192,
-				F9:  VEnumBcdC,
-				F26: -1.9806081e+09,
-			},
-			F10: VUnionDepth1_Rand0F16{18438502704496104546},
-			F11: VUnionDepth1_Rand1F6{},
-		}}),
+		TargetLabel: "VUnionDepth3_All{F5: {}}",
+		Target:      VUnionDepth3_All(VUnionDepth3_AllF5{}),
+		SourceLabel: "VUnionDepth3_All{F5: {}}",
+		Source:      VUnionDepth3_All(VUnionDepth3_AllF5{}),
+	},
+	{
+		Label:       "Random",
+		TargetLabel: "VUnionDepth3_All{F5: {}}",
+		Target:      VUnionDepth3_All(VUnionDepth3_AllF5{}),
+		SourceLabel: "VUnionDepth3_Rand1{F5: {}}",
+		Source:      VUnionDepth3_Rand1(VUnionDepth3_Rand1F5{}),
 	},
 	{
 		IsCanonical: true,
@@ -43613,13 +43764,13 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VUnionDepth3_Rand0{F2: {{VEnumAbc.C}}}",
+		TargetLabel: "VUnionDepth3_Rand0{F2: {{C}}}",
 		Target: VUnionDepth3_Rand0(VUnionDepth3_Rand0F2{[][]VEnumAbc{
 			{
 				VEnumAbcC,
 			},
 		}}),
-		SourceLabel: "VUnionDepth3_Rand0{F2: {{VEnumAbc.C}}}",
+		SourceLabel: "VUnionDepth3_Rand0{F2: {{C}}}",
 		Source: VUnionDepth3_Rand0(VUnionDepth3_Rand0F2{[][]VEnumAbc{
 			{
 				VEnumAbcC,
@@ -43628,13 +43779,13 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VUnionDepth3_Rand0{F2: {{VEnumAbc.C}}}",
+		TargetLabel: "VUnionDepth3_Rand0{F2: {{C}}}",
 		Target: VUnionDepth3_Rand0(VUnionDepth3_Rand0F2{[][]VEnumAbc{
 			{
 				VEnumAbcC,
 			},
 		}}),
-		SourceLabel: "VUnionDepth3_All{F2: {{VEnumAbc.C}}}",
+		SourceLabel: "VUnionDepth3_All{F2: {{C}}}",
 		Source: VUnionDepth3_All(VUnionDepth3_AllF2{[][]VEnumAbc{
 			{
 				VEnumAbcC,
@@ -43675,7 +43826,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		TargetLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F10{VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -43683,7 +43834,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		}}}),
-		SourceLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		SourceLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Source: VUnionDepth3_Rand1(VUnionDepth3_Rand1F10{VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -43694,7 +43845,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		TargetLabel: "VUnionDepth3_Rand1{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F10{VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -43702,7 +43853,7 @@ var vAllPass = []Entry{
 			F9:  VEnumBcdD,
 			F26: 1.23,
 		}}}),
-		SourceLabel: "VUnionDepth3_All{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}}}",
+		SourceLabel: "VUnionDepth3_All{F10: {F13: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}}}",
 		Source: VUnionDepth3_All(VUnionDepth3_AllF10{VUnionDepth2_AllF13{&VStructDepth1_Rand1{
 			F0:  int64(-123),
 			F1:  true,
@@ -43714,146 +43865,102 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_Rand1{F2: {{VEnumAbc.A, VEnumAbc.A, VEnumAbc.A}, {VEnumAbc.A}, {VEnumAbc.A}}}",
-		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
-			{
-				VEnumAbcA,
-				VEnumAbcA,
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
+		TargetLabel: "VUnionDepth3_Rand1{F1: {{F20: 0}, {F9: D}, {F9: C}}}",
+		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F1{VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F20{},
+			VUnionDepth1_Rand1F9{VEnumBcdD},
+			VUnionDepth1_Rand1F9{VEnumBcdC},
 		}}),
-		SourceLabel: "VUnionDepth3_Rand1{F2: {{VEnumAbc.A, VEnumAbc.A, VEnumAbc.A}, {VEnumAbc.A}, {VEnumAbc.A}}}",
-		Source: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
-			{
-				VEnumAbcA,
-				VEnumAbcA,
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
+		SourceLabel: "VUnionDepth3_Rand1{F1: {{F20: 0}, {F9: D}, {F9: C}}}",
+		Source: VUnionDepth3_Rand1(VUnionDepth3_Rand1F1{VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F20{},
+			VUnionDepth1_Rand1F9{VEnumBcdD},
+			VUnionDepth1_Rand1F9{VEnumBcdC},
 		}}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_Rand1{F2: {{VEnumAbc.A, VEnumAbc.A, VEnumAbc.A}, {VEnumAbc.A}, {VEnumAbc.A}}}",
-		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
-			{
-				VEnumAbcA,
-				VEnumAbcA,
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
+		TargetLabel: "VUnionDepth3_Rand1{F1: {{F20: 0}, {F9: D}, {F9: C}}}",
+		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F1{VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F20{},
+			VUnionDepth1_Rand1F9{VEnumBcdD},
+			VUnionDepth1_Rand1F9{VEnumBcdC},
 		}}),
-		SourceLabel: "VUnionDepth3_All{F2: {{VEnumAbc.A, VEnumAbc.A, VEnumAbc.A}, {VEnumAbc.A}, {VEnumAbc.A}}}",
-		Source: VUnionDepth3_All(VUnionDepth3_AllF2{[][]VEnumAbc{
-			{
-				VEnumAbcA,
-				VEnumAbcA,
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
-			{
-				VEnumAbcA,
-			},
+		SourceLabel: "VUnionDepth3_All{F1: {{F20: 0}, {F9: D}, {F9: C}}}",
+		Source: VUnionDepth3_All(VUnionDepth3_AllF1{VArray3_VUnionDepth1_Rand1{
+			VUnionDepth1_Rand1F20{},
+			VUnionDepth1_Rand1F9{VEnumBcdD},
+			VUnionDepth1_Rand1F9{VEnumBcdC},
 		}}),
 	},
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_Rand1{F7: {{}: {}, {F4: \"opΔΘΠΣΦ\", F21: 15635}: {F4: \"普澤世\", F21: -3147}, {F4: \"opΔΘΠΣΦ王普澤世界\", F15: 902864908}: {F4: \"ghijklmno\", F15: 1456157814, F21: 13606}}}",
-		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F7{VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
-			{}: {},
+		TargetLabel: "VUnionDepth3_Rand1{F2: {{C, C, B}, {A}, {C, C, C}}}",
+		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
 			{
-				F4:  "opΔΘΠΣΦ",
-				F21: 15635,
-			}: {
-				F4:  "普澤世",
-				F21: -3147,
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcB,
 			},
 			{
-				F4:  "opΔΘΠΣΦ王普澤世界",
-				F15: 902864908,
-			}: {
-				F4:  "ghijklmno",
-				F15: 1456157814,
-				F21: 13606,
+				VEnumAbcA,
+			},
+			{
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcC,
 			},
 		}}),
-		SourceLabel: "VUnionDepth3_Rand1{F7: {{}: {}, {F4: \"opΔΘΠΣΦ\", F21: 15635}: {F4: \"普澤世\", F21: -3147}, {F4: \"opΔΘΠΣΦ王普澤世界\", F15: 902864908}: {F4: \"ghijklmno\", F15: 1456157814, F21: 13606}}}",
-		Source: VUnionDepth3_Rand1(VUnionDepth3_Rand1F7{VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
-			{}: {},
+		SourceLabel: "VUnionDepth3_Rand1{F2: {{C, C, B}, {A}, {C, C, C}}}",
+		Source: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
 			{
-				F4:  "opΔΘΠΣΦ",
-				F21: 15635,
-			}: {
-				F4:  "普澤世",
-				F21: -3147,
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcB,
 			},
 			{
-				F4:  "opΔΘΠΣΦ王普澤世界",
-				F15: 902864908,
-			}: {
-				F4:  "ghijklmno",
-				F15: 1456157814,
-				F21: 13606,
+				VEnumAbcA,
+			},
+			{
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcC,
 			},
 		}}),
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "VUnionDepth3_Rand1{F7: {{}: {}, {F4: \"opΔΘΠΣΦ\", F21: 15635}: {F4: \"普澤世\", F21: -3147}, {F4: \"opΔΘΠΣΦ王普澤世界\", F15: 902864908}: {F4: \"ghijklmno\", F15: 1456157814, F21: 13606}}}",
-		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F7{VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
-			{}: {},
+		TargetLabel: "VUnionDepth3_Rand1{F2: {{C, C, B}, {A}, {C, C, C}}}",
+		Target: VUnionDepth3_Rand1(VUnionDepth3_Rand1F2{[][]VEnumAbc{
 			{
-				F4:  "opΔΘΠΣΦ",
-				F21: 15635,
-			}: {
-				F4:  "普澤世",
-				F21: -3147,
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcB,
 			},
 			{
-				F4:  "opΔΘΠΣΦ王普澤世界",
-				F15: 902864908,
-			}: {
-				F4:  "ghijklmno",
-				F15: 1456157814,
-				F21: 13606,
+				VEnumAbcA,
+			},
+			{
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcC,
 			},
 		}}),
-		SourceLabel: "VUnionDepth3_All{F7: {{}: {}, {F4: \"opΔΘΠΣΦ\", F21: 15635}: {F4: \"普澤世\", F21: -3147}, {F4: \"opΔΘΠΣΦ王普澤世界\", F15: 902864908}: {F4: \"ghijklmno\", F15: 1456157814, F21: 13606}}}",
-		Source: VUnionDepth3_All(VUnionDepth3_AllF7{VMap_VStructDepth1_Rand0_VStructDepth1_Rand0{
-			{}: {},
+		SourceLabel: "VUnionDepth3_All{F2: {{C, C, B}, {A}, {C, C, C}}}",
+		Source: VUnionDepth3_All(VUnionDepth3_AllF2{[][]VEnumAbc{
 			{
-				F4:  "opΔΘΠΣΦ",
-				F21: 15635,
-			}: {
-				F4:  "普澤世",
-				F21: -3147,
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcB,
 			},
 			{
-				F4:  "opΔΘΠΣΦ王普澤世界",
-				F15: 902864908,
-			}: {
-				F4:  "ghijklmno",
-				F15: 1456157814,
-				F21: 13606,
+				VEnumAbcA,
+			},
+			{
+				VEnumAbcC,
+				VEnumAbcC,
+				VEnumAbcC,
 			},
 		}}),
 	},
@@ -43881,7 +43988,7 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Full",
-		TargetLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: &VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -43913,7 +44020,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: &VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -43948,7 +44055,7 @@ var vAllPass = []Entry{
 	},
 	{
 		Label:       "Full",
-		TargetLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Target: &VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -43980,7 +44087,7 @@ var vAllPass = []Entry{
 				F11: VUnionDepth1_Rand1F20{-123},
 			},
 		},
-		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: VEnumBcd.D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
+		SourceLabel: "VStructDepth3_Rand0{F1: {{F4: \"abcdefghijklmnopΔΘΠΣΦ王普澤世界\", F15: 123, F21: -123}}, F5: {{F28: 1.23}}, F7: {{F28: 1.23}: {F28: 1.23}}, F8: {F0: {int64(-123), int64(-123), int64(-123)}, F9: {F0: int64(-123), F1: true, F7: 123, F9: D, F26: 1.23}, F10: {F28: 1.23}, F11: {F20: -123}}}",
 		Source: VStructDepth3_Rand0{
 			F1: VArray1_OptVStructDepth1_Rand0{
 				{
@@ -44016,66 +44123,102 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth3_Rand0{F5: {{F16: 0}, {F28: 2.1119226658265376e+09}}, F7: {{F12: 7751}: {F8: VEnumAbc.A}, {F8: VEnumAbc.C}: {F16: 0}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F5: {{F12: 23417}, {F28: -1.0675147565091993e+09}, {F8: C}}, F7: {{F10: {}}: {F8: A}}, F8: {F9: {F0: error{Id: \"cdefghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryBackoff, Msg: \"Φ王普\"}, F9: D, F26: -8.973381e+08}, F10: {F28: 6.954992858649766e+08}}}",
 		Target: &VStructDepth3_Rand0{
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                       struct{}{},
-				VUnionDepth1_Rand0F28{2.1119226658265376e+09}: struct{}{},
+				VUnionDepth1_Rand0F12{23417}:                   struct{}{},
+				VUnionDepth1_Rand0F28{-1.0675147565091993e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}:                struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{7751}:     VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{},
+				F9: VStructDepth1_Rand1{
+					F0: verror.FromWire(vdl.WireError{
+						Id:        "cdefghijklmnopΔΘΠΣΦ王普澤",
+						RetryCode: vdl.WireRetryCodeRetryBackoff,
+						Msg:       "Φ王普",
+					}),
+					F9:  VEnumBcdD,
+					F26: -8.973381e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{6.954992858649766e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "?VStructDepth3_Rand0{F5: {{F16: 0}, {F28: 2.1119226658265376e+09}}, F7: {{F12: 7751}: {F8: VEnumAbc.A}, {F8: VEnumAbc.C}: {F16: 0}}}",
+		SourceLabel: "?VStructDepth3_Rand0{F5: {{F12: 23417}, {F28: -1.0675147565091993e+09}, {F8: C}}, F7: {{F10: {}}: {F8: A}}, F8: {F9: {F0: error{Id: \"cdefghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryBackoff, Msg: \"Φ王普\"}, F9: D, F26: -8.973381e+08}, F10: {F28: 6.954992858649766e+08}}}",
 		Source: &VStructDepth3_Rand0{
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                       struct{}{},
-				VUnionDepth1_Rand0F28{2.1119226658265376e+09}: struct{}{},
+				VUnionDepth1_Rand0F12{23417}:                   struct{}{},
+				VUnionDepth1_Rand0F28{-1.0675147565091993e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}:                struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{7751}:     VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{},
+				F9: VStructDepth1_Rand1{
+					F0: verror.FromWire(vdl.WireError{
+						Id:        "cdefghijklmnopΔΘΠΣΦ王普澤",
+						RetryCode: vdl.WireRetryCodeRetryBackoff,
+						Msg:       "Φ王普",
+					}),
+					F9:  VEnumBcdD,
+					F26: -8.973381e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{6.954992858649766e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth3_Rand0{F5: {{F16: 0}, {F28: 2.1119226658265376e+09}}, F7: {{F12: 7751}: {F8: VEnumAbc.A}, {F8: VEnumAbc.C}: {F16: 0}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F5: {{F12: 23417}, {F28: -1.0675147565091993e+09}, {F8: C}}, F7: {{F10: {}}: {F8: A}}, F8: {F9: {F0: error{Id: \"cdefghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryBackoff, Msg: \"Φ王普\"}, F9: D, F26: -8.973381e+08}, F10: {F28: 6.954992858649766e+08}}}",
 		Target: &VStructDepth3_Rand0{
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                       struct{}{},
-				VUnionDepth1_Rand0F28{2.1119226658265376e+09}: struct{}{},
+				VUnionDepth1_Rand0F12{23417}:                   struct{}{},
+				VUnionDepth1_Rand0F28{-1.0675147565091993e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}:                struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{7751}:     VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{},
+				F9: VStructDepth1_Rand1{
+					F0: verror.FromWire(vdl.WireError{
+						Id:        "cdefghijklmnopΔΘΠΣΦ王普澤",
+						RetryCode: vdl.WireRetryCodeRetryBackoff,
+						Msg:       "Φ王普",
+					}),
+					F9:  VEnumBcdD,
+					F26: -8.973381e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{6.954992858649766e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F5: {{F16: 0}, {F28: 2.1119226658265376e+09}}, F7: {{F12: 7751}: {F8: VEnumAbc.A}, {F8: VEnumAbc.C}: {F16: 0}}}",
+		SourceLabel: "VStructDepth3_All{F5: {{F12: 23417}, {F28: -1.0675147565091993e+09}, {F8: C}}, F7: {{F10: {}}: {F8: A}}, F8: {F9: {F0: error{Id: \"cdefghijklmnopΔΘΠΣΦ王普澤\", RetryCode: RetryBackoff, Msg: \"Φ王普\"}, F9: D, F26: -8.973381e+08}, F10: {F28: 6.954992858649766e+08}}}",
 		Source: VStructDepth3_All{
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{}:                       struct{}{},
-				VUnionDepth1_Rand0F28{2.1119226658265376e+09}: struct{}{},
+				VUnionDepth1_Rand0F12{23417}:                   struct{}{},
+				VUnionDepth1_Rand0F28{-1.0675147565091993e+09}: struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcC}:                struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{7751}:     VUnionDepth1_Rand0F8{},
-				VUnionDepth1_Rand0F8{VEnumAbcC}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F10: VUnionDepth1_Rand0F8{},
+				F9: VStructDepth1_Rand1{
+					F0: verror.FromWire(vdl.WireError{
+						Id:        "cdefghijklmnopΔΘΠΣΦ王普澤",
+						RetryCode: vdl.WireRetryCodeRetryBackoff,
+						Msg:       "Φ王普",
+					}),
+					F9:  VEnumBcdD,
+					F26: -8.973381e+08,
+				},
+				F10: VUnionDepth1_Rand0F28{6.954992858649766e+08},
 				F11: VUnionDepth1_Rand1F6{},
 			},
 			F10: VUnionDepth2_AllF0{},
@@ -44085,187 +44228,71 @@ var vAllPass = []Entry{
 	{
 		IsCanonical: true,
 		Label:       "Random",
-		TargetLabel: "?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 10192}}, F7: {{F16: 12231693403235434997}: {F28: -2.137534959486493e+08}, {F28: 6.215327869465857e+08}: {F10: {}}}, F8: {F0: {VArray3_Any{uint16(12547), nil, VArray1_OptVStructDepth1_Rand0{{F4: \"defghijkl\", F21: -10952}}}, VSet_VEnumAbc{VEnumAbc.B}, set[uint16]{0, 14321, 59695}}, F9: {F0: VArray1_VUnionDepth2_Rand1{{F11: {F10: {}}}}, F7: 23, F9: VEnumBcd.C, F26: 1.2305161e+08}, F10: {F10: {}}, F11: {F9: VEnumBcd.C}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F5: {{F16: 7625294377182250282}, {F8: A}, {F8: B}}, F7: {{F10: {}}: {F16: 0}, {F8: A}: {F8: A}}}",
 		Target: &VStructDepth3_Rand0{
-			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
-			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{10192}: struct{}{},
+				VUnionDepth1_Rand0F16{7625294377182250282}: struct{}{},
+				VUnionDepth1_Rand0F8{}:                     struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcB}:            struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{12231693403235434997}:  VUnionDepth1_Rand0F28{-2.137534959486493e+08},
-				VUnionDepth1_Rand0F28{6.215327869465857e+08}: VUnionDepth1_Rand0F10{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VArray3_Any{
-						uint16(12547),
-						nil,
-						VArray1_OptVStructDepth1_Rand0{
-							{
-								F4:  "defghijkl",
-								F21: -10952,
-							},
-						},
-					},
-					VSet_VEnumAbc{
-						VEnumAbcB: struct{}{},
-					},
-					map[uint16]struct{}{
-						0:     struct{}{},
-						14321: struct{}{},
-						59695: struct{}{},
-					},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VArray1_VUnionDepth2_Rand1{
-						VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F10{}},
-					},
-					F7:  23,
-					F9:  VEnumBcdC,
-					F26: 1.2305161e+08,
-				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 10192}}, F7: {{F16: 12231693403235434997}: {F28: -2.137534959486493e+08}, {F28: 6.215327869465857e+08}: {F10: {}}}, F8: {F0: {VArray3_Any{uint16(12547), nil, VArray1_OptVStructDepth1_Rand0{{F4: \"defghijkl\", F21: -10952}}}, VSet_VEnumAbc{VEnumAbc.B}, set[uint16]{0, 14321, 59695}}, F9: {F0: VArray1_VUnionDepth2_Rand1{{F11: {F10: {}}}}, F7: 23, F9: VEnumBcd.C, F26: 1.2305161e+08}, F10: {F10: {}}, F11: {F9: VEnumBcd.C}}}",
+		SourceLabel: "?VStructDepth3_Rand0{F5: {{F16: 7625294377182250282}, {F8: A}, {F8: B}}, F7: {{F10: {}}: {F16: 0}, {F8: A}: {F8: A}}}",
 		Source: &VStructDepth3_Rand0{
-			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
-			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{10192}: struct{}{},
+				VUnionDepth1_Rand0F16{7625294377182250282}: struct{}{},
+				VUnionDepth1_Rand0F8{}:                     struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcB}:            struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{12231693403235434997}:  VUnionDepth1_Rand0F28{-2.137534959486493e+08},
-				VUnionDepth1_Rand0F28{6.215327869465857e+08}: VUnionDepth1_Rand0F10{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VArray3_Any{
-						uint16(12547),
-						nil,
-						VArray1_OptVStructDepth1_Rand0{
-							{
-								F4:  "defghijkl",
-								F21: -10952,
-							},
-						},
-					},
-					VSet_VEnumAbc{
-						VEnumAbcB: struct{}{},
-					},
-					map[uint16]struct{}{
-						0:     struct{}{},
-						14321: struct{}{},
-						59695: struct{}{},
-					},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VArray1_VUnionDepth2_Rand1{
-						VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F10{}},
-					},
-					F7:  23,
-					F9:  VEnumBcdC,
-					F26: 1.2305161e+08,
-				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
 	},
 	{
 		Label:       "Random",
-		TargetLabel: "?VStructDepth3_Rand0{F1: {{}}, F5: {{F12: 10192}}, F7: {{F16: 12231693403235434997}: {F28: -2.137534959486493e+08}, {F28: 6.215327869465857e+08}: {F10: {}}}, F8: {F0: {VArray3_Any{uint16(12547), nil, VArray1_OptVStructDepth1_Rand0{{F4: \"defghijkl\", F21: -10952}}}, VSet_VEnumAbc{VEnumAbc.B}, set[uint16]{0, 14321, 59695}}, F9: {F0: VArray1_VUnionDepth2_Rand1{{F11: {F10: {}}}}, F7: 23, F9: VEnumBcd.C, F26: 1.2305161e+08}, F10: {F10: {}}, F11: {F9: VEnumBcd.C}}}",
+		TargetLabel: "?VStructDepth3_Rand0{F5: {{F16: 7625294377182250282}, {F8: A}, {F8: B}}, F7: {{F10: {}}: {F16: 0}, {F8: A}: {F8: A}}}",
 		Target: &VStructDepth3_Rand0{
-			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
-			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{10192}: struct{}{},
+				VUnionDepth1_Rand0F16{7625294377182250282}: struct{}{},
+				VUnionDepth1_Rand0F8{}:                     struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcB}:            struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{12231693403235434997}:  VUnionDepth1_Rand0F28{-2.137534959486493e+08},
-				VUnionDepth1_Rand0F28{6.215327869465857e+08}: VUnionDepth1_Rand0F10{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VArray3_Any{
-						uint16(12547),
-						nil,
-						VArray1_OptVStructDepth1_Rand0{
-							{
-								F4:  "defghijkl",
-								F21: -10952,
-							},
-						},
-					},
-					VSet_VEnumAbc{
-						VEnumAbcB: struct{}{},
-					},
-					map[uint16]struct{}{
-						0:     struct{}{},
-						14321: struct{}{},
-						59695: struct{}{},
-					},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VArray1_VUnionDepth2_Rand1{
-						VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F10{}},
-					},
-					F7:  23,
-					F9:  VEnumBcdC,
-					F26: 1.2305161e+08,
-				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 		},
-		SourceLabel: "VStructDepth3_All{F1: {{}}, F5: {{F12: 10192}}, F7: {{F16: 12231693403235434997}: {F28: -2.137534959486493e+08}, {F28: 6.215327869465857e+08}: {F10: {}}}, F8: {F0: {VArray3_Any{uint16(12547), nil, VArray1_OptVStructDepth1_Rand0{{F4: \"defghijkl\", F21: -10952}}}, VSet_VEnumAbc{VEnumAbc.B}, set[uint16]{0, 14321, 59695}}, F9: {F0: VArray1_VUnionDepth2_Rand1{{F11: {F10: {}}}}, F7: 23, F9: VEnumBcd.C, F26: 1.2305161e+08}, F10: {F10: {}}, F11: {F9: VEnumBcd.C}}}",
+		SourceLabel: "VStructDepth3_All{F5: {{F16: 7625294377182250282}, {F8: A}, {F8: B}}, F7: {{F10: {}}: {F16: 0}, {F8: A}: {F8: A}}}",
 		Source: VStructDepth3_All{
-			F1: VArray1_OptVStructDepth1_Rand0{
-				{},
-			},
 			F5: VSet_VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F12{10192}: struct{}{},
+				VUnionDepth1_Rand0F16{7625294377182250282}: struct{}{},
+				VUnionDepth1_Rand0F8{}:                     struct{}{},
+				VUnionDepth1_Rand0F8{VEnumAbcB}:            struct{}{},
 			},
 			F7: map[VUnionDepth1_Rand0]VUnionDepth1_Rand0{
-				VUnionDepth1_Rand0F16{12231693403235434997}:  VUnionDepth1_Rand0F28{-2.137534959486493e+08},
-				VUnionDepth1_Rand0F28{6.215327869465857e+08}: VUnionDepth1_Rand0F10{},
+				VUnionDepth1_Rand0F10{}: VUnionDepth1_Rand0F16{},
+				VUnionDepth1_Rand0F8{}:  VUnionDepth1_Rand0F8{},
 			},
 			F8: VStructDepth2_Rand0{
-				F0: VArray3_Any{
-					VArray3_Any{
-						uint16(12547),
-						nil,
-						VArray1_OptVStructDepth1_Rand0{
-							{
-								F4:  "defghijkl",
-								F21: -10952,
-							},
-						},
-					},
-					VSet_VEnumAbc{
-						VEnumAbcB: struct{}{},
-					},
-					map[uint16]struct{}{
-						0:     struct{}{},
-						14321: struct{}{},
-						59695: struct{}{},
-					},
-				},
-				F9: VStructDepth1_Rand1{
-					F0: VArray1_VUnionDepth2_Rand1{
-						VUnionDepth2_Rand1F11{VUnionDepth1_Rand0F10{}},
-					},
-					F7:  23,
-					F9:  VEnumBcdC,
-					F26: 1.2305161e+08,
-				},
-				F10: VUnionDepth1_Rand0F10{},
-				F11: VUnionDepth1_Rand1F9{VEnumBcdC},
+				F10: VUnionDepth1_Rand0F8{},
+				F11: VUnionDepth1_Rand1F6{},
 			},
 			F10: VUnionDepth2_AllF0{},
 			F11: VUnionDepth2_Rand0F2{},

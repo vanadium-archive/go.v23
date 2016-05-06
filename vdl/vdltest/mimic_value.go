@@ -36,9 +36,6 @@ func MimicValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 	if base.IsNil() {
 		return mimicNilValue(tt, base)
 	}
-	if base.Kind() == vdl.Optional {
-		base = base.Elem()
-	}
 	// Now we know we're dealing with a non-nil base.  Flatten tt to a non-any
 	// non-optional type.
 	if tt == vdl.AnyType {
@@ -46,7 +43,7 @@ func MimicValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 		// same type as the base.
 		tt = base.Type()
 	}
-	value := mimicNonNilValue(tt.NonOptional(), base)
+	value := mimicNonNilValue(tt.NonOptional(), base.NonOptional())
 	if value == nil {
 		return nil
 	}

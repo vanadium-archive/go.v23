@@ -153,6 +153,229 @@ type E struct {
 	chainedPCs []uintptr     // PCs of a chained E
 }
 
+// TypeOf(verror.E{}) should give vdl.WireError.
+func (E) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl.WireError"`
+}) {
+}
+
+func (x E) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf(vdl.WireError{})); err != nil {
+		return err
+	}
+	if x.ID != "" {
+		if err := enc.NextField("Id"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(string(x.ID)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Action != NoRetry {
+		var actionStr string
+		switch x.Action {
+		case RetryConnection:
+			actionStr = "RetryConnection"
+		case RetryRefetch:
+			actionStr = "RetryRefetch"
+		case RetryBackoff:
+			actionStr = "RetryBackoff"
+		default:
+			return fmt.Errorf("%d does not correspond to a label in enum WireRetryCode", x.Action)
+		}
+		if err := enc.NextField("RetryCode"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf(vdl.WireRetryCodeNoRetry)); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(actionStr); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Msg != "" {
+		if err := enc.NextField("Msg"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.Msg); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if len(x.ParamList) != 0 {
+		if err := enc.NextField("ParamList"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
+			return err
+		}
+		if err := enc.SetLenHint(len(x.ParamList)); err != nil {
+			return err
+		}
+		for i := 0; i < len(x.ParamList); i++ {
+			if err := enc.NextEntry(false); err != nil {
+				return err
+			}
+			if x.ParamList[i] == nil {
+				if err := enc.NilValue(vdl.AnyType); err != nil {
+					return err
+				}
+			} else {
+				if err := vdl.Write(enc, x.ParamList[i]); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.NextEntry(true); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *E) VDLRead(dec vdl.Decoder) error {
+	*x = E{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+	switchBlock:
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Id":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			if id, err := dec.DecodeString(); err != nil {
+				return err
+			} else {
+				x.ID = ID(id)
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "RetryCode":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			label, err := dec.DecodeString()
+			if err != nil {
+				return err
+			}
+			switch label {
+			case "NoRetry":
+				x.Action = NoRetry
+			case "RetryConnection":
+				x.Action = RetryConnection
+			case "RetryRefetch":
+				x.Action = RetryRefetch
+			case "RetryBackoff":
+				x.Action = RetryBackoff
+			default:
+				return fmt.Errorf("label %s not in enum WireRetryCode", label)
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Msg":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Msg, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ParamList":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.ParamList), dec.Type()) {
+				return fmt.Errorf("incompatible list %T, from %v", x.ParamList, dec.Type())
+			}
+			switch len := dec.LenHint(); {
+			case len > 0:
+				x.ParamList = make([]interface{}, 0, len)
+			default:
+				x.ParamList = nil
+			}
+			for {
+				switch done, err := dec.NextEntry(); {
+				case err != nil:
+					return err
+				case done:
+					if err := dec.FinishValue(); err != nil {
+						return err
+					}
+					break switchBlock
+				}
+				var elem interface{}
+				if err := vdl.Read(dec, &elem); err != nil {
+					return err
+				}
+				x.ParamList = append(x.ParamList, elem)
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func init() {
+	vdl.RegisterNative(ErrorToNative, ErrorFromNative)
+}
+
+func ErrorToNative(wire *vdl.WireError, native *error) error {
+	if wire == nil {
+		*native = nil
+		return nil
+	} else {
+		var e E
+		*native = &e
+		return WireToNative(*wire, &e)
+	}
+}
+func ErrorFromNative(wire **vdl.WireError, native error) error {
+	if native == nil {
+		*wire = nil
+		return nil
+	} else {
+		return WireFromNative(*wire, native)
+	}
+}
+
 const maxPCs = 40 // Maximum number of PC values we'll include in a stack trace.
 
 // A SubErrs is a special type that allows clients to include a list of

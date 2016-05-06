@@ -64,22 +64,34 @@ type pipeOp int
 // pipeOp is used to check our invariants for state transitions.
 
 const (
-	pipeStartDec pipeOp = iota
+	pipeStartEnc pipeOp = iota
+	pipeStartDec
+	pipeFinishEnc
 	pipeFinishDec
-	pipeEnc
 )
 
 func (op pipeOp) String() string {
 	switch op {
+	case pipeStartEnc:
+		return "StartEnc"
 	case pipeStartDec:
 		return "StartDec"
+	case pipeFinishEnc:
+		return "FinishEnc"
 	case pipeFinishDec:
 		return "FinishDec"
-	case pipeEnc:
-		return "Encoder"
 	default:
 		panic("bad op")
 	}
+}
+
+func (op pipeOp) Next() pipeOp {
+	if op == pipeFinishDec {
+		op = pipeStartEnc
+	} else {
+		op++
+	}
+	return op
 }
 
 // We can only determine whether the next value is AnyType
@@ -174,14 +186,11 @@ func newPipe() (*pipeEncoder, *pipeDecoder) {
 }
 
 func (e *pipeEncoder) closeLocked(err error) error {
-	if err != nil {
-		if e.Err == nil {
-			e.Err = err
-		}
-		e.State = pipeStateClosed
-		e.Cond.Broadcast()
+	if err != nil && e.Err == nil {
+		e.Err = err
 	}
 	e.State = pipeStateClosed
+	e.Cond.Broadcast()
 	return e.Err
 }
 
@@ -244,18 +253,17 @@ func (e *pipeEncoder) FinishValue() error {
 	if e.State != pipeStateEncoder {
 		return e.closeLocked(errInvalidPipeState)
 	}
+	if err := e.waitLocked(); err != nil {
+		return err
+	}
 	top := e.encTop()
 	if top == nil {
 		return e.closeLocked(errEmptyPipeStack)
 	}
-	if err := e.waitLocked(); err != nil {
-		return err
+	if top.NextOp != pipeFinishEnc {
+		return e.closeLocked(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeFinishEnc, top.NextOp))
 	}
-	if top.NextOp != pipeEnc {
-		return e.closeLocked(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeEnc, top.NextOp))
-	}
-	top.NextOp = pipeFinishDec
-
+	top.NextOp = top.NextOp.Next()
 	return e.Err
 }
 
@@ -300,8 +308,7 @@ func (d *pipeDecoder) StartValue() error {
 	if top.NextOp != pipeStartDec {
 		return d.Close(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeStartDec, top.NextOp))
 	}
-	top.NextOp = pipeEnc
-
+	top.NextOp = top.NextOp.Next()
 	return d.Enc.Err
 }
 
@@ -309,7 +316,7 @@ func (d *pipeDecoder) FinishValue() error {
 	d.Enc.Mu.Lock()
 	defer d.Enc.Mu.Unlock()
 	if d.Enc.State != pipeStateDecoder {
-		return d.Close(errInvalidPipeState)
+		return d.Enc.closeLocked(errInvalidPipeState)
 	}
 	if d.Enc.DecHandlingBytes {
 		return d.Enc.Err
@@ -319,13 +326,13 @@ func (d *pipeDecoder) FinishValue() error {
 	}
 	top := d.decTop()
 	if top == nil {
-		return d.Close(errEmptyPipeStack)
+		return d.Enc.closeLocked(errEmptyPipeStack)
+	}
+
+	if top.NextOp != pipeFinishDec {
+		return d.Enc.closeLocked(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeFinishDec, top.NextOp))
 	}
 	d.Enc.Stack = d.Enc.Stack[:len(d.Enc.Stack)-1]
-	if top.NextOp != pipeFinishDec {
-		return d.Close(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeFinishDec, top.NextOp))
-	}
-	top.NextOp = pipeEnc
 	return d.Enc.Err
 }
 
@@ -386,7 +393,7 @@ func (e *pipeEncoder) NextField(name string) error {
 func (d *pipeDecoder) NextEntry() (bool, error) {
 	top := d.decTop()
 	if top == nil {
-		return false, d.Close(errEmptyPipeStack)
+		return false, d.Enc.closeLocked(errEmptyPipeStack)
 	}
 	top.Index++
 	var done bool
@@ -403,7 +410,7 @@ func (d *pipeDecoder) NextEntry() (bool, error) {
 func (d *pipeDecoder) NextField() (string, error) {
 	top := d.decTop()
 	if top == nil {
-		return "", d.Close(errEmptyPipeStack)
+		return "", d.Enc.closeLocked(errEmptyPipeStack)
 	}
 	top.Index++
 	name := d.Enc.NextFieldName
@@ -519,30 +526,30 @@ func (d *pipeDecoder) DecodeUint(bitlen int) (uint64, error) {
 		if d.Enc.IsBytes {
 			top := d.decTop()
 			if top == nil {
-				return 0, d.Close(errEmptyPipeStack)
+				return 0, d.Enc.closeLocked(errEmptyPipeStack)
 			}
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
 		if shift := 64 - uint(bitlen); x != (x<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "uint", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "uint", bitlen, x))
 		}
 		return x, d.Enc.Err
 	case numberInt:
 		x := d.Enc.ArgInt
 		ux := uint64(x)
 		if shift := 64 - uint(bitlen); x < 0 || ux != (ux<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "int", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "int", bitlen, x))
 		}
 		return ux, d.Enc.Err
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		ux := uint64(x)
 		if shift := 64 - uint(bitlen); x != float64(ux) || ux != (ux<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "float", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "float", bitlen, x))
 		}
 		return ux, d.Enc.Err
 	}
-	return 0, d.Close(fmt.Errorf("vdl: number not set"))
+	return 0, d.Enc.closeLocked(fmt.Errorf("vdl: number not set"))
 }
 
 func (e *pipeEncoder) EncodeInt(v int64) error {
@@ -562,7 +569,7 @@ func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
 		if d.Enc.IsBytes {
 			top := d.decTop()
 			if top == nil {
-				return 0, d.Close(errEmptyPipeStack)
+				return 0, d.Enc.closeLocked(errEmptyPipeStack)
 			}
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
@@ -570,24 +577,24 @@ func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
 		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
 		// numbers should be shifted by 33 rather than 32.
 		if shift := 65 - uint(bitlen); ix < 0 || x != (x<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "uint", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "uint", bitlen, x))
 		}
 		return ix, d.Enc.Err
 	case numberInt:
 		x := d.Enc.ArgInt
 		if shift := 64 - uint(bitlen); x != (x<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "int", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "int", bitlen, x))
 		}
 		return x, d.Enc.Err
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		ix := int64(x)
 		if shift := 64 - uint(bitlen); x != float64(ix) || ix != (ix<<shift)>>shift {
-			return 0, d.Close(fmt.Errorf(errFmt, "float", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "float", bitlen, x))
 		}
 		return ix, d.Enc.Err
 	}
-	return 0, d.Close(fmt.Errorf("vdl: number not set"))
+	return 0, d.Enc.closeLocked(fmt.Errorf("vdl: number not set"))
 }
 
 func (e *pipeEncoder) EncodeFloat(v float64) error {
@@ -607,7 +614,7 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 		if d.Enc.IsBytes {
 			top := d.decTop()
 			if top == nil {
-				return 0, d.Close(errEmptyPipeStack)
+				return 0, d.Enc.closeLocked(errEmptyPipeStack)
 			}
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
@@ -618,7 +625,7 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 			max = float32MaxInt
 		}
 		if x > max {
-			return 0, d.Close(fmt.Errorf(errFmt, "uint", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "uint", bitlen, x))
 		}
 		return float64(x), d.Enc.Err
 	case numberInt:
@@ -630,7 +637,7 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 			min, max = float32MinInt, float32MaxInt
 		}
 		if x < min || x > max {
-			return 0, d.Close(fmt.Errorf(errFmt, "int", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "int", bitlen, x))
 		}
 		return float64(x), d.Enc.Err
 	case numberFloat:

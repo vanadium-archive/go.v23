@@ -39,6 +39,12 @@ func registerRecursive(rt reflect.Type) error {
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
+	if rt == rtWireError || rt == rtError {
+		// Multiple types map to ?WireError. verror.E should be treated as the
+		// canonical reflect type so ignore the others.
+		// TODO(bprosnitz) Remove this special case
+		return nil
+	}
 	ri, added, err := deriveReflectInfo(rt)
 	if err != nil {
 		return err
@@ -222,6 +228,9 @@ func deriveReflectInfo(rt reflect.Type) (*reflectInfo, bool, error) {
 		}
 		if field, ok := rtReflect.FieldByName("Name"); ok {
 			ri.Name = field.Tag.Get("vdl")
+			if ri.Name == "" {
+				return nil, false, fmt.Errorf("empty vdl tag on __VDLReflect Name field")
+			}
 		}
 		if field, ok := rtReflect.FieldByName("Enum"); ok {
 			if err := describeEnum(field.Type, rt, ri); err != nil {
@@ -425,11 +434,6 @@ func TypeToReflect(t *Type) reflect.Type {
 // TODO(toddw): Replace TypeToReflect with typeToReflectFixed after the old
 // conversion logic is removed.
 func typeToReflectFixed(t *Type) reflect.Type {
-	if t == ErrorType {
-		if ni, err := nativeInfoForError(); err == nil {
-			return reflect.PtrTo(ni.NativeType)
-		}
-	}
 	if t.Name() != "" {
 		// Named types cannot be manufactured via Go reflect, so we lookup in our
 		// registry instead.

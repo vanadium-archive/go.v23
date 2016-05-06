@@ -4,6 +4,7 @@ pkg vdltool, const GenLanguageJavascript GenLanguage
 pkg vdltool, const GenLanguageSwift GenLanguage
 pkg vdltool, const GoKindArray GoKind
 pkg vdltool, const GoKindBool GoKind
+pkg vdltool, const GoKindIface GoKind
 pkg vdltool, const GoKindMap GoKind
 pkg vdltool, const GoKindNumber GoKind
 pkg vdltool, const GoKindPointer GoKind
@@ -152,8 +153,10 @@ pkg vdltool, type GoKindTarget struct
 pkg vdltool, type GoKindTarget struct, Value *GoKind
 pkg vdltool, type GoKindTarget struct, embedded vdl.TargetBase
 pkg vdltool, type GoType struct
+pkg vdltool, type GoType struct, FromNative string
 pkg vdltool, type GoType struct, Imports []GoImport
 pkg vdltool, type GoType struct, Kind GoKind
+pkg vdltool, type GoType struct, ToNative string
 pkg vdltool, type GoType struct, Type string
 pkg vdltool, type GoType struct, Zero GoZero
 pkg vdltool, type GoTypeTarget struct

@@ -1028,30 +1028,22 @@ func (x Method) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.InStream.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.OutStream != nil {
 		if err := enc.NextField("OutStream"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Arg)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.OutStream.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if len(x.Tags) != 0 {
 		if err := enc.NextField("Tags"); err != nil {

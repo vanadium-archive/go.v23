@@ -140,11 +140,6 @@ func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) er
 	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
-	// Special-case the error interface, and fill it in with the native error
-	// representation verror.E.  Nil errors are handled above in readFromNil.
-	if rv.Type() == rtError {
-		return readNonNilError(dec, rv)
-	}
 	// Handle the non-nil decoded value.
 	if err := readNonNilValue(dec, rv, tt.NonOptional()); err != nil {
 		return err
@@ -243,28 +238,6 @@ func readFromNil(dec Decoder, rv reflect.Value, tt *Type) error {
 	// special-case error interface.
 	rv.Set(reflect.Zero(rv.Type()))
 	return dec.FinishValue()
-}
-
-func readNonNilError(dec Decoder, rv reflect.Value) error {
-	// This function implements the equivalent of verror.VDLRead for the non-nil
-	// case.  We can't call the verror function directly, since that would create
-	// a dependency cycle between the vdl and verror packages.
-	dec.IgnoreNextStartValue()
-	var wire WireError
-	if err := wire.VDLRead(dec); err != nil {
-		return err
-	}
-	ni, err := nativeInfoForError()
-	if err != nil {
-		return err
-	}
-	rvNativePtr := reflect.New(ni.NativeType)
-	if err := ni.ToNative(reflect.ValueOf(wire), rvNativePtr); err != nil {
-		return err
-	}
-	rv.Set(rvNativePtr.Elem())
-	// Note that dec.FinishValue has already been called by wire.VDLRead.
-	return nil
 }
 
 func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {

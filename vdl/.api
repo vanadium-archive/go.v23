@@ -53,6 +53,7 @@ pkg vdl, func ReadReflect(Decoder, reflect.Value) error
 pkg vdl, func ReflectTarget(reflect.Value) (Target, error)
 pkg vdl, func Register(interface{})
 pkg vdl, func RegisterNative(interface{}, interface{})
+pkg vdl, func RegisterNativeError(interface{}, interface{})
 pkg vdl, func SetType(*Type) *Type
 pkg vdl, func SortValuesAsString([]*Value) []*Value
 pkg vdl, func SplitIdent(string) (string, string)

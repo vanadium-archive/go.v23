@@ -11,17 +11,18 @@ import (
 )
 
 func init() {
+	// TODO(bprosnitz) Remove this registration.
 	// We must register the error conversion functions between vdl.WireError and
 	// the standard error interface with the vdl package.  This allows the vdl
 	// package to have minimal dependencies.
-	vdl.RegisterNative(WireToNative, WireFromNative)
+	vdl.RegisterNativeError(WireToNative, WireFromNative)
 }
 
 // FromWire is a convenience for generated code to convert wire errors into
 // native errors.
 func FromWire(wire vdl.WireError) error {
-	var native E
-	WireToNative(wire, &native)
+	native := new(E)
+	WireToNative(wire, native)
 	return native
 }
 

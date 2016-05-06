@@ -126,6 +126,11 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NWire{}), WireTypeN},
 }
 
+var (
+	nonPtrError error = NonPtrError{}
+	ptrError    error = &PtrError{}
+)
+
 // rtNonKeyTests contains types that may not be used as map keys.
 var rtNonKeyTests = []rtTest{
 	// Unnamed scalars
@@ -134,8 +139,8 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
 	{reflect.TypeOf((*error)(nil)), ErrorType},
 	{reflect.TypeOf((*error)(nil)).Elem(), ErrorType},
-	{reflect.TypeOf(NonPtrError{}), ErrorType},
-	{reflect.TypeOf(&PtrError{}), ErrorType},
+	{reflect.TypeOf(&nonPtrError), ErrorType},
+	{reflect.TypeOf(&ptrError), ErrorType},
 	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
 	// Named scalars (we cannot detect the error type if it is named)
 	{reflect.TypeOf((*NInterface)(nil)), AnyType},

@@ -102,6 +102,16 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	if hasPtr {
 		rtAtMostOnePtr = reflect.PtrTo(rt)
 	}
+	if rt.ConvertibleTo(rtError) || rtAtMostOnePtr.ConvertibleTo(rtError) {
+		// TODO(bprosnitz) Remove this for new vdl error logic
+		return rtError
+	}
+	if rt == rtWireError || rt == rtError {
+		// Return if this is vdl.WireError or error because we want verror.E to be the
+		// type stored in reflect info.
+		// TODO(bprosnitz) Remove this special case.
+		return rtAtMostOnePtr
+	}
 	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.
 	if ri, _, _ := deriveReflectInfo(rt); ri != nil {
@@ -114,8 +124,6 @@ func normalizeType(rt reflect.Type) reflect.Type {
 		rt = ri.Type
 	}
 	switch {
-	case rt.ConvertibleTo(rtError) || rtAtMostOnePtr.ConvertibleTo(rtError):
-		return rtError
 	case rt.Kind() == reflect.Interface:
 		// Collapse all interfaces to interface{}
 		return rtInterface
@@ -134,6 +142,7 @@ func basicType(rt reflect.Type) *Type {
 	}
 	switch rt {
 	case rtError:
+		// TODO(bprosnitz) Remove this for new vdl error logic
 		return ErrorType
 	case rtInterface, rtValue:
 		return AnyType

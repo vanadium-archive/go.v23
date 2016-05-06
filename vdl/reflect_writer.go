@@ -92,11 +92,7 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 			}
 			return fmt.Errorf("vdl: can't encode nil from non-any non-optional %v", tt)
 		}
-		if rv.Type() == rtError {
-			// Special-case to handle non-nil error interfaces.  Nil errors are
-			// handled above, via the general nil handling logic.
-			return writeNonNilError(enc, rv)
-		}
+
 		rv = rv.Elem()
 		// Recompute tt as we pass interface boundaries.  There's no need to
 		// recompute as we traverse pointers, since tt won't change.
@@ -114,6 +110,11 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 	}
 	// Check for faster non-reflect support, which also handles vdl.Value and
 	// vom.RawBytes, and any other special-cases.
+	if rv.CanAddr() {
+		if err := writeNonReflect(enc, rv.Addr().Interface()); err != errWriteMustReflect {
+			return err
+		}
+	}
 	if err := writeNonReflect(enc, rv.Interface()); err != errWriteMustReflect {
 		return err
 	}
@@ -133,22 +134,6 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 		return err
 	}
 	return enc.FinishValue()
-}
-
-func writeNonNilError(enc Encoder, rv reflect.Value) error {
-	// This function implements the equivalent of verror.VDLWrite for the non-nil
-	// case.  We can't call the verror function directly, since that would create
-	// a dependency cycle between the vdl and verror packages.
-	var wire WireError
-	ni, err := nativeInfoForError()
-	if err != nil {
-		return err
-	}
-	if err := ni.FromNative(reflect.ValueOf(&wire), rv); err != nil {
-		return err
-	}
-	enc.SetNextStartValueIsOptional()
-	return wire.VDLWrite(enc)
 }
 
 func writeNonNilValue(enc Encoder, rv reflect.Value, tt *Type) error {

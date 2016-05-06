@@ -8,7 +8,10 @@ package i18n
 
 import "strings"
 import "testing"
-import "v.io/v23/context"
+import (
+	"fmt"
+	"v.io/v23/context"
+)
 
 // testLookupSetAndRemove tests Lookup, Set, and Set-to-empty on *cat.
 func testLookupSetAndRemove(t *testing.T, cat *Catalogue, catName string) {
@@ -142,6 +145,11 @@ func TestFormatParams(t *testing.T) {
 	expectFormatParams(t, " foo  bar wombat numbat",
 		"{1} foo {2:} bar{:3} wombat{:4:} numbat",
 		"", "", "", "")
+	expectFormatParams(t, "3: foo 2 bar 1 4 (3)",
+		"{3}: foo {2} bar {_} ({3})", 1, 2, 3, 4)
+
+	expectFormatParams(t, "2: error1",
+		"{2}: {1}", fmt.Errorf("error1"), 2)
 }
 
 var mergeData string = `# In what follows we use the "languages" "fwd" and "back".

@@ -60,10 +60,9 @@ func TestDeriveNativeInfo(t *testing.T) {
 			nil,
 		},
 		{
-			// Check our special-casing for the conversion functions for errors.
 			reflect.TypeOf(WireError{}),
-			reflect.TypeOf(nativeError{}),
-			reflect.ValueOf(func(WireError, *nativeError) error { return nil }),
+			reflect.TypeOf((*error)(nil)).Elem(),
+			reflect.ValueOf(func(WireError, *error) error { return nil }),
 			reflect.ValueOf(func(*WireError, error) error { return nil }),
 			nil,
 		},
@@ -72,109 +71,10 @@ func TestDeriveNativeInfo(t *testing.T) {
 		name := fmt.Sprintf("[%v %v]", test.WireType, test.NativeType)
 		ni, err := deriveNativeInfo(test.toNativeFunc.Interface(), test.fromNativeFunc.Interface())
 		if err != nil {
-			t.Errorf("%s got error: %v", name, err)
+			t.Fatalf("%s got error: %v", name, err)
 		}
 		if got, want := ni, test; !equalNativeInfo(*got, want) {
-			t.Errorf("%s got %#v, want %#v", name, got, want)
+			t.Errorf("%s got %v, want %v", name, got, want)
 		}
-	}
-}
-
-func TestDeriveNativeInfoError(t *testing.T) {
-	const (
-		errTo     = "toFn must have signature ToNative(wire W, native *N) error"
-		errFrom   = "fromFn must have signature FromNative(wire *W, native N) error"
-		errMis    = "mismatched wire/native types"
-		errMisErr = "mismatched error conversion"
-	)
-	var (
-		goodTo   = func(wireA, *nativeA) error { return nil }
-		goodFrom = func(*wireA, nativeA) error { return nil }
-	)
-
-	tests := []struct {
-		Name                 string
-		ToNative, FromNative interface{}
-		ErrStr               string
-	}{
-		{"NilFuncs", nil, nil, "nil arguments"},
-		{"NotFuncs", "abc", "abc", "arguments must be functions"},
-		{"BadTo1", func() {}, goodFrom, errTo},
-		{"BadTo2", func(wireA) {}, goodFrom, errTo},
-		{"BadTo3", func(wireA, nativeA) {}, goodFrom, errTo},
-		{"BadTo3", func(wireA, *nativeA) {}, goodFrom, errTo},
-		{"BadTo3", func(wireA, nativeA) error { return nil }, goodFrom, errTo},
-		{"BadFrom1", goodTo, func() {}, errFrom},
-		{"BadFrom2", goodTo, func(wireA) {}, errFrom},
-		{"BadFrom3", goodTo, func(wireA, nativeA) {}, errFrom},
-		{"BadFrom3", goodTo, func(*wireA, nativeA) {}, errFrom},
-		{"BadFrom3", goodTo, func(wireA, nativeA) error { return nil }, errFrom},
-		{
-			"Mismatch1",
-			func(string, *nativeA) error { return nil },
-			func(*wireA, nativeA) error { return nil },
-			errMis,
-		},
-		{
-			"Mismatch2",
-			func(wireA, *string) error { return nil },
-			func(*wireA, nativeA) error { return nil },
-			errMis,
-		},
-		{
-			"Mismatch3",
-			func(wireA, *nativeA) error { return nil },
-			func(*string, nativeA) error { return nil },
-			errMis,
-		},
-		{
-			"Mismatch4",
-			func(wireA, *nativeA) error { return nil },
-			func(*wireA, string) error { return nil },
-			errMis,
-		},
-		{
-			"MismatchPtr1",
-			func(*wireA, *nativeA) error { return nil },
-			func(*wireA, nativeA) error { return nil },
-			errMis,
-		},
-		{
-			"MismatchPtr2",
-			func(wireA, *nativeA) error { return nil },
-			func(*wireA, *nativeA) error { return nil },
-			errMis,
-		},
-		{
-			"MismatchError1",
-			func(WireError, *nativeA) error { return nil },
-			func(*WireError, nativeA) error { return nil },
-			errMisErr,
-		},
-		{
-			"MismatchError2",
-			func(WireError, *error) error { return nil },
-			func(*WireError, error) error { return nil },
-			errMisErr,
-		},
-		{
-			"MismatchError3",
-			func(WireError, *error) error { return nil },
-			func(*WireError, nativeA) error { return nil },
-			errMisErr,
-		},
-		{
-			"SameType",
-			func(wireA, *wireA) error { return nil },
-			func(*wireA, wireA) error { return nil },
-			"wire type == native type",
-		},
-	}
-	for _, test := range tests {
-		ni, err := deriveNativeInfo(test.ToNative, test.FromNative)
-		if ni != nil {
-			t.Errorf("%s got %#v, want nil", test.Name, ni)
-		}
-		ExpectErr(t, err, test.ErrStr, test.Name)
 	}
 }

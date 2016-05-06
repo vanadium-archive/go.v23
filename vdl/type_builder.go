@@ -51,9 +51,10 @@ var (
 )
 
 // ErrorType describes the built-in error type.
-var ErrorType = OptionalType(NamedType("error", StructType(
+// TODO(bprosnitz) We should define these as built-ins (with name wireError and wireRetryCode).
+var ErrorType = OptionalType(NamedType("v.io/v23/vdl.WireError", StructType(
 	Field{"Id", StringType},
-	Field{"RetryCode", EnumType("NoRetry", "RetryConnection", "RetryRefetch", "RetryBackoff")},
+	Field{"RetryCode", NamedType("v.io/v23/vdl.WireRetryCode", EnumType("NoRetry", "RetryConnection", "RetryRefetch", "RetryBackoff"))},
 	Field{"Msg", StringType},
 	Field{"ParamList", ListType(AnyType)},
 )))

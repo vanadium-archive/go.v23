@@ -2083,45 +2083,33 @@ func (x Conflict) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*ConflictRowSet)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.ReadSet.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.WriteSet != nil {
 		if err := enc.NextField("WriteSet"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*ConflictRowSet)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.WriteSet.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if x.ScanSet != nil {
 		if err := enc.NextField("ScanSet"); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*ConflictScanSet)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.ScanSet.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if len(x.Batches) != 0 {
 		if err := enc.NextField("Batches"); err != nil {
@@ -2472,15 +2460,11 @@ func (x ResolvedRow) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
-		if err := enc.StartValue(vdl.TypeOf((*Value)(nil)).Elem()); err != nil {
-			return err
-		}
+
 		if err := x.Result.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
+
 	}
 	if err := enc.NextField(""); err != nil {
 		return err

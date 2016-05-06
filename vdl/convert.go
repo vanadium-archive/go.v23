@@ -202,7 +202,7 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 		// converting from the wire type to the native type.
 		//
 		// TODO(toddw): This doesn't handle pointer native types.
-		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
+		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil && ni.NativeType != rtError {
 			tt, err := TypeFromReflect(ni.WireType)
 			if err != nil {
 				return convTarget{}, err
@@ -285,7 +285,7 @@ func finishConvert(fin, fill convTarget) error {
 		}
 		// Handle mirrored case in createFillTarget where fin.rv is a native type;
 		// fill.rv is the wire type that has been filled in.
-		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
+		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil && ni.NativeType != rtError {
 			rvFill := fill.rv
 			return ni.ToNative(rvFill, fin.rv.Addr())
 		}
@@ -476,6 +476,9 @@ func (c convTarget) FromNil(tt *Type) error {
 			if rtFromTT := TypeToReflect(tt); rtFromTT != nil {
 				rt = rtFromTT
 			}
+		}
+		if ni := nativeInfoFromWire(rt); ni != nil {
+			rt = ni.NativeType
 		}
 		// Set the zero value of the pointer or interface, which will give us nil of
 		// the correct type.

@@ -550,6 +550,9 @@ func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
 	}
 }
 
+// Type-check native conversion functions.
+var ()
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -570,6 +573,8 @@ func __VDLInit() struct{} {
 		return struct{}{}
 	}
 	__VDLInitCalled = true
+
+	// Register native type conversions first, so that vdl.TypeOf works.
 
 	// Register types.
 	Register((*WireRetryCode)(nil))

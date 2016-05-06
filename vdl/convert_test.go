@@ -68,9 +68,6 @@ var (
 		Msg:       "msg3",
 		ParamList: []interface{}{rvError1, &rvError2},
 	}
-	vvError1 = errorValue(rvError1)
-	vvError2 = errorValue(rvError2)
-	vvError3 = errorValue(rvError3)
 
 	vvBoolTrue = []*vdl.Value{
 		vdl.BoolValue(nil, true), vdl.BoolValue(vdl.BoolTypeN, true),

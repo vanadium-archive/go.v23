@@ -157,10 +157,11 @@ const (
 	GoKindSlice
 	GoKindMap
 	GoKindPointer
+	GoKindIface
 )
 
 // GoKindAll holds all labels for GoKind.
-var GoKindAll = [...]GoKind{GoKindStruct, GoKindBool, GoKindNumber, GoKindString, GoKindArray, GoKindSlice, GoKindMap, GoKindPointer}
+var GoKindAll = [...]GoKind{GoKindStruct, GoKindBool, GoKindNumber, GoKindString, GoKindArray, GoKindSlice, GoKindMap, GoKindPointer, GoKindIface}
 
 // GoKindFromString creates a GoKind from a string label.
 func GoKindFromString(label string) (x GoKind, err error) {
@@ -195,6 +196,9 @@ func (x *GoKind) Set(label string) error {
 	case "Pointer", "pointer":
 		*x = GoKindPointer
 		return nil
+	case "Iface", "iface":
+		*x = GoKindIface
+		return nil
 	}
 	*x = -1
 	return fmt.Errorf("unknown label %q in vdltool.GoKind", label)
@@ -219,13 +223,15 @@ func (x GoKind) String() string {
 		return "Map"
 	case GoKindPointer:
 		return "Pointer"
+	case GoKindIface:
+		return "Iface"
 	}
 	return ""
 }
 
 func (GoKind) __VDLReflect(struct {
 	Name string `vdl:"vdltool.GoKind"`
-	Enum struct{ Struct, Bool, Number, String, Array, Slice, Map, Pointer string }
+	Enum struct{ Struct, Bool, Number, String, Array, Slice, Map, Pointer, Iface string }
 }) {
 }
 
@@ -267,6 +273,8 @@ func (t *GoKindTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 		*t.Value = 6
 	case "Pointer":
 		*t.Value = 7
+	case "Iface":
+		*t.Value = 8
 	default:
 		return fmt.Errorf("label %s not in enum GoKind", src)
 	}
@@ -840,6 +848,11 @@ type GoType struct {
 	//   Imports: {{Path: "time", Name: "time"}},
 	//   Zero:    {Mode: Unique}
 	Type string
+	// ToNative and FromNative override the default name for the native conversion
+	// function with a custom function.
+	// e.g. "verror.ErrorToNative"
+	ToNative   string
+	FromNative string
 	// Imports are the Go imports required by the Type, used in generated code.
 	Imports []GoImport
 	// Zero specifies special behavior for zero value setting and checking.
@@ -895,39 +908,18 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var10 bool
-	if len(m.Imports) == 0 {
-		var10 = true
-	}
+	var10 := (m.ToNative == "")
 	if var10 {
-		if err := fieldsTarget1.ZeroField("Imports"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("ToNative"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Imports")
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("ToNative")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-
-			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(2).Type, len(m.Imports))
-			if err != nil {
-				return err
-			}
-			for i, elem13 := range m.Imports {
-				elemTarget12, err := listTarget11.StartElem(i)
-				if err != nil {
-					return err
-				}
-
-				if err := elem13.FillVDLTarget(elemTarget12, tt.NonOptional().Field(2).Type.Elem()); err != nil {
-					return err
-				}
-				if err := listTarget11.FinishElem(elemTarget12); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget9.FinishList(listTarget11); err != nil {
+			if err := fieldTarget9.FromString(string(m.ToNative), tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -935,22 +927,81 @@ func (m *GoType) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var16 := (m.Zero == GoZero{})
-	if var16 {
-		if err := fieldsTarget1.ZeroField("Zero"); err != nil && err != vdl.ErrFieldNoExist {
+	var13 := (m.FromNative == "")
+	if var13 {
+		if err := fieldsTarget1.ZeroField("FromNative"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Zero")
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("FromNative")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget12.FromString(string(m.FromNative), tt.NonOptional().Field(3).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
+				return err
+			}
+		}
+	}
+	var var16 bool
+	if len(m.Imports) == 0 {
+		var16 = true
+	}
+	if var16 {
+		if err := fieldsTarget1.ZeroField("Imports"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Imports")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			if err := m.Zero.FillVDLTarget(fieldTarget15, tt.NonOptional().Field(3).Type); err != nil {
+			listTarget17, err := fieldTarget15.StartList(tt.NonOptional().Field(4).Type, len(m.Imports))
+			if err != nil {
+				return err
+			}
+			for i, elem19 := range m.Imports {
+				elemTarget18, err := listTarget17.StartElem(i)
+				if err != nil {
+					return err
+				}
+
+				if err := elem19.FillVDLTarget(elemTarget18, tt.NonOptional().Field(4).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget17.FinishElem(elemTarget18); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget15.FinishList(listTarget17); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+				return err
+			}
+		}
+	}
+	var22 := (m.Zero == GoZero{})
+	if var22 {
+		if err := fieldsTarget1.ZeroField("Zero"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("Zero")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+
+			if err := m.Zero.FillVDLTarget(fieldTarget21, tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
 				return err
 			}
 		}
@@ -987,6 +1038,12 @@ func (t *GoTypeTarget) StartField(name string) (key, field vdl.Target, _ error) 
 	case "Type":
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Type))
 		return nil, target, err
+	case "ToNative":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.ToNative))
+		return nil, target, err
+	case "FromNative":
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.FromNative))
+		return nil, target, err
 	case "Imports":
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&t.Value.Imports))
 		return nil, target, err
@@ -1008,6 +1065,12 @@ func (t *GoTypeTarget) ZeroField(name string) error {
 	case "Type":
 		t.Value.Type = ""
 		return nil
+	case "ToNative":
+		t.Value.ToNative = ""
+		return nil
+	case "FromNative":
+		t.Value.FromNative = ""
+		return nil
 	case "Imports":
 		t.Value.Imports = []GoImport(nil)
 		return nil
@@ -1028,6 +1091,12 @@ func (x GoType) VDLIsZero() bool {
 		return false
 	}
 	if x.Type != "" {
+		return false
+	}
+	if x.ToNative != "" {
+		return false
+	}
+	if x.FromNative != "" {
 		return false
 	}
 	if len(x.Imports) != 0 {
@@ -1059,6 +1128,34 @@ func (x GoType) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		if err := enc.EncodeString(x.Type); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.ToNative != "" {
+		if err := enc.NextField("ToNative"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.ToNative); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.FromNative != "" {
+		if err := enc.NextField("FromNative"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.FromNative); err != nil {
 			return err
 		}
 		if err := enc.FinishValue(); err != nil {
@@ -1134,6 +1231,28 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 			}
 			var err error
 			if x.Type, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "ToNative":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.ToNative, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "FromNative":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.FromNative, err = dec.DecodeString(); err != nil {
 				return err
 			}
 			if err := dec.FinishValue(); err != nil {

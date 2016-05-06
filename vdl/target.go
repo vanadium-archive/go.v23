@@ -186,6 +186,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 	hasPtr := false
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
 		// Handle special-case for errors.
+		// TODO(bprosnitz) Remove this case.
 		if rv.Type().ConvertibleTo(rtError) && !rv.IsNil() {
 			return fromError(target, rv)
 		}
@@ -242,6 +243,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 	}
 
 	// Handle special-case for errors.
+	// TODO(bprosnitz) Remove this case.
 	if rv.Type().ConvertibleTo(rtError) {
 		return fromError(target, rv)
 	}
@@ -402,7 +404,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			rvField := rv.FieldByName(name)
 			if !rvField.IsValid() {
 				// This case occurs if the VDL type tt has a field name that doesn't
-				// eixst in the Go reflect.Type rt.  This should never occur; it
+				// exist in the Go reflect.Type rt.  This should never occur; it
 				// indicates a bug in the TypeOf logic.  Panic here to give us a
 				// stack trace to make it easier to debug.
 				panic(fmt.Errorf("missing struct field %q, tt: %v, rt: %v", name, tt, rt))
