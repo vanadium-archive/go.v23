@@ -42,12 +42,12 @@ func testMessagesWithResults(t *testing.T, ctx *context.T, cases []message.Messa
 func TestSetup(t *testing.T) {
 	ctx, shutdown := v23.Init()
 	defer shutdown()
-	ep1, err := v23.NewEndpoint(
+	ep1, err := naming.ParseEndpoint(
 		"@6@tcp@foo.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/foo")
 	if err != nil {
 		t.Fatal(err)
 	}
-	ep2, err := v23.NewEndpoint(
+	ep2, err := naming.ParseEndpoint(
 		"@6@tcp@bar.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/bar")
 	if err != nil {
 		t.Fatal(err)
@@ -158,12 +158,12 @@ func TestData(t *testing.T) {
 func TestProxy(t *testing.T) {
 	ctx, shutdown := test.V23Init()
 	defer shutdown()
-	ep1, err := v23.NewEndpoint(
+	ep1, err := naming.ParseEndpoint(
 		"@6@tcp@foo.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/foo")
 	if err != nil {
 		t.Fatal(err)
 	}
-	ep2, err := v23.NewEndpoint(
+	ep2, err := naming.ParseEndpoint(
 		"@6@tcp@bar.com:1234@a,b@00112233445566778899aabbccddeeff@m@v.io/bar")
 	if err != nil {
 		t.Fatal(err)

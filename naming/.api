@@ -14,6 +14,7 @@ pkg naming, func IsReserved(string) bool
 pkg naming, func Join(...string) string
 pkg naming, func JoinAddressName(string, string) string
 pkg naming, func NewRoutingID() (RoutingID, error)
+pkg naming, func ParseEndpoint(string) (Endpoint, error)
 pkg naming, func ReadRoutingID(io.Reader) (RoutingID, error)
 pkg naming, func Rooted(string) bool
 pkg naming, func SplitAddressName(string) (string, string)
@@ -64,6 +65,15 @@ pkg naming, method (*MountedServerTarget) ZeroField(string) error
 pkg naming, method (*RoutingID) FromString(string) error
 pkg naming, method (BlessingOpt) EndpointOpt()
 pkg naming, method (DisableCache) CacheCtl()
+pkg naming, method (Endpoint) Addr() net.Addr
+pkg naming, method (Endpoint) BlessingNames() []string
+pkg naming, method (Endpoint) IsZero() bool
+pkg naming, method (Endpoint) Name() string
+pkg naming, method (Endpoint) Routes() []string
+pkg naming, method (Endpoint) String() string
+pkg naming, method (Endpoint) VersionedString(int) string
+pkg naming, method (Endpoint) WithBlessingNames([]string) Endpoint
+pkg naming, method (Endpoint) WithRoutes([]string) Endpoint
 pkg naming, method (GlobChildrenReplyError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobChildrenReplyError) Index() int
 pkg naming, method (GlobChildrenReplyError) Interface() interface{}
@@ -113,17 +123,12 @@ pkg naming, type BlessingOpt string
 pkg naming, type CacheCtl interface { CacheCtl }
 pkg naming, type CacheCtl interface, CacheCtl()
 pkg naming, type DisableCache bool
-pkg naming, type Endpoint interface { Addr, BlessingNames, Name, Network, Routes, RoutingID, ServesLeaf, ServesMountTable, String, VersionedString }
-pkg naming, type Endpoint interface, Addr() net.Addr
-pkg naming, type Endpoint interface, BlessingNames() []string
-pkg naming, type Endpoint interface, Name() string
-pkg naming, type Endpoint interface, Network() string
-pkg naming, type Endpoint interface, Routes() []string
-pkg naming, type Endpoint interface, RoutingID() RoutingID
-pkg naming, type Endpoint interface, ServesLeaf() bool
-pkg naming, type Endpoint interface, ServesMountTable() bool
-pkg naming, type Endpoint interface, String() string
-pkg naming, type Endpoint interface, VersionedString(int) string
+pkg naming, type Endpoint struct
+pkg naming, type Endpoint struct, Address string
+pkg naming, type Endpoint struct, Protocol string
+pkg naming, type Endpoint struct, RoutingID RoutingID
+pkg naming, type Endpoint struct, ServesLeaf bool
+pkg naming, type Endpoint struct, ServesMountTable bool
 pkg naming, type EndpointOpt interface { EndpointOpt }
 pkg naming, type EndpointOpt interface, EndpointOpt()
 pkg naming, type GlobChildrenReply interface, FillVDLTarget(vdl.Target, *vdl.Type) error
@@ -190,6 +195,7 @@ pkg naming, type ReplaceMount bool
 pkg naming, type RouteOpt string
 pkg naming, type RoutingID struct
 pkg naming, type ServesMountTable bool
+pkg naming, var DefaultEndpointVersion int
 pkg naming, var ErrNameExists unknown-type
 pkg naming, var ErrNoMountTable unknown-type
 pkg naming, var ErrNoSuchName unknown-type

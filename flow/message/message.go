@@ -7,7 +7,7 @@ package message
 import (
 	"encoding/hex"
 	"fmt"
-	"v.io/v23"
+
 	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/rpc/version"
@@ -169,11 +169,11 @@ func (m *Setup) append(ctx *context.T, data []byte) ([]byte, error) {
 		data = appendSetupOption(peerNaClPublicKeyOption,
 			m.PeerNaClPublicKey[:], data)
 	}
-	if m.PeerRemoteEndpoint != nil {
+	if !m.PeerRemoteEndpoint.IsZero() {
 		data = appendSetupOption(peerRemoteEndpointOption,
 			[]byte(m.PeerRemoteEndpoint.String()), data)
 	}
-	if m.PeerLocalEndpoint != nil {
+	if !m.PeerLocalEndpoint.IsZero() {
 		data = appendSetupOption(peerLocalEndpointOption,
 			[]byte(m.PeerLocalEndpoint.String()), data)
 	}
@@ -216,9 +216,9 @@ func (m *Setup) read(ctx *context.T, orig []byte) error {
 			m.PeerNaClPublicKey = new([32]byte)
 			copy(m.PeerNaClPublicKey[:], payload)
 		case peerRemoteEndpointOption:
-			m.PeerRemoteEndpoint, err = v23.NewEndpoint(string(payload))
+			m.PeerRemoteEndpoint, err = naming.ParseEndpoint(string(payload))
 		case peerLocalEndpointOption:
-			m.PeerLocalEndpoint, err = v23.NewEndpoint(string(payload))
+			m.PeerLocalEndpoint, err = naming.ParseEndpoint(string(payload))
 		case mtuOption:
 			if mtu, _, valid := readVarUint64(ctx, payload); valid {
 				m.Mtu = mtu
@@ -514,7 +514,7 @@ func (m *ProxyResponse) read(ctx *context.T, orig []byte) error {
 		if epBytes, data, valid = readLenBytes(ctx, data); !valid {
 			return NewErrInvalidMsg(ctx, proxyResponseType, uint64(len(orig)), uint64(i), nil)
 		}
-		ep, err := v23.NewEndpoint(string(epBytes))
+		ep, err := naming.ParseEndpoint(string(epBytes))
 		if err != nil {
 			return NewErrInvalidMsg(ctx, proxyResponseType, uint64(len(orig)), uint64(i), err)
 		}

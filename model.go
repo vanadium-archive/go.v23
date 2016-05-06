@@ -27,7 +27,6 @@ import (
 	"v.io/v23/discovery"
 	"v.io/v23/flow"
 	"v.io/v23/namespace"
-	"v.io/v23/naming"
 	"v.io/v23/rpc"
 	"v.io/v23/security"
 )
@@ -110,26 +109,6 @@ type Runtime interface {
 	// Code that runs in this routine, unlike the code in the Runtime's
 	// constructor, can use the v23.Get/With methods.
 	Init(ctx *context.T) error
-
-	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
-	// string as per the format described above. It can be used to test
-	// a string to see if it's in valid endpoint format.
-	//
-	// NewEndpoint will accept strings both in the @ format described
-	// above and in internet host:port format.
-	//
-	// All implementations of NewEndpoint should provide appropriate
-	// defaults for any endpoint subfields not explicitly provided as
-	// follows:
-	// - a missing protocol will default to a protocol appropriate for the
-	//   implementation hosting NewEndpoint
-	// - a missing host:port will default to :0 - i.e. any port on all
-	//   interfaces
-	// - a missing routing id should default to the null routing id
-	// - a missing codec version should default to AnyCodec
-	// - a missing RPC version should default to the highest version
-	//   supported by the runtime implementation hosting NewEndpoint
-	NewEndpoint(ep string) (naming.Endpoint, error)
 
 	// WithPrincipal attaches 'principal' to the returned context.
 	WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
@@ -220,28 +199,6 @@ type Runtime interface {
 	// Dispatcher's Lookup method which will returns the object and
 	// security.Authorizer used to serve the actual RPC call.
 	WithNewDispatchingServer(ctx *context.T, name string, disp rpc.Dispatcher, opts ...rpc.ServerOpt) (*context.T, rpc.Server, error)
-}
-
-// NewEndpoint returns an Endpoint by parsing the supplied endpoint
-// string as per the format described above. It can be used to test
-// a string to see if it's in valid endpoint format.
-//
-// NewEndpoint will accept strings both in the @ format described
-// above and in internet host:port format.
-//
-// All implementations of NewEndpoint should provide appropriate
-// defaults for any endpoint subfields not explicitly provided as
-// follows:
-// - a missing protocol will default to a protocol appropriate for the
-//   implementation hosting NewEndpoint
-// - a missing host:port will default to :0 - i.e. any port on all
-//   interfaces
-// - a missing routing id should default to the null routing id
-// - a missing codec version should default to AnyCodec
-// - a missing RPC version should default to the highest version
-//   supported by the runtime implementation hosting NewEndpoint
-func NewEndpoint(ep string) (naming.Endpoint, error) {
-	return initState.currentRuntime().NewEndpoint(ep)
 }
 
 // WithPrincipal attaches 'principal' to the returned context.

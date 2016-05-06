@@ -54,8 +54,8 @@ func (*FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge { 
 func (*FakeStreamServerCall) LocalPrincipal() security.Principal              { return nil }
 func (*FakeStreamServerCall) LocalBlessings() security.Blessings              { return security.Blessings{} }
 func (*FakeStreamServerCall) RemoteBlessings() security.Blessings             { return security.Blessings{} }
-func (*FakeStreamServerCall) LocalEndpoint() naming.Endpoint                  { return nil }
-func (*FakeStreamServerCall) RemoteEndpoint() naming.Endpoint                 { return nil }
+func (*FakeStreamServerCall) LocalEndpoint() naming.Endpoint                  { return naming.Endpoint{} }
+func (*FakeStreamServerCall) RemoteEndpoint() naming.Endpoint                 { return naming.Endpoint{} }
 func (*FakeStreamServerCall) Security() security.Call                         { return nil }
 
 var (

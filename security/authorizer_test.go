@@ -5,7 +5,6 @@
 package security
 
 import (
-	"net"
 	"testing"
 
 	"v.io/v23/context"
@@ -189,30 +188,6 @@ func TestPublicKeyAuthorizer(t *testing.T) {
 	}
 }
 
-// implementation of naming.Endpoint.
-// TODO(ashankar): naming.Endpoint should either not be an interface or at the
-// very least have an implementation in v23.
-type endpoint struct {
-	blessings []string
-}
-
-func (e endpoint) Network() string { return "v23" }
-func (e endpoint) String() string {
-	var opts []naming.EndpointOpt
-	for _, b := range e.blessings {
-		opts = append(opts, naming.BlessingOpt(b))
-	}
-	return naming.FormatEndpoint("tcp", "localhost:14141", opts...)
-}
-func (e endpoint) Name() string                { return naming.JoinAddressName(e.String(), "") }
-func (e endpoint) VersionedString(int) string  { return e.String() }
-func (e endpoint) RoutingID() naming.RoutingID { return naming.FixedRoutingID(0xacbdef) }
-func (e endpoint) Routes() []string            { return nil }
-func (e endpoint) Addr() net.Addr              { return nil }
-func (e endpoint) ServesMountTable() bool      { return false }
-func (e endpoint) ServesLeaf() bool            { return true }
-func (e endpoint) BlessingNames() []string     { return e.blessings }
-
 func TestEndpointAuthorizer(t *testing.T) {
 	var (
 		pali = newPrincipal(t)
@@ -225,9 +200,9 @@ func TestEndpointAuthorizer(t *testing.T) {
 			ep naming.Endpoint
 			ok bool
 		}{
-			{endpoint{}, true},
-			{endpoint{blessings: []string{"foo", "bar"}}, false},
-			{endpoint{blessings: []string{"foo", "ali", "bar"}}, true},
+			{naming.Endpoint{}, true},
+			{naming.Endpoint{}.WithBlessingNames([]string{"foo", "bar"}), false},
+			{naming.Endpoint{}.WithBlessingNames([]string{"foo", "ali", "bar"}), true},
 		}
 
 		ctx, cancel = context.RootContext()

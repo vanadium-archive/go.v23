@@ -13,7 +13,6 @@ import (
 	"v.io/v23/discovery"
 	"v.io/v23/flow"
 	"v.io/v23/namespace"
-	"v.io/v23/naming"
 	"v.io/v23/rpc"
 	"v.io/v23/security"
 )
@@ -25,8 +24,7 @@ func MockFactory(ctx *context.T) (Runtime, *context.T, Shutdown, error) {
 
 type mockRuntime struct{}
 
-func (*mockRuntime) Init(ctx *context.T) error                      { return nil }
-func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil, nil }
+func (*mockRuntime) Init(ctx *context.T) error { return nil }
 func (*mockRuntime) WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
 	return nil, nil
 }

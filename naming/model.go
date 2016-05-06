@@ -4,11 +4,7 @@
 
 package naming
 
-import (
-	"net"
-
-	"v.io/v23/verror"
-)
+import "v.io/v23/verror"
 
 const (
 	pkgPath         = "v.io/v23/naming"
@@ -22,59 +18,6 @@ var (
 	ErrResolutionDepthExceeded = verror.Register(pkgPath+".resolutionDepthExceeded", verror.NoRetry, "{1} {2} Resolution depth exceeded {_}")
 	ErrNoMountTable            = verror.Register(pkgPath+".noMounttable", verror.NoRetry, "{1} {2} No mounttable {_}")
 )
-
-// Endpoint represents unique identifiers for entities communicating over a
-// network.  End users don't use endpoints - they deal solely with object names,
-// with the MountTable providing translation of object names to endpoints.
-type Endpoint interface {
-	// Network returns "v23" so that Endpoint can implement net.Addr.
-	Network() string
-
-	// String returns a string representation of the endpoint.
-	//
-	// The String method formats the endpoint as:
-	//   @<version>@<version specific fields>@@
-	// Where version is an unsigned integer.
-	//
-	// Version 6 is the current version for RPC:
-	//   @6@<protocol>@<address>@<route>[,<route>]...@<routingid>@m|s@[<blessing>[,<blessing>]...]@@
-	//
-	// Along with Network, this method ensures that Endpoint implements net.Addr.
-	String() string
-
-	// Name returns a string reprsentation of this Endpoint that can
-	// be used as a name with rpc.StartCall.
-	Name() string
-
-	// VersionedString returns a string in the specified format. If the version
-	// number is unsupported, the current 'default' version will be used.
-	VersionedString(version int) string
-
-	// RoutingID returns the RoutingID associated with this Endpoint.
-	RoutingID() RoutingID
-
-	// Routes returns the local routing identifiers used for proxying connections
-	// with multiple proxies.
-	Routes() []string
-
-	// Addrs returns a net.Addr whose String method will return the
-	// the underlying network address encoded in the endpoint rather than
-	// the endpoint string itself.
-	// For example, for TCP based endpoints it will return a net.Addr
-	// whose network is "tcp" and string representation is <host>:<port>,
-	// than the full Vanadium endpoint as per the String method above.
-	Addr() net.Addr
-
-	// ServesMountTable returns true if this endpoint serves a mount table.
-	ServesMountTable() bool
-
-	// ServesLeaf returns true if this endpoint serves a leaf server.
-	ServesLeaf() bool
-
-	// BlessingNames returns the blessings that the process associated with
-	// this Endpoint will present.
-	BlessingNames() []string
-}
 
 // Names returns the servers represented by MountEntry as names, including
 // the MountedName suffix.
