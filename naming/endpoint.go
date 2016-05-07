@@ -39,12 +39,9 @@ type Endpoint struct {
 	routes        []string
 	blessingNames []string
 
-	// TODO(mattr): We should just use an enum for ServesMountTable and ServesLeaf.
-
 	// ServesMountTable is true if this endpoint serves a mount table.
+	// TODO(mattr): Remove it?
 	ServesMountTable bool
-	// ServesLeaf is true if this endpoint serves a leaf server.
-	ServesLeaf bool
 }
 
 // ParseEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -112,25 +109,6 @@ func parseHostPort(blessing, hostport string) (Endpoint, error) {
 	return ep, nil
 }
 
-func parseMountTableFlag(input string) (bool, bool, error) {
-	switch len(input) {
-	case 0:
-		return true, false, nil
-	case 1:
-		switch f := input[0]; f {
-		case 'l':
-			return false, true, nil
-		case 'm':
-			return true, false, nil
-		case 's':
-			return false, false, nil
-		default:
-			return false, false, fmt.Errorf("%c is not one of 'l', 'm', or 's'", f)
-		}
-	}
-	return false, false, fmt.Errorf("flag is either missing or too long")
-}
-
 func parseV6(parts []string) (Endpoint, error) {
 	var ep Endpoint
 	if len(parts) < 6 {
@@ -162,10 +140,12 @@ func parseV6(parts []string) (Endpoint, error) {
 	if err := ep.RoutingID.FromString(parts[4]); err != nil {
 		return ep, fmt.Errorf("invalid routing id: %v", err)
 	}
-
-	var err error
-	if ep.ServesMountTable, ep.ServesLeaf, err = parseMountTableFlag(parts[5]); err != nil {
-		return ep, fmt.Errorf("invalid mount table flag: %v", err)
+	switch p := parts[5]; p {
+	case "", "m":
+		ep.ServesMountTable = true
+	case "s", "l":
+	default:
+		return ep, fmt.Errorf("invalid mount table flag (%v)", p)
 	}
 	// Join the remaining and re-split.
 	if str := strings.Join(parts[6:], separator); len(str) > 0 {
@@ -207,8 +187,7 @@ func (e Endpoint) IsZero() bool {
 		e.RoutingID == RoutingID{} &&
 		len(e.routes) == 0 &&
 		len(e.blessingNames) == 0 &&
-		!e.ServesMountTable &&
-		!e.ServesLeaf
+		!e.ServesMountTable
 }
 
 // VersionedString returns a string in the specified format. If the version
@@ -218,10 +197,7 @@ func (e Endpoint) VersionedString(version int) string {
 	switch version {
 	case 6:
 		mt := "s"
-		switch {
-		case e.ServesLeaf:
-			mt = "l"
-		case e.ServesMountTable:
+		if e.ServesMountTable {
 			mt = "m"
 		}
 		blessings := strings.Join(e.blessingNames, blessingsSeparator)

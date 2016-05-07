@@ -127,7 +127,6 @@ pkg naming, type Endpoint struct
 pkg naming, type Endpoint struct, Address string
 pkg naming, type Endpoint struct, Protocol string
 pkg naming, type Endpoint struct, RoutingID RoutingID
-pkg naming, type Endpoint struct, ServesLeaf bool
 pkg naming, type Endpoint struct, ServesMountTable bool
 pkg naming, type EndpointOpt interface { EndpointOpt }
 pkg naming, type EndpointOpt interface, EndpointOpt()
