@@ -305,7 +305,7 @@ func (c *typeStatsCollector) Collect(name string, fn func(*vdl.Type) bool, propF
 	for _, tt := range c.Types {
 		if fn(tt) {
 			// The predicate matches.  Update the total count and the properties.  The
-			// leading space ensures the Total column shows up first.
+			// leading space in " Total" ensures the Total column shows up first.
 			row.Columns.Delta(" Total", 0, 1)
 			for _, propFn := range propFns {
 				row.UpdateProp(propFn.Name, propFn.Fn(tt), propFn.Accumulate)
@@ -426,9 +426,12 @@ func (c *entryStatsCollector) Collect(name string, fn func(EntryValue) bool, pro
 					row.UpdateProp(nonCanonicalPropName, noncanon, false)
 				}
 			}
-			// The leading space ensures the Total column shows up first.
+			// The leading space in " Total" ensures the Total column shows up first.
+			// Strip trailing numbers in e.Label to aggregate Random{0,1,...} under
+			// the same column header.
 			row.Columns.Delta(" Total", subColumn, 1)
-			row.Columns.Delta(e.Label, subColumn, 1)
+			header := strings.TrimRight(e.Label, "0123456789")
+			row.Columns.Delta(header, subColumn, 1)
 			if e.Source.IsZero() {
 				row.Columns.Delta("isZero", subColumn, 1)
 			}

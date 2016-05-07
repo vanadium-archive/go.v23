@@ -791,7 +791,7 @@ func (t *ResponseTarget) FinishField(_, _ vdl.Target) error {
 func (t *ResponseTarget) ZeroField(name string) error {
 	switch name {
 	case "Error":
-		t.Value.Error = (error)(nil)
+		t.Value.Error = nil
 		return nil
 	case "EndStreamResults":
 		t.Value.EndStreamResults = false

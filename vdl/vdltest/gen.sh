@@ -23,7 +23,7 @@ package vdltest
 
 // This dummy file is only used when compiling the vdltestgen tool to generate
 // new test entries.  Normally these vars are defined in *_gen.vdl files.
-var vAllPass, vAllFail []Entry
+var vAllPass, vAllFail, xAllPass, xAllFail []Entry
 EOF
 
 # Re-generate the vdltest package, since we removed the vdl files above.

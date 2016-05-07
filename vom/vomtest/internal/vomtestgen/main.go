@@ -100,7 +100,7 @@ func writeFileVomTest(fileName, constName string, entries []vdltest.EntryValue) 
 	// TODO(toddw): Determine a better strategy.
 	var filtered []vdltest.EntryValue
 	for _, e := range entries {
-		if e.Label != "Random" {
+		if !strings.HasPrefix(e.Label, "Random") {
 			filtered = append(filtered, e)
 		}
 	}

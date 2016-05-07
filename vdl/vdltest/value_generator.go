@@ -289,7 +289,7 @@ func (g *ValueGenerator) genNonNilValue(tt *vdl.Type, mode GenMode, depth int) *
 		case GenNegMin:
 			return vdl.FloatValue(tt, -g.smallFloat(kind))
 		case GenFull:
-			return vdl.FloatValue(tt, 1.23)
+			return vdl.FloatValue(tt, 1.5)
 		default:
 			return vdl.FloatValue(tt, g.randomFloat())
 		}
@@ -426,7 +426,7 @@ func (g *ValueGenerator) randomFloat() float64 {
 	return g.rng.Float64() * float64(g.rng.Uint32()) * neg
 }
 
-const fullString = "abcdefghijklmnopΔΘΠΣΦ王普澤世界"
+const fullString = "abcdeΔΘΠΣΦ王普澤世界"
 
 func (g *ValueGenerator) randomString() string {
 	rLen := utf8.RuneCountInString(fullString)

@@ -835,7 +835,7 @@ func (t *GlobErrorTarget) ZeroField(name string) error {
 		t.Value.Name = ""
 		return nil
 	case "Error":
-		t.Value.Error = (error)(nil)
+		t.Value.Error = nil
 		return nil
 	default:
 		return vdl.ErrFieldNoExist

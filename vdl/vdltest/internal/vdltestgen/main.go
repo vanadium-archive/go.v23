@@ -28,9 +28,13 @@ var cmdGen = &cmdline.Command{
 Command vdltestgen generates types and values for the vdltest package.  The
 following files are generated:
 
-   vtype_gen.vdl       - A variety of types useful for testing.
+   vtype_gen.vdl       - Named "V" types, regular VDL types.
    ventry_pass_gen.vdl - Entries that pass conversion from source to target.
    ventry_fail_gen.vdl - Entries that fail conversion from source to target.
+
+   xtype_gen.vdl       - Named "X" types, no VDL{IsZero,Read,Write} methods.
+   xentry_pass_gen.vdl - Entries that pass conversion from source to target.
+   xentry_fail_gen.vdl - Entries that fail conversion from source to target.
 
 This tool does not run the vdl tool on the generated *.vdl files; you must do
 that yourself, typically via "jiri go install".
@@ -42,9 +46,14 @@ Instead of running this tool manually, it is typically invoked via:
 }
 
 func main() {
-	cmdGen.Flags.StringVar(&flagVType, "vtype", "vtype_gen.vdl", "Name of the generated vtype file, containing VDL types.")
-	cmdGen.Flags.StringVar(&flagVEntryPass, "ventry-pass", "ventry_pass_gen.vdl", "Name of the generated ventry pass file, containing VDL values that pass conversion tests.")
-	cmdGen.Flags.StringVar(&flagVEntryFail, "ventry-fail", "ventry_fail_gen.vdl", "Name of the generated ventry fail file, containing VDL values that fail conversion tests.")
+	cmdGen.Flags.StringVar(&flagVType, "vtype", "vtype_gen.vdl", "Name of the generated vtype file.")
+	cmdGen.Flags.StringVar(&flagVEntryPass, "ventry-pass", "ventry_pass_gen.vdl", "Name of the generated ventry pass file, containing passing test entries.")
+	cmdGen.Flags.StringVar(&flagVEntryFail, "ventry-fail", "ventry_fail_gen.vdl", "Name of the generated ventry fail file, containing failing test entries.")
+
+	cmdGen.Flags.StringVar(&flagXType, "xtype", "xtype_gen.vdl", "Name of the generated xtype file.")
+	cmdGen.Flags.StringVar(&flagXEntryPass, "xentry-pass", "xentry_pass_gen.vdl", "Name of the generated xentry pass file, containing passing test entries.")
+	cmdGen.Flags.StringVar(&flagXEntryFail, "xentry-fail", "xentry_fail_gen.vdl", "Name of the generated xentry fail file, containing failing test entries.")
+
 	cmdline.Main(cmdGen)
 }
 
@@ -52,18 +61,51 @@ var (
 	flagVType      string
 	flagVEntryPass string
 	flagVEntryFail string
+	flagXType      string
+	flagXEntryPass string
+	flagXEntryFail string
 )
 
 func runGen(_ *cmdline.Env, _ []string) error {
-	typeGen := vdltest.NewTypeGenerator()
-	typeGen.RandSeed(1)
-	types := typeGen.Gen(3)
-	entryGen := vdltest.NewEntryGenerator(types)
-	entryGen.RandSeed(1)
-	writeFileVType(flagVType, types)
-	writeFileVEntry(flagVEntryPass, "vAllPass", entryGen.GenAllPass())
-	writeFileVEntry(flagVEntryFail, "vAllFail", entryGen.GenAllFail())
+	const maxTypeDepth, seed = 3, 1
+	// Generate "V" types and entries.
+	vTypeGen := vdltest.NewTypeGenerator()
+	vTypeGen.RandSeed(seed)
+	vTypeGen.NamePrefix = "V"
+	vTypes := vTypeGen.Gen(maxTypeDepth)
+	vEntryGen := vdltest.NewEntryGenerator(vTypes)
+	vEntryGen.RandSeed(seed)
+	writeTypeFile(flagVType, vTypes)
+	writeEntryFile(flagVEntryPass, "vAllPass", vEntryGen.GenAllPass(vTypes))
+	writeEntryFile(flagVEntryFail, "vAllFail", vEntryGen.GenAllFail(vTypes))
+	// Generate "X" types and entries.
+	xTypeGen := vdltest.NewTypeGenerator()
+	xTypeGen.RandSeed(seed)
+	xTypeGen.NamePrefix = "X"
+	xTypes := xTypeGen.Gen(maxTypeDepth)
+	xEntryGen := vdltest.NewEntryGenerator(xTypes)
+	xEntryGen.RandSeed(seed)
+	// Don't generate "X" entries for types already covered by "V" entries.
+	xTargetTypes := subtractTypes(xTypes, vTypes)
+	writeTypeFile(flagXType, xTypes)
+	writeEntryFile(flagXEntryPass, "xAllPass", xEntryGen.GenAllPass(xTargetTypes))
+	writeEntryFile(flagXEntryFail, "xAllFail", xEntryGen.GenAllFail(xTargetTypes))
 	return nil
+}
+
+// subtractTypes returns all types that don't appear in sub.
+func subtractTypes(types, sub []*vdl.Type) []*vdl.Type {
+	subMap := make(map[*vdl.Type]bool)
+	for _, tt := range sub {
+		subMap[tt] = true
+	}
+	var result []*vdl.Type
+	for _, tt := range types {
+		if !subMap[tt] {
+			result = append(result, tt)
+		}
+	}
+	return result
 }
 
 // This tool is only used to generate test cases for the vdltest package, so the
@@ -99,7 +141,7 @@ package vdltest
 `)
 }
 
-func writeFileVType(fileName string, types []*vdl.Type) {
+func writeTypeFile(fileName string, types []*vdl.Type) {
 	fmt.Printf("Writing %[1]s:\t%[2]d types\n", fileName, len(types))
 	file, cleanup := createFile(fileName)
 	defer cleanup()
@@ -119,7 +161,7 @@ func writeFileVType(fileName string, types []*vdl.Type) {
 	writef(file, ")\n")
 }
 
-func writeFileVEntry(fileName, constName string, entries []vdltest.EntryValue) {
+func writeEntryFile(fileName, constName string, entries []vdltest.EntryValue) {
 	fmt.Printf("Writing %[1]s:\t%[2]d entries\n", fileName, len(entries))
 	file, cleanup := createFile(fileName)
 	defer cleanup()
@@ -134,7 +176,12 @@ func writeFileVEntry(fileName, constName string, entries []vdltest.EntryValue) {
 		}
 		target := vdlgen.TypedConst(e.Target, "", nil)
 		source := vdlgen.TypedConst(e.Source, "", nil)
-		writef(file, "\t{ %[1]v, %#[2]q, %#[3]q, %[3]s, %#[4]q, %[4]s },\n", e.IsCanonical(), e.Label, target, source)
+		if len(target)*2+len(source)*2 < 100 {
+			// Write a pretty one-liner, if it's short enough.
+			writef(file, "\t{ %[1]v, %#[2]q, %#[3]q, %[3]s, %#[4]q, %[4]s },\n", e.IsCanonical(), e.Label, target, source)
+		} else {
+			writef(file, "\t{ %[1]v, %#[2]q,\n\t  %#[3]q,\n\t  %[3]s,\n\t  %#[4]q,\n\t  %[4]s,\n\t},\n", e.IsCanonical(), e.Label, target, source)
+		}
 	}
 	writef(file, "}\n")
 }

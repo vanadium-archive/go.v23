@@ -353,29 +353,6 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
-func init() {
-	vdl.RegisterNative(ErrorToNative, ErrorFromNative)
-}
-
-func ErrorToNative(wire *vdl.WireError, native *error) error {
-	if wire == nil {
-		*native = nil
-		return nil
-	} else {
-		var e E
-		*native = &e
-		return WireToNative(*wire, &e)
-	}
-}
-func ErrorFromNative(wire **vdl.WireError, native error) error {
-	if native == nil {
-		*wire = nil
-		return nil
-	} else {
-		return WireFromNative(*wire, native)
-	}
-}
-
 const maxPCs = 40 // Maximum number of PC values we'll include in a stack trace.
 
 // A SubErrs is a special type that allows clients to include a list of

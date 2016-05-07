@@ -26,17 +26,9 @@ type TypeGenerator struct {
 	// Each element corresponds to the value at that depth, starting at depth 1.
 	// Use -1 to indicate "unlimited".
 	BaseTypesPerKind []int
-	// NumStructUnion is the number of struct/union types to generate at each
-	// depth.  The first struct/union type at depth N always contains fields of
-	// all types from depth N-1, while other struct/union types contain randomly
-	// chosen subsets of those fields.
-	NumStructUnion int
-	// AllFieldsPerKind is like BaseTypesPerKind, but limits the number of fields
-	// to generate for All structs and unions.
-	NumAllFieldsPerKind []int
-	// MaxRandomFields limits the number of fields to randomly choose for non-All
-	// structs and unions.
-	MaxRandomFields int
+	// FieldsPerKind is like BaseTypesPerKind, but limits the number of fields to
+	// generate for structs and unions.
+	FieldsPerKind []int
 	// MaxArrayLen is the maximum array length; the actual length is chosen
 	// randomly up to this max.
 	MaxArrayLen int
@@ -48,13 +40,11 @@ type TypeGenerator struct {
 // generator seeded to the current time.
 func NewTypeGenerator() *TypeGenerator {
 	return &TypeGenerator{
-		NamePrefix:          "V",
-		BaseTypesPerKind:    []int{3, 1},
-		NumStructUnion:      3,
-		NumAllFieldsPerKind: []int{-1, 2},
-		MaxRandomFields:     5,
-		MaxArrayLen:         3,
-		rng:                 rand.New(rand.NewSource(time.Now().Unix())),
+		NamePrefix:       "V",
+		BaseTypesPerKind: []int{3, 1},
+		FieldsPerKind:    []int{-1, 2, 1},
+		MaxArrayLen:      3,
+		rng:              rand.New(rand.NewSource(time.Now().Unix())),
 	}
 }
 
@@ -105,8 +95,14 @@ func (g *TypeGenerator) Gen(maxDepth int) []*vdl.Type {
 	// Special-cases that would have been included in depth 0, had we not
 	// special-cased depth 0 to only include scalars.  We include a named empty
 	// struct and the error type.
-	depth0 = append(depth0, g.genNamed(vdl.StructType())...)
+	depth0 = append(depth0, vdl.NamedType(g.NamePrefix+"StructEmpty", vdl.StructType()))
 	depth0 = append(depth0, vdl.ErrorType)
+	// NamedError is a type that is compatible with the built-in error type.  It
+	// intentionally doesn't have the RetryCode or ParamList fields, to test error
+	// compatibility with other types.
+	depth0 = append(depth0, vdl.NamedType(g.NamePrefix+"NamedError", vdl.StructType(
+		vdl.Field{Name: "Id", Type: vdl.StringType},
+		vdl.Field{Name: "Msg", Type: vdl.StringType})))
 	// Generate composite types for each depth N, based on the base types from
 	// depth N-1.  We keep the base types in separate buckets per kind, so that
 	// when we prune types we get a good distribution of different kinds.
@@ -203,9 +199,18 @@ func (g *TypeGenerator) prune(buckets [][]*vdl.Type, maxPerBucket int) []*vdl.Ty
 			result = append(result, bucket...)
 			continue
 		}
-		// INVARIANT: maxPerBucket > 0 && maxPerBucket < len(bucket)
+		max := maxPerBucket
+		// INVARIANT: max > 0 && max < len(bucket)
+		if k := bucket[0].Kind(); k == vdl.Struct || k == vdl.Union {
+			// Pick the first struct or union, which is the "all fields" type.
+			// Picking this type increases the odds that we'll be able to mimic values
+			// that are convertible.
+			result = append(result, bucket[0])
+			bucket = bucket[1:]
+			max--
+		}
 		// Choose the remaining types randomly, maintaining the relative order.
-		for _, p := range g.randomChoose(len(bucket), maxPerBucket) {
+		for _, p := range g.randomChoose(len(bucket), max) {
 			result = append(result, bucket[p])
 		}
 	}
@@ -217,8 +222,8 @@ func typeName(tt *vdl.Type) string {
 	switch {
 	case tt == vdl.TypeObjectType:
 		return "TypeObject" // by default we'd get Typeobject
-	case tt == vdl.ErrorType || tt.Name() == "error":
-		return "Error" // by default we'd get Opterror or Verror
+	case tt == vdl.ErrorType:
+		return "Error" // by default we'd get Opterror
 	case tt.Kind() == vdl.Optional:
 		return "Opt" + typeName(tt.Elem())
 	case tt.Name() != "":
@@ -242,14 +247,7 @@ func typeName(tt *vdl.Type) string {
 	case vdl.Map:
 		name += "_" + typeName(tt.Key()) + "_" + typeName(tt.Elem())
 	case vdl.Struct, vdl.Union:
-		switch tt.NumField() {
-		case 0:
-			name += "Empty"
-		case 1:
-			name += "_" + typeName(tt.Field(0).Type)
-		default:
-			panic(fmt.Errorf("vdltest: multi-field structs must be named in genStructUnion: %v", tt))
-		}
+		panic(fmt.Errorf("vdltest: structs must be named in genStructUnion: %v", tt))
 	}
 	return name
 }
@@ -314,42 +312,33 @@ func (g *TypeGenerator) genSetMap(kind vdl.Kind, base [][]*vdl.Type, depth int) 
 }
 
 func (g *TypeGenerator) genStructUnion(kind vdl.Kind, base [][]*vdl.Type, depth int) []*vdl.Type {
-	num := g.NumStructUnion
-	if num <= 0 {
-		return nil
-	}
 	var res []*vdl.Type
 	prefix := g.NamePrefix
 	prefix += fmt.Sprintf("%sDepth%d_", strings.Title(kind.String()), depth)
-	// First create the All struct, which contains all fields.
+	// First collect all fields, with sequentially numbered field names.  Using
+	// the same field names between the single-field and all-fields types ensures
+	// that the values are convertible.
 	var allFields []vdl.Field
-	fieldsPerKind := valueAtDepth(g.NumAllFieldsPerKind, depth)
+	fieldsPerKind := valueAtDepth(g.FieldsPerKind, depth)
 	for i, tt := range g.prune(base, fieldsPerKind) {
-		fieldName := "F" + strconv.Itoa(i)
-		allFields = append(allFields, vdl.Field{Name: fieldName, Type: tt})
+		field := vdl.Field{Name: "F" + strconv.Itoa(i), Type: tt}
+		allFields = append(allFields, field)
 	}
-	num--
-	res = append(res, vdl.NamedType(prefix+"All", makeStructUnion(kind, allFields)))
-	// Now create some random structs with randomly chosen fields.  Field names in
-	// these structs match the field names in the All struct, to provide
-	// opportunities for more valid conversions.
-	if maxFields := g.MaxRandomFields; maxFields > 0 {
-		if len := len(allFields); maxFields >= len {
-			maxFields = len - 1
-		}
-		for ix := 0; ix < num; ix++ {
-			var fields []vdl.Field
-			for _, f := range g.randomChoose(len(allFields), 1+g.rng.Intn(maxFields)) {
-				fields = append(fields, allFields[f])
-			}
-			name := prefix + "Rand" + strconv.Itoa(ix)
-			res = append(res, vdl.NamedType(name, makeStructUnion(kind, fields)))
-		}
+	// Create a type with all fields.  We do this first so that subsequent depths
+	// will prefer to choose this type in g.prune.
+	if numAll := len(allFields); numAll > 1 {
+		name := prefix + "All"
+		res = append(res, vdl.NamedType(name, makeStructUnion(kind, allFields...)))
+	}
+	// Create single-field types.
+	for _, field := range allFields {
+		name := prefix + typeName(field.Type)
+		res = append(res, vdl.NamedType(name, makeStructUnion(kind, field)))
 	}
 	return res
 }
 
-func makeStructUnion(kind vdl.Kind, fields []vdl.Field) *vdl.Type {
+func makeStructUnion(kind vdl.Kind, fields ...vdl.Field) *vdl.Type {
 	if kind == vdl.Struct {
 		return vdl.StructType(fields...)
 	}

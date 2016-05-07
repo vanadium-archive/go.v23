@@ -11,23 +11,55 @@ import (
 )
 
 func init() {
-	// TODO(bprosnitz) Remove this registration.
+	// TODO(bprosnitz) Remove this old-style registration.
 	// We must register the error conversion functions between vdl.WireError and
 	// the standard error interface with the vdl package.  This allows the vdl
 	// package to have minimal dependencies.
 	vdl.RegisterNativeError(WireToNative, WireFromNative)
+
+	// New-style error registration.
+	vdl.RegisterNative(ErrorToNative, ErrorFromNative)
+}
+
+// TODO(toddw): rename Error{To,From}Native to Wire{To,From}Native, after we've
+// switched to the new vdl Encoder/Decoder, and the old functions are no longer
+// used.
+
+// ErrorToNative converts from the wire to native representation of errors.
+func ErrorToNative(wire *vdl.WireError, native *error) error {
+	if wire == nil {
+		*native = nil
+		return nil
+	}
+	e := new(E)
+	*native = e
+	return WireToNative(*wire, e)
+}
+
+// ErrorFromNative converts from the native to wire representation of errors.
+func ErrorFromNative(wire **vdl.WireError, native error) error {
+	if native == nil {
+		*wire = nil
+		return nil
+	}
+	return WireFromNative(*wire, native)
 }
 
 // FromWire is a convenience for generated code to convert wire errors into
 // native errors.
-func FromWire(wire vdl.WireError) error {
-	native := new(E)
-	WireToNative(wire, native)
+func FromWire(wire *vdl.WireError) error {
+	var native error
+	if err := ErrorToNative(wire, &native); err != nil {
+		native = err
+	}
 	return native
 }
 
 // WireToNative converts from vdl.WireError to verror.E, which
 // implements the standard go error interface.
+//
+// TODO(toddw): Remove this function after the switch to the new vdl
+// Encoder/Decoder is complete.
 func WireToNative(wire vdl.WireError, native *E) error {
 	*native = E{
 		ID:     ID(wire.Id),
@@ -55,6 +87,9 @@ func WireToNative(wire vdl.WireError, native *E) error {
 
 // WireFromNative converts from the standard go error interface to
 // verror.E, and then to vdl.WireError.
+//
+// TODO(toddw): Remove this function after the switch to the new vdl
+// Encoder/Decoder is complete.
 func WireFromNative(wire *vdl.WireError, native error) error {
 	e := ExplicitConvert(ErrUnknown, "", "", "", native)
 	*wire = vdl.WireError{
@@ -66,7 +101,7 @@ func WireFromNative(wire *vdl.WireError, native error) error {
 		var pWire *vdl.Value
 		if err := vdl.Convert(&pWire, p); err != nil {
 			// It's questionable what to do here if the conversion fails, similarly to
-			// the conversion failure above in errorFromWire.
+			// the conversion failure above in WireToNative.
 			//
 			// TODO(toddw): Consider whether there is a better strategy.
 			pWire = vdl.StringValue(nil, err.Error())

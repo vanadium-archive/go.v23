@@ -39,8 +39,10 @@ func MimicValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 	// Now we know we're dealing with a non-nil base.  Flatten tt to a non-any
 	// non-optional type.
 	if tt == vdl.AnyType {
-		// If we're asked to build a value of any type, we just build exactly the
-		// same type as the base.
+		// If we're asked to build a value of any type, we must build exactly the
+		// same type as the base.  It's not good enough to build a value of a
+		// compatible type; if the base itself is an any type, it must be populated
+		// with a value of the exact type.
 		tt = base.Type()
 	}
 	value := mimicNonNilValue(tt.NonOptional(), base.NonOptional())
@@ -206,10 +208,40 @@ func mimicFloat(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 		if ix < min || ix > max {
 			return nil
 		}
-	case vdl.Float32, vdl.Float64:
+	case vdl.Float32:
 		x = base.Float()
-		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
-			return nil
+	case vdl.Float64:
+		x = base.Float()
+		if tt.Kind() == vdl.Float32 {
+			// We're trying to mimic a base float64 value with a float32 value.  Make
+			// sure we won't lose precision.
+			//
+			// Float64 has 1 sign bit, 11 exponent bits, and 52 fraction bits.
+			// Float32 has 1 sign bit, 8 exponent bits, and 23 fraction bits.
+			//
+			// The offsetExp is offset by 1023.  Some special values:
+			//   offsetExp == 0   && frac == 0 : Negative 0
+			//   offsetExp == 0   && frac > 0  : Subnormal number
+			//   offsetExp == 7ff && frac == 0 : Inf
+			//   offsetExp == 7ff && frac > 0  : NaN
+			//
+			// https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+			// https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+			bits := math.Float64bits(x)
+			offsetExp := bits >> 52 & ((1 << 11) - 1)
+			frac := bits & ((1 << 52) - 1)
+			switch exp := int(offsetExp) - 1023; {
+			case offsetExp == 0 && frac > 0:
+				// Float64 subnormals can't be represented by float32.
+				return nil
+			case exp < -0xff || exp > 0xff:
+				// Float64 with >8 exponent bits can't be represented by float32.
+				// TODO(toddw): Handle Inf and Nan in vdl float consts.
+				return nil
+			case frac&((1<<23)-1) != 0:
+				// Float64 with >23 fraction bits can't be represented by float32.
+				return nil
+			}
 		}
 	}
 	return vdl.FloatValue(tt, x)

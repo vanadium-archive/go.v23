@@ -3371,7 +3371,7 @@ func (t *RejectedBlessingTarget) ZeroField(name string) error {
 		t.Value.Blessing = ""
 		return nil
 	case "Err":
-		t.Value.Err = (error)(nil)
+		t.Value.Err = nil
 		return nil
 	default:
 		return vdl.ErrFieldNoExist
