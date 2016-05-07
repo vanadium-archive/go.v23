@@ -15,7 +15,7 @@ pkg vomtest, type TestCase struct, HexType string
 pkg vomtest, type TestCase struct, HexValue string
 pkg vomtest, type TestCase struct, HexVersion string
 pkg vomtest, type TestCase struct, Name string
-pkg vomtest, type TestCase struct, Value interface{}
+pkg vomtest, type TestCase struct, Value *vom.RawBytes
 pkg vomtest, type TestCaseTarget struct
 pkg vomtest, type TestCaseTarget struct, Value *TestCase
 pkg vomtest, type TestCaseTarget struct, embedded vdl.FieldsTargetBase

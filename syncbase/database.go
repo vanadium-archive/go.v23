@@ -121,13 +121,13 @@ func (d *database) Watch(ctx *context.T, collection wire.Id, prefix string, resu
 }
 
 // Syncgroup implements Database.Syncgroup.
-func (d *database) Syncgroup(sgName string) Syncgroup {
-	return newSyncgroup(d.fullName, sgName)
+func (d *database) Syncgroup(id wire.Id) Syncgroup {
+	return newSyncgroup(d.fullName, id)
 }
 
-// GetSyncgroupNames implements Database.GetSyncgroupNames.
-func (d *database) GetSyncgroupNames(ctx *context.T) ([]string, error) {
-	return d.c.GetSyncgroupNames(ctx)
+// ListSyncgroups implements Database.ListSyncgroups.
+func (d *database) ListSyncgroups(ctx *context.T) ([]wire.Id, error) {
+	return d.c.ListSyncgroups(ctx)
 }
 
 // Blob implements Database.Blob.

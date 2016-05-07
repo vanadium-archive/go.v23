@@ -186,35 +186,35 @@ type Row interface {
 // SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManager interface {
-	// GetSyncgroupNames returns the global names of all syncgroups attached to
+	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
-	GetSyncgroupNames() ([]string | error) {access.Read}
+	ListSyncgroups() ([]Id | error) {access.Read}
 
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; all
 	// Collections specified in prefixes must exist; Client must have at least
 	// Read access on each of the Collection ACLs.
-	CreateSyncgroup(sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error {access.Read}
+	CreateSyncgroup(sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error {access.Read}
 
 	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
+	JoinSyncgroup(remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
 
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(sgName string) error {access.Read}
+	LeaveSyncgroup(sgId Id) error {access.Read}
 
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(sgName string) error {access.Read}
+	DestroySyncgroup(sgId Id) error {access.Read}
 
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
@@ -222,14 +222,14 @@ type SyncgroupManager interface {
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(sgName, member string) error {access.Read}
+	EjectFromSyncgroup(sgId Id, member string) error {access.Read}
 
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupSpec(sgName string) (spec SyncgroupSpec, version string | error) {access.Read}
+	GetSyncgroupSpec(sgId Id) (spec SyncgroupSpec, version string | error) {access.Read}
 
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
@@ -237,13 +237,13 @@ type SyncgroupManager interface {
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(sgName string, spec SyncgroupSpec, version string) error {access.Read}
+	SetSyncgroupSpec(sgId Id, spec SyncgroupSpec, version string) error {access.Read}
 
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupMembers(sgName string) (members map[string]SyncgroupMemberInfo | error) {access.Read}
+	GetSyncgroupMembers(sgId Id) (members map[string]SyncgroupMemberInfo | error) {access.Read}
 
 	// TODO(hpucha): Allow clients to tune the behavior of sync.
 	// - Suspend/ResumeSync

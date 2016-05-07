@@ -1286,6 +1286,9 @@ func (x *CollectionRow) VDLRead(dec vdl.Decoder) error {
 type SyncgroupSpec struct {
 	// Human-readable description of this syncgroup.
 	Description string
+	// Optional. If present then any syncbase that is the admin of this syncgroup
+	// is responsible for ensuring that the syncgroup is published to this syncbase instance.
+	PublishSyncbaseName string
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 	// Data (collectionId-rowPrefix pairs) covered by this syncgroup.
@@ -1334,22 +1337,18 @@ func (m *SyncgroupSpec) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var7 bool
-	if len(m.Perms) == 0 {
-		var7 = true
-	}
+	var7 := (m.PublishSyncbaseName == "")
 	if var7 {
-		if err := fieldsTarget1.ZeroField("Perms"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("PublishSyncbaseName"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Perms")
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("PublishSyncbaseName")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-
-			if err := m.Perms.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldTarget6.FromString(string(m.PublishSyncbaseName), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -1358,38 +1357,21 @@ func (m *SyncgroupSpec) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 		}
 	}
 	var var10 bool
-	if len(m.Prefixes) == 0 {
+	if len(m.Perms) == 0 {
 		var10 = true
 	}
 	if var10 {
-		if err := fieldsTarget1.ZeroField("Prefixes"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("Perms"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Prefixes")
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Perms")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			listTarget11, err := fieldTarget9.StartList(tt.NonOptional().Field(2).Type, len(m.Prefixes))
-			if err != nil {
-				return err
-			}
-			for i, elem13 := range m.Prefixes {
-				elemTarget12, err := listTarget11.StartElem(i)
-				if err != nil {
-					return err
-				}
-
-				if err := elem13.FillVDLTarget(elemTarget12, tt.NonOptional().Field(2).Type.Elem()); err != nil {
-					return err
-				}
-				if err := listTarget11.FinishElem(elemTarget12); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget9.FinishList(listTarget11); err != nil {
+			if err := m.Perms.FillVDLTarget(fieldTarget9, tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -1397,60 +1379,100 @@ func (m *SyncgroupSpec) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var var16 bool
-	if len(m.MountTables) == 0 {
-		var16 = true
+	var var13 bool
+	if len(m.Prefixes) == 0 {
+		var13 = true
 	}
-	if var16 {
-		if err := fieldsTarget1.ZeroField("MountTables"); err != nil && err != vdl.ErrFieldNoExist {
+	if var13 {
+		if err := fieldsTarget1.ZeroField("Prefixes"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("MountTables")
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Prefixes")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
 
-			listTarget17, err := fieldTarget15.StartList(tt.NonOptional().Field(3).Type, len(m.MountTables))
+			listTarget14, err := fieldTarget12.StartList(tt.NonOptional().Field(3).Type, len(m.Prefixes))
 			if err != nil {
 				return err
 			}
-			for i, elem19 := range m.MountTables {
-				elemTarget18, err := listTarget17.StartElem(i)
+			for i, elem16 := range m.Prefixes {
+				elemTarget15, err := listTarget14.StartElem(i)
 				if err != nil {
 					return err
 				}
-				if err := elemTarget18.FromString(string(elem19), tt.NonOptional().Field(3).Type.Elem()); err != nil {
+
+				if err := elem16.FillVDLTarget(elemTarget15, tt.NonOptional().Field(3).Type.Elem()); err != nil {
 					return err
 				}
-				if err := listTarget17.FinishElem(elemTarget18); err != nil {
+				if err := listTarget14.FinishElem(elemTarget15); err != nil {
 					return err
 				}
 			}
-			if err := fieldTarget15.FinishList(listTarget17); err != nil {
+			if err := fieldTarget12.FinishList(listTarget14); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
 				return err
 			}
 		}
 	}
-	var22 := (m.IsPrivate == false)
-	if var22 {
-		if err := fieldsTarget1.ZeroField("IsPrivate"); err != nil && err != vdl.ErrFieldNoExist {
+	var var19 bool
+	if len(m.MountTables) == 0 {
+		var19 = true
+	}
+	if var19 {
+		if err := fieldsTarget1.ZeroField("MountTables"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("IsPrivate")
+		keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("MountTables")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget21.FromBool(bool(m.IsPrivate), tt.NonOptional().Field(4).Type); err != nil {
+
+			listTarget20, err := fieldTarget18.StartList(tt.NonOptional().Field(4).Type, len(m.MountTables))
+			if err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
+			for i, elem22 := range m.MountTables {
+				elemTarget21, err := listTarget20.StartElem(i)
+				if err != nil {
+					return err
+				}
+				if err := elemTarget21.FromString(string(elem22), tt.NonOptional().Field(4).Type.Elem()); err != nil {
+					return err
+				}
+				if err := listTarget20.FinishElem(elemTarget21); err != nil {
+					return err
+				}
+			}
+			if err := fieldTarget18.FinishList(listTarget20); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
+				return err
+			}
+		}
+	}
+	var25 := (m.IsPrivate == false)
+	if var25 {
+		if err := fieldsTarget1.ZeroField("IsPrivate"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget23, fieldTarget24, err := fieldsTarget1.StartField("IsPrivate")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget24.FromBool(bool(m.IsPrivate), tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget23, fieldTarget24); err != nil {
 				return err
 			}
 		}
@@ -1466,12 +1488,13 @@ func (m *SyncgroupSpec) MakeVDLTarget() vdl.Target {
 }
 
 type SyncgroupSpecTarget struct {
-	Value             *SyncgroupSpec
-	descriptionTarget vdl.StringTarget
-	permsTarget       access.PermissionsTarget
-	prefixesTarget    __VDLTarget1_list
-	mountTablesTarget vdl.StringSliceTarget
-	isPrivateTarget   vdl.BoolTarget
+	Value                     *SyncgroupSpec
+	descriptionTarget         vdl.StringTarget
+	publishSyncbaseNameTarget vdl.StringTarget
+	permsTarget               access.PermissionsTarget
+	prefixesTarget            __VDLTarget1_list
+	mountTablesTarget         vdl.StringSliceTarget
+	isPrivateTarget           vdl.BoolTarget
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
@@ -1488,6 +1511,10 @@ func (t *SyncgroupSpecTarget) StartField(name string) (key, field vdl.Target, _ 
 	case "Description":
 		t.descriptionTarget.Value = &t.Value.Description
 		target, err := &t.descriptionTarget, error(nil)
+		return nil, target, err
+	case "PublishSyncbaseName":
+		t.publishSyncbaseNameTarget.Value = &t.Value.PublishSyncbaseName
+		target, err := &t.publishSyncbaseNameTarget, error(nil)
 		return nil, target, err
 	case "Perms":
 		t.permsTarget.Value = &t.Value.Perms
@@ -1516,6 +1543,9 @@ func (t *SyncgroupSpecTarget) ZeroField(name string) error {
 	switch name {
 	case "Description":
 		t.Value.Description = ""
+		return nil
+	case "PublishSyncbaseName":
+		t.Value.PublishSyncbaseName = ""
 		return nil
 	case "Perms":
 		t.Value.Perms = access.Permissions(nil)
@@ -1575,6 +1605,9 @@ func (x SyncgroupSpec) VDLIsZero() bool {
 	if x.Description != "" {
 		return false
 	}
+	if x.PublishSyncbaseName != "" {
+		return false
+	}
 	if len(x.Perms) != 0 {
 		return false
 	}
@@ -1602,6 +1635,20 @@ func (x SyncgroupSpec) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 		if err := enc.EncodeString(x.Description); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.PublishSyncbaseName != "" {
+		if err := enc.NextField("PublishSyncbaseName"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.PublishSyncbaseName); err != nil {
 			return err
 		}
 		if err := enc.FinishValue(); err != nil {
@@ -1722,6 +1769,17 @@ func (x *SyncgroupSpec) VDLRead(dec vdl.Decoder) error {
 			}
 			var err error
 			if x.Description, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "PublishSyncbaseName":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.PublishSyncbaseName, err = dec.DecodeString(); err != nil {
 				return err
 			}
 			if err := dec.FinishValue(); err != nil {
@@ -6799,56 +6857,56 @@ var descDatabaseWatcher = rpc.InterfaceDesc{
 // SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerClientMethods interface {
-	// GetSyncgroupNames returns the global names of all syncgroups attached to
+	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
-	GetSyncgroupNames(*context.T, ...rpc.CallOpt) ([]string, error)
+	ListSyncgroups(*context.T, ...rpc.CallOpt) ([]Id, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; all
 	// Collections specified in prefixes must exist; Client must have at least
 	// Read access on each of the Collection ACLs.
-	CreateSyncgroup(_ *context.T, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
+	CreateSyncgroup(_ *context.T, sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
 	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(_ *context.T, sgName string, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
+	JoinSyncgroup(_ *context.T, remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
+	LeaveSyncgroup(_ *context.T, sgId Id, _ ...rpc.CallOpt) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(_ *context.T, sgName string, _ ...rpc.CallOpt) error
+	DestroySyncgroup(_ *context.T, sgId Id, _ ...rpc.CallOpt) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(_ *context.T, sgName string, member string, _ ...rpc.CallOpt) error
+	EjectFromSyncgroup(_ *context.T, sgId Id, member string, _ ...rpc.CallOpt) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupSpec(_ *context.T, sgName string, _ ...rpc.CallOpt) (spec SyncgroupSpec, version string, _ error)
+	GetSyncgroupSpec(_ *context.T, sgId Id, _ ...rpc.CallOpt) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(_ *context.T, sgName string, spec SyncgroupSpec, version string, _ ...rpc.CallOpt) error
+	SetSyncgroupSpec(_ *context.T, sgId Id, spec SyncgroupSpec, version string, _ ...rpc.CallOpt) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupMembers(_ *context.T, sgName string, _ ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, _ error)
+	GetSyncgroupMembers(_ *context.T, sgId Id, _ ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
 // SyncgroupManagerClientStub adds universal methods to SyncgroupManagerClientMethods.
@@ -6866,47 +6924,47 @@ type implSyncgroupManagerClientStub struct {
 	name string
 }
 
-func (c implSyncgroupManagerClientStub) GetSyncgroupNames(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupNames", nil, []interface{}{&o0}, opts...)
+func (c implSyncgroupManagerClientStub) ListSyncgroups(ctx *context.T, opts ...rpc.CallOpt) (o0 []Id, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListSyncgroups", nil, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) CreateSyncgroup(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo, opts ...rpc.CallOpt) (err error) {
+func (c implSyncgroupManagerClientStub) CreateSyncgroup(ctx *context.T, i0 Id, i1 SyncgroupSpec, i2 SyncgroupMemberInfo, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "CreateSyncgroup", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncgroup", []interface{}{i0, i1}, []interface{}{&o0}, opts...)
+func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 string, i2 Id, i3 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncgroup", []interface{}{i0, i1, i2, i3}, []interface{}{&o0}, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) LeaveSyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+func (c implSyncgroupManagerClientStub) LeaveSyncgroup(ctx *context.T, i0 Id, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "LeaveSyncgroup", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) DestroySyncgroup(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+func (c implSyncgroupManagerClientStub) DestroySyncgroup(ctx *context.T, i0 Id, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DestroySyncgroup", []interface{}{i0}, nil, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) EjectFromSyncgroup(ctx *context.T, i0 string, i1 string, opts ...rpc.CallOpt) (err error) {
+func (c implSyncgroupManagerClientStub) EjectFromSyncgroup(ctx *context.T, i0 Id, i1 string, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "EjectFromSyncgroup", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) GetSyncgroupSpec(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 SyncgroupSpec, o1 string, err error) {
+func (c implSyncgroupManagerClientStub) GetSyncgroupSpec(ctx *context.T, i0 Id, opts ...rpc.CallOpt) (o0 SyncgroupSpec, o1 string, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupSpec", []interface{}{i0}, []interface{}{&o0, &o1}, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) SetSyncgroupSpec(ctx *context.T, i0 string, i1 SyncgroupSpec, i2 string, opts ...rpc.CallOpt) (err error) {
+func (c implSyncgroupManagerClientStub) SetSyncgroupSpec(ctx *context.T, i0 Id, i1 SyncgroupSpec, i2 string, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "SetSyncgroupSpec", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
-func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 map[string]SyncgroupMemberInfo, err error) {
+func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 Id, opts ...rpc.CallOpt) (o0 map[string]SyncgroupMemberInfo, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "GetSyncgroupMembers", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
@@ -6917,56 +6975,56 @@ func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 s
 // SyncgroupManager is the interface for syncgroup operations.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerServerMethods interface {
-	// GetSyncgroupNames returns the global names of all syncgroups attached to
+	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
-	GetSyncgroupNames(*context.T, rpc.ServerCall) ([]string, error)
+	ListSyncgroups(*context.T, rpc.ServerCall) ([]Id, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
 	// Requires: Client must have at least Read access on the Database; all
 	// Collections specified in prefixes must exist; Client must have at least
 	// Read access on each of the Collection ACLs.
-	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
+	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
 	// JoinSyncgroup joins the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
+	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
 	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
+	LeaveSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
 	// continue to be available to all members.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(_ *context.T, _ rpc.ServerCall, sgName string) error
+	DestroySyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
 	// synced.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(_ *context.T, _ rpc.ServerCall, sgName string, member string) error
+	EjectFromSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id, member string) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string) (spec SyncgroupSpec, version string, _ error)
+	GetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgId Id) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
 	// Requires: Client must have at least Read access on the Database, and must
 	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgName string, spec SyncgroupSpec, version string) error
+	SetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgId Id, spec SyncgroupSpec, version string) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	GetSyncgroupMembers(_ *context.T, _ rpc.ServerCall, sgName string) (members map[string]SyncgroupMemberInfo, _ error)
+	GetSyncgroupMembers(_ *context.T, _ rpc.ServerCall, sgId Id) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
 // SyncgroupManagerServerStubMethods is the server interface containing
@@ -7004,39 +7062,39 @@ type implSyncgroupManagerServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implSyncgroupManagerServerStub) GetSyncgroupNames(ctx *context.T, call rpc.ServerCall) ([]string, error) {
-	return s.impl.GetSyncgroupNames(ctx, call)
+func (s implSyncgroupManagerServerStub) ListSyncgroups(ctx *context.T, call rpc.ServerCall) ([]Id, error) {
+	return s.impl.ListSyncgroups(ctx, call)
 }
 
-func (s implSyncgroupManagerServerStub) CreateSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 SyncgroupMemberInfo) error {
+func (s implSyncgroupManagerServerStub) CreateSyncgroup(ctx *context.T, call rpc.ServerCall, i0 Id, i1 SyncgroupSpec, i2 SyncgroupMemberInfo) error {
 	return s.impl.CreateSyncgroup(ctx, call, i0, i1, i2)
 }
 
-func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupMemberInfo) (SyncgroupSpec, error) {
-	return s.impl.JoinSyncgroup(ctx, call, i0, i1)
+func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string, i2 Id, i3 SyncgroupMemberInfo) (SyncgroupSpec, error) {
+	return s.impl.JoinSyncgroup(ctx, call, i0, i1, i2, i3)
 }
 
-func (s implSyncgroupManagerServerStub) LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+func (s implSyncgroupManagerServerStub) LeaveSyncgroup(ctx *context.T, call rpc.ServerCall, i0 Id) error {
 	return s.impl.LeaveSyncgroup(ctx, call, i0)
 }
 
-func (s implSyncgroupManagerServerStub) DestroySyncgroup(ctx *context.T, call rpc.ServerCall, i0 string) error {
+func (s implSyncgroupManagerServerStub) DestroySyncgroup(ctx *context.T, call rpc.ServerCall, i0 Id) error {
 	return s.impl.DestroySyncgroup(ctx, call, i0)
 }
 
-func (s implSyncgroupManagerServerStub) EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string) error {
+func (s implSyncgroupManagerServerStub) EjectFromSyncgroup(ctx *context.T, call rpc.ServerCall, i0 Id, i1 string) error {
 	return s.impl.EjectFromSyncgroup(ctx, call, i0, i1)
 }
 
-func (s implSyncgroupManagerServerStub) GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string) (SyncgroupSpec, string, error) {
+func (s implSyncgroupManagerServerStub) GetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 Id) (SyncgroupSpec, string, error) {
 	return s.impl.GetSyncgroupSpec(ctx, call, i0)
 }
 
-func (s implSyncgroupManagerServerStub) SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 string, i1 SyncgroupSpec, i2 string) error {
+func (s implSyncgroupManagerServerStub) SetSyncgroupSpec(ctx *context.T, call rpc.ServerCall, i0 Id, i1 SyncgroupSpec, i2 string) error {
 	return s.impl.SetSyncgroupSpec(ctx, call, i0, i1, i2)
 }
 
-func (s implSyncgroupManagerServerStub) GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, i0 string) (map[string]SyncgroupMemberInfo, error) {
+func (s implSyncgroupManagerServerStub) GetSyncgroupMembers(ctx *context.T, call rpc.ServerCall, i0 Id) (map[string]SyncgroupMemberInfo, error) {
 	return s.impl.GetSyncgroupMembers(ctx, call, i0)
 }
 
@@ -7058,10 +7116,10 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 	Doc:     "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
 	Methods: []rpc.MethodDesc{
 		{
-			Name: "GetSyncgroupNames",
-			Doc:  "// GetSyncgroupNames returns the global names of all syncgroups attached to\n// this database.",
+			Name: "ListSyncgroups",
+			Doc:  "// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to\n// this database.",
 			OutArgs: []rpc.ArgDesc{
-				{"", ``}, // []string
+				{"", ``}, // []Id
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -7069,7 +7127,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "CreateSyncgroup",
 			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; all\n// Collections specified in prefixes must exist; Client must have at least\n// Read access on each of the Collection ACLs.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``},   // Id
 				{"spec", ``},   // SyncgroupSpec
 				{"myInfo", ``}, // SyncgroupMemberInfo
 			},
@@ -7079,8 +7137,10 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "JoinSyncgroup",
 			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
-				{"myInfo", ``}, // SyncgroupMemberInfo
+				{"remoteSyncbaseName", ``},       // string
+				{"expectedSyncbaseBlessing", ``}, // string
+				{"sgId", ``},                     // Id
+				{"myInfo", ``},                   // SyncgroupMemberInfo
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"spec", ``}, // SyncgroupSpec
@@ -7091,7 +7151,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "LeaveSyncgroup",
 			Doc:  "// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``}, // Id
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -7099,7 +7159,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "DestroySyncgroup",
 			Doc:  "// DestroySyncgroup destroys the syncgroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``}, // Id
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
@@ -7107,7 +7167,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "EjectFromSyncgroup",
 			Doc:  "// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``},   // Id
 				{"member", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
@@ -7116,7 +7176,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "GetSyncgroupSpec",
 			Doc:  "// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncgroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``}, // Id
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"spec", ``},    // SyncgroupSpec
@@ -7128,7 +7188,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "SetSyncgroupSpec",
 			Doc:  "// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``},  // string
+				{"sgId", ``},    // Id
 				{"spec", ``},    // SyncgroupSpec
 				{"version", ``}, // string
 			},
@@ -7138,7 +7198,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "GetSyncgroupMembers",
 			Doc:  "// GetSyncgroupMembers gets the info objects for members of the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"sgName", ``}, // string
+				{"sgId", ``}, // Id
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"members", ``}, // map[string]SyncgroupMemberInfo

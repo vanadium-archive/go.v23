@@ -14,10 +14,9 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
-	"v.io/x/ref/services/syncbase/common"
+	wire "v.io/v23/services/syncbase"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -35,14 +34,15 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sbs := setupSyncbases(t, sh, N, false)
 
 	// Syncbase s0 is the creator.
-	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
+	sbName := sbs[0].sbName
+	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sgName, "foo"))
+			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, "foo"))
 		}(i)
 	}
 
@@ -53,7 +53,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
 		ok(t, verifySync(sb.clientCtx, sb.sbName, N, "foo"))
-		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
+		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgId, N))
 	}
 
 	fmt.Println("TestV23SyncgroupRendezvousOnline=====Phase 1 Done")
@@ -77,14 +77,15 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	sbs := setupSyncbases(t, sh, N+1, false)
 
 	// Syncbase s0 is the creator, and sN is the cloud.
-	sgName := naming.Join(sbs[N].sbName, common.SyncbaseSuffix, "SG1")
+	sbName := sbs[N].sbName
+	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "", sbBlessings(sbs), nil))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
 		go func(i int) {
-			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sgName, "foo"))
+			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, "foo"))
 		}(i)
 	}
 
@@ -95,7 +96,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	// Verify steady state sequentially.
 	for i := 0; i < N; i++ {
 		ok(t, verifySync(sbs[i].clientCtx, sbs[i].sbName, N, "foo"))
-		// ok(t, verifySyncgroupMembers(sbs[i].clientCtx, sbs[i].sbName, sgName, N+1))
+		// ok(t, verifySyncgroupMembers(sbs[i].clientCtx, sbs[i].sbName, sgId, N+1))
 	}
 
 	fmt.Println("TestV23SyncgroupRendezvousOnlineCloud=====Phase 1 Done")
@@ -120,7 +121,8 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 
 	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
 	// Syncbase "s6".
-	sgName := naming.Join("s6", common.SyncbaseSuffix, "SG1")
+	sbName := "s6"
+	sgId := wire.Id{Name: "SG1", Blessing: "root"}
 
 	// For now, we set the permissions to have a single admin. Once we have
 	// syncgroup conflict resolution in place, we should be able to have
@@ -136,12 +138,12 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	}
 	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "/mttable", "", perms))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "/mttable", "root", perms))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sgName, "foo"))
+			ok(t, runSyncWorkload(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, "foo"))
 		}(i)
 	}
 
@@ -152,7 +154,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
 		ok(t, verifySync(sb.clientCtx, sb.sbName, N, "foo"))
-		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
+		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgId, N))
 	}
 
 	fmt.Println("TestV23SyncgroupNeighborhoodOnly=====Phase 1 Done")
@@ -174,13 +176,14 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
-	sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, "SG1")
-	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, "c:foo", "", sbBlessings(sbs)))
+	sbName := sbs[0].sbName
+	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, "c:foo", "", sbBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sgName, "c:foo", "", sbBlessings(sbs)))
+			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, "c:foo", "", sbBlessings(sbs)))
 		}(i)
 	}
 
@@ -195,7 +198,7 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
 		ok(t, verifySync(sb.clientCtx, sb.sbName, N, "foo"))
-		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgName, N))
+		ok(t, verifySyncgroupMembers(sb.clientCtx, sb.sbName, sgId, N))
 	}
 
 	fmt.Println("TestV23SyncgroupPreknownStaggered=====Phase 1 Done")
@@ -204,11 +207,11 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 ////////////////////////////////////////
 // Helpers.
 
-func runSyncWorkload(ctx *context.T, syncbaseName, sgName, prefix string) error {
+func runSyncWorkload(ctx *context.T, syncbaseName, sbName string, sgId wire.Id, prefix string) error {
 	var err error
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
-		if err = joinSyncgroup(ctx, syncbaseName, sgName); err == nil {
+		if err = joinSyncgroup(ctx, syncbaseName, sbName, sgId); err == nil {
 			break
 		}
 	}
@@ -231,9 +234,9 @@ func verifySync(ctx *context.T, syncbaseName string, numSyncbases int, prefix st
 	return nil
 }
 
-func joinOrCreateSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, bps string) error {
-	if err := joinSyncgroup(ctx, syncbaseName, sgName); err == nil {
+func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgPrefixes, mtName, bps string) error {
+	if err := joinSyncgroup(ctx, sbNameLocal, sbNameRemote, sgId); err == nil {
 		return nil
 	}
-	return createSyncgroup(ctx, syncbaseName, sgName, sgPrefixes, mtName, bps, nil)
+	return createSyncgroup(ctx, sbNameLocal, sgId, sgPrefixes, mtName, bps, nil)
 }

@@ -181,12 +181,12 @@ pkg syncbase, type Database interface, Exec(*context.T, string, ...interface{}) 
 pkg syncbase, type Database interface, Exists(*context.T) (bool, error)
 pkg syncbase, type Database interface, FullName() string
 pkg syncbase, type Database interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
-pkg syncbase, type Database interface, GetSyncgroupNames(*context.T) ([]string, error)
 pkg syncbase, type Database interface, Id() wire.Id
 pkg syncbase, type Database interface, ListCollections(*context.T) ([]wire.Id, error)
+pkg syncbase, type Database interface, ListSyncgroups(*context.T) ([]wire.Id, error)
 pkg syncbase, type Database interface, PauseSync(*context.T) error
 pkg syncbase, type Database interface, ResumeSync(*context.T) error
-pkg syncbase, type Database interface, Syncgroup(string) Syncgroup
+pkg syncbase, type Database interface, Syncgroup(wire.Id) Syncgroup
 pkg syncbase, type Database interface, Watch(*context.T, wire.Id, string, watch.ResumeMarker) (WatchStream, error)
 pkg syncbase, type Database interface, unexported methods
 pkg syncbase, type DatabaseHandle interface { Collection, CollectionForId, Exec, FullName, GetResumeMarker, Id, ListCollections }
@@ -250,13 +250,14 @@ pkg syncbase, type Stream interface { Advance, Cancel, Err }
 pkg syncbase, type Stream interface, Advance() bool
 pkg syncbase, type Stream interface, Cancel()
 pkg syncbase, type Stream interface, Err() error
-pkg syncbase, type Syncgroup interface { Create, Destroy, Eject, GetMembers, GetSpec, Join, Leave, SetSpec }
+pkg syncbase, type Syncgroup interface { Create, Destroy, Eject, GetMembers, GetSpec, Id, Join, Leave, SetSpec }
 pkg syncbase, type Syncgroup interface, Create(*context.T, wire.SyncgroupSpec, wire.SyncgroupMemberInfo) error
 pkg syncbase, type Syncgroup interface, Destroy(*context.T) error
 pkg syncbase, type Syncgroup interface, Eject(*context.T, string) error
 pkg syncbase, type Syncgroup interface, GetMembers(*context.T) (map[string]wire.SyncgroupMemberInfo, error)
 pkg syncbase, type Syncgroup interface, GetSpec(*context.T) (wire.SyncgroupSpec, string, error)
-pkg syncbase, type Syncgroup interface, Join(*context.T, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+pkg syncbase, type Syncgroup interface, Id() wire.Id
+pkg syncbase, type Syncgroup interface, Join(*context.T, string, string, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
 pkg syncbase, type Syncgroup interface, Leave(*context.T) error
 pkg syncbase, type Syncgroup interface, SetSpec(*context.T, wire.SyncgroupSpec, string) error
 pkg syncbase, type Value struct

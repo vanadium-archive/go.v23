@@ -14,53 +14,58 @@ var (
 )
 
 type syncgroup struct {
-	c    wire.DatabaseClientMethods
-	name string // globally unique syncgroup name
+	c  wire.DatabaseClientMethods
+	id wire.Id
 }
 
-func newSyncgroup(dbName, sgName string) Syncgroup {
+func newSyncgroup(dbName string, id wire.Id) Syncgroup {
 	return &syncgroup{
-		c:    wire.DatabaseClient(dbName),
-		name: sgName,
+		c:  wire.DatabaseClient(dbName),
+		id: id,
 	}
 }
 
 // Create implements Syncgroup.Create.
 func (sg *syncgroup) Create(ctx *context.T, spec wire.SyncgroupSpec, myInfo wire.SyncgroupMemberInfo) error {
-	return sg.c.CreateSyncgroup(ctx, sg.name, spec, myInfo)
+	return sg.c.CreateSyncgroup(ctx, sg.id, spec, myInfo)
 }
 
 // Join implements Syncgroup.Join.
-func (sg *syncgroup) Join(ctx *context.T, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error) {
-	return sg.c.JoinSyncgroup(ctx, sg.name, myInfo)
+func (sg *syncgroup) Join(ctx *context.T, remoteSyncbaseName, expectedSyncbaseBlessing string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error) {
+	return sg.c.JoinSyncgroup(ctx, remoteSyncbaseName, expectedSyncbaseBlessing, sg.id, myInfo)
 }
 
 // Leave implements Syncgroup.Leave.
 func (sg *syncgroup) Leave(ctx *context.T) error {
-	return sg.c.LeaveSyncgroup(ctx, sg.name)
+	return sg.c.LeaveSyncgroup(ctx, sg.id)
 }
 
 // Destroy implements Syncgroup.Destroy.
 func (sg *syncgroup) Destroy(ctx *context.T) error {
-	return sg.c.DestroySyncgroup(ctx, sg.name)
+	return sg.c.DestroySyncgroup(ctx, sg.id)
 }
 
 // Eject implements Syncgroup.Eject.
 func (sg *syncgroup) Eject(ctx *context.T, member string) error {
-	return sg.c.EjectFromSyncgroup(ctx, sg.name, member)
+	return sg.c.EjectFromSyncgroup(ctx, sg.id, member)
 }
 
 // GetSpec implements Syncgroup.GetSpec.
 func (sg *syncgroup) GetSpec(ctx *context.T) (wire.SyncgroupSpec, string, error) {
-	return sg.c.GetSyncgroupSpec(ctx, sg.name)
+	return sg.c.GetSyncgroupSpec(ctx, sg.id)
 }
 
 // SetSpec implements Syncgroup.SetSpec.
 func (sg *syncgroup) SetSpec(ctx *context.T, spec wire.SyncgroupSpec, version string) error {
-	return sg.c.SetSyncgroupSpec(ctx, sg.name, spec, version)
+	return sg.c.SetSyncgroupSpec(ctx, sg.id, spec, version)
 }
 
 // GetMembers implements Syncgroup.GetMembers.
 func (sg *syncgroup) GetMembers(ctx *context.T) (map[string]wire.SyncgroupMemberInfo, error) {
-	return sg.c.GetSyncgroupMembers(ctx, sg.name)
+	return sg.c.GetSyncgroupMembers(ctx, sg.id)
+}
+
+// Id implements Syncgroup.Id.
+func (sg *syncgroup) Id() wire.Id {
+	return sg.id
 }

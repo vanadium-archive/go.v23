@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
@@ -36,7 +35,7 @@ func TestV23CRRuleConfig(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 10, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -72,7 +71,7 @@ func TestV23CRDefault(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 1, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 1, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -107,7 +106,7 @@ func TestV23CRGenVectorWinsOverVClock(t *testing.T) {
 
 	// Creates S0 and S1 and populates S0 with foo0, foo1 and verifies that it
 	// synced to S1
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 2, true)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 2, true)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -165,7 +164,7 @@ func TestV23CRWithAtomicBatch(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 100, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 100, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -200,7 +199,7 @@ func TestV23CRAppResolved(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 10, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -247,7 +246,7 @@ func TestV23CRAppBasedResolutionOverridesOthers(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 20, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 20, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -288,7 +287,7 @@ func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
-	client0Ctx, client1Ctx, _ := setupCRTest(t, sh, 10, false)
+	client0Ctx, client1Ctx, _, _ := setupCRTest(t, sh, 10, false)
 
 	ok(t, pauseSync(client0Ctx, "s0"))
 	ok(t, pauseSync(client1Ctx, "s1"))
@@ -319,21 +318,21 @@ func TestV23CRMultipleBatchesAsSingleConflict(t *testing.T) {
 	})
 }
 
-func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool) (client0, client1 *context.T, sgName string) {
+func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool) (client0, client1 *context.T, sbName string, sgId wire.Id) {
 	sh.StartRootMountTable()
 	sbs := setupSyncbases(t, sh, 2, devMode)
 
-	sgName = naming.Join("s0", common.SyncbaseSuffix, "SG1")
+	sgId = wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
 	// Create syncgroup and populate data on s0.
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgId, "c:foo", "", sbBlessings(sbs), nil))
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, numInitRows))
 
 	// Join syncgroup and verify data on s1.
-	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", "s0", sgId))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, numInitRows))
 
-	return sbs[0].clientCtx, sbs[1].clientCtx, sgName
+	return sbs[0].clientCtx, sbs[1].clientCtx, "s0", sgId
 }
 
 // TODO(sadovsky): This pattern is not ideal in that it makes the test code

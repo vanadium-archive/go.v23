@@ -9,13 +9,11 @@ import (
 	"testing"
 
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
-	"v.io/x/ref/services/syncbase/common"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
@@ -27,12 +25,12 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncgroupSpec{}
-	sg1 := naming.Join(sName, common.SyncbaseSuffix, "sg1")
+	sg1 := wire.Id{Name: "sg1", Blessing: "b1"}
 
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ErrBadArg.ID)
 
-	var wantNames []string
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
+	var wantGroups []wire.Id
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 
 	// Prefill entries before creating a syncgroup to exercise the bootstrap
 	// of a syncgroup through Snapshot operations to the watcher.
@@ -53,31 +51,31 @@ func TestCreateSyncgroup(t *testing.T) {
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
 
 	// Verify syncgroup is created.
-	wantNames = []string{sg1}
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
+	wantGroups = []wire.Id{sg1}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 	verifySyncgroupInfo(t, ctx, d, sg1, spec, 1)
 
 	// Check if creating an already existing syncgroup fails.
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ErrExist.ID)
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 
 	// Create a peer syncgroup.
 	spec.Description = "test syncgroup sg2"
-	sg2 := naming.Join(sName, common.SyncbaseSuffix, "sg2")
+	sg2 := wire.Id{Name: "sg2", Blessing: "b2"}
 	createSyncgroup(t, ctx, d, sg2, spec, verror.ID(""))
 
-	wantNames = []string{sg1, sg2}
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
+	wantGroups = []wire.Id{sg1, sg2}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 	verifySyncgroupInfo(t, ctx, d, sg2, spec, 1)
 
 	// Create a nested syncgroup.
 	spec.Description = "test syncgroup sg3"
 	spec.Prefixes = []wire.CollectionRow{{CollectionId: testCollection, Row: "foobar"}}
-	sg3 := naming.Join(sName, common.SyncbaseSuffix, "sg3")
+	sg3 := wire.Id{Name: "sg3", Blessing: "b3"}
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
 
-	wantNames = []string{sg1, sg2, sg3}
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
+	wantGroups = []wire.Id{sg1, sg2, sg3}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 	verifySyncgroupInfo(t, ctx, d, sg3, spec, 1)
 
 	// Check that create fails if the perms disallow access.
@@ -87,9 +85,9 @@ func TestCreateSyncgroup(t *testing.T) {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 	spec.Description = "test syncgroup sg4"
-	sg4 := naming.Join(sName, common.SyncbaseSuffix, "sg4")
+	sg4 := wire.Id{Name: "sg4", Blessing: "b4"}
 	createSyncgroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
-	verifySyncgroupNames(t, ctx, d, nil, verror.ErrNoAccess.ID)
+	verifySyncgroups(t, ctx, d, nil, verror.ErrNoAccess.ID)
 }
 
 // Tests that Syncgroup.Join works as expected for the case with one Syncbase
@@ -106,20 +104,20 @@ func TestJoinSyncgroup(t *testing.T) {
 		Perms:       perms("root:client1"),
 		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
-	sgNameA := naming.Join(sName, common.SyncbaseSuffix, "sgA")
-	createSyncgroup(t, ctx1, d1, sgNameA, specA, verror.ID(""))
+	sgIdA := wire.Id{Name: "sgA", Blessing: "bA"}
+	createSyncgroup(t, ctx1, d1, sgIdA, specA, verror.ID(""))
 
 	// Check that creator can call join successfully.
-	joinSyncgroup(t, ctx1, d1, sgNameA, verror.ID(""))
+	joinSyncgroup(t, ctx1, d1, sName, sgIdA, verror.ID(""))
 
 	// Create client2.
 	ctx2 := tu.NewCtx(ctx, rootp, "client2")
 	d2 := syncbase.NewService(sName).DatabaseForId(tu.DbId("d"), nil)
 
 	// Check that client2's join fails if the perms disallow access.
-	joinSyncgroup(t, ctx2, d2, sgNameA, verror.ErrNoAccess.ID)
+	joinSyncgroup(t, ctx2, d2, sName, sgIdA, verror.ErrNoAccess.ID)
 
-	verifySyncgroupNames(t, ctx2, d2, nil, verror.ErrNoAccess.ID)
+	verifySyncgroups(t, ctx2, d2, nil, verror.ErrNoAccess.ID)
 
 	// Client1 gives access to client2.
 	if err := d1.SetPermissions(ctx1, perms("root:client1", "root:client2"), ""); err != nil {
@@ -132,7 +130,7 @@ func TestJoinSyncgroup(t *testing.T) {
 	}
 
 	// Check that client2's join still fails since the SG ACL disallows access.
-	joinSyncgroup(t, ctx2, d2, sgNameA, verror.ErrNoAccess.ID)
+	joinSyncgroup(t, ctx2, d2, sName, sgIdA, verror.ErrNoAccess.ID)
 
 	// Create a different syncgroup.
 	specB := wire.SyncgroupSpec{
@@ -140,19 +138,19 @@ func TestJoinSyncgroup(t *testing.T) {
 		Perms:       perms("root:client1", "root:client2"),
 		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
-	sgNameB := naming.Join(sName, common.SyncbaseSuffix, "sgB")
-	createSyncgroup(t, ctx1, d1, sgNameB, specB, verror.ID(""))
+	sgIdB := wire.Id{Name: "sgB", Blessing: "bB"}
+	createSyncgroup(t, ctx1, d1, sgIdB, specB, verror.ID(""))
 
 	// Check that client2's join now succeeds.
-	joinSyncgroup(t, ctx2, d2, sgNameB, verror.ID(""))
+	joinSyncgroup(t, ctx2, d2, sName, sgIdB, verror.ID(""))
 
 	// Verify syncgroup state.
-	wantNames := []string{sgNameA, sgNameB}
-	verifySyncgroupNames(t, ctx1, d1, wantNames, verror.ID(""))
-	verifySyncgroupNames(t, ctx2, d2, wantNames, verror.ID(""))
-	verifySyncgroupInfo(t, ctx1, d1, sgNameA, specA, 1)
-	verifySyncgroupInfo(t, ctx1, d1, sgNameB, specB, 1)
-	verifySyncgroupInfo(t, ctx2, d2, sgNameB, specB, 1)
+	wantGroups := []wire.Id{sgIdA, sgIdB}
+	verifySyncgroups(t, ctx1, d1, wantGroups, verror.ID(""))
+	verifySyncgroups(t, ctx2, d2, wantGroups, verror.ID(""))
+	verifySyncgroupInfo(t, ctx1, d1, sgIdA, specA, 1)
+	verifySyncgroupInfo(t, ctx1, d1, sgIdB, specB, 1)
+	verifySyncgroupInfo(t, ctx2, d2, sgIdB, specB, 1)
 }
 
 // Tests that Syncgroup.SetSpec works as expected.
@@ -162,59 +160,62 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	// Create successfully.
-	sgName := naming.Join(sName, common.SyncbaseSuffix, "sg1")
+	sgId := wire.Id{Name: "sg1", Blessing: "b1"}
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
 		Perms:       perms("root:client"),
 		Prefixes:    []wire.CollectionRow{{CollectionId: testCollection, Row: "foo"}},
 	}
-	createSyncgroup(t, ctx, d, sgName, spec, verror.ID(""))
+	createSyncgroup(t, ctx, d, sgId, spec, verror.ID(""))
 
 	// Verify syncgroup is created.
-	wantNames := []string{sgName}
-	verifySyncgroupNames(t, ctx, d, wantNames, verror.ID(""))
-	verifySyncgroupInfo(t, ctx, d, sgName, spec, 1)
+	wantNames := []wire.Id{sgId}
+	verifySyncgroups(t, ctx, d, wantNames, verror.ID(""))
+	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
 
 	spec.Description = "test syncgroup sg1 update"
 	spec.Perms = perms("root:client", "root:client1")
 
-	sg := d.Syncgroup(sgName)
+	sg := d.Syncgroup(sgId)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
 	}
-	verifySyncgroupInfo(t, ctx, d, sgName, spec, 1)
+	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
 }
 
 ///////////////////
 // Helpers.
 
-func createSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgName string, spec wire.SyncgroupSpec, errID verror.ID) syncbase.Syncgroup {
-	sg := d.Syncgroup(sgName)
+func createSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgId wire.Id, spec wire.SyncgroupSpec, errID verror.ID) syncbase.Syncgroup {
+	sg := d.Syncgroup(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); verror.ErrorID(err) != errID {
-		tu.Fatalf(t, "Create SG %q failed: %v", sgName, err)
+		tu.Fatalf(t, "Create SG %+v failed: %v", sgId, err)
 	}
 	return sg
 }
 
-func joinSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgName string, wantErr verror.ID) syncbase.Syncgroup {
-	sg := d.Syncgroup(sgName)
+func joinSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sbName string, sgId wire.Id, wantErr verror.ID) syncbase.Syncgroup {
+	sg := d.Syncgroup(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, info); verror.ErrorID(err) != wantErr {
-		tu.Fatalf(t, "Join SG %v failed: %v", sgName, err)
+	if _, err := sg.Join(ctx, sbName, "", info); verror.ErrorID(err) != wantErr {
+		tu.Fatalf(t, "Join SG %v failed: %v", sgId, err)
 	}
 	return sg
 }
 
-func verifySyncgroupNames(t *testing.T, ctx *context.T, d syncbase.Database, wantNames []string, wantErr verror.ID) {
-	gotNames, gotErr := d.GetSyncgroupNames(ctx)
-	if verror.ErrorID(gotErr) != wantErr || !reflect.DeepEqual(gotNames, wantNames) {
-		t.Fatalf("d.GetSyncgroupNames() failed, got %v, want %v, err %v", gotNames, wantNames, gotErr)
+func verifySyncgroups(t *testing.T, ctx *context.T, d syncbase.Database, wantGroups []wire.Id, wantErr verror.ID) {
+	gotGroups, gotErr := d.ListSyncgroups(ctx)
+	if verror.ErrorID(gotErr) != wantErr {
+		t.Fatalf("d.GetSyncgroup() failed, want %+v, got err %v", wantGroups, gotErr)
+	}
+	if !reflect.DeepEqual(gotGroups, wantGroups) {
+		t.Fatalf("d.GetSyncgroup() failed, got %+v, want %+v", gotGroups, wantGroups)
 	}
 }
 
-func verifySyncgroupInfo(t *testing.T, ctx *context.T, d syncbase.Database, sgName string, wantSpec wire.SyncgroupSpec, wantMembers int) {
-	sg := d.Syncgroup(sgName)
+func verifySyncgroupInfo(t *testing.T, ctx *context.T, d syncbase.Database, sgId wire.Id, wantSpec wire.SyncgroupSpec, wantMembers int) {
+	sg := d.Syncgroup(sgId)
 	gotSpec, _, err := sg.GetSpec(ctx)
 	if err != nil || !reflect.DeepEqual(gotSpec, wantSpec) {
 		t.Fatalf("sg.GetSpec() failed, got %v, want %v, err %v", gotSpec, wantSpec, err)

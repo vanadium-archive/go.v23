@@ -223,7 +223,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 // Helpers for managing syncgroups
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
-func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, blessingPatterns string, perms access.Permissions) error {
+func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgPrefixes, mtName, blessingPatterns string, perms access.Permissions) error {
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
 		if len(roots) == 0 {
@@ -245,34 +245,34 @@ func createSyncgroup(ctx *context.T, syncbaseName, sgName, sgPrefixes, mtName, b
 		MountTables: []string{mtName},
 	}
 
-	sg := d.Syncgroup(sgName)
+	sg := d.Syncgroup(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
-		return fmt.Errorf("{%q, %q} sg.Create() failed: %v", syncbaseName, sgName, err)
+		return fmt.Errorf("{%q, %v} sg.Create() failed: %v", syncbaseName, sgId, err)
 	}
 	return nil
 }
 
-func joinSyncgroup(ctx *context.T, syncbaseName, sgName string) error {
-	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	sg := d.Syncgroup(sgName)
+func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id) error {
+	d := syncbase.NewService(sbNameLocal).DatabaseForId(testDb, nil)
+	sg := d.Syncgroup(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, info); err != nil {
-		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", syncbaseName, sgName, err)
+	if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
+		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", sbNameRemote, sgId, err)
 	}
 	return nil
 }
 
-func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMembers int) error {
+func verifySyncgroupMembers(ctx *context.T, syncbaseName string, sgId wire.Id, wantMembers int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	sg := d.Syncgroup(sgName)
+	sg := d.Syncgroup(sgId)
 
 	var gotMembers int
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
 		members, err := sg.GetMembers(ctx)
 		if err != nil {
-			return fmt.Errorf("{%q, %q} sg.GetMembers() failed: %v", syncbaseName, sgName, err)
+			return fmt.Errorf("{%q, %q} sg.GetMembers() failed: %v", syncbaseName, sgId, err)
 		}
 		gotMembers = len(members)
 		if gotMembers == wantMembers {
@@ -280,7 +280,7 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName, sgName string, wantMem
 		}
 	}
 	if gotMembers != wantMembers {
-		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d", syncbaseName, sgName, gotMembers, wantMembers)
+		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d", syncbaseName, sgId, gotMembers, wantMembers)
 	}
 	return nil
 }

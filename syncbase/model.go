@@ -155,13 +155,14 @@ type Database interface {
 	// returns just a ScanStream.
 	Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
-	// Syncgroup returns a handle to the syncgroup with the given name.
-	Syncgroup(sgName string) Syncgroup
+	// Syncgroup returns a handle to the syncgroup with the given Id.
+	// TODO(fredq): change this to SyncgroupForId and add a Syncgroup method that just
+	// takes a name, similar to Database.Collection/CollectionForId and
+	// Service.Database/DatabaseForId, extracting the user blessing from the context.
+	Syncgroup(id wire.Id) Syncgroup
 
-	// GetSyncgroupNames returns the names of all syncgroups attached to this
-	// database.
-	// TODO(sadovsky): Rename to ListSyncgroups, for parity with ListDatabases.
-	GetSyncgroupNames(ctx *context.T) ([]string, error)
+	// ListSyncgroups returns all Syncgroups attached to this database.
+	ListSyncgroups(ctx *context.T) ([]wire.Id, error)
 
 	// CreateBlob creates a new blob and returns a handle to it.
 	CreateBlob(ctx *context.T) (Blob, error)
@@ -449,7 +450,7 @@ type Syncgroup interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	Join(ctx *context.T, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+	Join(ctx *context.T, syncbaseName string, expectedSyncbaseBlessings string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
 
 	// Leave leaves the syncgroup. Previously synced data will continue
 	// to be available.
@@ -492,6 +493,9 @@ type Syncgroup interface {
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
 	GetMembers(ctx *context.T) (map[string]wire.SyncgroupMemberInfo, error)
+
+	// Id returns the relative syncgroup name and blessing.
+	Id() wire.Id
 }
 
 // Blob is the interface for a Blob in the store.

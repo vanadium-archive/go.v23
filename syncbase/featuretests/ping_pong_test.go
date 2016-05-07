@@ -11,10 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"v.io/v23/naming"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
-	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -58,8 +57,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 		// Setup *numGroup Syncgroups
 		for g := 0; g < *numGroup; g++ {
 			// Syncbase s0 is the creator.
-			sgSuffix := fmt.Sprintf("SG%d", g+1)
-			sgName := naming.Join(sbs[0].sbName, common.SyncbaseSuffix, sgSuffix)
+			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: sbBlessings(sbs)}
 
 			// TODO(alexfandrianto): Was unable to use the empty prefix ("c:").
 			// Observation: w0's watch isn't working with the empty prefix.
@@ -67,11 +65,11 @@ func BenchmarkPingPongPair(b *testing.B) {
 			// from the Collection ACL. If this value is synced over from the opposing
 			// peer, conflict resolution can mean that s0 loses the ability to watch.
 			syncString := fmt.Sprintf("%s:p", testCx.Name)
-			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgName, syncString, "", sbBlessings(sbs), nil))
+			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, syncString, "", sbBlessings(sbs), nil))
 
 			// The other syncbases will attempt to join the syncgroup.
 			for i := 1; i < *numSync; i++ {
-				ok(b, joinSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sgName))
+				ok(b, joinSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbs[0].sbName, sgId))
 			}
 		}
 

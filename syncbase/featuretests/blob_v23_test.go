@@ -13,10 +13,8 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
-	"v.io/x/ref/services/syncbase/common"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -28,11 +26,11 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 
 	sbs := setupSyncbases(t, sh, 2, false)
 
-	sgName := naming.Join("s0", common.SyncbaseSuffix, "SG1")
+	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
 	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgName, "c:foo", "", sbBlessings(sbs), nil))
-	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", sgName))
+	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgId, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", "s0", sgId))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, 10))
 
 	// FetchBlob first.
