@@ -596,7 +596,7 @@ func runCreateSyncgroup(ctx *context.T, serviceName, sbName, sgName, sgPrefixes,
 		MountTables: mtNames,
 	}
 
-	sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("Create SG %v failed: %v\n", sgName, err)
@@ -606,7 +606,7 @@ func runCreateSyncgroup(ctx *context.T, serviceName, sbName, sgName, sgPrefixes,
 
 func runJoinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote, sgName string) error {
 	d := dbHandle(sbNameLocal)
-	sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
 		return fmt.Errorf("Join SG %q, %q failed: %v\n", sbNameRemote, sgName, err)
@@ -616,7 +616,7 @@ func runJoinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote, sgName string) 
 
 func runSetSyncgroupSpec(ctx *context.T, serviceName, sbName, sgName, sgDesc, sgPrefixes string, sgBlessings ...string) error {
 	d := dbHandle(serviceName)
-	sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 
 	mtNames := v23.GetNamespace(ctx).Roots()
 	spec := wire.SyncgroupSpec{
@@ -634,7 +634,7 @@ func runSetSyncgroupSpec(ctx *context.T, serviceName, sbName, sgName, sgDesc, sg
 
 func runGetSyncgroupSpec(ctx *context.T, serviceName, sbName, sgName, wantDesc, wantPrefixes string, wantBlessings ...string) error {
 	d := dbHandle(serviceName)
-	sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 
 	wantPfxs := toSgPrefixes(wantPrefixes)
 	wantPerms := perms(wantBlessings...)
@@ -659,7 +659,7 @@ func runGetSyncgroupSpec(ctx *context.T, serviceName, sbName, sgName, wantDesc, 
 
 func runGetSyncgroupMembers(ctx *context.T, serviceName, sbName, sgName string, wantMembers uint64) error {
 	d := dbHandle(serviceName)
-	sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 
 	var gotMembers uint64
 	var members map[string]wire.SyncgroupMemberInfo
@@ -1134,7 +1134,7 @@ func runPopulateSyncgroupMulti(ctx *context.T, serviceName string, numApps, numD
 				MountTables: mtNames,
 			}
 
-			sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+			sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 			info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 			if err := sg.Create(ctx, spec, info); err != nil {
 				return fmt.Errorf("Create SG %q failed: %v\n", sgName, err)
@@ -1156,7 +1156,7 @@ func runJoinSyncgroupMulti(ctx *context.T, sbNameLocal, sbNameRemote string, num
 			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 
 			sgName := fmt.Sprintf("%s_%s", appName, dbName)
-			sg := d.Syncgroup(wire.Id{Name: sgName, Blessing: "blessing"})
+			sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 			info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 			if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
 				return fmt.Errorf("Join SG Multi %q failed: %v\n", sgName, err)

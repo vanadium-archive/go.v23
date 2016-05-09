@@ -120,9 +120,19 @@ func (d *database) Watch(ctx *context.T, collection wire.Id, prefix string, resu
 	return newWatchStream(cancel, call), nil
 }
 
-// Syncgroup implements Database.Syncgroup.
-func (d *database) Syncgroup(id wire.Id) Syncgroup {
+// SyncgroupForId implements Database.SyncgroupForId.
+func (d *database) SyncgroupForId(id wire.Id) Syncgroup {
 	return newSyncgroup(d.fullName, id)
+}
+
+// Syncgroup implements Database.Syncgroup.
+func (d *database) Syncgroup(ctx *context.T, name string) Syncgroup {
+	blessing, err := util.UserBlessingFromContext(ctx)
+	if err != nil {
+		// TODO(sadovsky): Return invalid Syncgroup handle.
+		panic(err)
+	}
+	return newSyncgroup(d.fullName, wire.Id{Name: name, Blessing: blessing})
 }
 
 // ListSyncgroups implements Database.ListSyncgroups.

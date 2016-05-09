@@ -186,7 +186,8 @@ pkg syncbase, type Database interface, ListCollections(*context.T) ([]wire.Id, e
 pkg syncbase, type Database interface, ListSyncgroups(*context.T) ([]wire.Id, error)
 pkg syncbase, type Database interface, PauseSync(*context.T) error
 pkg syncbase, type Database interface, ResumeSync(*context.T) error
-pkg syncbase, type Database interface, Syncgroup(wire.Id) Syncgroup
+pkg syncbase, type Database interface, Syncgroup(*context.T, string) Syncgroup
+pkg syncbase, type Database interface, SyncgroupForId(wire.Id) Syncgroup
 pkg syncbase, type Database interface, Watch(*context.T, wire.Id, string, watch.ResumeMarker) (WatchStream, error)
 pkg syncbase, type Database interface, unexported methods
 pkg syncbase, type DatabaseHandle interface { Collection, CollectionForId, Exec, FullName, GetResumeMarker, Id, ListCollections }

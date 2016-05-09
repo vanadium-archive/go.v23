@@ -155,11 +155,12 @@ type Database interface {
 	// returns just a ScanStream.
 	Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
 
-	// Syncgroup returns a handle to the syncgroup with the given Id.
-	// TODO(fredq): change this to SyncgroupForId and add a Syncgroup method that just
-	// takes a name, similar to Database.Collection/CollectionForId and
-	// Service.Database/DatabaseForId, extracting the user blessing from the context.
-	Syncgroup(id wire.Id) Syncgroup
+	// SyncgroupForId returns a handle to the syncgroup with the given Id.
+	SyncgroupForId(id wire.Id) Syncgroup
+
+	// Syncgroup returns a handle to the syncgroup with the given name and with the user
+	// blessing.
+	Syncgroup(ctx *context.T, name string) Syncgroup
 
 	// ListSyncgroups returns all Syncgroups attached to this database.
 	ListSyncgroups(ctx *context.T) ([]wire.Id, error)

@@ -245,7 +245,7 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgPrefix
 		MountTables: []string{mtName},
 	}
 
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("{%q, %v} sg.Create() failed: %v", syncbaseName, sgId, err)
@@ -255,7 +255,7 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgPrefix
 
 func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id) error {
 	d := syncbase.NewService(sbNameLocal).DatabaseForId(testDb, nil)
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
 		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", sbNameRemote, sgId, err)
@@ -265,7 +265,7 @@ func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.I
 
 func verifySyncgroupMembers(ctx *context.T, syncbaseName string, sgId wire.Id, wantMembers int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 
 	var gotMembers int
 	for i := 0; i < 8; i++ {

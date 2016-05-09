@@ -176,7 +176,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	spec.Description = "test syncgroup sg1 update"
 	spec.Perms = perms("root:client", "root:client1")
 
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
 	}
@@ -187,7 +187,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 // Helpers.
 
 func createSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgId wire.Id, spec wire.SyncgroupSpec, errID verror.ID) syncbase.Syncgroup {
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); verror.ErrorID(err) != errID {
 		tu.Fatalf(t, "Create SG %+v failed: %v", sgId, err)
@@ -196,7 +196,7 @@ func createSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgId wir
 }
 
 func joinSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sbName string, sgId wire.Id, wantErr verror.ID) syncbase.Syncgroup {
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, sbName, "", info); verror.ErrorID(err) != wantErr {
 		tu.Fatalf(t, "Join SG %v failed: %v", sgId, err)
@@ -215,7 +215,7 @@ func verifySyncgroups(t *testing.T, ctx *context.T, d syncbase.Database, wantGro
 }
 
 func verifySyncgroupInfo(t *testing.T, ctx *context.T, d syncbase.Database, sgId wire.Id, wantSpec wire.SyncgroupSpec, wantMembers int) {
-	sg := d.Syncgroup(sgId)
+	sg := d.SyncgroupForId(sgId)
 	gotSpec, _, err := sg.GetSpec(ctx)
 	if err != nil || !reflect.DeepEqual(gotSpec, wantSpec) {
 		t.Fatalf("sg.GetSpec() failed, got %v, want %v, err %v", gotSpec, wantSpec, err)
