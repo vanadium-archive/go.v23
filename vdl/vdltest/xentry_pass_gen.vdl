@@ -686,8 +686,8 @@ const xAllPass = []Entry{
 	{ false, `Full`,
 	  `XArray3_Any{int64(-123), int64(-123), int64(-123)}`,
 	  XArray3_Any{int64(-123), int64(-123), int64(-123)},
-	  `XList_XFloat32{-123, -123, -123}`,
-	  XList_XFloat32{-123, -123, -123},
+	  `XList_Any{int64(-123), int64(-123), int64(-123)}`,
+	  XList_Any{int64(-123), int64(-123), int64(-123)},
 	},
 	// Canonical
 	{ true, `Random0`,

@@ -30,20 +30,36 @@ const (
 func MimicValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 	// Handle nil first, to get rid of pesky corner cases.  After this is done,
 	// we've flattened the base value to its non-nil element.
+	baseWasAny := false
 	if base.Kind() == vdl.Any && !base.IsNil() {
+		baseWasAny = true
 		base = base.Elem()
 	}
 	if base.IsNil() {
 		return mimicNilValue(tt, base)
 	}
-	// Now we know we're dealing with a non-nil base.  Flatten tt to a non-any
-	// non-optional type.
+	// Now we know we're dealing with a non-nil non-any base.
 	if tt == vdl.AnyType {
-		// If we're asked to build a value of any type, we must build exactly the
-		// same type as the base.  It's not good enough to build a value of a
-		// compatible type; if the base itself is an any type, it must be populated
-		// with a value of the exact type.
+		// We've been asked to build a value of any type, so we build exactly the
+		// same type as the base.  There are two cases:
+		//   1) base: int64      tt: any
+		//   2) base: any(int64) tt: any
+		//
+		// For case 1 we could actually fill in tt with any type compatible with the
+		// base type, but for case 2 we must fill in tt with the exact base type;
+		// see case 4 below.  For simplicity we just always use the exact base type.
 		tt = base.Type()
+	}
+	if baseWasAny && tt != base.Type() {
+		// If base was an any value, tt must be exactly the same type as the base.
+		// There are two cases:
+		//   3) base: any(int64) tt: int64
+		//   4) base: any(int64) tt: any(int64)
+		//
+		// Note that it's not good enough to mimic a value of a compatible type tt;
+		// if we changed tt to int16 above, we wouldn't end up with a result of the
+		// right type.  Case 4 was ensured by case 2 above.
+		return nil
 	}
 	value := mimicNonNilValue(tt.NonOptional(), base.NonOptional())
 	if value == nil {

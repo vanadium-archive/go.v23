@@ -30648,9 +30648,9 @@ var vAllPass = []Entry{
 		Target: []interface{}{
 			int64(-123),
 		},
-		SourceLabel: "[]int16{-123}",
-		Source: []int16{
-			-123,
+		SourceLabel: "VList_Any{int64(-123)}",
+		Source: VList_Any{
+			int64(-123),
 		},
 	},
 	{
@@ -60466,11 +60466,11 @@ var xAllPass = []Entry{
 			int64(-123),
 			int64(-123),
 		},
-		SourceLabel: "XList_XFloat32{-123, -123, -123}",
-		Source: XList_XFloat32{
-			-123,
-			-123,
-			-123,
+		SourceLabel: "XList_Any{int64(-123), int64(-123), int64(-123)}",
+		Source: XList_Any{
+			int64(-123),
+			int64(-123),
+			int64(-123),
 		},
 	},
 	{
