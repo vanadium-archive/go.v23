@@ -50,6 +50,7 @@ pkg verror, method (*ErrorTarget) FromNil(*vdl.Type) error
 pkg verror, method (*ErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg verror, method (ActionCode) RetryAction() ActionCode
 pkg verror, method (E) Error() string
+pkg verror, method (E) VDLEqual(interface{}) bool
 pkg verror, method (E) VDLWrite(vdl.Encoder) error
 pkg verror, method (PCs) String() string
 pkg verror, method (SubErrs) String() string

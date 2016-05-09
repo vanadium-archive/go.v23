@@ -950,7 +950,7 @@ func (x *VArray3_Any) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1011,7 +1011,7 @@ func (x *VArray3_Bool) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1071,7 +1071,7 @@ func (x *VArray3_VBool) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1130,7 +1130,7 @@ func (x *VArray1_String) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1190,7 +1190,7 @@ func (x *VArray3_VString) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1248,7 +1248,7 @@ func (x *VArray2_TypeObject) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1340,7 +1340,7 @@ func (x *VArray2_VByte) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1393,7 +1393,7 @@ func (x *VArray2_VEnumAbc) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1446,7 +1446,7 @@ func (x *VArray2_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1499,7 +1499,7 @@ func (x *VArray1_VStructEmpty) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1552,7 +1552,7 @@ func (x *VArray1_VNamedError) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1605,7 +1605,7 @@ func (x *VArray2_Error) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1664,7 +1664,7 @@ func (x *VArray1_Uint32) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1731,7 +1731,7 @@ func (x *VArray3_Uint64) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1797,7 +1797,7 @@ func (x *VArray3_Int64) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1866,7 +1866,7 @@ func (x *VArray1_OptVStructEmpty) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -1943,7 +1943,7 @@ func (x *VArray3_OptVNamedError) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12395,7 +12395,7 @@ func (x *VArray1_VArray3_Int64) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12453,7 +12453,7 @@ func (x *VArray1_VList_Byte) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12532,7 +12532,7 @@ func (x *VArray1_Set_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12658,7 +12658,7 @@ func (x *VArray2_Map_Byte_Byte) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12770,7 +12770,7 @@ func (x *VArray2_VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12805,9 +12805,6 @@ func (x VArray3_VUnionDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case x[i] == nil:
 			// Write the zero value of the union type.
@@ -12839,7 +12836,7 @@ func (x *VArray3_VUnionDepth1_All) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -12901,7 +12898,7 @@ func (x *VArray3_OptVStructDepth1_VFloat32) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -13351,9 +13348,6 @@ func (x VList_VUnionDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case x[i] == nil:
 			// Write the zero value of the union type.
@@ -13634,9 +13628,6 @@ func (x VSet_VUnionDepth1_VInt8) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -13855,9 +13846,6 @@ func (x VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64) VDLWrite(enc vdl.Encoder
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -13868,9 +13856,6 @@ func (x VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64) VDLWrite(enc vdl.Encoder
 			if err := key.VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := elem.VDLWrite(enc); err != nil {
-			return err
 		}
 		switch {
 		case elem == nil:
@@ -15726,9 +15711,6 @@ func (x VUnionDepth2_AllF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("F10"); err != nil {
 		return err
 	}
-	if err := x.Value.VDLWrite(enc); err != nil {
-		return err
-	}
 	switch {
 	case x.Value == nil:
 		// Write the zero value of the union type.
@@ -15751,9 +15733,6 @@ func (x VUnionDepth2_AllF11) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if err := enc.NextField("F11"); err != nil {
-		return err
-	}
-	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
 	switch {
@@ -16898,9 +16877,6 @@ func (x VUnionDepth2_VUnionDepth1_AllF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("F10"); err != nil {
 		return err
 	}
-	if err := x.Value.VDLWrite(enc); err != nil {
-		return err
-	}
 	switch {
 	case x.Value == nil:
 		// Write the zero value of the union type.
@@ -16991,9 +16967,6 @@ func (x VUnionDepth2_VUnionDepth1_VUint32F11) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if err := enc.NextField("F11"); err != nil {
-		return err
-	}
-	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
 	switch {
@@ -17308,7 +17281,7 @@ func (x *VArray1_VArray1_VList_Byte) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17387,7 +17360,7 @@ func (x *VArray2_List_VMap_VByte_VByte) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17471,9 +17444,6 @@ func __VDLWriteAnon_set_10(enc vdl.Encoder, x map[VUnionDepth1_VNamedError]struc
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -17505,7 +17475,7 @@ func (x *VArray2_Set_VUnionDepth1_VNamedError) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17593,9 +17563,6 @@ func __VDLWriteAnon_map_11(enc vdl.Encoder, x map[VUnionDepth1_Float64]VUnionDep
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -17606,9 +17573,6 @@ func __VDLWriteAnon_map_11(enc vdl.Encoder, x map[VUnionDepth1_Float64]VUnionDep
 			if err := key.VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := elem.VDLWrite(enc); err != nil {
-			return err
 		}
 		switch {
 		case elem == nil:
@@ -17641,7 +17605,7 @@ func (x *VArray3_Map_VUnionDepth1_Float64_VUnionDepth1_Float64) VDLRead(dec vdl.
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17737,7 +17701,7 @@ func (x *VArray2_VStructDepth2_All) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17772,9 +17736,6 @@ func (x VArray2_VUnionDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case x[i] == nil:
 			// Write the zero value of the union type.
@@ -17806,7 +17767,7 @@ func (x *VArray2_VUnionDepth2_All) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -17868,7 +17829,7 @@ func (x *VArray3_OptVStructDepth2_Set_Float64) VDLRead(dec vdl.Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *x)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
 			return dec.FinishValue()
 		}
@@ -18216,9 +18177,6 @@ func (x VList_VUnionDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case x[i] == nil:
 			// Write the zero value of the union type.
@@ -18499,9 +18457,6 @@ func (x VSet_VUnionDepth2_VArray1_String) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -18720,9 +18675,6 @@ func (x VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte) VDLWrite(enc
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := key.VDLWrite(enc); err != nil {
-			return err
-		}
 		switch {
 		case key == nil:
 			// Write the zero value of the union type.
@@ -18733,9 +18685,6 @@ func (x VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte) VDLWrite(enc
 			if err := key.VDLWrite(enc); err != nil {
 				return err
 			}
-		}
-		if err := elem.VDLWrite(enc); err != nil {
-			return err
 		}
 		switch {
 		case elem == nil:
@@ -18911,9 +18860,6 @@ func __VDLWriteAnon_list_12(enc vdl.Encoder, x []VUnionDepth1_All) error {
 	}
 	for i := 0; i < len(x); i++ {
 		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := x[i].VDLWrite(enc); err != nil {
 			return err
 		}
 		switch {
@@ -19705,9 +19651,6 @@ func (x VUnionDepth3_AllF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.NextField("F5"); err != nil {
 		return err
 	}
-	if err := x.Value.VDLWrite(enc); err != nil {
-		return err
-	}
 	switch {
 	case x.Value == nil:
 		// Write the zero value of the union type.
@@ -20401,9 +20344,6 @@ func (x VUnionDepth3_VUnionDepth2_AllF5) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if err := enc.NextField("F5"); err != nil {
-		return err
-	}
-	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
 	switch {

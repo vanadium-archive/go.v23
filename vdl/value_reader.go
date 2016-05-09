@@ -180,7 +180,7 @@ func (vv *Value) readArray(dec Decoder) error {
 		case err != nil:
 			return err
 		case done != (index >= vv.Type().Len()):
-			return fmt.Errorf("array len mismatch, got %d, want %v", index, vv.Type())
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %v", done, index, vv.Type().Len(), vv.Type())
 		case done:
 			return nil
 		}

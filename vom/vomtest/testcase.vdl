@@ -8,8 +8,8 @@ package vomtest
 type TestCase struct {
 	Name       string // Name of the testcase
 	Value      any    // Value to test
+	Version    byte   // Version of encoding.
 	Hex        string // Hex pattern representing golden vom encoding
-	HexVersion string // Portion of Hex representing the version.
 	HexType    string // Portion of Hex representing the type message(s).
 	HexValue   string // Portion of Hex representing the value message.
 }

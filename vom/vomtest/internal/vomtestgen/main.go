@@ -94,6 +94,7 @@ package vomtest
 }
 
 func writeFileVomTest(fileName, constName string, entries []vdltest.EntryValue) {
+	const version vom.Version = vom.Version81
 	// We skip all random entries for now, since they may contain multiple set and
 	// map elements, which would cause non-deterministic output.
 	//
@@ -121,15 +122,15 @@ func writeFileVomTest(fileName, constName string, entries []vdltest.EntryValue) 
 	writef(file, "\nconst %[1]s = []TestCase {\n", constName)
 	for _, e := range entries {
 		source := vdlgen.TypedConst(e.Source, "v.io/v23/vom/vomtest", imports)
-		hexVersion, hexType, hexValue, vomDump := toVomHex(vom.Version81, e.Source)
+		hexVersion, hexType, hexValue, vomDump := toVomHex(version, e.Source)
 		writef(file, `%[1]s
 	{
 		%#[2]q,
 		%[3]s,
-		%[4]q,
+		0x%[4]x,
 		%[5]q, %[6]q, %[7]q,
 	},
-`, vomDump, e.Label+" "+source, source, hexVersion+hexType+hexValue, hexVersion, hexType, hexValue)
+`, vomDump, e.Label+" "+source, source, byte(version), hexVersion+hexType+hexValue, hexType, hexValue)
 	}
 	writef(file, "}\n")
 }

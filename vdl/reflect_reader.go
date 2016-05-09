@@ -326,7 +326,7 @@ func readArray(dec Decoder, rv reflect.Value, tt *Type) error {
 		case err != nil:
 			return err
 		case done != (index >= rv.Len()):
-			return fmt.Errorf("array len mismatch, got %d, want %v", index, rt)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %v", done, index, rt.Len(), rt)
 		case done:
 			return nil
 		}

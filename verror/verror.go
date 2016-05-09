@@ -159,6 +159,26 @@ func (E) __VDLReflect(struct {
 }) {
 }
 
+func (x E) VDLEqual(yiface interface{}) bool {
+	y := yiface.(E)
+	switch {
+	case x.ID != y.ID:
+		return false
+	case x.Action != y.Action:
+		return false
+	case x.Msg != y.Msg:
+		return false
+	case len(x.ParamList) != len(y.ParamList):
+		return false
+	}
+	for i := range x.ParamList {
+		if !vdl.DeepEqual(x.ParamList[i], y.ParamList[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 func (x E) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf(vdl.WireError{})); err != nil {
 		return err

@@ -22,6 +22,8 @@ type Equaler interface {
 	VDLEqual(v interface{}) bool
 }
 
+var rtEqualer = reflect.TypeOf((*Equaler)(nil)).Elem()
+
 // DeepEqual is like reflect.DeepEqual, with the following differences:
 //   1. If a value is encountered that implements Equaler, we will use that for
 //      the comparison.
@@ -58,8 +60,11 @@ func deepEqual(a, b reflect.Value, pathA, pathB []unsafe.Pointer) bool {
 		//
 		// TODO(toddw): Verify the logic below actually allows us to find and call
 		// the VDLEqual method, if a is an unexported struct field.
-		if rvEqual := a.MethodByName("VDLEqual"); rvEqual.IsValid() {
-			return rvEqual.Call([]reflect.Value{b})[0].Bool()
+		if a.Type().Implements(rtEqualer) && (a.Kind() != reflect.Ptr || !a.Type().Elem().Implements(rtEqualer)) {
+			// Note: We check that the child type is not an Equaler because
+			// the receiver of the VDLEqual method must be the same as the
+			// argument type.
+			return a.MethodByName("VDLEqual").Call([]reflect.Value{b})[0].Bool()
 		}
 	}
 

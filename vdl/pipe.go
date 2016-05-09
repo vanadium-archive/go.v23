@@ -315,8 +315,11 @@ func (d *pipeDecoder) StartValue() error {
 func (d *pipeDecoder) FinishValue() error {
 	d.Enc.Mu.Lock()
 	defer d.Enc.Mu.Unlock()
-	if d.Enc.State != pipeStateDecoder {
+	switch {
+	case d.Enc.State == pipeStateEncoder:
 		return d.Enc.closeLocked(errInvalidPipeState)
+	case d.Enc.State == pipeStateClosed:
+		return d.Enc.Err
 	}
 	if d.Enc.DecHandlingBytes {
 		return d.Enc.Err
@@ -692,7 +695,7 @@ func bytesVDLRead(fixedlen int, b *[]byte, d Decoder) error {
 		case err != nil:
 			return err
 		case fixedlen >= 0 && done != (index >= fixedlen):
-			return fmt.Errorf("array len mismatch, got %d, want %T", index, *b)
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T", done, index, len(*b), *b)
 		case done:
 			return nil
 		}

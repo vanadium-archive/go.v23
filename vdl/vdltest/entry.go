@@ -14,6 +14,11 @@ type EntryValue struct {
 	Source *vdl.Value
 }
 
+// Name returns the name of the EntryValue.
+func (e EntryValue) Name() string {
+	return e.Label + " Target(" + e.Target.String() + ") Source(" + e.Source.String() + ")"
+}
+
 // ToEntryValue converts the Entry e into an EntryValue.
 func ToEntryValue(e Entry) EntryValue {
 	return EntryValue{

@@ -282,6 +282,7 @@ pkg vdltest, method (Entry) Name() string
 pkg vdltest, method (Entry) VDLIsZero() bool
 pkg vdltest, method (Entry) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (EntryValue) IsCanonical() bool
+pkg vdltest, method (EntryValue) Name() string
 pkg vdltest, method (GenMode) String() string
 pkg vdltest, method (VArray1_Byte) VDLIsZero() bool
 pkg vdltest, method (VArray1_Byte) VDLWrite(vdl.Encoder) error
