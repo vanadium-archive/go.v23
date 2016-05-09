@@ -32,5 +32,7 @@ The global flags are:
    Dump timing information to stderr before exiting the program.
  -vdltest=
    Filter vdltest.All to only return entries that contain the given substring.
+   If the value starts with "!", only returns entries that don't contain the
+   given substring.
 */
 package main

@@ -72,6 +72,7 @@ pkg vdl, func ValueFromReflect(reflect.Value) (*Value, error)
 pkg vdl, func ValueOf(interface{}) *Value
 pkg vdl, func ValueTarget(*Value) (Target, error)
 pkg vdl, func WireRetryCodeFromString(string) (WireRetryCode, error)
+pkg vdl, func WrapInUnionInterface(reflect.Value) reflect.Value
 pkg vdl, func Write(Encoder, interface{}) error
 pkg vdl, func WriteReflect(Encoder, reflect.Value) error
 pkg vdl, func ZeroValue(*Type) *Value

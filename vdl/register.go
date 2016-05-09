@@ -120,6 +120,24 @@ func reflectInfoFromName(name string) *reflectInfo {
 	return ri
 }
 
+// WrapInUnionInterface returns a value of the union interface type that holds
+// the union value rv.  Returns an invalid reflect.Value if rv isn't a union
+// value.  Returns rv unchanged if its type is already the interface type.
+func WrapInUnionInterface(rv reflect.Value) reflect.Value {
+	ri, _, err := deriveReflectInfo(rv.Type())
+	switch {
+	case err != nil || len(ri.UnionFields) == 0:
+		return reflect.Value{} // rv isn't a union
+	case ri.Type == rv.Type():
+		return rv // rv's type is already the interface type
+	}
+	// Here ri.Type is the union interface type, while rv is a concrete struct
+	// type.  Wrap rv in a value of the interface type.
+	rvIface := reflect.New(ri.Type).Elem()
+	rvIface.Set(rv)
+	return rvIface
+}
+
 // reflectInfo holds the reflection information for a type.  All fields are
 // populated via reflection over the Type.
 //
@@ -377,9 +395,6 @@ func describeUnion(unionReflect, rt reflect.Type, ri *reflectInfo) error {
 // named types in our registry, and build the unnamed types that we can via the
 // Go reflect package.  Returns nil for types that can't be manufactured.
 func TypeToReflect(t *Type) reflect.Type {
-	// TODO(toddw): This is broken, since it doesn't handle registered native
-	// error types correctly.  But it's hard to fix with the old convert.go logic,
-	// so we'll wait until we get rid of that code completely.
 	if t.Name() != "" {
 		// Named types cannot be manufactured via Go reflect, so we lookup in our
 		// registry instead.
@@ -418,60 +433,6 @@ func TypeToReflect(t *Type) reflect.Type {
 		return nil
 	case Map:
 		if key, elem := TypeToReflect(t.Key()), TypeToReflect(t.Elem()); key != nil && elem != nil {
-			return reflect.MapOf(key, elem)
-		}
-		return nil
-	case Struct:
-		if t.NumField() == 0 {
-			return rtUnnamedEmptyStruct
-		}
-		return nil
-	default:
-		return rtFromKind[t.Kind()]
-	}
-}
-
-// TODO(toddw): Replace TypeToReflect with typeToReflectFixed after the old
-// conversion logic is removed.
-func typeToReflectFixed(t *Type) reflect.Type {
-	if t.Name() != "" {
-		// Named types cannot be manufactured via Go reflect, so we lookup in our
-		// registry instead.
-		if ri := reflectInfoFromName(t.Name()); ri != nil {
-			if ni := nativeInfoFromWire(ri.Type); ni != nil {
-				return ni.NativeType
-			}
-			return ri.Type
-		}
-		return nil
-	}
-	// We can make some unnamed types via Go reflect.  Return nil otherwise.
-	switch t.Kind() {
-	case Any, Enum, Union:
-		// We can't make unnamed versions of any of these types.
-		return nil
-	case Optional:
-		if elem := typeToReflectFixed(t.Elem()); elem != nil {
-			return reflect.PtrTo(elem)
-		}
-		return nil
-	case Array:
-		if elem := typeToReflectFixed(t.Elem()); elem != nil {
-			return reflect.ArrayOf(t.Len(), elem)
-		}
-		return nil
-	case List:
-		if elem := typeToReflectFixed(t.Elem()); elem != nil {
-			return reflect.SliceOf(elem)
-		}
-		return nil
-	case Set:
-		if key := typeToReflectFixed(t.Key()); key != nil {
-			return reflect.MapOf(key, rtUnnamedEmptyStruct)
-		}
-		return nil
-	case Map:
-		if key, elem := typeToReflectFixed(t.Key()), typeToReflectFixed(t.Elem()); key != nil && elem != nil {
 			return reflect.MapOf(key, elem)
 		}
 		return nil

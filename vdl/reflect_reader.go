@@ -197,10 +197,7 @@ func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	}
 	// Lookup the reflect type based on the decoder type, and create a new value
 	// to decode into.
-	//
-	// TODO(toddw): Replace typeToReflectFixed with TypeToReflect, after we've
-	// fixed it to treat the error type correctly.
-	rtDecode := typeToReflectFixed(dec.Type())
+	rtDecode := TypeToReflect(dec.Type())
 	if rtDecode == nil {
 		return fmt.Errorf("vdl: %v not registered, call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
 	}

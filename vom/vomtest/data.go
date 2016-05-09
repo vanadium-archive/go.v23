@@ -14,17 +14,24 @@ import (
 // The following causes data files to be generated when "go generate" is run.
 //go:generate ./gen.sh
 
-var flagContains string
+var flagVOMTest string
 
 func init() {
-	flag.StringVar(&flagContains, "vomtest", "", "Filter vomtest.Data to only return entries that contain the given substring.")
+	flag.StringVar(&flagVOMTest, "vomtest", "", `Filter vomtest.Data to only return entries that contain the given substring.  If the value starts with "!", only returns entries that don't contain the given substring.`)
+}
+
+func filter() (bool, string) {
+	if strings.HasPrefix(flagVOMTest, "!") {
+		return false, strings.TrimPrefix(flagVOMTest, "!")
+	}
+	return true, flagVOMTest
 }
 
 // Data returns all vom test cases.
 func Data() []TestCase {
 	var result []TestCase
 	for _, t := range data81 {
-		if strings.Contains(t.Name, flagContains) {
+		if want, substr := filter(); strings.Contains(t.Name, substr) == want {
 			result = append(result, t)
 		}
 	}
