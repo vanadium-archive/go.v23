@@ -54,7 +54,7 @@ package vdltest
 // Random:     Target is random value.
 // Zero:       Target is zero value.
 
-const vAllPass = []Entry{
+const vAllPass = []vdlEntry{
 	// Canonical
 	{ true, `Zero`, `any(nil)`, any(nil), `any(nil)`, any(nil) },
 	// Canonical

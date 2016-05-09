@@ -33,6 +33,11 @@ func DeepEqual(a, b interface{}) bool {
 	return deepEqual(reflect.ValueOf(a), reflect.ValueOf(b), nil, nil)
 }
 
+// DeepEqualReflect is the same as DeepEqual, but takes reflect.Value arguments.
+func DeepEqualReflect(a, b reflect.Value) bool {
+	return deepEqual(a, b, nil, nil)
+}
+
 func findPathIndex(path []unsafe.Pointer, target unsafe.Pointer) int {
 	for index, item := range path {
 		if item == target {

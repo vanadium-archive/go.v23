@@ -169,7 +169,7 @@ func writeEntryFile(fileName, constName string, entries []vdltest.EntryValue) {
 	comment := textutil.PrefixLineWriter(file, "// ")
 	panicOnError(vdltest.PrintEntryStats(comment, entries...))
 	panicOnError(comment.Flush())
-	writef(file, "\nconst %[1]s = []Entry{\n", constName)
+	writef(file, "\nconst %[1]s = []vdlEntry{\n", constName)
 	for _, e := range entries {
 		if e.IsCanonical() {
 			writef(file, "\t// Canonical\n")

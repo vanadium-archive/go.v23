@@ -52,11 +52,10 @@ var (
 )
 
 func runGen(_ *cmdline.Env, _ []string) error {
-	entries := vdltest.AllPassFunc(func(e vdltest.Entry) bool {
+	allCanonical := vdltest.AllPassFunc(func(e vdltest.Entry) bool {
 		return e.IsCanonical
 	})
-	writeFileVomTest(flagData81, "data81", vdltest.ToEntryValues(entries))
-
+	writeFileVomTest(flagData81, "data81", vdltest.ToEntryValues(allCanonical))
 	return nil
 }
 

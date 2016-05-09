@@ -18,15 +18,14 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 //////////////////////////////////////////////////
 // Type definitions
 
-// Entry represents a test entry, which contains a target and source value.
-// Each test tries to convert the source value to the type of the target value.
-// This conversion will either pass or fail; AllPass returns passing entries,
-// while AllFail returns failing entries.
+// vdlEntry represents a test entry, which contains a target and source value.
+// Each test converts the source value to the type of the target value, and
+// either passes or fails.
 //
 // An entry may either be canonical or not.  For a given canonical entry C,
 // C.Target==C.Source always holds, and in addition, C.Source is the canonical
 // representation of the value.
-type Entry struct {
+type vdlEntry struct {
 	IsCanonical bool
 	Label       string      // Label describes the entry, e.g. Full, Random...
 	TargetLabel string      // TargetLabel describes the Target value
@@ -35,17 +34,17 @@ type Entry struct {
 	Source      interface{} // Source value for conversion test
 }
 
-func (Entry) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vdl/vdltest.Entry"`
+func (vdlEntry) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.vdlEntry"`
 }) {
 }
 
-func (x Entry) VDLIsZero() bool {
-	return x == Entry{}
+func (x vdlEntry) VDLIsZero() bool {
+	return x == vdlEntry{}
 }
 
-func (x Entry) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Entry)(nil)).Elem()); err != nil {
+func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*vdlEntry)(nil)).Elem()); err != nil {
 		return err
 	}
 	if x.IsCanonical {
@@ -126,8 +125,8 @@ func (x Entry) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func (x *Entry) VDLRead(dec vdl.Decoder) error {
-	*x = Entry{}
+func (x *vdlEntry) VDLRead(dec vdl.Decoder) error {
+	*x = vdlEntry{}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -24075,8 +24074,8 @@ func (x XUnionDepth3_OptXStructDepth2_Set_Float64F6) __VDLReflect(__XUnionDepth3
 //////////////////////////////////////////////////
 // Const definitions
 
-var vAllFail = []Entry(nil)
-var vAllPass = []Entry{
+var vAllFail = []vdlEntry(nil)
+var vAllPass = []vdlEntry{
 	{
 		IsCanonical: true,
 		Label:       "Zero",
@@ -57702,8 +57701,8 @@ var vAllPass = []Entry{
 		},
 	},
 }
-var xAllFail = []Entry(nil)
-var xAllPass = []Entry{
+var xAllFail = []vdlEntry(nil)
+var xAllPass = []vdlEntry{
 	{
 		IsCanonical: true,
 		Label:       "Zero",
@@ -87306,7 +87305,7 @@ func __VDLInit() struct{} {
 	__VDLInitCalled = true
 
 	// Register types.
-	vdl.Register((*Entry)(nil))
+	vdl.Register((*vdlEntry)(nil))
 	vdl.Register((*VBool)(nil))
 	vdl.Register((*VString)(nil))
 	vdl.Register((*VByte)(nil))

@@ -14,14 +14,14 @@ import (
 )
 
 func TestValueReadNew(t *testing.T) {
-	for _, test := range vdltest.ToEntryValues(vdltest.AllPass()) {
-		out := vdl.ZeroValue(test.Target.Type())
-		if err := out.VDLRead(test.Source.Decoder()); err != nil {
-			t.Errorf("%s: error in ValueRead: %v", test.Name, err)
+	for _, entry := range vdltest.ToEntryValues(vdltest.AllPass()) {
+		out := vdl.ZeroValue(entry.Target.Type())
+		if err := out.VDLRead(entry.Source.Decoder()); err != nil {
+			t.Errorf("%s: error in ValueRead: %v", entry.Name(), err)
 			continue
 		}
-		if !vdl.EqualValue(test.Target, out) {
-			t.Errorf("%s: got %v, want %v", test.Name, out, test.Target)
+		if !vdl.EqualValue(entry.Target, out) {
+			t.Errorf("%s: got %v, want %v", entry.Name(), out, entry.Target)
 		}
 	}
 }

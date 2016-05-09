@@ -89,7 +89,6 @@ pkg vdltest, func VEnumAbcFromString(string) (VEnumAbc, error)
 pkg vdltest, func VEnumBcdFromString(string) (VEnumBcd, error)
 pkg vdltest, func XEnumAbcFromString(string) (XEnumAbc, error)
 pkg vdltest, func XEnumBcdFromString(string) (XEnumBcd, error)
-pkg vdltest, method (*Entry) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*EntryGenerator) GenAllFail([]*vdl.Type) []EntryValue
 pkg vdltest, method (*EntryGenerator) GenAllPass([]*vdl.Type) []EntryValue
 pkg vdltest, method (*EntryGenerator) GenFail(*vdl.Type) []EntryValue
@@ -279,8 +278,6 @@ pkg vdltest, method (*ValueGenerator) RandSeed(int64)
 pkg vdltest, method (*XEnumAbc) Set(string) error
 pkg vdltest, method (*XEnumBcd) Set(string) error
 pkg vdltest, method (Entry) Name() string
-pkg vdltest, method (Entry) VDLIsZero() bool
-pkg vdltest, method (Entry) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (EntryValue) IsCanonical() bool
 pkg vdltest, method (EntryValue) Name() string
 pkg vdltest, method (GenMode) String() string
@@ -1505,9 +1502,9 @@ pkg vdltest, method (XUnionDepth3_XUnionDepth2_AllF5) Name() string
 pkg vdltest, type Entry struct
 pkg vdltest, type Entry struct, IsCanonical bool
 pkg vdltest, type Entry struct, Label string
-pkg vdltest, type Entry struct, Source interface{}
+pkg vdltest, type Entry struct, Source reflect.Value
 pkg vdltest, type Entry struct, SourceLabel string
-pkg vdltest, type Entry struct, Target interface{}
+pkg vdltest, type Entry struct, Target reflect.Value
 pkg vdltest, type Entry struct, TargetLabel string
 pkg vdltest, type EntryGenerator struct
 pkg vdltest, type EntryGenerator struct, AllMaxMinTargets bool

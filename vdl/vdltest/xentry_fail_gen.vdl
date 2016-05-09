@@ -54,5 +54,5 @@ package vdltest
 // Random:     Target is random value.
 // Zero:       Target is zero value.
 
-const xAllFail = []Entry{
+const xAllFail = []vdlEntry{
 }

@@ -7,6 +7,7 @@ package vdltest
 
 import (
 	"flag"
+	"reflect"
 	"strings"
 )
 
@@ -19,14 +20,8 @@ func init() {
 	flag.StringVar(&flagContains, "vdltest", "", "Filter vdltest.All to only return entries that contain the given substring.")
 }
 
-// Name returns the name of the entry, which combines the entry, target and
-// source labels.
-func (e Entry) Name() string {
-	return e.Label + " Target(" + e.TargetLabel + ") Source(" + e.SourceLabel + ")"
-}
-
 // The following vars are defined in generated files:
-//   var vAllPass, vAllFail []Entry
+//   var vAllPass, vAllFail, xAllPass, xAllFail []vdlEntry
 
 // AllPass returns all entries where the source value, when converted to the
 // type of the target value, results in exactly the target value.
@@ -34,7 +29,7 @@ func (e Entry) Name() string {
 // The -vdltest flag may be used to filter the returned entries.
 func AllPass() []Entry {
 	var result []Entry
-	for _, e := range vAllPass {
+	for _, e := range fromVDLEntries(vAllPass, xAllPass) {
 		if strings.Contains(e.Name(), flagContains) {
 			result = append(result, e)
 		}
@@ -65,7 +60,7 @@ func AllPassFunc(fn func(e Entry) bool) []Entry {
 // The -vdltest flag may be used to filter the returned entries.
 func AllFail() []Entry {
 	var result []Entry
-	for _, e := range vAllFail {
+	for _, e := range fromVDLEntries(vAllFail, xAllFail) {
 		if strings.Contains(e.Name(), flagContains) {
 			result = append(result, e)
 		}
@@ -85,9 +80,31 @@ func AllFailFunc(fn func(e Entry) bool) []Entry {
 	return result
 }
 
-// TODO: Native types
-// TODO: Struct drop/ignore fields
-// TODO: Invalid conversions
+func fromVDLEntries(groups ...[]vdlEntry) []Entry {
+	var result []Entry
+	for _, entries := range groups {
+		for _, e := range entries {
+			entry := fromVDLEntry(e)
+			result = append(result, entry)
+			// TODO(toddw): add additional entries and pointer tests.
+			/*
+				switch ttTarget := vdl.TypeOf(e.Target); {
+				case ttTarget.Kind() == vdl.Union:
+				case ttTarget == vdl.ErrorType:
+				}
+			*/
+		}
+	}
+	return result
+}
 
-// TODO: vomtests take each entry, converts into vdl.Value, writes vomtest.vdl
-// with dump info and bytes.
+func fromVDLEntry(e vdlEntry) Entry {
+	return Entry{
+		IsCanonical: e.IsCanonical,
+		Label:       e.Label,
+		TargetLabel: e.TargetLabel,
+		Target:      reflect.ValueOf(e.Target),
+		SourceLabel: e.SourceLabel,
+		Source:      reflect.ValueOf(e.Source),
+	}
+}

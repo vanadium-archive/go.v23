@@ -35,6 +35,7 @@ pkg vdl, func Compatible2(*Type, *Type) bool
 pkg vdl, func Convert(interface{}, interface{}) error
 pkg vdl, func CopyValue(*Value) *Value
 pkg vdl, func DeepEqual(interface{}, interface{}) bool
+pkg vdl, func DeepEqualReflect(reflect.Value, reflect.Value) bool
 pkg vdl, func EnumType(...string) *Type
 pkg vdl, func EnumValue(*Type, int) *Value
 pkg vdl, func EqualValue(*Value, *Value) bool

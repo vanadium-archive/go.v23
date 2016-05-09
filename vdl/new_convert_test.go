@@ -14,31 +14,22 @@ import (
 	"v.io/v23/vdl/vdltest"
 )
 
-func zeroTargetPtr(e vdltest.Entry) interface{} {
-	if e.Target != nil {
-		return reflect.New(reflect.TypeOf(e.Target)).Interface()
-	}
-	var x interface{}
-	return &x
-}
-
 func TestConvertNew(t *testing.T) {
 	for _, entry := range vdltest.AllPass() {
-		targetPtr := zeroTargetPtr(entry)
-		if err := vdl.Convert(targetPtr, entry.Source); err != nil {
+		rvTargetPtr := reflect.New(entry.Target.Type())
+		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err != nil {
 			t.Errorf("%s: error %v", entry.Name(), err)
 		}
-		target := reflect.ValueOf(targetPtr).Elem().Interface()
-		if !vdl.DeepEqual(target, entry.Target) {
-			t.Errorf("%s: got %T %#v, want %T %#v", entry.Name(), target, target, entry.Target, entry.Target)
+		if !vdl.DeepEqualReflect(rvTargetPtr.Elem(), entry.Target) {
+			t.Errorf("%[1]s: got %[2]T %#[2]v, want %[3]T %#[3]v", entry.Name(), rvTargetPtr.Elem(), entry.Target)
 		}
 	}
 }
 
 func TestConvertFailNew(t *testing.T) {
 	for _, entry := range vdltest.AllFail() {
-		targetPtr := zeroTargetPtr(entry)
-		if err := vdl.Convert(targetPtr, entry.Source); err == nil {
+		rvTargetPtr := reflect.New(entry.Target.Type())
+		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err == nil {
 			t.Errorf("%s: expected failure", entry.Name())
 		}
 	}
