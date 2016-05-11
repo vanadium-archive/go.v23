@@ -167,6 +167,10 @@ func ValueFromReflect(rv reflect.Value) (*Value, error) {
 		}
 		return result, nil
 	}
+	if !rv.IsValid() {
+		// TODO(bprosnitz) Is this the behavior we want?
+		return ZeroValue(AnyType), nil
+	}
 	var result *Value
 	err := convertPipe(&result, rv.Interface())
 	return result, err

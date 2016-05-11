@@ -30,6 +30,14 @@ func VersionedEncode(version Version, v interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+func VersionedXEncode(version Version, v interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	if err := NewVersionedXEncoder(version, &buf).Encode(v); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 // Decode reads the value from the given data, and stores it in value v.  The
 // semantics of value decoding are described by Decoder.Decode.
 //
@@ -65,6 +73,51 @@ func Decode(data []byte, v interface{}) error {
 	decoder := &Decoder{
 		buf:     buf,
 		typeDec: typeDec,
+	}
+	if err := decoder.Decode(v); err != nil {
+		return err
+	}
+	// Populate the typeDecoder cache for future re-use.
+	if cacheMiss {
+		singleShotTypeDecoderCache.insert(key, typeDec)
+	}
+	return nil
+}
+
+func XDecode(data []byte, v interface{}) error {
+	// The implementation below corresponds (logically) to the following:
+	//   return NewDecoder(bytes.NewReader(data)).Decode(valptr)
+	//
+	// However decoding type messages is expensive, so we cache typeDecoders to
+	// skip the decoding in the common case.
+	key, err := computeTypeDecoderCacheKey(data)
+	if err != nil {
+		return err
+	}
+	var buf *decbuf
+	typeDec := singleShotTypeDecoderCache.lookup(key)
+	cacheMiss := false
+	if typeDec == nil {
+		// Cache miss; start decoding at the beginning of all type messages with a
+		// new TypeDecoder.
+		cacheMiss = true
+		buf = newDecbufFromBytes(data)
+		typeDec = newTypeDecoderInternal(buf)
+	} else {
+		version := Version(data[0])
+		data = data[len(key):] // skip the already-read types
+		buf = newDecbufFromBytes(data)
+		buf.version = version
+		typeDec = newDerivedTypeDecoderInternal(buf, typeDec)
+	}
+	// Decode the value message.
+	decoder := &XDecoder{
+		xDecoder{
+			old: &Decoder{
+				buf:     buf,
+				typeDec: typeDec,
+			},
+		},
 	}
 	if err := decoder.Decode(v); err != nil {
 		return err

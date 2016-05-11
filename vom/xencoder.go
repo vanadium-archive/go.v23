@@ -144,7 +144,7 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 
 	nextValueIsAny := e.top().nextValueIsAny()
 	var anyRef anyStartRef
-	if nextValueIsAny {
+	if nextValueIsAny && tt.Kind() == vdl.Optional {
 		tid, err := e.typeEnc.encode(tt)
 		if err != nil {
 			return err
@@ -154,7 +154,7 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 		binaryEncodeUint(e.buf, uint64(anyRef.index))
 	}
 	binaryEncodeControl(e.buf, WireCtrlNil)
-	if nextValueIsAny {
+	if nextValueIsAny && tt.Kind() == vdl.Optional {
 		e.anyLens.FinishAny(anyRef, e.buf.Len())
 	}
 

@@ -296,7 +296,7 @@ func (d *pipeDecoder) StartValue() error {
 	d.Enc.Mu.Lock()
 	defer d.Enc.Mu.Unlock()
 	if d.Enc.DecStarted && d.Enc.State != pipeStateDecoder {
-		return d.Close(errInvalidPipeState)
+		return d.Enc.closeLocked(errInvalidPipeState)
 	}
 	if d.IgnoringNextStartValue {
 		d.IgnoringNextStartValue = false
@@ -310,10 +310,10 @@ func (d *pipeDecoder) StartValue() error {
 	}
 	top := d.decTop()
 	if top == nil {
-		return d.Close(errEmptyPipeStack)
+		return d.Enc.closeLocked(errEmptyPipeStack)
 	}
 	if top.NextOp != pipeStartDec {
-		return d.Close(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeStartDec, top.NextOp))
+		return d.Enc.closeLocked(fmt.Errorf("vdl: pipe expected state %v, but got %v", pipeStartDec, top.NextOp))
 	}
 	top.NextOp = top.NextOp.Next()
 	return d.Enc.Err
@@ -653,7 +653,7 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
-			return 0, d.Close(fmt.Errorf(errFmt, "float", bitlen, x))
+			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, "float", bitlen, x))
 		}
 		return x, d.Enc.Err
 	}
@@ -672,10 +672,13 @@ func (e *pipeEncoder) EncodeBytes(v []byte) error {
 
 func (d *pipeDecoder) DecodeBytes(fixedLen int, b *[]byte) error {
 	if !d.Enc.IsBytes {
-		return d.Close(bytesVDLRead(fixedLen, b, d))
+		if err := bytesVDLRead(fixedLen, b, d); err != nil {
+			return d.Enc.closeLocked(err)
+		}
+		return nil
 	}
 	if fixedLen >= 0 && fixedLen != len(d.Enc.ArgBytes) {
-		return d.Close(fmt.Errorf("invalid byte len: got %v, want %v", len(d.Enc.ArgBytes), fixedLen))
+		return d.Enc.closeLocked(fmt.Errorf("invalid byte len: got %v, want %v", len(d.Enc.ArgBytes), fixedLen))
 	}
 	if len(*b) < len(d.Enc.ArgBytes) {
 		*b = make([]byte, len(d.Enc.ArgBytes))
