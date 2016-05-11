@@ -18,10 +18,10 @@ func (vv *Value) VDLWrite(enc Encoder) error {
 		vv = vv.Elem()
 	}
 	if vv.Kind() == Optional {
+		enc.SetNextStartValueIsOptional()
 		if vv.IsNil() {
 			return enc.NilValue(vv.Type())
 		}
-		enc.SetNextStartValueIsOptional()
 		vv = vv.Elem()
 	}
 	if err := enc.StartValue(vv.Type()); err != nil {

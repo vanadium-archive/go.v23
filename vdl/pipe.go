@@ -209,6 +209,13 @@ func (e *pipeEncoder) SetNextStartValueIsOptional() {
 }
 
 func (e *pipeEncoder) NilValue(tt *Type) error {
+	switch tt.Kind() {
+	case Any:
+	case Optional:
+		e.SetNextStartValueIsOptional()
+	default:
+		return fmt.Errorf("concrete types disallowed for NilValue (type was %v)", tt)
+	}
 	if err := e.StartValue(tt); err != nil {
 		return err
 	}

@@ -87,7 +87,10 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 			case tt.Kind() == Union && isIface:
 				// Treat nil Union interface as the zero value of the type at index 0.
 				return ZeroValue(tt).VDLWrite(enc)
-			case tt.Kind() == Optional || tt == AnyType:
+			case tt.Kind() == Optional:
+				enc.SetNextStartValueIsOptional()
+				return enc.NilValue(tt)
+			case tt == AnyType:
 				return enc.NilValue(tt)
 			}
 			return fmt.Errorf("vdl: can't encode nil from non-any non-optional %v", tt)
