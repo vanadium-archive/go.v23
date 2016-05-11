@@ -31,8 +31,8 @@ func (sg *syncgroup) Create(ctx *context.T, spec wire.SyncgroupSpec, myInfo wire
 }
 
 // Join implements Syncgroup.Join.
-func (sg *syncgroup) Join(ctx *context.T, remoteSyncbaseName, expectedSyncbaseBlessing string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error) {
-	return sg.c.JoinSyncgroup(ctx, remoteSyncbaseName, expectedSyncbaseBlessing, sg.id, myInfo)
+func (sg *syncgroup) Join(ctx *context.T, remoteSyncbaseName string, expectedSyncbaseBlessings []string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error) {
+	return sg.c.JoinSyncgroup(ctx, remoteSyncbaseName, expectedSyncbaseBlessings, sg.id, myInfo)
 }
 
 // Leave implements Syncgroup.Leave.

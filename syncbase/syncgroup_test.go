@@ -198,7 +198,7 @@ func createSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sgId wir
 func joinSyncgroup(t *testing.T, ctx *context.T, d syncbase.Database, sbName string, sgId wire.Id, wantErr verror.ID) syncbase.Syncgroup {
 	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, sbName, "", info); verror.ErrorID(err) != wantErr {
+	if _, err := sg.Join(ctx, sbName, nil, info); verror.ErrorID(err) != wantErr {
 		tu.Fatalf(t, "Join SG %v failed: %v", sgId, err)
 	}
 	return sg

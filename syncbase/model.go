@@ -451,7 +451,7 @@ type Syncgroup interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	Join(ctx *context.T, syncbaseName string, expectedSyncbaseBlessings string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+	Join(ctx *context.T, syncbaseName string, expectedSyncbaseBlessings []string, myInfo wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
 
 	// Leave leaves the syncgroup. Previously synced data will continue
 	// to be available.

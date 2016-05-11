@@ -6870,7 +6870,7 @@ type SyncgroupManagerClientMethods interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(_ *context.T, remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
+	JoinSyncgroup(_ *context.T, remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
@@ -6934,7 +6934,7 @@ func (c implSyncgroupManagerClientStub) CreateSyncgroup(ctx *context.T, i0 Id, i
 	return
 }
 
-func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 string, i2 Id, i3 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
+func (c implSyncgroupManagerClientStub) JoinSyncgroup(ctx *context.T, i0 string, i1 []string, i2 Id, i3 SyncgroupMemberInfo, opts ...rpc.CallOpt) (o0 SyncgroupSpec, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "JoinSyncgroup", []interface{}{i0, i1, i2, i3}, []interface{}{&o0}, opts...)
 	return
 }
@@ -6988,7 +6988,7 @@ type SyncgroupManagerServerMethods interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
+	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.
 	//
@@ -7070,7 +7070,7 @@ func (s implSyncgroupManagerServerStub) CreateSyncgroup(ctx *context.T, call rpc
 	return s.impl.CreateSyncgroup(ctx, call, i0, i1, i2)
 }
 
-func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 string, i2 Id, i3 SyncgroupMemberInfo) (SyncgroupSpec, error) {
+func (s implSyncgroupManagerServerStub) JoinSyncgroup(ctx *context.T, call rpc.ServerCall, i0 string, i1 []string, i2 Id, i3 SyncgroupMemberInfo) (SyncgroupSpec, error) {
 	return s.impl.JoinSyncgroup(ctx, call, i0, i1, i2, i3)
 }
 
@@ -7137,10 +7137,10 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			Name: "JoinSyncgroup",
 			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
 			InArgs: []rpc.ArgDesc{
-				{"remoteSyncbaseName", ``},       // string
-				{"expectedSyncbaseBlessing", ``}, // string
-				{"sgId", ``},                     // Id
-				{"myInfo", ``},                   // SyncgroupMemberInfo
+				{"remoteSyncbaseName", ``},        // string
+				{"expectedSyncbaseBlessings", ``}, // []string
+				{"sgId", ``},                      // Id
+				{"myInfo", ``},                    // SyncgroupMemberInfo
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"spec", ``}, // SyncgroupSpec

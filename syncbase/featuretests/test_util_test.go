@@ -257,7 +257,7 @@ func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.I
 	d := syncbase.NewService(sbNameLocal).DatabaseForId(testDb, nil)
 	sg := d.SyncgroupForId(sgId)
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
+	if _, err := sg.Join(ctx, sbNameRemote, nil, info); err != nil {
 		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", sbNameRemote, sgId, err)
 	}
 	return nil

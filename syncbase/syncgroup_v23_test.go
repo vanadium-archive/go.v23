@@ -608,7 +608,7 @@ func runJoinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote, sgName string) 
 	d := dbHandle(sbNameLocal)
 	sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-	if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
+	if _, err := sg.Join(ctx, sbNameRemote, nil, info); err != nil {
 		return fmt.Errorf("Join SG %q, %q failed: %v\n", sbNameRemote, sgName, err)
 	}
 	return nil
@@ -1158,7 +1158,7 @@ func runJoinSyncgroupMulti(ctx *context.T, sbNameLocal, sbNameRemote string, num
 			sgName := fmt.Sprintf("%s_%s", appName, dbName)
 			sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
 			info := wire.SyncgroupMemberInfo{SyncPriority: 10}
-			if _, err := sg.Join(ctx, sbNameRemote, "", info); err != nil {
+			if _, err := sg.Join(ctx, sbNameRemote, nil, info); err != nil {
 				return fmt.Errorf("Join SG Multi %q failed: %v\n", sgName, err)
 			}
 		}

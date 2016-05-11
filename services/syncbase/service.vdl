@@ -201,7 +201,7 @@ type SyncgroupManager interface {
 	//
 	// Requires: Client must have at least Read access on the Database and on the
 	// syncgroup ACL.
-	JoinSyncgroup(remoteSyncbaseName string, expectedSyncbaseBlessing string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
+	JoinSyncgroup(remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
 
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
 	// to be available.

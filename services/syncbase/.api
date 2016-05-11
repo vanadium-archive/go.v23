@@ -621,7 +621,7 @@ pkg syncbase, type DatabaseClientMethods interface, GetResumeMarker(*context.T, 
 pkg syncbase, type DatabaseClientMethods interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type DatabaseClientMethods interface, GetSyncgroupMembers(*context.T, Id, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type DatabaseClientMethods interface, GetSyncgroupSpec(*context.T, Id, ...rpc.CallOpt) (SyncgroupSpec, string, error)
-pkg syncbase, type DatabaseClientMethods interface, JoinSyncgroup(*context.T, string, string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg syncbase, type DatabaseClientMethods interface, JoinSyncgroup(*context.T, string, []string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientMethods interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, LeaveSyncgroup(*context.T, Id, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]Id, error)
@@ -655,7 +655,7 @@ pkg syncbase, type DatabaseClientStub interface, GetResumeMarker(*context.T, Bat
 pkg syncbase, type DatabaseClientStub interface, GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 pkg syncbase, type DatabaseClientStub interface, GetSyncgroupMembers(*context.T, Id, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type DatabaseClientStub interface, GetSyncgroupSpec(*context.T, Id, ...rpc.CallOpt) (SyncgroupSpec, string, error)
-pkg syncbase, type DatabaseClientStub interface, JoinSyncgroup(*context.T, string, string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg syncbase, type DatabaseClientStub interface, JoinSyncgroup(*context.T, string, []string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseClientStub interface, KeepBlob(*context.T, BlobRef, uint64, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, LeaveSyncgroup(*context.T, Id, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, ListCollections(*context.T, BatchHandle, ...rpc.CallOpt) ([]Id, error)
@@ -700,7 +700,7 @@ pkg syncbase, type DatabaseServerMethods interface, GetResumeMarker(*context.T, 
 pkg syncbase, type DatabaseServerMethods interface, GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
 pkg syncbase, type DatabaseServerMethods interface, GetSyncgroupMembers(*context.T, rpc.ServerCall, Id) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type DatabaseServerMethods interface, GetSyncgroupSpec(*context.T, rpc.ServerCall, Id) (SyncgroupSpec, string, error)
-pkg syncbase, type DatabaseServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, string, Id, SyncgroupMemberInfo) (SyncgroupSpec, error)
+pkg syncbase, type DatabaseServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, []string, Id, SyncgroupMemberInfo) (SyncgroupSpec, error)
 pkg syncbase, type DatabaseServerMethods interface, KeepBlob(*context.T, rpc.ServerCall, BlobRef, uint64) error
 pkg syncbase, type DatabaseServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, Id) error
 pkg syncbase, type DatabaseServerMethods interface, ListCollections(*context.T, rpc.ServerCall, BatchHandle) ([]Id, error)
@@ -911,7 +911,7 @@ pkg syncbase, type SyncgroupManagerClientMethods interface, DestroySyncgroup(*co
 pkg syncbase, type SyncgroupManagerClientMethods interface, EjectFromSyncgroup(*context.T, Id, string, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientMethods interface, GetSyncgroupMembers(*context.T, Id, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type SyncgroupManagerClientMethods interface, GetSyncgroupSpec(*context.T, Id, ...rpc.CallOpt) (SyncgroupSpec, string, error)
-pkg syncbase, type SyncgroupManagerClientMethods interface, JoinSyncgroup(*context.T, string, string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg syncbase, type SyncgroupManagerClientMethods interface, JoinSyncgroup(*context.T, string, []string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type SyncgroupManagerClientMethods interface, LeaveSyncgroup(*context.T, Id, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientMethods interface, ListSyncgroups(*context.T, ...rpc.CallOpt) ([]Id, error)
 pkg syncbase, type SyncgroupManagerClientMethods interface, SetSyncgroupSpec(*context.T, Id, SyncgroupSpec, string, ...rpc.CallOpt) error
@@ -920,7 +920,7 @@ pkg syncbase, type SyncgroupManagerClientStub interface, DestroySyncgroup(*conte
 pkg syncbase, type SyncgroupManagerClientStub interface, EjectFromSyncgroup(*context.T, Id, string, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientStub interface, GetSyncgroupMembers(*context.T, Id, ...rpc.CallOpt) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type SyncgroupManagerClientStub interface, GetSyncgroupSpec(*context.T, Id, ...rpc.CallOpt) (SyncgroupSpec, string, error)
-pkg syncbase, type SyncgroupManagerClientStub interface, JoinSyncgroup(*context.T, string, string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
+pkg syncbase, type SyncgroupManagerClientStub interface, JoinSyncgroup(*context.T, string, []string, Id, SyncgroupMemberInfo, ...rpc.CallOpt) (SyncgroupSpec, error)
 pkg syncbase, type SyncgroupManagerClientStub interface, LeaveSyncgroup(*context.T, Id, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientStub interface, ListSyncgroups(*context.T, ...rpc.CallOpt) ([]Id, error)
 pkg syncbase, type SyncgroupManagerClientStub interface, SetSyncgroupSpec(*context.T, Id, SyncgroupSpec, string, ...rpc.CallOpt) error
@@ -931,7 +931,7 @@ pkg syncbase, type SyncgroupManagerServerMethods interface, DestroySyncgroup(*co
 pkg syncbase, type SyncgroupManagerServerMethods interface, EjectFromSyncgroup(*context.T, rpc.ServerCall, Id, string) error
 pkg syncbase, type SyncgroupManagerServerMethods interface, GetSyncgroupMembers(*context.T, rpc.ServerCall, Id) (map[string]SyncgroupMemberInfo, error)
 pkg syncbase, type SyncgroupManagerServerMethods interface, GetSyncgroupSpec(*context.T, rpc.ServerCall, Id) (SyncgroupSpec, string, error)
-pkg syncbase, type SyncgroupManagerServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, string, Id, SyncgroupMemberInfo) (SyncgroupSpec, error)
+pkg syncbase, type SyncgroupManagerServerMethods interface, JoinSyncgroup(*context.T, rpc.ServerCall, string, []string, Id, SyncgroupMemberInfo) (SyncgroupSpec, error)
 pkg syncbase, type SyncgroupManagerServerMethods interface, LeaveSyncgroup(*context.T, rpc.ServerCall, Id) error
 pkg syncbase, type SyncgroupManagerServerMethods interface, ListSyncgroups(*context.T, rpc.ServerCall) ([]Id, error)
 pkg syncbase, type SyncgroupManagerServerMethods interface, SetSyncgroupSpec(*context.T, rpc.ServerCall, Id, SyncgroupSpec, string) error

@@ -258,7 +258,7 @@ pkg syncbase, type Syncgroup interface, Eject(*context.T, string) error
 pkg syncbase, type Syncgroup interface, GetMembers(*context.T) (map[string]wire.SyncgroupMemberInfo, error)
 pkg syncbase, type Syncgroup interface, GetSpec(*context.T) (wire.SyncgroupSpec, string, error)
 pkg syncbase, type Syncgroup interface, Id() wire.Id
-pkg syncbase, type Syncgroup interface, Join(*context.T, string, string, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
+pkg syncbase, type Syncgroup interface, Join(*context.T, string, []string, wire.SyncgroupMemberInfo) (wire.SyncgroupSpec, error)
 pkg syncbase, type Syncgroup interface, Leave(*context.T) error
 pkg syncbase, type Syncgroup interface, SetSpec(*context.T, wire.SyncgroupSpec, string) error
 pkg syncbase, type Value struct
