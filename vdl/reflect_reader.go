@@ -79,8 +79,7 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 	return errReadMustReflect
 }
 
-// ReadReflect is like Read, but takes a reflect.Value argument.  Use Read if
-// performance is important and you have an interface{} handy.
+// ReadReflect is like Read, but takes a reflect.Value argument.
 func ReadReflect(dec Decoder, rv reflect.Value) error {
 	if !rv.IsValid() {
 		return errReadIntoNilValue
@@ -103,24 +102,13 @@ func ReadReflect(dec Decoder, rv reflect.Value) error {
 // success we guarantee that StartValue / FinishValue has been called on dec.
 // If calledStart is true, StartValue has already been called.
 func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) error {
-	// Handle native types first, since they need the ToNative conversion.
-	if ni := nativeInfoFromNative(rv.Type()); ni != nil {
-		rvWire := reflect.New(ni.WireType).Elem()
-		if err := readNonNative(dec, calledStart, rvWire, tt); err != nil {
-			return err
-		}
-		return ni.ToNative(rvWire, rv.Addr())
-	}
-	return readNonNative(dec, calledStart, rv, tt)
-}
-
-func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) error {
-	// Any is handled first, since any(nil) is handled differently from ?T(nil)
-	// contained in an any value, so this factoring makes things simpler.
+	// Handle decoding into an any value first, since vom.RawBytes.VDLRead doesn't
+	// support IgnoreNextStartValue, and requires that StartValue hasn't been
+	// called yet.
 	if tt == AnyType {
-		return readAny(dec, calledStart, rv)
+		return readIntoAny(dec, calledStart, rv)
 	}
-	// Now we can start the decoder value, if we haven't already.
+	// Now start the decoder value, if we haven't already.
 	if !calledStart {
 		if err := dec.StartValue(); err != nil {
 			return err
@@ -129,30 +117,44 @@ func readNonNative(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) er
 			return err
 		}
 	}
-	// Nil decoded values are handled next, to special-case the pointer handling;
-	// we don't create pointers all the way down to the actual value.
+	// Handle nil decoded values next, to simplify the rest of the cases.
 	if dec.IsNil() {
 		return readFromNil(dec, rv, tt)
 	}
-	// Now we know that the decoded value isn't nil.  Walk pointers and check for
-	// faster non-reflect support.
-	rv = readWalkPointers(rv)
+	// Now we know that the decoded value isn't nil.  Flatten pointers and check
+	// for fast non-reflect support.
+	rv = readFlattenPointers(rv)
 	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
-	// Handle the non-nil decoded value.
+	// Handle native types, which need the ToNative conversion.  Notice that rv is
+	// never a pointer here, so we don't support native pointer types.  In theory
+	// we could support native pointer types, but they're complicated and will
+	// probably slow everything down.
+	//
+	// TODO(toddw): Investigate support for native pointer types.
+	if ni := nativeInfoFromNative(rv.Type()); ni != nil {
+		rvWire := reflect.New(ni.WireType).Elem()
+		if err := readReflect(dec, true, rvWire, tt); err != nil {
+			return err
+		}
+		return ni.ToNative(rvWire, rv.Addr())
+		// NOTE: readReflect guarantees that FinishValue has already been called.
+	}
+	// Handle non-nil wire values.
 	if err := readNonNilValue(dec, rv, tt.NonOptional()); err != nil {
 		return err
 	}
 	return dec.FinishValue()
 }
 
-// readWalkPointers repeatedly dereferences pointers, creating new values if the
-// pointer is nil, and returns the final non-pointer reflect value.
-func readWalkPointers(rv reflect.Value) reflect.Value {
+// readFlattenPointers repeatedly dereferences pointers, creating new values if
+// the pointer is nil, and returns the final non-pointer reflect value.  As a
+// special-case, *Type is returned as a pointer.
+func readFlattenPointers(rv reflect.Value) reflect.Value {
 	for rv.Kind() == reflect.Ptr {
-		// Special-case to stop at *Type, which is filled in via readNonReflect.
 		if rv.Type() == rtPtrToType {
+			// Special-case to stop at *Type, which is filled in via readNonReflect.
 			return rv
 		}
 		if rv.IsNil() {
@@ -163,56 +165,60 @@ func readWalkPointers(rv reflect.Value) reflect.Value {
 	return rv
 }
 
-func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
+// readIntoAny uses dec to decode a value into rv, which has VDL type any.
+func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	if calledStart {
 		// The existing code ensures that calledStart is always false here, since
-		// readReflect(dec, true, ...) is only called below in this function, which
-		// never calls it with another any type.  If we did, we'd have a vdl
+		// readReflect(dec, true, ...) is only called in situations where it's
+		// impossible to call readIntoAny.  E.g. it's called later in this function,
+		// which never calls it with another any type.  If we did, we'd have a vdl
 		// any(any), which isn't allowed.  This error tries to prevent future
 		// changes that will break this requirement.
 		//
-		// Also note that the implementation of vom.RawBytes.VDLRead requires that
-		// StartValue has not been called yet.
+		// The requirement is mandated by vom.RawBytes.VDLRead, which doesn't handle
+		// IgnoreNextStartValue.
 		return errReadAnyAlreadyStarted
 	}
-	// Walk pointers and check for faster non-reflect support, which handles
+	// Flatten pointers and check for fast non-reflect support, which handles
 	// vdl.Value and vom.RawBytes, and any other special-cases.
-	rv = readWalkPointers(rv)
+	rv = readFlattenPointers(rv)
 	if err := readNonReflect(dec, false, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
 	// The only case left is to handle interfaces.  We allow decoding into
-	// interface{}, as well as any other interface.
+	// all interfaces, including interface{}.
 	if rv.Kind() != reflect.Interface {
 		return errReadAnyInterfaceOnly
 	}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
-	// Handle decoding any(nil) by setting the interface to nil.  Note that the
+	// Handle decoding any(nil) by setting the rv interface to nil.  Note that the
 	// only case where dec.Type() is AnyType is when the value is any(nil).
 	if dec.Type() == AnyType {
-		rv.Set(reflect.Zero(rv.Type()))
+		if !rv.IsNil() {
+			rv.Set(reflect.Zero(rv.Type()))
+		}
 		return dec.FinishValue()
 	}
 	// Lookup the reflect type based on the decoder type, and create a new value
 	// to decode into.
 	rtDecode := TypeToReflect(dec.Type())
 	if rtDecode == nil {
-		return fmt.Errorf("vdl: %v not registered, call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
+		return fmt.Errorf("vdl: %v not registered, either call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
 	}
-	// If we decoded an optional type, ensure that it is a pointer.  Note that if
-	// we decoded a nil, dec.Type() is already optional, so rtDecode will already
-	// be a pointer.
+	// If we decoded an optional type, ensure that we set a pointer value.  Note
+	// that if we decoded a nil, dec.Type() is already optional, so rtDecode will
+	// already be a pointer.
 	if dec.IsOptional() && !dec.IsNil() {
 		rtDecode = reflect.PtrTo(rtDecode)
 	}
 	if !rtDecode.Implements(rv.Type()) {
 		return fmt.Errorf("vdl: %v doesn't implement %v", rtDecode, rv.Type())
 	}
-	// Handle decoding optional(nil), by setting rv to a nil pointer of the
-	// concrete type.  We know that rtDecode must be a pointer, since dec.Type()
-	// is optional.
+	// Handle decoding optional(nil), by setting the rv interface to a nil pointer
+	// of the concrete type.  We know that rtDecode must be a pointer, since
+	// dec.Type() is optional.
 	if dec.Type().Kind() == Optional {
 		rv.Set(reflect.Zero(rtDecode))
 		return dec.FinishValue()
@@ -223,18 +229,75 @@ func readAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 		return err
 	}
 	rv.Set(rvDecode)
-	// Note that dec.FinishValue has already been called by readReflect.
+	// NOTE: readReflect guarantees that FinishValue has already been called.
 	return nil
 }
 
+// readFromNil uses dec to decode a nil value into rv, which has VDL type tt.
+// The value in dec might be either any(nil) or optional(nil).
+//
+// REQUIRES: dec.IsNil() && tt != AnyType
 func readFromNil(dec Decoder, rv reflect.Value, tt *Type) error {
 	if tt.Kind() != Optional {
 		return fmt.Errorf("vdl: can't decode nil into non-optional %v", tt)
 	}
-	// Note that since tt is optional, we know that rv is always a pointer, or the
-	// special-case error interface.
-	rv.Set(reflect.Zero(rv.Type()))
+	// Flatten pointers until we have a single pointer left, or there were no
+	// pointers to begin with.
+	rt := rv.Type()
+	for rt.Kind() == reflect.Ptr && rt.Elem().Kind() == reflect.Ptr {
+		if rv.IsNil() {
+			rv.Set(reflect.New(rt.Elem()))
+		}
+		rv, rt = rv.Elem(), rt.Elem()
+	}
+	// Handle tricky cases where rv is a native type.
+	if handled, err := readFromNilNative(dec, rv, tt); handled {
+		return err
+	}
+	// Now handle the simple case: rv has one pointer left, and should be set to a
+	// nil pointer.
+	if rt.Kind() != reflect.Ptr {
+		return fmt.Errorf("vdl: can't decode nil into non-pointer %v optional %v", rt, tt)
+	}
+	if !rv.IsNil() {
+		rv.Set(reflect.Zero(rt))
+	}
 	return dec.FinishValue()
+}
+
+// readFromNilNative handles tricky cases where rv is a native type.  Returns
+// true if rv is a native type and was handled, otherwise returns false.
+//
+// REQUIRES: rv.Type() has at most one pointer.
+func readFromNilNative(dec Decoder, rv reflect.Value, tt *Type) (bool, error) {
+	var ni *nativeInfo
+	if rt := rv.Type(); rt.Kind() != reflect.Ptr {
+		// Handle the case where rv isn't a pointer; e.g. the Go error interface is
+		// a non-pointer native type, and is handled here.
+		ni = nativeInfoFromNative(rt)
+	} else {
+		// Handle the case where rv is a pointer, and the elem is a native type.
+		// E.g. *error is handled here.  Note that we don't support native pointer
+		// types; see comments at other calls to nativeInfoFromNative.
+		ni = nativeInfoFromNative(rt.Elem())
+		if ni != nil {
+			if rv.IsNil() {
+				rv.Set(reflect.New(rt.Elem()))
+			}
+			rv = rv.Elem()
+		}
+	}
+	if ni != nil {
+		// Handle the native type from either case above.  At this point, rv is the
+		// native type and isn't a nil pointer.
+		rvWire := reflect.New(ni.WireType).Elem()
+		if err := readReflect(dec, true, rvWire, tt); err != nil {
+			return true, err
+		}
+		return true, ni.ToNative(rvWire, rv.Addr())
+		// NOTE: readReflect guarantees that FinishValue has already been called.
+	}
+	return false, nil
 }
 
 func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {

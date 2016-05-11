@@ -166,7 +166,12 @@ func (x E) VDLEqual(yiface interface{}) bool {
 		return false
 	case x.Action != y.Action:
 		return false
-	case x.Msg != y.Msg:
+	case x.Error() != y.Error():
+		// NOTE: We compare the result of Error() rather than comparing the Msg
+		// fields, since the Msg field isn't always set; Msg=="" is equivalent to
+		// Msg==v.io/v23/verror.Unknown.
+		//
+		// TODO(toddw): Investigate the root cause of this.
 		return false
 	case len(x.ParamList) != len(y.ParamList):
 		return false

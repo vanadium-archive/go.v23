@@ -21,7 +21,7 @@ func TestConvertNew(t *testing.T) {
 			t.Errorf("%s: error %v", entry.Name(), err)
 		}
 		if !vdl.DeepEqualReflect(rvTargetPtr.Elem(), entry.Target) {
-			t.Errorf("%[1]s: got %[2]T %#[2]v, want %[3]T %#[3]v", entry.Name(), rvTargetPtr.Elem(), entry.Target)
+			t.Errorf("%[1]s:\nGOT  %[2]v\nWANT %[3]v", entry.Name(), rvTargetPtr.Elem(), entry.Target)
 		}
 	}
 }
