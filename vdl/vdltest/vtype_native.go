@@ -65,7 +65,11 @@ func VWireBoolNBoolFromNative(wire *VWireBoolNBool, native VNativeWireBoolNBool)
 	return nil
 }
 func VWireBoolNStringToNative(wire VWireBoolNString, native *VNativeWireBoolNString) error {
-	*native = VNativeWireBoolNString(strconv.FormatBool(bool(wire)))
+	if wire {
+		*native = "true"
+	} else {
+		*native = ""
+	}
 	return nil
 }
 func VWireBoolNStringFromNative(wire *VWireBoolNString, native VNativeWireBoolNString) error {
@@ -73,7 +77,11 @@ func VWireBoolNStringFromNative(wire *VWireBoolNString, native VNativeWireBoolNS
 	return nil
 }
 func VWireBoolNStructToNative(wire VWireBoolNStruct, native *VNativeWireBoolNStruct) error {
-	native.X = strconv.FormatBool(bool(wire))
+	if wire {
+		native.X = "true"
+	} else {
+		native.X = ""
+	}
 	return nil
 }
 func VWireBoolNStructFromNative(wire *VWireBoolNStruct, native VNativeWireBoolNStruct) error {
@@ -92,27 +100,43 @@ func VWireIntNIntFromNative(wire *VWireIntNInt, native VNativeWireIntNInt) error
 	return nil
 }
 func VWireIntNStringToNative(wire VWireIntNString, native *VNativeWireIntNString) error {
-	*native = VNativeWireIntNString(strconv.Itoa(int(wire)))
+	if wire == 0 {
+		*native = ""
+	} else {
+		*native = VNativeWireIntNString(strconv.Itoa(int(wire)))
+	}
 	return nil
 }
 func VWireIntNStringFromNative(wire *VWireIntNString, native VNativeWireIntNString) error {
-	x, err := strconv.Atoi(string(native))
-	if err != nil {
-		x = 0 // Ignore errors for this test type.
+	if native == "" {
+		*wire = 0
+	} else {
+		x, err := strconv.Atoi(string(native))
+		if err != nil {
+			return err
+		}
+		*wire = VWireIntNString(x)
 	}
-	*wire = VWireIntNString(x)
 	return nil
 }
 func VWireIntNStructToNative(wire VWireIntNStruct, native *VNativeWireIntNStruct) error {
-	native.X = strconv.Itoa(int(wire))
+	if wire == 0 {
+		native.X = ""
+	} else {
+		native.X = strconv.Itoa(int(wire))
+	}
 	return nil
 }
 func VWireIntNStructFromNative(wire *VWireIntNStruct, native VNativeWireIntNStruct) error {
-	x, err := strconv.Atoi(native.X)
-	if err != nil {
-		x = 0 // Ignore errors for this test type.
+	if native.X == "" {
+		*wire = 0
+	} else {
+		x, err := strconv.Atoi(native.X)
+		if err != nil {
+			return err
+		}
+		*wire = VWireIntNStruct(x)
 	}
-	*wire = VWireIntNStruct(x)
 	return nil
 }
 
@@ -158,17 +182,25 @@ func VWireArrayNStructFromNative(wire *VWireArrayNStruct, native VNativeWireArra
 
 func VWireListNStringToNative(wire VWireListNString, native *VNativeWireListNString) error {
 	*native = ""
-	for i, w := range wire {
-		if i > 0 {
-			*native += ","
+	switch {
+	case len(wire) == 1 && wire[0] == "":
+		*native = "+" // Special-case to distinguish a single "" item from empty.
+	case len(wire) > 0:
+		for i, w := range wire {
+			if i > 0 {
+				*native += ","
+			}
+			*native += VNativeWireListNString(w)
 		}
-		*native += VNativeWireListNString(w)
 	}
 	return nil
 }
 func VWireListNStringFromNative(wire *VWireListNString, native VNativeWireListNString) error {
 	*wire = nil
-	if native != "" {
+	switch {
+	case native == "+":
+		*wire = VWireListNString{""}
+	case native != "":
 		for _, n := range strings.Split(string(native), ",") {
 			*wire = append(*wire, n)
 		}
@@ -177,17 +209,25 @@ func VWireListNStringFromNative(wire *VWireListNString, native VNativeWireListNS
 }
 func VWireListNStructToNative(wire VWireListNStruct, native *VNativeWireListNStruct) error {
 	native.X = ""
-	for i, w := range wire {
-		if i > 0 {
-			native.X += ","
+	switch {
+	case len(wire) == 1 && wire[0] == "":
+		native.X = "+" // Special-case to distinguish a single "" item from empty.
+	case len(wire) > 0:
+		for i, w := range wire {
+			if i > 0 {
+				native.X += ","
+			}
+			native.X += w
 		}
-		native.X += w
 	}
 	return nil
 }
 func VWireListNStructFromNative(wire *VWireListNStruct, native VNativeWireListNStruct) error {
 	*wire = nil
-	if native.X != "" {
+	switch {
+	case native.X == "+":
+		*wire = VWireListNStruct{""}
+	case native.X != "":
 		for _, n := range strings.Split(native.X, ",") {
 			*wire = append(*wire, n)
 		}
@@ -223,7 +263,10 @@ func VWireStructNArrayFromNative(wire *VWireStructNArray, native VNativeWireStru
 }
 func VWireStructNSliceToNative(wire VWireStructNSlice, native *VNativeWireStructNSlice) error {
 	*native = nil
-	if wire.X != "" {
+	switch {
+	case wire.X == "+":
+		*native = VNativeWireStructNSlice{""}
+	case wire.X != "":
 		for _, w := range strings.Split(wire.X, ",") {
 			*native = append(*native, w)
 		}
@@ -232,11 +275,16 @@ func VWireStructNSliceToNative(wire VWireStructNSlice, native *VNativeWireStruct
 }
 func VWireStructNSliceFromNative(wire *VWireStructNSlice, native VNativeWireStructNSlice) error {
 	wire.X = ""
-	for i, n := range native {
-		if i > 0 {
-			wire.X += ","
+	switch {
+	case len(native) == 1 && native[0] == "":
+		wire.X = "+" // Special-case to distinguish a single "" item from empty.
+	case len(native) > 0:
+		for i, n := range native {
+			if i > 0 {
+				wire.X += ","
+			}
+			wire.X += n
 		}
-		wire.X += n
 	}
 	return nil
 }
@@ -289,7 +337,10 @@ func VWireUnionNSliceToNative(wire VWireUnionNSlice, native *VNativeWireUnionNSl
 	*native = nil
 	switch wt := wire.(type) {
 	case VWireUnionNSliceX:
-		if wt.Value != "" {
+		switch {
+		case wt.Value == "+":
+			*native = VNativeWireUnionNSlice{""}
+		case wt.Value != "":
 			for _, w := range strings.Split(wt.Value, ",") {
 				*native = append(*native, w)
 			}
@@ -299,11 +350,16 @@ func VWireUnionNSliceToNative(wire VWireUnionNSlice, native *VNativeWireUnionNSl
 }
 func VWireUnionNSliceFromNative(wire *VWireUnionNSlice, native VNativeWireUnionNSlice) error {
 	x := ""
-	for i, n := range native {
-		if i > 0 {
-			x += ","
+	switch {
+	case len(native) == 1 && native[0] == "":
+		x = "+" // Special-case to distinguish a single "" item from empty.
+	case len(native) > 0:
+		for i, n := range native {
+			if i > 0 {
+				x += ","
+			}
+			x += n
 		}
-		x += n
 	}
 	*wire = VWireUnionNSliceX{Value: x}
 	return nil

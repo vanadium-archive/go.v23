@@ -130,10 +130,18 @@ func genExtraEntries(e vdlEntry) []Entry {
 		entry := fromVDLEntry(e)
 		entry.IsCanonical = false
 		entry.Label += " [union interface]"
-		entry.Target = vdl.WrapInUnionInterface(entry.Target)
+		if target := vdl.WrapInUnionInterface(entry.Target); target.IsValid() {
+			entry.Target = target
+		} else {
+			// If the target is a native type, with a union wire type of union, it
+			// won't have a union interface.  There's no extra entry to generate.
+			break
+		}
 		entry.TargetLabel += " [interface]"
 		if vdl.TypeOf(e.Source).Kind() == vdl.Union {
-			entry.Source = vdl.WrapInUnionInterface(entry.Source)
+			if source := vdl.WrapInUnionInterface(entry.Source); source.IsValid() {
+				entry.Source = source
+			}
 			entry.SourceLabel += " [interface]"
 		}
 		extra = append(extra, entry)
