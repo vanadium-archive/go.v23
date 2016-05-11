@@ -8,40 +8,41 @@
 
 package vdltest
 
-// Entries: 1999
-// ----------------------------------------------------------------------------------
-// |          | Total  |+Max |+Min |-Max|-Min| Full  |NilAny|Random | Zero  |isZero |
-// ----------------------------------------------------------------------------------
-// |total     |822,1177|10,57|10,92|6,22|6,32|289,277|  0, 7|210,194|291,496|291,342| [!can max=11]
-// |isZero    |291, 342| 0, 0| 0, 0|0, 0|0, 0|  0,  2|  0, 7|  0,  2|291,331|291,342| [!can max=3]
-// ----------------------------------------------------------------------------------
-// |any       |  0,   7| 0, 0| 0, 0|0, 0|0, 0|  0,  0|  0, 7|  0,  0|  0,  0|  0,  7| [nil=7]
-// |optional  | 18,  61| 0, 0| 0, 0|0, 0|0, 0|  7,  4|  0, 0|  4,  4|  7, 53|  7,  9| [!can max=3] [nil=16]
-// |bool      |  2,   2| 0, 0| 0, 0|0, 0|0, 0|  1,  1|  0, 0|  0,  0|  1,  1|  1,  1| [!can max=1]
-// |byte      |  5,  11| 1, 1| 1, 9|0, 0|0, 0|  1,  0|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=11]
-// |uint16    |  5,  17| 1, 6| 1, 9|0, 0|0, 0|  1,  1|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=11]
-// |uint32    |  5,  17| 1, 6| 1, 8|0, 0|0, 0|  1,  0|  0, 0|  1,  0|  1,  3|  1,  3| [!can max=11]
-// |uint64    |  5,  24| 1,13| 1, 8|0, 0|0, 0|  1,  0|  0, 0|  1,  1|  1,  2|  1,  2| [!can max=11]
-// |int8      |  7,  16| 1, 0| 1, 7|1, 0|1, 4|  1,  2|  0, 0|  1,  0|  1,  3|  1,  3| [!can max=11]
-// |int16     |  7,  22| 1, 2| 1, 8|1, 2|1, 4|  1,  1|  0, 0|  1,  0|  1,  5|  1,  5| [!can max=11]
-// |int32     |  7,  21| 1, 4| 1, 8|1, 3|1, 5|  1,  0|  0, 0|  1,  1|  1,  0|  1,  0| [!can max=11]
-// |int64     |  7,  35| 1, 9| 1, 9|1, 6|1, 5|  1,  0|  0, 0|  1,  4|  1,  2|  1,  2| [!can max=11]
-// |float32   |  7,  33| 1, 7| 1,10|1, 4|1, 7|  1,  4|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=3]
-// |float64   |  7,  47| 1, 9| 1,16|1, 7|1, 7|  1,  2|  0, 0|  1,  4|  1,  2|  1,  2| [!can max=2]
-// |string    |  3,  14| 0, 0| 0, 0|0, 0|0, 0|  1,  9|  0, 0|  1,  1|  1,  4|  1,  1| [!can max=1]
-// |enum      |  6,   4| 0, 0| 0, 0|0, 0|0, 0|  4,  3|  0, 0|  0,  0|  2,  1|  2,  1| [!can max=3]
-// |typeobject|  0,   0| 0, 0| 0, 0|0, 0|0, 0|  0,  0|  0, 0|  0,  0|  0,  0|  0,  0|
-// |array     | 88,  19| 0, 0| 0, 0|0, 0|0, 0| 31,  6|  0, 0| 25,  8| 32,  5| 32,  2| [!can max=2] [len min=1 max=3]
-// |list      |147, 304| 0, 0| 0, 0|0, 0|0, 0| 56, 81|  0, 0| 35, 52| 56,171| 56,112| [!can max=2] [len max=3]
-// |set       | 83,  93| 0, 0| 0, 0|0, 0|0, 0| 32, 26|  0, 0| 19, 15| 32, 52| 32, 52| [!can max=2] [len max=3]
-// |map       | 91,  92| 0, 0| 0, 0|0, 0|0, 0| 34, 24|  0, 0| 23, 14| 34, 54| 34, 54| [!can max=2] [len max=3]
-// |struct    |163, 175| 0, 0| 0, 0|0, 0|0, 0| 57, 57|  0, 0| 47, 44| 59, 74| 59, 75| [!can max=2]
-// |union     |159, 163| 0, 0| 0, 0|0, 0|0, 0| 56, 56|  0, 0| 46, 46| 57, 61| 57,  8| [!can max=2]
-// ----------------------------------------------------------------------------------
-// |IsNamed   |668, 765|10,39|10,73|6,12|6,21|230,194|  0, 0|174,137|232,289|232,196| [!can max=11]
-// |IsUnnamed |154, 412| 0,18| 0,19|0,10|0,11| 59, 83|  0, 7| 36, 57| 59,207| 59,146| [!can max=3]
-// |IsBytes   | 15,  16| 0, 0| 0, 0|0, 0|0, 0|  5,  5|  0, 0|  5,  1|  5, 10|  5,  8| [!can max=2]
-// ----------------------------------------------------------------------------------
+// Entries: 2014
+// -------------------------------------------------------------------------------------
+// |             | Total  |+Max |+Min |-Max|-Min| Full  |NilAny|Random | Zero  |isZero |
+// -------------------------------------------------------------------------------------
+// |total        |831,1183|10,57|10,92|6,22|6,32|292,277|  0, 7|213,194|294,502|294,347| [!can max=11]
+// |isZero       |294, 347| 0, 0| 0, 0|0, 0|0, 0|  0,  2|  0, 7|  0,  2|294,336|294,347| [!can max=3]
+// -------------------------------------------------------------------------------------
+// |any          |  0,   7| 0, 0| 0, 0|0, 0|0, 0|  0,  0|  0, 7|  0,  0|  0,  0|  0,  7| [nil=7]
+// |optional     | 18,  62| 0, 0| 0, 0|0, 0|0, 0|  7,  4|  0, 0|  4,  4|  7, 54|  7,  9| [!can max=3] [nil=16]
+// |bool         |  2,   2| 0, 0| 0, 0|0, 0|0, 0|  1,  1|  0, 0|  0,  0|  1,  1|  1,  1| [!can max=1]
+// |byte         |  5,  11| 1, 1| 1, 9|0, 0|0, 0|  1,  0|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=11]
+// |uint16       |  5,  17| 1, 6| 1, 9|0, 0|0, 0|  1,  1|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=11]
+// |uint32       |  5,  17| 1, 6| 1, 8|0, 0|0, 0|  1,  0|  0, 0|  1,  0|  1,  3|  1,  3| [!can max=11]
+// |uint64       |  5,  24| 1,13| 1, 8|0, 0|0, 0|  1,  0|  0, 0|  1,  1|  1,  2|  1,  2| [!can max=11]
+// |int8         |  7,  16| 1, 0| 1, 7|1, 0|1, 4|  1,  2|  0, 0|  1,  0|  1,  3|  1,  3| [!can max=11]
+// |int16        |  7,  22| 1, 2| 1, 8|1, 2|1, 4|  1,  1|  0, 0|  1,  0|  1,  5|  1,  5| [!can max=11]
+// |int32        |  7,  21| 1, 4| 1, 8|1, 3|1, 5|  1,  0|  0, 0|  1,  1|  1,  0|  1,  0| [!can max=11]
+// |int64        |  7,  35| 1, 9| 1, 9|1, 6|1, 5|  1,  0|  0, 0|  1,  4|  1,  2|  1,  2| [!can max=11]
+// |float32      |  7,  33| 1, 7| 1,10|1, 4|1, 7|  1,  4|  0, 0|  1,  0|  1,  1|  1,  1| [!can max=3]
+// |float64      |  7,  47| 1, 9| 1,16|1, 7|1, 7|  1,  2|  0, 0|  1,  4|  1,  2|  1,  2| [!can max=2]
+// |string       |  3,  14| 0, 0| 0, 0|0, 0|0, 0|  1,  9|  0, 0|  1,  1|  1,  4|  1,  1| [!can max=1]
+// |enum         |  6,   4| 0, 0| 0, 0|0, 0|0, 0|  4,  3|  0, 0|  0,  0|  2,  1|  2,  1| [!can max=3]
+// |typeobject   |  0,   0| 0, 0| 0, 0|0, 0|0, 0|  0,  0|  0, 0|  0,  0|  0,  0|  0,  0|
+// |array        | 88,  19| 0, 0| 0, 0|0, 0|0, 0| 31,  6|  0, 0| 25,  8| 32,  5| 32,  2| [!can max=2] [len min=1 max=3]
+// |list         |147, 304| 0, 0| 0, 0|0, 0|0, 0| 56, 81|  0, 0| 35, 52| 56,171| 56,112| [!can max=2] [len max=3]
+// |set          | 83,  93| 0, 0| 0, 0|0, 0|0, 0| 32, 26|  0, 0| 19, 15| 32, 52| 32, 52| [!can max=2] [len max=3]
+// |map          | 91,  92| 0, 0| 0, 0|0, 0|0, 0| 34, 24|  0, 0| 23, 14| 34, 54| 34, 54| [!can max=2] [len max=3]
+// |struct       |172, 180| 0, 0| 0, 0|0, 0|0, 0| 60, 57|  0, 0| 50, 44| 62, 79| 62, 80| [!can max=2]
+// |union        |159, 163| 0, 0| 0, 0|0, 0|0, 0| 56, 56|  0, 0| 46, 46| 57, 61| 57,  8| [!can max=2]
+// -------------------------------------------------------------------------------------
+// |IsNamed      |677, 770|10,39|10,73|6,12|6,21|233,194|  0, 0|177,137|235,294|235,201| [!can max=11]
+// |IsUnnamed    |154, 413| 0,18| 0,19|0,10|0,11| 59, 83|  0, 7| 36, 57| 59,208| 59,146| [!can max=3]
+// |IsBytes      | 15,  16| 0, 0| 0, 0|0, 0|0, 0|  5,  5|  0, 0|  5,  1|  5, 10|  5,  8| [!can max=2]
+// |IsPartOfCycle|  9,   2| 0, 0| 0, 0|0, 0|0, 0|  3,  0|  0, 0|  3,  0|  3,  2|  3,  2| [!can max=2]
+// -------------------------------------------------------------------------------------
 // 
 // Each column has a pair of entry counts (canonical,non-canonical), computed
 // from the Source value.  An entry is canonical if Target == Source.
@@ -8465,5 +8466,54 @@ const xAllPass = []vdlEntry{
 	  ?XStructDepth3_XArray1_Set_XEnumBcd{F0: {{D}}},
 	  `XStructDepth3_XArray1_Set_XEnumBcd{F0: {{D}}}`,
 	  XStructDepth3_XArray1_Set_XEnumBcd{F0: {{D}}},
+	},
+	// Canonical
+	{ true, `Zero`, `XSelfCycle{}`, XSelfCycle{}, `XSelfCycle{}`, XSelfCycle{} },
+	{ false, `Zero`, `XSelfCycle{}`, XSelfCycle{}, `XMutualCycleB{}`, XMutualCycleB{} },
+	{ false, `Zero`, `XSelfCycle{}`, XSelfCycle{}, `XStructEmpty{}`, XStructEmpty{} },
+	// Canonical
+	{ true, `Full`,
+	  `XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}`,
+	  XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}},
+	  `XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}`,
+	  XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}},
+	},
+	// Canonical
+	{ true, `Random0`,
+	  `XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}}`,
+	  XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}},
+	  `XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}}`,
+	  XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}},
+	},
+	// Canonical
+	{ true, `Zero`, `XMutualCycleB{}`, XMutualCycleB{}, `XMutualCycleB{}`, XMutualCycleB{} },
+	{ false, `Zero`, `XMutualCycleB{}`, XMutualCycleB{}, `?XStructEmpty{}`, ?XStructEmpty{} },
+	{ false, `Zero`, `XMutualCycleB{}`, XMutualCycleB{}, `XStructEmpty{}`, XStructEmpty{} },
+	// Canonical
+	{ true, `Full`,
+	  `XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}`,
+	  XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}},
+	  `XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}`,
+	  XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}},
+	},
+	// Canonical
+	{ true, `Random0`, `XMutualCycleB{A: {}}`, XMutualCycleB{A: {}}, `XMutualCycleB{A: {}}`, XMutualCycleB{A: {}} },
+	// Canonical
+	{ true, `Zero`, `XMutualCycleA{}`, XMutualCycleA{}, `XMutualCycleA{}`, XMutualCycleA{} },
+	{ false, `Zero`, `XMutualCycleA{}`, XMutualCycleA{}, `XSelfCycle{}`, XSelfCycle{} },
+	{ false, `Zero`, `XMutualCycleA{}`, XMutualCycleA{}, `XStructEmpty{}`, XStructEmpty{} },
+	// Canonical
+	{ true, `Full`,
+	  `XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}`,
+	  XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}},
+	  `XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}`,
+	  XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}},
+	},
+	// Canonical
+	{ true, `Random0`,
+	  `XMutualCycleA{Data: -1006823554338124716, B: {}}`,
+	  XMutualCycleA{Data: -1006823554338124716, B: {}},
+	  `XMutualCycleA{Data: -1006823554338124716, B: {}}`,
+	  XMutualCycleA{Data: -1006823554338124716, B: {}},
 	},
 }

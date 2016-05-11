@@ -8098,6 +8098,1015 @@ var data81 = []TestCase{
 		HexValue: "520500000102e1",
 	},
 	{
+		Name:     "Zero vdltest.VSelfCycle{}",
+		Value:    vdltest.VSelfCycle{},
+		Version:  129,
+		Hex:      "81e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5653656c664379636c6501020004446174610109e100044e657874012ae1e15201e1",
+		HexType:  "e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5653656c664379636c6501020004446174610109e100044e657874012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Value: vdltest.VSelfCycle{
+			Data: -123,
+			Next: &vdltest.VSelfCycle{
+				Data: -123,
+				Next: &vdltest.VSelfCycle{
+					Data: -123,
+					Next: &vdltest.VSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5653656c664379636c6501020004446174610109e100044e657874012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5653656c664379636c6501020004446174610109e100044e657874012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
+	},
+	{
+		Name:     "Zero vdltest.VMutualCycleB{}",
+		Value:    vdltest.VMutualCycleB{},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ae1e15201e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Value: vdltest.VMutualCycleB{
+			Data: -123,
+			A: &vdltest.VMutualCycleA{
+				Data: -123,
+				B: &vdltest.VMutualCycleB{
+					Data: -123,
+					A: &vdltest.VMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
+	},
+	{
+		Name:     "Zero vdltest.VMutualCycleA{}",
+		Value:    vdltest.VMutualCycleA{},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ae1e15201e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Value: vdltest.VMutualCycleA{
+			Data: -123,
+			B: &vdltest.VMutualCycleB{
+				Data: -123,
+				A: &vdltest.VMutualCycleA{
+					Data: -123,
+					B: &vdltest.VMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e564d757475616c4379636c654101020004446174610109e1000142012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
+	},
+	{
+		Name:     "Zero vdltest.VWireBoolNBool(false)",
+		Value:    vdltest.VNativeWireBoolNBool(false),
+		Version:  129,
+		Hex:      "815129000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e15200",
+		HexType:  "5129000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "Full vdltest.VWireBoolNBool(true)",
+		Value: func() vdltest.VNativeWireBoolNBool {
+			var native vdltest.VNativeWireBoolNBool
+			wire := vdltest.VWireBoolNBool(true)
+			if err := vdltest.VWireBoolNBoolToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815129000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e15201",
+		HexType:  "5129000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1",
+		HexValue: "5201",
+	},
+	{
+		Name:     "Zero vdltest.VWireBoolNString(false)",
+		Value:    vdltest.VNativeWireBoolNString(""),
+		Version:  129,
+		Hex:      "81512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e15200",
+		HexType:  "512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "Full vdltest.VWireBoolNString(true)",
+		Value: func() vdltest.VNativeWireBoolNString {
+			var native vdltest.VNativeWireBoolNString
+			wire := vdltest.VWireBoolNString(true)
+			if err := vdltest.VWireBoolNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e15201",
+		HexType:  "512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1",
+		HexValue: "5201",
+	},
+	{
+		Name:     "Zero vdltest.VWireBoolNStruct(false)",
+		Value:    vdltest.VNativeWireBoolNStruct{},
+		Version:  129,
+		Hex:      "81512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15200",
+		HexType:  "512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "Full vdltest.VWireBoolNStruct(true)",
+		Value: func() vdltest.VNativeWireBoolNStruct {
+			var native vdltest.VNativeWireBoolNStruct
+			wire := vdltest.VWireBoolNStruct(true)
+			if err := vdltest.VWireBoolNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15201",
+		HexType:  "512b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e1",
+		HexValue: "5201",
+	},
+	{
+		Name:     "Zero vdltest.VWireIntNInt(0)",
+		Value:    vdltest.VNativeWireIntNInt(0),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15200",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "+Max vdltest.VWireIntNInt(2147483647)",
+		Value: func() vdltest.VNativeWireIntNInt {
+			var native vdltest.VNativeWireIntNInt
+			wire := vdltest.VWireIntNInt(2147483647)
+			if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e152fcfffffffe",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "52fcfffffffe",
+	},
+	{
+		Name: "+Min vdltest.VWireIntNInt(1)",
+		Value: func() vdltest.VNativeWireIntNInt {
+			var native vdltest.VNativeWireIntNInt
+			wire := vdltest.VWireIntNInt(1)
+			if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15202",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "5202",
+	},
+	{
+		Name: "-Max vdltest.VWireIntNInt(-2147483648)",
+		Value: func() vdltest.VNativeWireIntNInt {
+			var native vdltest.VNativeWireIntNInt
+			wire := vdltest.VWireIntNInt(-2147483648)
+			if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e152fcffffffff",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "52fcffffffff",
+	},
+	{
+		Name: "-Min vdltest.VWireIntNInt(-1)",
+		Value: func() vdltest.VNativeWireIntNInt {
+			var native vdltest.VNativeWireIntNInt
+			wire := vdltest.VWireIntNInt(-1)
+			if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15201",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "5201",
+	},
+	{
+		Name: "Full vdltest.VWireIntNInt(-123)",
+		Value: func() vdltest.VNativeWireIntNInt {
+			var native vdltest.VNativeWireIntNInt
+			wire := vdltest.VWireIntNInt(-123)
+			if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e152fff5",
+		HexType:  "5127000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e1",
+		HexValue: "52fff5",
+	},
+	{
+		Name:     "Zero vdltest.VWireIntNString(0)",
+		Value:    vdltest.VNativeWireIntNString(""),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15200",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "+Max vdltest.VWireIntNString(2147483647)",
+		Value: func() vdltest.VNativeWireIntNString {
+			var native vdltest.VNativeWireIntNString
+			wire := vdltest.VWireIntNString(2147483647)
+			if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e152fcfffffffe",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "52fcfffffffe",
+	},
+	{
+		Name: "+Min vdltest.VWireIntNString(1)",
+		Value: func() vdltest.VNativeWireIntNString {
+			var native vdltest.VNativeWireIntNString
+			wire := vdltest.VWireIntNString(1)
+			if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15202",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "5202",
+	},
+	{
+		Name: "-Max vdltest.VWireIntNString(-2147483648)",
+		Value: func() vdltest.VNativeWireIntNString {
+			var native vdltest.VNativeWireIntNString
+			wire := vdltest.VWireIntNString(-2147483648)
+			if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e152fcffffffff",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "52fcffffffff",
+	},
+	{
+		Name: "-Min vdltest.VWireIntNString(-1)",
+		Value: func() vdltest.VNativeWireIntNString {
+			var native vdltest.VNativeWireIntNString
+			wire := vdltest.VWireIntNString(-1)
+			if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15201",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "5201",
+	},
+	{
+		Name: "Full vdltest.VWireIntNString(-123)",
+		Value: func() vdltest.VNativeWireIntNString {
+			var native vdltest.VNativeWireIntNString
+			wire := vdltest.VWireIntNString(-123)
+			if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e152fff5",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e1",
+		HexValue: "52fff5",
+	},
+	{
+		Name:     "Zero vdltest.VWireIntNStruct(0)",
+		Value:    vdltest.VNativeWireIntNStruct{},
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15200",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "+Max vdltest.VWireIntNStruct(2147483647)",
+		Value: func() vdltest.VNativeWireIntNStruct {
+			var native vdltest.VNativeWireIntNStruct
+			wire := vdltest.VWireIntNStruct(2147483647)
+			if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e152fcfffffffe",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "52fcfffffffe",
+	},
+	{
+		Name: "+Min vdltest.VWireIntNStruct(1)",
+		Value: func() vdltest.VNativeWireIntNStruct {
+			var native vdltest.VNativeWireIntNStruct
+			wire := vdltest.VWireIntNStruct(1)
+			if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15202",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "5202",
+	},
+	{
+		Name: "-Max vdltest.VWireIntNStruct(-2147483648)",
+		Value: func() vdltest.VNativeWireIntNStruct {
+			var native vdltest.VNativeWireIntNStruct
+			wire := vdltest.VWireIntNStruct(-2147483648)
+			if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e152fcffffffff",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "52fcffffffff",
+	},
+	{
+		Name: "-Min vdltest.VWireIntNStruct(-1)",
+		Value: func() vdltest.VNativeWireIntNStruct {
+			var native vdltest.VNativeWireIntNStruct
+			wire := vdltest.VWireIntNStruct(-1)
+			if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15201",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "5201",
+	},
+	{
+		Name: "Full vdltest.VWireIntNStruct(-123)",
+		Value: func() vdltest.VNativeWireIntNStruct {
+			var native vdltest.VNativeWireIntNStruct
+			wire := vdltest.VWireIntNStruct(-123)
+			if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e152fff5",
+		HexType:  "512a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e1",
+		HexValue: "52fff5",
+	},
+	{
+		Name:     "Zero vdltest.VWireStringNString(\"\")",
+		Value:    vdltest.VNativeWireStringNString(""),
+		Version:  129,
+		Hex:      "81512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e15200",
+		HexType:  "512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "Full vdltest.VWireStringNString(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Value: func() vdltest.VNativeWireStringNString {
+			var native vdltest.VNativeWireStringNString
+			wire := vdltest.VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+			if err := vdltest.VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1521e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1",
+		HexValue: "521e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireStringNStruct(\"\")",
+		Value:    vdltest.VNativeWireStringNStruct{},
+		Version:  129,
+		Hex:      "81512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e15200",
+		HexType:  "512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1",
+		HexValue: "5200",
+	},
+	{
+		Name: "Full vdltest.VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Value: func() vdltest.VNativeWireStringNStruct {
+			var native vdltest.VNativeWireStringNStruct
+			wire := vdltest.VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+			if err := vdltest.VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1521e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1",
+		HexValue: "521e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireArrayNString{}",
+		Value:    vdltest.VNativeWireArrayNString(""),
+		Version:  129,
+		Hex:      "81512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e152020000",
+		HexType:  "512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireArrayNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireArrayNString {
+			var native vdltest.VNativeWireArrayNString
+			wire := vdltest.VWireArrayNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireArrayNStruct{}",
+		Value:    vdltest.VNativeWireArrayNStruct{},
+		Version:  129,
+		Hex:      "81512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e152020000",
+		HexType:  "512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireArrayNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireArrayNStruct {
+			var native vdltest.VNativeWireArrayNStruct
+			wire := vdltest.VWireArrayNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireListNString{}",
+		Value:    vdltest.VNativeWireListNString(""),
+		Version:  129,
+		Hex:      "81512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1520100",
+		HexType:  "512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1",
+		HexValue: "520100",
+	},
+	{
+		Name: "Full vdltest.VWireListNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireListNString {
+			var native vdltest.VNativeWireListNString
+			wire := vdltest.VWireListNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e15220011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1",
+		HexValue: "5220011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireListNStruct{}",
+		Value:    vdltest.VNativeWireListNStruct{},
+		Version:  129,
+		Hex:      "81512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e1520100",
+		HexType:  "512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e1",
+		HexValue: "520100",
+	},
+	{
+		Name: "Full vdltest.VWireListNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireListNStruct {
+			var native vdltest.VNativeWireListNStruct
+			wire := vdltest.VWireListNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "81512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e15220011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "512b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e1",
+		HexValue: "5220011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNString{}",
+		Value:    vdltest.VNativeWireStructNString(""),
+		Version:  129,
+		Hex:      "815133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e15201e1",
+		HexType:  "5133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireStructNString {
+			var native vdltest.VNativeWireStructNString
+			wire := vdltest.VWireStructNString{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNStruct{}",
+		Value:    vdltest.VNativeWireStructNStruct{},
+		Version:  129,
+		Hex:      "815133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e15201e1",
+		HexType:  "5133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireStructNStruct {
+			var native vdltest.VNativeWireStructNStruct
+			wire := vdltest.VWireStructNStruct{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5133060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNArray{}",
+		Value:    vdltest.VNativeWireStructNArray{},
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e15201e1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireStructNArray {
+			var native vdltest.VNativeWireStructNArray
+			wire := vdltest.VWireStructNArray{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNSlice{}",
+		Value:    vdltest.VNativeWireStructNSlice(nil),
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e15201e1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireStructNSlice {
+			var native vdltest.VNativeWireStructNSlice
+			wire := vdltest.VWireStructNSlice{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := vdltest.VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNPointer{}",
+		Value:    vdltest.VWireStructNPointer{},
+		Version:  129,
+		Hex:      "815134060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e15201e1",
+		HexType:  "5134060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: vdltest.VWireStructNPointer{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		Version:  129,
+		Hex:      "815134060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5134060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireStructNIface{}",
+		Value:    vdltest.VWireStructNIface{},
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e15201e1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: vdltest.VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		Version:  129,
+		Hex:      "815132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e15221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e1",
+		HexValue: "5221001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNString{X: \"\"}",
+		Value:    vdltest.VNativeWireUnionNString(""),
+		Version:  129,
+		Hex:      "815132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e152020000",
+		HexType:  "5132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireUnionNString {
+			var native vdltest.VNativeWireUnionNString
+			wire := vdltest.VWireUnionNString(vdltest.VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := vdltest.VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNStruct{X: \"\"}",
+		Value:    vdltest.VNativeWireUnionNStruct{},
+		Version:  129,
+		Hex:      "815132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e152020000",
+		HexType:  "5132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireUnionNStruct {
+			var native vdltest.VNativeWireUnionNStruct
+			wire := vdltest.VWireUnionNStruct(vdltest.VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := vdltest.VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5132070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNArray{X: \"\"}",
+		Value:    vdltest.VNativeWireUnionNArray{},
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e152020000",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireUnionNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireUnionNArray {
+			var native vdltest.VNativeWireUnionNArray
+			wire := vdltest.VWireUnionNArray(vdltest.VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := vdltest.VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNSlice{X: \"\"}",
+		Value:    vdltest.VNativeWireUnionNSlice(nil),
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e152020000",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name: "Full vdltest.VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value: func() vdltest.VNativeWireUnionNSlice {
+			var native vdltest.VNativeWireUnionNSlice
+			wire := vdltest.VWireUnionNSlice(vdltest.VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := vdltest.VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNPointer{X: \"\"}",
+		Value:    vdltest.VWireUnionNPointer(vdltest.VWireUnionNPointerX{}),
+		Version:  129,
+		Hex:      "815133070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e152020000",
+		HexType:  "5133070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name:     "Full vdltest.VWireUnionNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value:    vdltest.VWireUnionNPointer(vdltest.VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		Version:  129,
+		Hex:      "815133070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5133070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name:     "Zero vdltest.VWireUnionNIface{X: \"\"}",
+		Value:    vdltest.VWireUnionNIface(vdltest.VWireUnionNIfaceX{}),
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e152020000",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e1",
+		HexValue: "52020000",
+	},
+	{
+		Name:     "Full vdltest.VWireUnionNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Value:    vdltest.VWireUnionNIface(vdltest.VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		Version:  129,
+		Hex:      "815131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e15220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+		HexType:  "5131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e1",
+		HexValue: "5220001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c",
+	},
+	{
+		Name: "Zero vdltest.VWireAll{}",
+		Value: vdltest.VWireAll{
+			UnionNPointer: vdltest.VWireUnionNPointerX{},
+			UnionNIface:   vdltest.VWireUnionNIfaceX{},
+		},
+		Version:  129,
+		Hex:      "815329000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1552b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1572b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15927000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15b2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15d2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15f2d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1612d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1632e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1652e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1672b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1692b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e16b33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e16d33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e16f32060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e17132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e17334060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e17532060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e17732070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e17932070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e17b31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e17d31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e17f33070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1ff8131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e151fe01af06001d762e696f2f7632332f76646c2f76646c746573742e5657697265416c6c01180009426f6f6c4e426f6f6c012ae1000b426f6f6c4e537472696e67012be1000b426f6f6c4e537472756374012ce10007496e744e496e74012de1000a496e744e537472696e67012ee1000a496e744e537472756374012fe1000d537472696e674e537472696e670130e1000d537472696e674e5374727563740131e1000c41727261794e537472696e670132e1000c41727261794e5374727563740133e1000b4c6973744e537472696e670134e1000b4c6973744e5374727563740135e1000d5374727563744e537472696e670136e1000d5374727563744e5374727563740137e1000c5374727563744e41727261790138e1000c5374727563744e536c6963650139e1000e5374727563744e506f696e746572013ae1000c5374727563744e4966616365013be1000c556e696f6e4e537472696e67013ce1000c556e696f6e4e537472756374013de1000b556e696f6e4e4172726179013ee1000b556e696f6e4e536c696365013fe1000d556e696f6e4e506f696e7465720140e1000b556e696f6e4e49666163650141e1e15201e1",
+		HexType:  "5329000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1552b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1572b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15927000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15b2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15d2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15f2d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1612d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1632e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1652e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1672b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1692b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e16b33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e16d33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e16f32060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e17132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e17334060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e17532060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e17732070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e17932070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e17b31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e17d31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e17f33070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1ff8131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e151fe01af06001d762e696f2f7632332f76646c2f76646c746573742e5657697265416c6c01180009426f6f6c4e426f6f6c012ae1000b426f6f6c4e537472696e67012be1000b426f6f6c4e537472756374012ce10007496e744e496e74012de1000a496e744e537472696e67012ee1000a496e744e537472756374012fe1000d537472696e674e537472696e670130e1000d537472696e674e5374727563740131e1000c41727261794e537472696e670132e1000c41727261794e5374727563740133e1000b4c6973744e537472696e670134e1000b4c6973744e5374727563740135e1000d5374727563744e537472696e670136e1000d5374727563744e5374727563740137e1000c5374727563744e41727261790138e1000c5374727563744e536c6963650139e1000e5374727563744e506f696e746572013ae1000c5374727563744e4966616365013be1000c556e696f6e4e537472696e67013ce1000c556e696f6e4e537472756374013de1000b556e696f6e4e4172726179013ee1000b556e696f6e4e536c696365013fe1000d556e696f6e4e506f696e7465720140e1000b556e696f6e4e49666163650141e1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.VWireAll{BoolNBool: true, BoolNString: true, BoolNStruct: true, IntNInt: -123, IntNString: -123, IntNStruct: -123, StringNString: \"abcdeΔΘΠΣΦ王普澤世界\", StringNStruct: \"abcdeΔΘΠΣΦ王普澤世界\", ArrayNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ArrayNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, StructNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}}",
+		Value: vdltest.VWireAll{
+			BoolNBool: func() vdltest.VNativeWireBoolNBool {
+				var native vdltest.VNativeWireBoolNBool
+				wire := vdltest.VWireBoolNBool(true)
+				if err := vdltest.VWireBoolNBoolToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNString: func() vdltest.VNativeWireBoolNString {
+				var native vdltest.VNativeWireBoolNString
+				wire := vdltest.VWireBoolNString(true)
+				if err := vdltest.VWireBoolNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNStruct: func() vdltest.VNativeWireBoolNStruct {
+				var native vdltest.VNativeWireBoolNStruct
+				wire := vdltest.VWireBoolNStruct(true)
+				if err := vdltest.VWireBoolNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNInt: func() vdltest.VNativeWireIntNInt {
+				var native vdltest.VNativeWireIntNInt
+				wire := vdltest.VWireIntNInt(-123)
+				if err := vdltest.VWireIntNIntToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNString: func() vdltest.VNativeWireIntNString {
+				var native vdltest.VNativeWireIntNString
+				wire := vdltest.VWireIntNString(-123)
+				if err := vdltest.VWireIntNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNStruct: func() vdltest.VNativeWireIntNStruct {
+				var native vdltest.VNativeWireIntNStruct
+				wire := vdltest.VWireIntNStruct(-123)
+				if err := vdltest.VWireIntNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNString: func() vdltest.VNativeWireStringNString {
+				var native vdltest.VNativeWireStringNString
+				wire := vdltest.VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+				if err := vdltest.VWireStringNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNStruct: func() vdltest.VNativeWireStringNStruct {
+				var native vdltest.VNativeWireStringNStruct
+				wire := vdltest.VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+				if err := vdltest.VWireStringNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNString: func() vdltest.VNativeWireArrayNString {
+				var native vdltest.VNativeWireArrayNString
+				wire := vdltest.VWireArrayNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireArrayNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNStruct: func() vdltest.VNativeWireArrayNStruct {
+				var native vdltest.VNativeWireArrayNStruct
+				wire := vdltest.VWireArrayNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireArrayNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNString: func() vdltest.VNativeWireListNString {
+				var native vdltest.VNativeWireListNString
+				wire := vdltest.VWireListNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireListNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNStruct: func() vdltest.VNativeWireListNStruct {
+				var native vdltest.VNativeWireListNStruct
+				wire := vdltest.VWireListNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireListNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNString: func() vdltest.VNativeWireStructNString {
+				var native vdltest.VNativeWireStructNString
+				wire := vdltest.VWireStructNString{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireStructNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNStruct: func() vdltest.VNativeWireStructNStruct {
+				var native vdltest.VNativeWireStructNStruct
+				wire := vdltest.VWireStructNStruct{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireStructNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNArray: func() vdltest.VNativeWireStructNArray {
+				var native vdltest.VNativeWireStructNArray
+				wire := vdltest.VWireStructNArray{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireStructNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNSlice: func() vdltest.VNativeWireStructNSlice {
+				var native vdltest.VNativeWireStructNSlice
+				wire := vdltest.VWireStructNSlice{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := vdltest.VWireStructNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNPointer: vdltest.VWireStructNPointer{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			StructNIface: vdltest.VWireStructNIface{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			UnionNString: func() vdltest.VNativeWireUnionNString {
+				var native vdltest.VNativeWireUnionNString
+				wire := vdltest.VWireUnionNString(vdltest.VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := vdltest.VWireUnionNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNStruct: func() vdltest.VNativeWireUnionNStruct {
+				var native vdltest.VNativeWireUnionNStruct
+				wire := vdltest.VWireUnionNStruct(vdltest.VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := vdltest.VWireUnionNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNArray: func() vdltest.VNativeWireUnionNArray {
+				var native vdltest.VNativeWireUnionNArray
+				wire := vdltest.VWireUnionNArray(vdltest.VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := vdltest.VWireUnionNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNSlice: func() vdltest.VNativeWireUnionNSlice {
+				var native vdltest.VNativeWireUnionNSlice
+				wire := vdltest.VWireUnionNSlice(vdltest.VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := vdltest.VWireUnionNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNPointer: vdltest.VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"},
+			UnionNIface:   vdltest.VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"},
+		},
+		Version:  129,
+		Hex:      "815329000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1552b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1572b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15927000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15b2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15d2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15f2d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1612d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1632e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1652e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1672b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1692b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e16b33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e16d33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e16f32060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e17132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e17334060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e17532060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e17732070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e17932070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e17b31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e17d31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e17f33070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1ff8131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e151fe01af06001d762e696f2f7632332f76646c2f76646c746573742e5657697265416c6c01180009426f6f6c4e426f6f6c012ae1000b426f6f6c4e537472696e67012be1000b426f6f6c4e537472756374012ce10007496e744e496e74012de1000a496e744e537472696e67012ee1000a496e744e537472756374012fe1000d537472696e674e537472696e670130e1000d537472696e674e5374727563740131e1000c41727261794e537472696e670132e1000c41727261794e5374727563740133e1000b4c6973744e537472696e670134e1000b4c6973744e5374727563740135e1000d5374727563744e537472696e670136e1000d5374727563744e5374727563740137e1000c5374727563744e41727261790138e1000c5374727563744e536c6963650139e1000e5374727563744e506f696e746572013ae1000c5374727563744e4966616365013be1000c556e696f6e4e537472696e67013ce1000c556e696f6e4e537472756374013de1000b556e696f6e4e4172726179013ee1000b556e696f6e4e536c696365013fe1000d556e696f6e4e506f696e7465720140e1000b556e696f6e4e49666163650141e1e152fe026600010101020103fff504fff505fff5061e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c071e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c08001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c09001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0a011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0b011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0c001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10d001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10e001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10f001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce110001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce111001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce112001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c13001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c14001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c15001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c16001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c17001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+		HexType:  "5329000023762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e426f6f6c0101e1552b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e537472696e670101e1572b000025762e696f2f7632332f76646c2f76646c746573742e5657697265426f6f6c4e5374727563740101e15927000021762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e496e740108e15b2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e537472696e670108e15d2a000024762e696f2f7632332f76646c2f76646c746573742e5657697265496e744e5374727563740108e15f2d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e537472696e670103e1612d000027762e696f2f7632332f76646c2f76646c746573742e5657697265537472696e674e5374727563740103e1632e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e537472696e6701030201e1652e020026762e696f2f7632332f76646c2f76646c746573742e565769726541727261794e53747275637401030201e1672b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e537472696e670103e1692b030025762e696f2f7632332f76646c2f76646c746573742e56576972654c6973744e5374727563740103e16b33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e537472696e6701010001580103e1e16d33060027762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e53747275637401010001580103e1e16f32060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e417272617901010001580103e1e17132060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e536c69636501010001580103e1e17334060028762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e506f696e74657201010001580103e1e17532060026762e696f2f7632332f76646c2f76646c746573742e56576972655374727563744e496661636501010001580103e1e17732070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e537472696e6701010001580103e1e17932070026762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e53747275637401010001580103e1e17b31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e417272617901010001580103e1e17d31070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e536c69636501010001580103e1e17f33070027762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e506f696e74657201010001580103e1e1ff8131070025762e696f2f7632332f76646c2f76646c746573742e5657697265556e696f6e4e496661636501010001580103e1e151fe01af06001d762e696f2f7632332f76646c2f76646c746573742e5657697265416c6c01180009426f6f6c4e426f6f6c012ae1000b426f6f6c4e537472696e67012be1000b426f6f6c4e537472756374012ce10007496e744e496e74012de1000a496e744e537472696e67012ee1000a496e744e537472756374012fe1000d537472696e674e537472696e670130e1000d537472696e674e5374727563740131e1000c41727261794e537472696e670132e1000c41727261794e5374727563740133e1000b4c6973744e537472696e670134e1000b4c6973744e5374727563740135e1000d5374727563744e537472696e670136e1000d5374727563744e5374727563740137e1000c5374727563744e41727261790138e1000c5374727563744e536c6963650139e1000e5374727563744e506f696e746572013ae1000c5374727563744e4966616365013be1000c556e696f6e4e537472696e67013ce1000c556e696f6e4e537472756374013de1000b556e696f6e4e4172726179013ee1000b556e696f6e4e536c696365013fe1000d556e696f6e4e506f696e7465720140e1000b556e696f6e4e49666163650141e1e1",
+		HexValue: "52fe026600010101020103fff504fff505fff5061e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c071e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c08001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c09001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0a011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0b011e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c0c001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10d001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10e001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce10f001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce110001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce111001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce112001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c13001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c14001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c15001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c16001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958c17001e6162636465ce94ce98cea0cea3cea6e78e8be699aee6bea4e4b896e7958ce1",
+	},
+	{
 		Name:     "Zero vdltest.XBool(false)",
 		Value:    vdltest.XBool(false),
 		Version:  129,
@@ -15015,6 +16024,87 @@ var data81 = []TestCase{
 		Hex:      "81592901001d762e696f2f7632332f76646c2f76646c746573742e58456e756d4263640103014201430144e1570404012de15531020029762e696f2f7632332f76646c2f76646c746573742e584172726179315f5365745f58456e756d426364012c0201e15344060037762e696f2f7632332f76646c2f76646c746573742e585374727563744465707468335f584172726179315f5365745f58456e756d426364010100024630012be1e1510408012ae1520500000102e1",
 		HexType:  "592901001d762e696f2f7632332f76646c2f76646c746573742e58456e756d4263640103014201430144e1570404012de15531020029762e696f2f7632332f76646c2f76646c746573742e584172726179315f5365745f58456e756d426364012c0201e15344060037762e696f2f7632332f76646c2f76646c746573742e585374727563744465707468335f584172726179315f5365745f58456e756d426364010100024630012be1e1510408012ae1",
 		HexValue: "520500000102e1",
+	},
+	{
+		Name:     "Zero vdltest.XSelfCycle{}",
+		Value:    vdltest.XSelfCycle{},
+		Version:  129,
+		Hex:      "81e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5853656c664379636c6501020004446174610109e100044e657874012ae1e15201e1",
+		HexType:  "e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5853656c664379636c6501020004446174610109e100044e657874012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Value: vdltest.XSelfCycle{
+			Data: -123,
+			Next: &vdltest.XSelfCycle{
+				Data: -123,
+				Next: &vdltest.XSelfCycle{
+					Data: -123,
+					Next: &vdltest.XSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5853656c664379636c6501020004446174610109e100044e657874012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25304080129e1513706001f762e696f2f7632332f76646c2f76646c746573742e5853656c664379636c6501020004446174610109e100044e657874012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
+	},
+	{
+		Name:     "Zero vdltest.XMutualCycleB{}",
+		Value:    vdltest.XMutualCycleB{},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ae1e15201e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Value: vdltest.XMutualCycleB{
+			Data: -123,
+			A: &vdltest.XMutualCycleA{
+				Data: -123,
+				B: &vdltest.XMutualCycleB{
+					Data: -123,
+					A: &vdltest.XMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
+	},
+	{
+		Name:     "Zero vdltest.XMutualCycleA{}",
+		Value:    vdltest.XMutualCycleA{},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ae1e15201e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ae1e1",
+		HexValue: "5201e1",
+	},
+	{
+		Name: "Full vdltest.XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Value: vdltest.XMutualCycleA{
+			Data: -123,
+			B: &vdltest.XMutualCycleB{
+				Data: -123,
+				A: &vdltest.XMutualCycleA{
+					Data: -123,
+					B: &vdltest.XMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+		Version:  129,
+		Hex:      "81e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ae1e1521300fff50100fff50100fff50100fff5e1e1e1e1",
+		HexType:  "e25704080129e1e25537060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654201020004446174610109e1000141012ce1e1e2530408012be15137060022762e696f2f7632332f76646c2f76646c746573742e584d757475616c4379636c654101020004446174610109e1000142012ae1e1",
+		HexValue: "521300fff50100fff50100fff50100fff5e1e1e1e1",
 	},
 }
 

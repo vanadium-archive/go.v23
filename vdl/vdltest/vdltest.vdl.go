@@ -20502,6 +20502,2463 @@ func VDLReadVUnionDepth3_OptVStructDepth2_Set_Float64(dec vdl.Decoder, x *VUnion
 	return dec.FinishValue()
 }
 
+// VSelfCycle tests self-cyclic types.
+type VSelfCycle struct {
+	Data int64
+	Next *VSelfCycle
+}
+
+func (VSelfCycle) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VSelfCycle"`
+}) {
+}
+
+func (x VSelfCycle) VDLIsZero() bool {
+	return x == VSelfCycle{}
+}
+
+func (x VSelfCycle) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSelfCycle)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Data != 0 {
+		if err := enc.NextField("Data"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Data); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.Next != nil {
+		if err := enc.NextField("Next"); err != nil {
+			return err
+		}
+		enc.SetNextStartValueIsOptional()
+
+		if err := x.Next.VDLWrite(enc); err != nil {
+			return err
+		}
+
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VSelfCycle) VDLRead(dec vdl.Decoder) error {
+	*x = VSelfCycle{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Data":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Data, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "Next":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.Next), dec.Type()) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.Next, dec.Type())
+				}
+				x.Next = nil
+				if err := dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.Next = new(VSelfCycle)
+				dec.IgnoreNextStartValue()
+				if err := x.Next.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+// VMutualCycleB tests mutually cyclic types A and B.
+type VMutualCycleB struct {
+	Data int64
+	A    *VMutualCycleA
+}
+
+func (VMutualCycleB) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VMutualCycleB"`
+}) {
+}
+
+func (x VMutualCycleB) VDLIsZero() bool {
+	return x == VMutualCycleB{}
+}
+
+func (x VMutualCycleB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VMutualCycleB)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Data != 0 {
+		if err := enc.NextField("Data"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Data); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.A != nil {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		enc.SetNextStartValueIsOptional()
+
+		if err := x.A.VDLWrite(enc); err != nil {
+			return err
+		}
+
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VMutualCycleB) VDLRead(dec vdl.Decoder) error {
+	*x = VMutualCycleB{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Data":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Data, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "A":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.A), dec.Type()) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.A, dec.Type())
+				}
+				x.A = nil
+				if err := dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.A = new(VMutualCycleA)
+				dec.IgnoreNextStartValue()
+				if err := x.A.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+// VMutualCycleA tests mutually cyclic types A and B.
+type VMutualCycleA struct {
+	Data int64
+	B    *VMutualCycleB
+}
+
+func (VMutualCycleA) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VMutualCycleA"`
+}) {
+}
+
+func (x VMutualCycleA) VDLIsZero() bool {
+	return x == VMutualCycleA{}
+}
+
+func (x VMutualCycleA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VMutualCycleA)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.Data != 0 {
+		if err := enc.NextField("Data"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int64Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(x.Data); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.B != nil {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		enc.SetNextStartValueIsOptional()
+
+		if err := x.B.VDLWrite(enc); err != nil {
+			return err
+		}
+
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VMutualCycleA) VDLRead(dec vdl.Decoder) error {
+	*x = VMutualCycleA{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "Data":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.Data, err = dec.DecodeInt(64); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "B":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			if dec.IsNil() {
+				if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.B), dec.Type()) {
+					return fmt.Errorf("incompatible optional %T, from %v", x.B, dec.Type())
+				}
+				x.B = nil
+				if err := dec.FinishValue(); err != nil {
+					return err
+				}
+			} else {
+				x.B = new(VMutualCycleB)
+				dec.IgnoreNextStartValue()
+				if err := x.B.VDLRead(dec); err != nil {
+					return err
+				}
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireBoolNBool bool
+
+func (VWireBoolNBool) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireBoolNBool"`
+}) {
+}
+
+func (x VWireBoolNBool) VDLIsZero() bool {
+	return bool(!x)
+}
+
+func (x VWireBoolNBool) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireBoolNBool)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(bool(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireBoolNBool) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeBool()
+	if err != nil {
+		return err
+	}
+	*x = VWireBoolNBool(tmp)
+	return dec.FinishValue()
+}
+
+type VWireBoolNString bool
+
+func (VWireBoolNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireBoolNString"`
+}) {
+}
+
+func (x VWireBoolNString) VDLIsZero() bool {
+	return bool(!x)
+}
+
+func (x VWireBoolNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireBoolNString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(bool(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireBoolNString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeBool()
+	if err != nil {
+		return err
+	}
+	*x = VWireBoolNString(tmp)
+	return dec.FinishValue()
+}
+
+type VWireBoolNStruct bool
+
+func (VWireBoolNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireBoolNStruct"`
+}) {
+}
+
+func (x VWireBoolNStruct) VDLIsZero() bool {
+	return bool(!x)
+}
+
+func (x VWireBoolNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireBoolNStruct)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(bool(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireBoolNStruct) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeBool()
+	if err != nil {
+		return err
+	}
+	*x = VWireBoolNStruct(tmp)
+	return dec.FinishValue()
+}
+
+type VWireIntNInt int32
+
+func (VWireIntNInt) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireIntNInt"`
+}) {
+}
+
+func (x VWireIntNInt) VDLIsZero() bool {
+	return x == 0
+}
+
+func (x VWireIntNInt) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireIntNInt)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireIntNInt) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = VWireIntNInt(tmp)
+	return dec.FinishValue()
+}
+
+type VWireIntNString int32
+
+func (VWireIntNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireIntNString"`
+}) {
+}
+
+func (x VWireIntNString) VDLIsZero() bool {
+	return x == 0
+}
+
+func (x VWireIntNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireIntNString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireIntNString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = VWireIntNString(tmp)
+	return dec.FinishValue()
+}
+
+type VWireIntNStruct int32
+
+func (VWireIntNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireIntNStruct"`
+}) {
+}
+
+func (x VWireIntNStruct) VDLIsZero() bool {
+	return x == 0
+}
+
+func (x VWireIntNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireIntNStruct)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireIntNStruct) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = VWireIntNStruct(tmp)
+	return dec.FinishValue()
+}
+
+type VWireStringNString string
+
+func (VWireStringNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStringNString"`
+}) {
+}
+
+func (x VWireStringNString) VDLIsZero() bool {
+	return x == ""
+}
+
+func (x VWireStringNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStringNString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStringNString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = VWireStringNString(tmp)
+	return dec.FinishValue()
+}
+
+type VWireStringNStruct string
+
+func (VWireStringNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStringNStruct"`
+}) {
+}
+
+func (x VWireStringNStruct) VDLIsZero() bool {
+	return x == ""
+}
+
+func (x VWireStringNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStringNStruct)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStringNStruct) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = VWireStringNStruct(tmp)
+	return dec.FinishValue()
+}
+
+type VWireArrayNString [1]string
+
+func (VWireArrayNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireArrayNString"`
+}) {
+}
+
+func (x VWireArrayNString) VDLIsZero() bool {
+	return x == VWireArrayNString{}
+}
+
+func (x VWireArrayNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireArrayNString)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 1; i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireArrayNString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+	}
+	index := 0
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done != (index >= len(*x)):
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
+		case done:
+			return dec.FinishValue()
+		}
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if x[index], err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		index++
+	}
+}
+
+type VWireArrayNStruct [1]string
+
+func (VWireArrayNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireArrayNStruct"`
+}) {
+}
+
+func (x VWireArrayNStruct) VDLIsZero() bool {
+	return x == VWireArrayNStruct{}
+}
+
+func (x VWireArrayNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireArrayNStruct)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 1; i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireArrayNStruct) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+	}
+	index := 0
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done != (index >= len(*x)):
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
+		case done:
+			return dec.FinishValue()
+		}
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if x[index], err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		index++
+	}
+}
+
+type VWireListNString []string
+
+func (VWireListNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireListNString"`
+}) {
+}
+
+func (x VWireListNString) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VWireListNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireListNString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireListNString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len > 0:
+		*x = make(VWireListNString, 0, len)
+	default:
+		*x = nil
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem string
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if elem, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+type VWireListNStruct []string
+
+func (VWireListNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireListNStruct"`
+}) {
+}
+
+func (x VWireListNStruct) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VWireListNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireListNStruct)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x[i]); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireListNStruct) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len > 0:
+		*x = make(VWireListNStruct, 0, len)
+	default:
+		*x = nil
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem string
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if elem, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+type VWireStructNString struct {
+	X string
+}
+
+func (VWireStructNString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNString"`
+}) {
+}
+
+func (x VWireStructNString) VDLIsZero() bool {
+	return x == VWireStructNString{}
+}
+
+func (x VWireStructNString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNString)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNString) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNString{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireStructNStruct struct {
+	X string
+}
+
+func (VWireStructNStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNStruct"`
+}) {
+}
+
+func (x VWireStructNStruct) VDLIsZero() bool {
+	return x == VWireStructNStruct{}
+}
+
+func (x VWireStructNStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNStruct) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNStruct{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireStructNArray struct {
+	X string
+}
+
+func (VWireStructNArray) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNArray"`
+}) {
+}
+
+func (x VWireStructNArray) VDLIsZero() bool {
+	return x == VWireStructNArray{}
+}
+
+func (x VWireStructNArray) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNArray)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNArray) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNArray{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireStructNSlice struct {
+	X string
+}
+
+func (VWireStructNSlice) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNSlice"`
+}) {
+}
+
+func (x VWireStructNSlice) VDLIsZero() bool {
+	return x == VWireStructNSlice{}
+}
+
+func (x VWireStructNSlice) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNSlice)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNSlice) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNSlice{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireStructNPointer struct {
+	X string
+}
+
+func (VWireStructNPointer) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNPointer"`
+}) {
+}
+
+func (x VWireStructNPointer) VDLIsZero() bool {
+	return x == VWireStructNPointer{}
+}
+
+func (x VWireStructNPointer) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNPointer)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNPointer) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNPointer{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VWireStructNIface struct {
+	X string
+}
+
+func (VWireStructNIface) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireStructNIface"`
+}) {
+}
+
+func (x VWireStructNIface) VDLIsZero() bool {
+	return x == VWireStructNIface{}
+}
+
+func (x VWireStructNIface) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireStructNIface)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.X != "" {
+		if err := enc.NextField("X"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.X); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireStructNIface) VDLRead(dec vdl.Decoder) error {
+	*x = VWireStructNIface{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "X":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.X, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type (
+	// VWireUnionNString represents any single field of the VWireUnionNString union type.
+	VWireUnionNString interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNString union type.
+		__VDLReflect(__VWireUnionNStringReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNStringX represents field X of the VWireUnionNString union type.
+	VWireUnionNStringX struct{ Value string }
+	// __VWireUnionNStringReflect describes the VWireUnionNString union type.
+	__VWireUnionNStringReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNString"`
+		Type  VWireUnionNString
+		Union struct {
+			X VWireUnionNStringX
+		}
+	}
+)
+
+func (x VWireUnionNStringX) Index() int                              { return 0 }
+func (x VWireUnionNStringX) Interface() interface{}                  { return x.Value }
+func (x VWireUnionNStringX) Name() string                            { return "X" }
+func (x VWireUnionNStringX) __VDLReflect(__VWireUnionNStringReflect) {}
+
+func (x VWireUnionNStringX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNStringX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNString(dec vdl.Decoder, x *VWireUnionNString) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNStringX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+type (
+	// VWireUnionNStruct represents any single field of the VWireUnionNStruct union type.
+	VWireUnionNStruct interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNStruct union type.
+		__VDLReflect(__VWireUnionNStructReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNStructX represents field X of the VWireUnionNStruct union type.
+	VWireUnionNStructX struct{ Value string }
+	// __VWireUnionNStructReflect describes the VWireUnionNStruct union type.
+	__VWireUnionNStructReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNStruct"`
+		Type  VWireUnionNStruct
+		Union struct {
+			X VWireUnionNStructX
+		}
+	}
+)
+
+func (x VWireUnionNStructX) Index() int                              { return 0 }
+func (x VWireUnionNStructX) Interface() interface{}                  { return x.Value }
+func (x VWireUnionNStructX) Name() string                            { return "X" }
+func (x VWireUnionNStructX) __VDLReflect(__VWireUnionNStructReflect) {}
+
+func (x VWireUnionNStructX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNStructX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNStruct)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNStruct(dec vdl.Decoder, x *VWireUnionNStruct) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNStructX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+type (
+	// VWireUnionNArray represents any single field of the VWireUnionNArray union type.
+	VWireUnionNArray interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNArray union type.
+		__VDLReflect(__VWireUnionNArrayReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNArrayX represents field X of the VWireUnionNArray union type.
+	VWireUnionNArrayX struct{ Value string }
+	// __VWireUnionNArrayReflect describes the VWireUnionNArray union type.
+	__VWireUnionNArrayReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNArray"`
+		Type  VWireUnionNArray
+		Union struct {
+			X VWireUnionNArrayX
+		}
+	}
+)
+
+func (x VWireUnionNArrayX) Index() int                             { return 0 }
+func (x VWireUnionNArrayX) Interface() interface{}                 { return x.Value }
+func (x VWireUnionNArrayX) Name() string                           { return "X" }
+func (x VWireUnionNArrayX) __VDLReflect(__VWireUnionNArrayReflect) {}
+
+func (x VWireUnionNArrayX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNArrayX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNArray)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNArray(dec vdl.Decoder, x *VWireUnionNArray) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNArrayX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+type (
+	// VWireUnionNSlice represents any single field of the VWireUnionNSlice union type.
+	VWireUnionNSlice interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNSlice union type.
+		__VDLReflect(__VWireUnionNSliceReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNSliceX represents field X of the VWireUnionNSlice union type.
+	VWireUnionNSliceX struct{ Value string }
+	// __VWireUnionNSliceReflect describes the VWireUnionNSlice union type.
+	__VWireUnionNSliceReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNSlice"`
+		Type  VWireUnionNSlice
+		Union struct {
+			X VWireUnionNSliceX
+		}
+	}
+)
+
+func (x VWireUnionNSliceX) Index() int                             { return 0 }
+func (x VWireUnionNSliceX) Interface() interface{}                 { return x.Value }
+func (x VWireUnionNSliceX) Name() string                           { return "X" }
+func (x VWireUnionNSliceX) __VDLReflect(__VWireUnionNSliceReflect) {}
+
+func (x VWireUnionNSliceX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNSliceX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNSlice)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNSlice(dec vdl.Decoder, x *VWireUnionNSlice) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNSliceX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+type (
+	// VWireUnionNPointer represents any single field of the VWireUnionNPointer union type.
+	VWireUnionNPointer interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNPointer union type.
+		__VDLReflect(__VWireUnionNPointerReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNPointerX represents field X of the VWireUnionNPointer union type.
+	VWireUnionNPointerX struct{ Value string }
+	// __VWireUnionNPointerReflect describes the VWireUnionNPointer union type.
+	__VWireUnionNPointerReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNPointer"`
+		Type  VWireUnionNPointer
+		Union struct {
+			X VWireUnionNPointerX
+		}
+	}
+)
+
+func (x VWireUnionNPointerX) Index() int                               { return 0 }
+func (x VWireUnionNPointerX) Interface() interface{}                   { return x.Value }
+func (x VWireUnionNPointerX) Name() string                             { return "X" }
+func (x VWireUnionNPointerX) __VDLReflect(__VWireUnionNPointerReflect) {}
+
+func (x VWireUnionNPointerX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNPointerX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNPointer)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNPointer(dec vdl.Decoder, x *VWireUnionNPointer) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNPointerX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+type (
+	// VWireUnionNIface represents any single field of the VWireUnionNIface union type.
+	VWireUnionNIface interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VWireUnionNIface union type.
+		__VDLReflect(__VWireUnionNIfaceReflect)
+		VDLIsZero() bool
+		VDLWrite(vdl.Encoder) error
+	}
+	// VWireUnionNIfaceX represents field X of the VWireUnionNIface union type.
+	VWireUnionNIfaceX struct{ Value string }
+	// __VWireUnionNIfaceReflect describes the VWireUnionNIface union type.
+	__VWireUnionNIfaceReflect struct {
+		Name  string `vdl:"v.io/v23/vdl/vdltest.VWireUnionNIface"`
+		Type  VWireUnionNIface
+		Union struct {
+			X VWireUnionNIfaceX
+		}
+	}
+)
+
+func (x VWireUnionNIfaceX) Index() int                             { return 0 }
+func (x VWireUnionNIfaceX) Interface() interface{}                 { return x.Value }
+func (x VWireUnionNIfaceX) Name() string                           { return "X" }
+func (x VWireUnionNIfaceX) __VDLReflect(__VWireUnionNIfaceReflect) {}
+
+func (x VWireUnionNIfaceX) VDLIsZero() bool {
+	return x.Value == ""
+}
+
+func (x VWireUnionNIfaceX) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireUnionNIface)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("X"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVWireUnionNIface(dec vdl.Decoder, x *VWireUnionNIface) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
+		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
+	}
+	f, err := dec.NextField()
+	if err != nil {
+		return err
+	}
+	switch f {
+	case "X":
+		var field VWireUnionNIfaceX
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = field
+	case "":
+		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
+	default:
+		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
+	}
+	switch f, err := dec.NextField(); {
+	case err != nil:
+		return err
+	case f != "":
+		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	}
+	return dec.FinishValue()
+}
+
+// VWireAll contains all wire types, which will be represented as native types
+// in the generated code.
+type VWireAll struct {
+	BoolNBool      VNativeWireBoolNBool
+	BoolNString    VNativeWireBoolNString
+	BoolNStruct    VNativeWireBoolNStruct
+	IntNInt        VNativeWireIntNInt
+	IntNString     VNativeWireIntNString
+	IntNStruct     VNativeWireIntNStruct
+	StringNString  VNativeWireStringNString
+	StringNStruct  VNativeWireStringNStruct
+	ArrayNString   VNativeWireArrayNString
+	ArrayNStruct   VNativeWireArrayNStruct
+	ListNString    VNativeWireListNString
+	ListNStruct    VNativeWireListNStruct
+	StructNString  VNativeWireStructNString
+	StructNStruct  VNativeWireStructNStruct
+	StructNArray   VNativeWireStructNArray
+	StructNSlice   VNativeWireStructNSlice
+	StructNPointer VWireStructNPointer
+	StructNIface   VWireStructNIface
+	UnionNString   VNativeWireUnionNString
+	UnionNStruct   VNativeWireUnionNStruct
+	UnionNArray    VNativeWireUnionNArray
+	UnionNSlice    VNativeWireUnionNSlice
+	UnionNPointer  VWireUnionNPointer
+	UnionNIface    VWireUnionNIface
+}
+
+func (VWireAll) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.VWireAll"`
+}) {
+}
+
+func (x VWireAll) VDLIsZero() bool {
+	if x.BoolNBool != false {
+		return false
+	}
+	if x.BoolNString != "" {
+		return false
+	}
+	if x.BoolNStruct != (VNativeWireBoolNStruct{}) {
+		return false
+	}
+	if x.IntNInt != 0 {
+		return false
+	}
+	if x.IntNString != "" {
+		return false
+	}
+	if x.IntNStruct != (VNativeWireIntNStruct{}) {
+		return false
+	}
+	if x.StringNString != "" {
+		return false
+	}
+	if x.StringNStruct != (VNativeWireStringNStruct{}) {
+		return false
+	}
+	if x.ArrayNString != "" {
+		return false
+	}
+	if x.ArrayNStruct != (VNativeWireArrayNStruct{}) {
+		return false
+	}
+	if x.ListNString != "" {
+		return false
+	}
+	if x.ListNStruct != (VNativeWireListNStruct{}) {
+		return false
+	}
+	if x.StructNString != "" {
+		return false
+	}
+	if x.StructNStruct != (VNativeWireStructNStruct{}) {
+		return false
+	}
+	if x.StructNArray != (VNativeWireStructNArray{}) {
+		return false
+	}
+	if !x.StructNSlice.IsZero() {
+		return false
+	}
+	if x.StructNPointer != (VWireStructNPointer{}) {
+		return false
+	}
+	if x.StructNIface != (VWireStructNIface{}) {
+		return false
+	}
+	if x.UnionNString != "" {
+		return false
+	}
+	if x.UnionNStruct != (VNativeWireUnionNStruct{}) {
+		return false
+	}
+	if x.UnionNArray != (VNativeWireUnionNArray{}) {
+		return false
+	}
+	if !x.UnionNSlice.IsZero() {
+		return false
+	}
+	if x.UnionNPointer != nil && !x.UnionNPointer.VDLIsZero() {
+		return false
+	}
+	if x.UnionNIface != nil && !x.UnionNIface.VDLIsZero() {
+		return false
+	}
+	return true
+}
+
+func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VWireAll)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.BoolNBool != false {
+		if err := enc.NextField("BoolNBool"); err != nil {
+			return err
+		}
+		var wire VWireBoolNBool
+		if err := VWireBoolNBoolFromNative(&wire, x.BoolNBool); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.BoolNString != "" {
+		if err := enc.NextField("BoolNString"); err != nil {
+			return err
+		}
+		var wire VWireBoolNString
+		if err := VWireBoolNStringFromNative(&wire, x.BoolNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.BoolNStruct != (VNativeWireBoolNStruct{}) {
+		if err := enc.NextField("BoolNStruct"); err != nil {
+			return err
+		}
+		var wire VWireBoolNStruct
+		if err := VWireBoolNStructFromNative(&wire, x.BoolNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.IntNInt != 0 {
+		if err := enc.NextField("IntNInt"); err != nil {
+			return err
+		}
+		var wire VWireIntNInt
+		if err := VWireIntNIntFromNative(&wire, x.IntNInt); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.IntNString != "" {
+		if err := enc.NextField("IntNString"); err != nil {
+			return err
+		}
+		var wire VWireIntNString
+		if err := VWireIntNStringFromNative(&wire, x.IntNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.IntNStruct != (VNativeWireIntNStruct{}) {
+		if err := enc.NextField("IntNStruct"); err != nil {
+			return err
+		}
+		var wire VWireIntNStruct
+		if err := VWireIntNStructFromNative(&wire, x.IntNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StringNString != "" {
+		if err := enc.NextField("StringNString"); err != nil {
+			return err
+		}
+		var wire VWireStringNString
+		if err := VWireStringNStringFromNative(&wire, x.StringNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StringNStruct != (VNativeWireStringNStruct{}) {
+		if err := enc.NextField("StringNStruct"); err != nil {
+			return err
+		}
+		var wire VWireStringNStruct
+		if err := VWireStringNStructFromNative(&wire, x.StringNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.ArrayNString != "" {
+		if err := enc.NextField("ArrayNString"); err != nil {
+			return err
+		}
+		var wire VWireArrayNString
+		if err := VWireArrayNStringFromNative(&wire, x.ArrayNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.ArrayNStruct != (VNativeWireArrayNStruct{}) {
+		if err := enc.NextField("ArrayNStruct"); err != nil {
+			return err
+		}
+		var wire VWireArrayNStruct
+		if err := VWireArrayNStructFromNative(&wire, x.ArrayNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.ListNString != "" {
+		if err := enc.NextField("ListNString"); err != nil {
+			return err
+		}
+		var wire VWireListNString
+		if err := VWireListNStringFromNative(&wire, x.ListNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.ListNStruct != (VNativeWireListNStruct{}) {
+		if err := enc.NextField("ListNStruct"); err != nil {
+			return err
+		}
+		var wire VWireListNStruct
+		if err := VWireListNStructFromNative(&wire, x.ListNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StructNString != "" {
+		if err := enc.NextField("StructNString"); err != nil {
+			return err
+		}
+		var wire VWireStructNString
+		if err := VWireStructNStringFromNative(&wire, x.StructNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StructNStruct != (VNativeWireStructNStruct{}) {
+		if err := enc.NextField("StructNStruct"); err != nil {
+			return err
+		}
+		var wire VWireStructNStruct
+		if err := VWireStructNStructFromNative(&wire, x.StructNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StructNArray != (VNativeWireStructNArray{}) {
+		if err := enc.NextField("StructNArray"); err != nil {
+			return err
+		}
+		var wire VWireStructNArray
+		if err := VWireStructNArrayFromNative(&wire, x.StructNArray); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if !x.StructNSlice.IsZero() {
+		if err := enc.NextField("StructNSlice"); err != nil {
+			return err
+		}
+		var wire VWireStructNSlice
+		if err := VWireStructNSliceFromNative(&wire, x.StructNSlice); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StructNPointer != (VWireStructNPointer{}) {
+		if err := enc.NextField("StructNPointer"); err != nil {
+			return err
+		}
+		if err := x.StructNPointer.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.StructNIface != (VWireStructNIface{}) {
+		if err := enc.NextField("StructNIface"); err != nil {
+			return err
+		}
+		if err := x.StructNIface.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.UnionNString != "" {
+		if err := enc.NextField("UnionNString"); err != nil {
+			return err
+		}
+		var wire VWireUnionNString
+		if err := VWireUnionNStringFromNative(&wire, x.UnionNString); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.UnionNStruct != (VNativeWireUnionNStruct{}) {
+		if err := enc.NextField("UnionNStruct"); err != nil {
+			return err
+		}
+		var wire VWireUnionNStruct
+		if err := VWireUnionNStructFromNative(&wire, x.UnionNStruct); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.UnionNArray != (VNativeWireUnionNArray{}) {
+		if err := enc.NextField("UnionNArray"); err != nil {
+			return err
+		}
+		var wire VWireUnionNArray
+		if err := VWireUnionNArrayFromNative(&wire, x.UnionNArray); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if !x.UnionNSlice.IsZero() {
+		if err := enc.NextField("UnionNSlice"); err != nil {
+			return err
+		}
+		var wire VWireUnionNSlice
+		if err := VWireUnionNSliceFromNative(&wire, x.UnionNSlice); err != nil {
+			return err
+		}
+		if err := wire.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.UnionNPointer != nil && !x.UnionNPointer.VDLIsZero() {
+		if err := enc.NextField("UnionNPointer"); err != nil {
+			return err
+		}
+		if err := x.UnionNPointer.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if x.UnionNIface != nil && !x.UnionNIface.VDLIsZero() {
+		if err := enc.NextField("UnionNIface"); err != nil {
+			return err
+		}
+		if err := x.UnionNIface.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
+	*x = VWireAll{
+		UnionNPointer: VWireUnionNPointerX{},
+		UnionNIface:   VWireUnionNIfaceX{},
+	}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "BoolNBool":
+			var wire VWireBoolNBool
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireBoolNBoolToNative(wire, &x.BoolNBool); err != nil {
+				return err
+			}
+		case "BoolNString":
+			var wire VWireBoolNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireBoolNStringToNative(wire, &x.BoolNString); err != nil {
+				return err
+			}
+		case "BoolNStruct":
+			var wire VWireBoolNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireBoolNStructToNative(wire, &x.BoolNStruct); err != nil {
+				return err
+			}
+		case "IntNInt":
+			var wire VWireIntNInt
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireIntNIntToNative(wire, &x.IntNInt); err != nil {
+				return err
+			}
+		case "IntNString":
+			var wire VWireIntNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireIntNStringToNative(wire, &x.IntNString); err != nil {
+				return err
+			}
+		case "IntNStruct":
+			var wire VWireIntNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireIntNStructToNative(wire, &x.IntNStruct); err != nil {
+				return err
+			}
+		case "StringNString":
+			var wire VWireStringNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStringNStringToNative(wire, &x.StringNString); err != nil {
+				return err
+			}
+		case "StringNStruct":
+			var wire VWireStringNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStringNStructToNative(wire, &x.StringNStruct); err != nil {
+				return err
+			}
+		case "ArrayNString":
+			var wire VWireArrayNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireArrayNStringToNative(wire, &x.ArrayNString); err != nil {
+				return err
+			}
+		case "ArrayNStruct":
+			var wire VWireArrayNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireArrayNStructToNative(wire, &x.ArrayNStruct); err != nil {
+				return err
+			}
+		case "ListNString":
+			var wire VWireListNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireListNStringToNative(wire, &x.ListNString); err != nil {
+				return err
+			}
+		case "ListNStruct":
+			var wire VWireListNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireListNStructToNative(wire, &x.ListNStruct); err != nil {
+				return err
+			}
+		case "StructNString":
+			var wire VWireStructNString
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStructNStringToNative(wire, &x.StructNString); err != nil {
+				return err
+			}
+		case "StructNStruct":
+			var wire VWireStructNStruct
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStructNStructToNative(wire, &x.StructNStruct); err != nil {
+				return err
+			}
+		case "StructNArray":
+			var wire VWireStructNArray
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStructNArrayToNative(wire, &x.StructNArray); err != nil {
+				return err
+			}
+		case "StructNSlice":
+			var wire VWireStructNSlice
+			if err := wire.VDLRead(dec); err != nil {
+				return err
+			}
+			if err := VWireStructNSliceToNative(wire, &x.StructNSlice); err != nil {
+				return err
+			}
+		case "StructNPointer":
+			if err := x.StructNPointer.VDLRead(dec); err != nil {
+				return err
+			}
+		case "StructNIface":
+			if err := x.StructNIface.VDLRead(dec); err != nil {
+				return err
+			}
+		case "UnionNString":
+			var wire VWireUnionNString
+			if err := VDLReadVWireUnionNString(dec, &wire); err != nil {
+				return err
+			}
+			if err := VWireUnionNStringToNative(wire, &x.UnionNString); err != nil {
+				return err
+			}
+		case "UnionNStruct":
+			var wire VWireUnionNStruct
+			if err := VDLReadVWireUnionNStruct(dec, &wire); err != nil {
+				return err
+			}
+			if err := VWireUnionNStructToNative(wire, &x.UnionNStruct); err != nil {
+				return err
+			}
+		case "UnionNArray":
+			var wire VWireUnionNArray
+			if err := VDLReadVWireUnionNArray(dec, &wire); err != nil {
+				return err
+			}
+			if err := VWireUnionNArrayToNative(wire, &x.UnionNArray); err != nil {
+				return err
+			}
+		case "UnionNSlice":
+			var wire VWireUnionNSlice
+			if err := VDLReadVWireUnionNSlice(dec, &wire); err != nil {
+				return err
+			}
+			if err := VWireUnionNSliceToNative(wire, &x.UnionNSlice); err != nil {
+				return err
+			}
+		case "UnionNPointer":
+			if err := VDLReadVWireUnionNPointer(dec, &x.UnionNPointer); err != nil {
+				return err
+			}
+		case "UnionNIface":
+			if err := VDLReadVWireUnionNIface(dec, &x.UnionNIface); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 type XBool bool
 
 func (XBool) __VDLReflect(struct {
@@ -24070,6 +26527,83 @@ func (x XUnionDepth3_OptXStructDepth2_Set_Float64F6) Interface() interface{} { r
 func (x XUnionDepth3_OptXStructDepth2_Set_Float64F6) Name() string           { return "F6" }
 func (x XUnionDepth3_OptXStructDepth2_Set_Float64F6) __VDLReflect(__XUnionDepth3_OptXStructDepth2_Set_Float64Reflect) {
 }
+
+// XSelfCycle tests self-cyclic types.
+type XSelfCycle struct {
+	Data int64
+	Next *XSelfCycle
+}
+
+func (XSelfCycle) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.XSelfCycle"`
+}) {
+}
+
+// XMutualCycleB tests mutually cyclic types A and B.
+type XMutualCycleB struct {
+	Data int64
+	A    *XMutualCycleA
+}
+
+func (XMutualCycleB) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.XMutualCycleB"`
+}) {
+}
+
+// XMutualCycleA tests mutually cyclic types A and B.
+type XMutualCycleA struct {
+	Data int64
+	B    *XMutualCycleB
+}
+
+func (XMutualCycleA) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vdl/vdltest.XMutualCycleA"`
+}) {
+}
+
+// Type-check native conversion functions.
+var (
+	_ func(VWireArrayNString, *VNativeWireArrayNString) error   = VWireArrayNStringToNative
+	_ func(*VWireArrayNString, VNativeWireArrayNString) error   = VWireArrayNStringFromNative
+	_ func(VWireArrayNStruct, *VNativeWireArrayNStruct) error   = VWireArrayNStructToNative
+	_ func(*VWireArrayNStruct, VNativeWireArrayNStruct) error   = VWireArrayNStructFromNative
+	_ func(VWireBoolNBool, *VNativeWireBoolNBool) error         = VWireBoolNBoolToNative
+	_ func(*VWireBoolNBool, VNativeWireBoolNBool) error         = VWireBoolNBoolFromNative
+	_ func(VWireBoolNString, *VNativeWireBoolNString) error     = VWireBoolNStringToNative
+	_ func(*VWireBoolNString, VNativeWireBoolNString) error     = VWireBoolNStringFromNative
+	_ func(VWireBoolNStruct, *VNativeWireBoolNStruct) error     = VWireBoolNStructToNative
+	_ func(*VWireBoolNStruct, VNativeWireBoolNStruct) error     = VWireBoolNStructFromNative
+	_ func(VWireIntNInt, *VNativeWireIntNInt) error             = VWireIntNIntToNative
+	_ func(*VWireIntNInt, VNativeWireIntNInt) error             = VWireIntNIntFromNative
+	_ func(VWireIntNString, *VNativeWireIntNString) error       = VWireIntNStringToNative
+	_ func(*VWireIntNString, VNativeWireIntNString) error       = VWireIntNStringFromNative
+	_ func(VWireIntNStruct, *VNativeWireIntNStruct) error       = VWireIntNStructToNative
+	_ func(*VWireIntNStruct, VNativeWireIntNStruct) error       = VWireIntNStructFromNative
+	_ func(VWireListNString, *VNativeWireListNString) error     = VWireListNStringToNative
+	_ func(*VWireListNString, VNativeWireListNString) error     = VWireListNStringFromNative
+	_ func(VWireListNStruct, *VNativeWireListNStruct) error     = VWireListNStructToNative
+	_ func(*VWireListNStruct, VNativeWireListNStruct) error     = VWireListNStructFromNative
+	_ func(VWireStringNString, *VNativeWireStringNString) error = VWireStringNStringToNative
+	_ func(*VWireStringNString, VNativeWireStringNString) error = VWireStringNStringFromNative
+	_ func(VWireStringNStruct, *VNativeWireStringNStruct) error = VWireStringNStructToNative
+	_ func(*VWireStringNStruct, VNativeWireStringNStruct) error = VWireStringNStructFromNative
+	_ func(VWireStructNArray, *VNativeWireStructNArray) error   = VWireStructNArrayToNative
+	_ func(*VWireStructNArray, VNativeWireStructNArray) error   = VWireStructNArrayFromNative
+	_ func(VWireStructNSlice, *VNativeWireStructNSlice) error   = VWireStructNSliceToNative
+	_ func(*VWireStructNSlice, VNativeWireStructNSlice) error   = VWireStructNSliceFromNative
+	_ func(VWireStructNString, *VNativeWireStructNString) error = VWireStructNStringToNative
+	_ func(*VWireStructNString, VNativeWireStructNString) error = VWireStructNStringFromNative
+	_ func(VWireStructNStruct, *VNativeWireStructNStruct) error = VWireStructNStructToNative
+	_ func(*VWireStructNStruct, VNativeWireStructNStruct) error = VWireStructNStructFromNative
+	_ func(VWireUnionNArray, *VNativeWireUnionNArray) error     = VWireUnionNArrayToNative
+	_ func(*VWireUnionNArray, VNativeWireUnionNArray) error     = VWireUnionNArrayFromNative
+	_ func(VWireUnionNSlice, *VNativeWireUnionNSlice) error     = VWireUnionNSliceToNative
+	_ func(*VWireUnionNSlice, VNativeWireUnionNSlice) error     = VWireUnionNSliceFromNative
+	_ func(VWireUnionNString, *VNativeWireUnionNString) error   = VWireUnionNStringToNative
+	_ func(*VWireUnionNString, VNativeWireUnionNString) error   = VWireUnionNStringFromNative
+	_ func(VWireUnionNStruct, *VNativeWireUnionNStruct) error   = VWireUnionNStructToNative
+	_ func(*VWireUnionNStruct, VNativeWireUnionNStruct) error   = VWireUnionNStructFromNative
+)
 
 //////////////////////////////////////////////////
 // Const definitions
@@ -57700,6 +60234,5306 @@ var vAllPass = []vdlEntry{
 			},
 		},
 	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VSelfCycle{}",
+		Target:      VSelfCycle{},
+		SourceLabel: "VSelfCycle{}",
+		Source:      VSelfCycle{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VSelfCycle{}",
+		Target:      VSelfCycle{},
+		SourceLabel: "VMutualCycleA{}",
+		Source:      VMutualCycleA{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VSelfCycle{}",
+		Target:      VSelfCycle{},
+		SourceLabel: "VMutualCycleB{}",
+		Source:      VMutualCycleB{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Target: VSelfCycle{
+			Data: -123,
+			Next: &VSelfCycle{
+				Data: -123,
+				Next: &VSelfCycle{
+					Data: -123,
+					Next: &VSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "VSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Source: VSelfCycle{
+			Data: -123,
+			Next: &VSelfCycle{
+				Data: -123,
+				Next: &VSelfCycle{
+					Data: -123,
+					Next: &VSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VSelfCycle{Data: -3933048656192887342, Next: {Data: -1666879701135447875, Next: {}}}",
+		Target: VSelfCycle{
+			Data: -3933048656192887342,
+			Next: &VSelfCycle{
+				Data: -1666879701135447875,
+				Next: &VSelfCycle{},
+			},
+		},
+		SourceLabel: "VSelfCycle{Data: -3933048656192887342, Next: {Data: -1666879701135447875, Next: {}}}",
+		Source: VSelfCycle{
+			Data: -3933048656192887342,
+			Next: &VSelfCycle{
+				Data: -1666879701135447875,
+				Next: &VSelfCycle{},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleB{}",
+		Target:      VMutualCycleB{},
+		SourceLabel: "VMutualCycleB{}",
+		Source:      VMutualCycleB{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleB{}",
+		Target:      VMutualCycleB{},
+		SourceLabel: "VSelfCycle{}",
+		Source:      VSelfCycle{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleB{}",
+		Target:      VMutualCycleB{},
+		SourceLabel: "?VStructEmpty{}",
+		Source:      &VStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Target: VMutualCycleB{
+			Data: -123,
+			A: &VMutualCycleA{
+				Data: -123,
+				B: &VMutualCycleB{
+					Data: -123,
+					A: &VMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "VMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Source: VMutualCycleB{
+			Data: -123,
+			A: &VMutualCycleA{
+				Data: -123,
+				B: &VMutualCycleB{
+					Data: -123,
+					A: &VMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VMutualCycleB{Data: 3315306687289648358, A: {B: {Data: -830867813984030735}}}",
+		Target: VMutualCycleB{
+			Data: 3315306687289648358,
+			A: &VMutualCycleA{
+				B: &VMutualCycleB{
+					Data: -830867813984030735,
+				},
+			},
+		},
+		SourceLabel: "VMutualCycleB{Data: 3315306687289648358, A: {B: {Data: -830867813984030735}}}",
+		Source: VMutualCycleB{
+			Data: 3315306687289648358,
+			A: &VMutualCycleA{
+				B: &VMutualCycleB{
+					Data: -830867813984030735,
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleA{}",
+		Target:      VMutualCycleA{},
+		SourceLabel: "VMutualCycleA{}",
+		Source:      VMutualCycleA{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleA{}",
+		Target:      VMutualCycleA{},
+		SourceLabel: "VSelfCycle{}",
+		Source:      VSelfCycle{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VMutualCycleA{}",
+		Target:      VMutualCycleA{},
+		SourceLabel: "?VStructEmpty{}",
+		Source:      &VStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Target: VMutualCycleA{
+			Data: -123,
+			B: &VMutualCycleB{
+				Data: -123,
+				A: &VMutualCycleA{
+					Data: -123,
+					B: &VMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "VMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Source: VMutualCycleA{
+			Data: -123,
+			B: &VMutualCycleB{
+				Data: -123,
+				A: &VMutualCycleA{
+					Data: -123,
+					B: &VMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VMutualCycleA{Data: -1454793165023012937, B: {}}",
+		Target: VMutualCycleA{
+			Data: -1454793165023012937,
+			B:    &VMutualCycleB{},
+		},
+		SourceLabel: "VMutualCycleA{Data: -1454793165023012937, B: {}}",
+		Source: VMutualCycleA{
+			Data: -1454793165023012937,
+			B:    &VMutualCycleB{},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNBool(false)",
+		Target:      VNativeWireBoolNBool(false),
+		SourceLabel: "VWireBoolNBool(false)",
+		Source:      VNativeWireBoolNBool(false),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNBool(false)",
+		Target:      VNativeWireBoolNBool(false),
+		SourceLabel: "VWireBoolNString(false)",
+		Source:      VNativeWireBoolNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNBool(false)",
+		Target:      VNativeWireBoolNBool(false),
+		SourceLabel: "VWireBoolNStruct(false)",
+		Source:      VNativeWireBoolNStruct{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireBoolNBool(true)",
+		Target: func() VNativeWireBoolNBool {
+			var native VNativeWireBoolNBool
+			wire := VWireBoolNBool(true)
+			if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireBoolNBool(true)",
+		Source: func() VNativeWireBoolNBool {
+			var native VNativeWireBoolNBool
+			wire := VWireBoolNBool(true)
+			if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireBoolNBool(true)",
+		Target: func() VNativeWireBoolNBool {
+			var native VNativeWireBoolNBool
+			wire := VWireBoolNBool(true)
+			if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireBoolNStruct(true)",
+		Source: func() VNativeWireBoolNStruct {
+			var native VNativeWireBoolNStruct
+			wire := VWireBoolNStruct(true)
+			if err := VWireBoolNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNString(false)",
+		Target:      VNativeWireBoolNString(""),
+		SourceLabel: "VWireBoolNString(false)",
+		Source:      VNativeWireBoolNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNString(false)",
+		Target:      VNativeWireBoolNString(""),
+		SourceLabel: "VWireBoolNStruct(false)",
+		Source:      VNativeWireBoolNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNString(false)",
+		Target:      VNativeWireBoolNString(""),
+		SourceLabel: "false",
+		Source:      false,
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireBoolNString(true)",
+		Target: func() VNativeWireBoolNString {
+			var native VNativeWireBoolNString
+			wire := VWireBoolNString(true)
+			if err := VWireBoolNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireBoolNString(true)",
+		Source: func() VNativeWireBoolNString {
+			var native VNativeWireBoolNString
+			wire := VWireBoolNString(true)
+			if err := VWireBoolNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireBoolNString(true)",
+		Target: func() VNativeWireBoolNString {
+			var native VNativeWireBoolNString
+			wire := VWireBoolNString(true)
+			if err := VWireBoolNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireBoolNBool(true)",
+		Source: func() VNativeWireBoolNBool {
+			var native VNativeWireBoolNBool
+			wire := VWireBoolNBool(true)
+			if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNStruct(false)",
+		Target:      VNativeWireBoolNStruct{},
+		SourceLabel: "VWireBoolNStruct(false)",
+		Source:      VNativeWireBoolNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNStruct(false)",
+		Target:      VNativeWireBoolNStruct{},
+		SourceLabel: "VWireBoolNString(false)",
+		Source:      VNativeWireBoolNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireBoolNStruct(false)",
+		Target:      VNativeWireBoolNStruct{},
+		SourceLabel: "false",
+		Source:      false,
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireBoolNStruct(true)",
+		Target: func() VNativeWireBoolNStruct {
+			var native VNativeWireBoolNStruct
+			wire := VWireBoolNStruct(true)
+			if err := VWireBoolNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireBoolNStruct(true)",
+		Source: func() VNativeWireBoolNStruct {
+			var native VNativeWireBoolNStruct
+			wire := VWireBoolNStruct(true)
+			if err := VWireBoolNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireBoolNStruct(true)",
+		Target: func() VNativeWireBoolNStruct {
+			var native VNativeWireBoolNStruct
+			wire := VWireBoolNStruct(true)
+			if err := VWireBoolNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "true",
+		Source:      true,
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireIntNInt(0)",
+		Target:      VNativeWireIntNInt(0),
+		SourceLabel: "VWireIntNInt(0)",
+		Source:      VNativeWireIntNInt(0),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNInt(0)",
+		Target:      VNativeWireIntNInt(0),
+		SourceLabel: "int64(0)",
+		Source:      int64(0),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNInt(0)",
+		Target:      VNativeWireIntNInt(0),
+		SourceLabel: "uint16(0)",
+		Source:      uint16(0),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(2147483647)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(2147483647)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(2147483647)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(2147483647)",
+		Source:      VUint32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(2147483647)",
+		Source:      VUint64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(2147483647)",
+		Source:      VInt32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(2147483647)",
+		Source:      VInt64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(2.147483647e+09)",
+		Source:      VFloat64(2.147483647e+09),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "uint64(2147483647)",
+		Source:      uint64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNInt(2147483647)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "float64(2.147483647e+09)",
+		Source:      float64(2.147483647e+09),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VByte(1)",
+		Source:      VByte(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint16(1)",
+		Source:      VUint16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(1)",
+		Source:      VUint32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(1)",
+		Source:      VUint64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(1)",
+		Source:      VInt8(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(1)",
+		Source:      VInt16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(1)",
+		Source:      VInt32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(1)",
+		Source:      VInt64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(1)",
+		Source:      VFloat32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(1)",
+		Source:      VFloat64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "uint64(1)",
+		Source:      uint64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNInt(1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "uint32(1)",
+		Source:      uint32(1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-2147483648)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-2147483648)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-2147483648)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-2147483648)",
+		Source:      VInt32(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-2147483648)",
+		Source:      VInt64(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-2.147483648e+09)",
+		Source:      VFloat64(-2.147483648e+09),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(-2147483648)",
+		Source:      int64(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNInt(-2147483648)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int32(-2147483648)",
+		Source:      int32(-2147483648),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(-1)",
+		Source:      VInt8(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(-1)",
+		Source:      VInt16(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-1)",
+		Source:      VInt32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-1)",
+		Source:      VInt64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(-1)",
+		Source:      VFloat32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-1)",
+		Source:      VFloat64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int8(-1)",
+		Source:      int8(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNInt(-1)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int16(-1)",
+		Source:      int16(-1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireIntNInt(-123)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-123)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-123)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-123)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireIntNInt(-123)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-123)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int8(-123)",
+		Source:      int8(-123),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireIntNInt(-456364020)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-456364020)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-456364020)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-456364020)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireIntNInt(-456364020)",
+		Target: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-456364020)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-456364020)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-456364020)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireIntNString(0)",
+		Target:      VNativeWireIntNString(""),
+		SourceLabel: "VWireIntNString(0)",
+		Source:      VNativeWireIntNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNString(0)",
+		Target:      VNativeWireIntNString(""),
+		SourceLabel: "int64(0)",
+		Source:      int64(0),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNString(0)",
+		Target:      VNativeWireIntNString(""),
+		SourceLabel: "VUint32(0)",
+		Source:      VUint32(0),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(2147483647)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(2147483647)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(2147483647)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(2147483647)",
+		Source:      VUint32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(2147483647)",
+		Source:      VUint64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(2147483647)",
+		Source:      VInt32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(2147483647)",
+		Source:      VInt64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(2.147483647e+09)",
+		Source:      VFloat64(2.147483647e+09),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int32(2147483647)",
+		Source:      int32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNString(2147483647)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "float64(2.147483647e+09)",
+		Source:      float64(2.147483647e+09),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VByte(1)",
+		Source:      VByte(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint16(1)",
+		Source:      VUint16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(1)",
+		Source:      VUint32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(1)",
+		Source:      VUint64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(1)",
+		Source:      VInt8(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(1)",
+		Source:      VInt16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(1)",
+		Source:      VInt32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(1)",
+		Source:      VInt64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(1)",
+		Source:      VFloat32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(1)",
+		Source:      VFloat64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(1)",
+		Source:      int64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNString(1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int16(1)",
+		Source:      int16(1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-2147483648)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-2147483648)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-2147483648)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-2147483648)",
+		Source:      VInt32(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-2147483648)",
+		Source:      VInt64(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-2.147483648e+09)",
+		Source:      VFloat64(-2.147483648e+09),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(-2147483648)",
+		Source:      int64(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNString(-2147483648)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int32(-2147483648)",
+		Source:      int32(-2147483648),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(-1)",
+		Source:      VInt8(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(-1)",
+		Source:      VInt16(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-1)",
+		Source:      VInt32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-1)",
+		Source:      VInt64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(-1)",
+		Source:      VFloat32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-1)",
+		Source:      VFloat64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int8(-1)",
+		Source:      int8(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNString(-1)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(-1)",
+		Source:      int64(-1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireIntNString(-123)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-123)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-123)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-123)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireIntNString(-123)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-123)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-123)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-123)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireIntNString(891620478)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(891620478)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(891620478)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(891620478)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireIntNString(891620478)",
+		Target: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(891620478)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(891620478)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(891620478)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireIntNStruct(0)",
+		Target:      VNativeWireIntNStruct{},
+		SourceLabel: "VWireIntNStruct(0)",
+		Source:      VNativeWireIntNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNStruct(0)",
+		Target:      VNativeWireIntNStruct{},
+		SourceLabel: "float32(0)",
+		Source:      float32(0),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireIntNStruct(0)",
+		Target:      VNativeWireIntNStruct{},
+		SourceLabel: "VUint64(0)",
+		Source:      VUint64(0),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(2147483647)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(2147483647)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(2147483647)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(2147483647)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(2147483647)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(2147483647)",
+		Source:      VUint32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(2147483647)",
+		Source:      VUint64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(2147483647)",
+		Source:      VInt32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(2147483647)",
+		Source:      VInt64(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(2.147483647e+09)",
+		Source:      VFloat64(2.147483647e+09),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "uint32(2147483647)",
+		Source:      uint32(2147483647),
+	},
+	{
+		Label:       "+Max",
+		TargetLabel: "VWireIntNStruct(2147483647)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(2147483647)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(2147483647)",
+		Source:      int64(2147483647),
+	},
+	{
+		IsCanonical: true,
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VByte(1)",
+		Source:      VByte(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint16(1)",
+		Source:      VUint16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint32(1)",
+		Source:      VUint32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VUint64(1)",
+		Source:      VUint64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(1)",
+		Source:      VInt8(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(1)",
+		Source:      VInt16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(1)",
+		Source:      VInt32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(1)",
+		Source:      VInt64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(1)",
+		Source:      VFloat32(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(1)",
+		Source:      VFloat64(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "uint16(1)",
+		Source:      uint16(1),
+	},
+	{
+		Label:       "+Min",
+		TargetLabel: "VWireIntNStruct(1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int16(1)",
+		Source:      int16(1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-2147483648)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-2147483648)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-2147483648)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-2147483648)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-2147483648)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-2147483648)",
+		Source:      VInt32(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-2147483648)",
+		Source:      VInt64(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-2.147483648e+09)",
+		Source:      VFloat64(-2.147483648e+09),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int32(-2147483648)",
+		Source:      int32(-2147483648),
+	},
+	{
+		Label:       "-Max",
+		TargetLabel: "VWireIntNStruct(-2147483648)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-2147483648)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "float64(-2.147483648e+09)",
+		Source:      float64(-2.147483648e+09),
+	},
+	{
+		IsCanonical: true,
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-1)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNInt(-1)",
+		Source: func() VNativeWireIntNInt {
+			var native VNativeWireIntNInt
+			wire := VWireIntNInt(-1)
+			if err := VWireIntNIntToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNString(-1)",
+		Source: func() VNativeWireIntNString {
+			var native VNativeWireIntNString
+			wire := VWireIntNString(-1)
+			if err := VWireIntNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt8(-1)",
+		Source:      VInt8(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt16(-1)",
+		Source:      VInt16(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt32(-1)",
+		Source:      VInt32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VInt64(-1)",
+		Source:      VInt64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat32(-1)",
+		Source:      VFloat32(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-1)",
+		Source:      VFloat64(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int16(-1)",
+		Source:      int16(-1),
+	},
+	{
+		Label:       "-Min",
+		TargetLabel: "VWireIntNStruct(-1)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-1)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "float32(-1)",
+		Source:      float32(-1),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireIntNStruct(-123)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-123)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-123)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-123)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireIntNStruct(-123)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-123)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VFloat64(-123)",
+		Source:      VFloat64(-123),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireIntNStruct(-472003459)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-472003459)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireIntNStruct(-472003459)",
+		Source: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-472003459)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireIntNStruct(-472003459)",
+		Target: func() VNativeWireIntNStruct {
+			var native VNativeWireIntNStruct
+			wire := VWireIntNStruct(-472003459)
+			if err := VWireIntNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "int64(-472003459)",
+		Source:      int64(-472003459),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStringNString(\"\")",
+		Target:      VNativeWireStringNString(""),
+		SourceLabel: "VWireStringNString(\"\")",
+		Source:      VNativeWireStringNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStringNString(\"\")",
+		Target:      VNativeWireStringNString(""),
+		SourceLabel: "\"\"",
+		Source:      "",
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStringNString(\"\")",
+		Target:      VNativeWireStringNString(""),
+		SourceLabel: "VWireStringNStruct(\"\")",
+		Source:      VNativeWireStringNStruct{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStringNString(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Target: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStringNString(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Source: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStringNString(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Target: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VString(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Source:      VString("abcdeΔΘΠΣΦ王普澤世界"),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStringNString(\"cde\")",
+		Target: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("cde")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStringNString(\"cde\")",
+		Source: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("cde")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStringNString(\"cde\")",
+		Target: func() VNativeWireStringNString {
+			var native VNativeWireStringNString
+			wire := VWireStringNString("cde")
+			if err := VWireStringNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "\"cde\"",
+		Source:      "cde",
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStringNStruct(\"\")",
+		Target:      VNativeWireStringNStruct{},
+		SourceLabel: "VWireStringNStruct(\"\")",
+		Source:      VNativeWireStringNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStringNStruct(\"\")",
+		Target:      VNativeWireStringNStruct{},
+		SourceLabel: "VString(\"\")",
+		Source:      VString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStringNStruct(\"\")",
+		Target:      VNativeWireStringNStruct{},
+		SourceLabel: "VWireStringNString(\"\")",
+		Source:      VNativeWireStringNString(""),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Target: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Source: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤世界\")",
+		Target: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "\"abcdeΔΘΠΣΦ王普澤世界\"",
+		Source:      "abcdeΔΘΠΣΦ王普澤世界",
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤\")",
+		Target: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤\")",
+		Source: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStringNStruct(\"abcdeΔΘΠΣΦ王普澤\")",
+		Target: func() VNativeWireStringNStruct {
+			var native VNativeWireStringNStruct
+			wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤")
+			if err := VWireStringNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "\"abcdeΔΘΠΣΦ王普澤\"",
+		Source:      "abcdeΔΘΠΣΦ王普澤",
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNString{}",
+		Target:      VNativeWireArrayNString(""),
+		SourceLabel: "VWireArrayNString{}",
+		Source:      VNativeWireArrayNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNString{}",
+		Target:      VNativeWireArrayNString(""),
+		SourceLabel: "[]string{\"\"}",
+		Source: []string{
+			"",
+		},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNString{}",
+		Target:      VNativeWireArrayNString(""),
+		SourceLabel: "VWireListNString{\"\"}",
+		Source: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireArrayNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireArrayNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireArrayNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VList_String{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VList_String{
+			"abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireArrayNString{\"a\"}",
+		Target: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"a",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireArrayNString{\"a\"}",
+		Source: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"a",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireArrayNString{\"a\"}",
+		Target: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"a",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VList_String{\"a\"}",
+		Source: VList_String{
+			"a",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNStruct{}",
+		Target:      VNativeWireArrayNStruct{},
+		SourceLabel: "VWireArrayNStruct{}",
+		Source:      VNativeWireArrayNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNStruct{}",
+		Target:      VNativeWireArrayNStruct{},
+		SourceLabel: "[]string{\"\"}",
+		Source: []string{
+			"",
+		},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireArrayNStruct{}",
+		Target:      VNativeWireArrayNStruct{},
+		SourceLabel: "[]VString{\"\"}",
+		Source: []VString{
+			"",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireArrayNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireArrayNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireArrayNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VList_Any{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VList_Any{
+			"abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireArrayNStruct{\"cdeΔΘΠΣ\"}",
+		Target: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"cdeΔΘΠΣ",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireArrayNStruct{\"cdeΔΘΠΣ\"}",
+		Source: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"cdeΔΘΠΣ",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireArrayNStruct{\"cdeΔΘΠΣ\"}",
+		Target: func() VNativeWireArrayNStruct {
+			var native VNativeWireArrayNStruct
+			wire := VWireArrayNStruct{
+				"cdeΔΘΠΣ",
+			}
+			if err := VWireArrayNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNStruct{\"cdeΔΘΠΣ\"}",
+		Source: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"cdeΔΘΠΣ",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireListNString{}",
+		Target:      VNativeWireListNString(""),
+		SourceLabel: "VWireListNString{}",
+		Source:      VNativeWireListNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireListNString{}",
+		Target:      VNativeWireListNString(""),
+		SourceLabel: "[]VString{}",
+		Source:      []VString(nil),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireListNString{}",
+		Target:      VNativeWireListNString(""),
+		SourceLabel: "[]VEnumAbc{}",
+		Source:      []VEnumAbc(nil),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireListNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireListNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VArray1_String{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VArray1_String{
+			"abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireListNString{\"de\"}",
+		Target: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"de",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNString{\"de\"}",
+		Source: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"de",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireListNString{\"de\"}",
+		Target: func() VNativeWireListNString {
+			var native VNativeWireListNString
+			wire := VWireListNString{
+				"de",
+			}
+			if err := VWireListNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNStruct{\"de\"}",
+		Source: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"de",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireListNStruct{}",
+		Target:      VNativeWireListNStruct{},
+		SourceLabel: "VWireListNStruct{}",
+		Source:      VNativeWireListNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireListNStruct{}",
+		Target:      VNativeWireListNStruct{},
+		SourceLabel: "VList_VString{}",
+		Source:      VList_VString(nil),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireListNStruct{}",
+		Target:      VNativeWireListNStruct{},
+		SourceLabel: "[]VEnumAbc{}",
+		Source:      []VEnumAbc(nil),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireListNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireListNStruct{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireArrayNString{\"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireArrayNString {
+			var native VNativeWireArrayNString
+			wire := VWireArrayNString{
+				"abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireArrayNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireListNStruct{\"deΔΘΠΣΦ王普\", \"澤世\", \"bcdeΔΘΠΣΦ王\"}",
+		Target: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"deΔΘΠΣΦ王普",
+				"澤世",
+				"bcdeΔΘΠΣΦ王",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireListNStruct{\"deΔΘΠΣΦ王普\", \"澤世\", \"bcdeΔΘΠΣΦ王\"}",
+		Source: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"deΔΘΠΣΦ王普",
+				"澤世",
+				"bcdeΔΘΠΣΦ王",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireListNStruct{\"deΔΘΠΣΦ王普\", \"澤世\", \"bcdeΔΘΠΣΦ王\"}",
+		Target: func() VNativeWireListNStruct {
+			var native VNativeWireListNStruct
+			wire := VWireListNStruct{
+				"deΔΘΠΣΦ王普",
+				"澤世",
+				"bcdeΔΘΠΣΦ王",
+			}
+			if err := VWireListNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "[]any{\"deΔΘΠΣΦ王普\", \"澤世\", \"bcdeΔΘΠΣΦ王\"}",
+		Source: []interface{}{
+			"deΔΘΠΣΦ王普",
+			"澤世",
+			"bcdeΔΘΠΣΦ王",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNString{}",
+		Target:      VNativeWireStructNString(""),
+		SourceLabel: "VWireStructNString{}",
+		Source:      VNativeWireStructNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNString{}",
+		Target:      VNativeWireStructNString(""),
+		SourceLabel: "VWireStructNArray{}",
+		Source:      VNativeWireStructNArray{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNString{}",
+		Target:      VNativeWireStructNString(""),
+		SourceLabel: "VWireStructNPointer{}",
+		Source:      VWireStructNPointer{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNString{X: \"ΘΠΣΦ\"}",
+		Target: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "ΘΠΣΦ",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNString{X: \"ΘΠΣΦ\"}",
+		Source: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "ΘΠΣΦ",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNString{X: \"ΘΠΣΦ\"}",
+		Target: func() VNativeWireStructNString {
+			var native VNativeWireStructNString
+			wire := VWireStructNString{
+				X: "ΘΠΣΦ",
+			}
+			if err := VWireStructNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNIface{X: \"ΘΠΣΦ\"}",
+		Source: VWireStructNIface{
+			X: "ΘΠΣΦ",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNStruct{}",
+		Target:      VNativeWireStructNStruct{},
+		SourceLabel: "VWireStructNStruct{}",
+		Source:      VNativeWireStructNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNStruct{}",
+		Target:      VNativeWireStructNStruct{},
+		SourceLabel: "VWireStructNIface{}",
+		Source:      VWireStructNIface{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNStruct{}",
+		Target:      VNativeWireStructNStruct{},
+		SourceLabel: "VWireStructNString{}",
+		Source:      VNativeWireStructNString(""),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNStruct{X: \"Φ王普澤\"}",
+		Target: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "Φ王普澤",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNStruct{X: \"Φ王普澤\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "Φ王普澤",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNStruct{X: \"Φ王普澤\"}",
+		Target: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "Φ王普澤",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNPointer{X: \"Φ王普澤\"}",
+		Source: VWireStructNPointer{
+			X: "Φ王普澤",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNArray{}",
+		Target:      VNativeWireStructNArray{},
+		SourceLabel: "VWireStructNArray{}",
+		Source:      VNativeWireStructNArray{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNArray{}",
+		Target:      VNativeWireStructNArray{},
+		SourceLabel: "VWireStructNIface{}",
+		Source:      VWireStructNIface{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNArray{}",
+		Target:      VNativeWireStructNArray{},
+		SourceLabel: "VWireStructNPointer{}",
+		Source:      VWireStructNPointer{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNArray{X: \"abcdeΔ\"}",
+		Target: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔ",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNArray{X: \"abcdeΔ\"}",
+		Source: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔ",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNArray{X: \"abcdeΔ\"}",
+		Target: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "abcdeΔ",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNStruct{X: \"abcdeΔ\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "abcdeΔ",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNSlice{}",
+		Target:      VNativeWireStructNSlice(nil),
+		SourceLabel: "VWireStructNSlice{}",
+		Source:      VNativeWireStructNSlice(nil),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNSlice{}",
+		Target:      VNativeWireStructNSlice(nil),
+		SourceLabel: "VWireStructNString{}",
+		Source:      VNativeWireStructNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNSlice{}",
+		Target:      VNativeWireStructNSlice(nil),
+		SourceLabel: "VWireStructNArray{}",
+		Source:      VNativeWireStructNArray{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNPointer{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNSlice{X: \"ΣΦ王普\"}",
+		Target: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "ΣΦ王普",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNSlice{X: \"ΣΦ王普\"}",
+		Source: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "ΣΦ王普",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNSlice{X: \"ΣΦ王普\"}",
+		Target: func() VNativeWireStructNSlice {
+			var native VNativeWireStructNSlice
+			wire := VWireStructNSlice{
+				X: "ΣΦ王普",
+			}
+			if err := VWireStructNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireStructNStruct{X: \"ΣΦ王普\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "ΣΦ王普",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNPointer{}",
+		Target:      VWireStructNPointer{},
+		SourceLabel: "VWireStructNPointer{}",
+		Source:      VWireStructNPointer{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNPointer{}",
+		Target:      VWireStructNPointer{},
+		SourceLabel: "VWireStructNStruct{}",
+		Source:      VNativeWireStructNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNPointer{}",
+		Target:      VWireStructNPointer{},
+		SourceLabel: "VWireStructNIface{}",
+		Source:      VWireStructNIface{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: VWireStructNPointer{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		SourceLabel: "VWireStructNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNPointer{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: VWireStructNPointer{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		SourceLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNPointer{X: \"世\"}",
+		Target: VWireStructNPointer{
+			X: "世",
+		},
+		SourceLabel: "VWireStructNPointer{X: \"世\"}",
+		Source: VWireStructNPointer{
+			X: "世",
+		},
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNPointer{X: \"世\"}",
+		Target: VWireStructNPointer{
+			X: "世",
+		},
+		SourceLabel: "VWireStructNArray{X: \"世\"}",
+		Source: func() VNativeWireStructNArray {
+			var native VNativeWireStructNArray
+			wire := VWireStructNArray{
+				X: "世",
+			}
+			if err := VWireStructNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireStructNIface{}",
+		Target:      VWireStructNIface{},
+		SourceLabel: "VWireStructNIface{}",
+		Source:      VWireStructNIface{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNIface{}",
+		Target:      VWireStructNIface{},
+		SourceLabel: "VWireStructNPointer{}",
+		Source:      VWireStructNPointer{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireStructNIface{}",
+		Target:      VWireStructNIface{},
+		SourceLabel: "?VStructEmpty{}",
+		Source:      &VStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		SourceLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireStructNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: VWireStructNIface{
+			X: "abcdeΔΘΠΣΦ王普澤世界",
+		},
+		SourceLabel: "VWireStructNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireStructNIface{X: \"cde\"}",
+		Target: VWireStructNIface{
+			X: "cde",
+		},
+		SourceLabel: "VWireStructNIface{X: \"cde\"}",
+		Source: VWireStructNIface{
+			X: "cde",
+		},
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireStructNIface{X: \"cde\"}",
+		Target: VWireStructNIface{
+			X: "cde",
+		},
+		SourceLabel: "VWireStructNStruct{X: \"cde\"}",
+		Source: func() VNativeWireStructNStruct {
+			var native VNativeWireStructNStruct
+			wire := VWireStructNStruct{
+				X: "cde",
+			}
+			if err := VWireStructNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNString{X: \"\"}",
+		Target:      VNativeWireUnionNString(""),
+		SourceLabel: "VWireUnionNString{X: \"\"}",
+		Source:      VNativeWireUnionNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNString{X: \"\"}",
+		Target:      VNativeWireUnionNString(""),
+		SourceLabel: "VWireUnionNArray{X: \"\"}",
+		Source:      VNativeWireUnionNArray{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNString{X: \"\"}",
+		Target:      VNativeWireUnionNString(""),
+		SourceLabel: "VWireUnionNSlice{X: \"\"}",
+		Source:      VNativeWireUnionNSlice(nil),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNString{X: \"abcdeΔ\"}",
+		Target: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔ"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNString{X: \"abcdeΔ\"}",
+		Source: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔ"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNString{X: \"abcdeΔ\"}",
+		Target: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔ"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNIface{X: \"abcdeΔ\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"abcdeΔ"}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNStruct{X: \"\"}",
+		Target:      VNativeWireUnionNStruct{},
+		SourceLabel: "VWireUnionNStruct{X: \"\"}",
+		Source:      VNativeWireUnionNStruct{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNStruct{X: \"\"}",
+		Target:      VNativeWireUnionNStruct{},
+		SourceLabel: "VWireUnionNString{X: \"\"}",
+		Source:      VNativeWireUnionNString(""),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNStruct{X: \"\"}",
+		Target:      VNativeWireUnionNStruct{},
+		SourceLabel: "VWireUnionNSlice{X: \"\"}",
+		Source:      VNativeWireUnionNSlice(nil),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNStruct{X: \"ΘΠΣ\"}",
+		Target: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"ΘΠΣ"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNStruct{X: \"ΘΠΣ\"}",
+		Source: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"ΘΠΣ"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNStruct{X: \"ΘΠΣ\"}",
+		Target: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"ΘΠΣ"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNIface{X: \"ΘΠΣ\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"ΘΠΣ"}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNArray{X: \"\"}",
+		Target:      VNativeWireUnionNArray{},
+		SourceLabel: "VWireUnionNArray{X: \"\"}",
+		Source:      VNativeWireUnionNArray{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNArray{X: \"\"}",
+		Target:      VNativeWireUnionNArray{},
+		SourceLabel: "VWireUnionNPointer{X: \"\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{}),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNArray{X: \"\"}",
+		Target:      VNativeWireUnionNArray{},
+		SourceLabel: "VWireUnionNIface{X: \"\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNArray{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNArray{X: \"cdeΔ\"}",
+		Target: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"cdeΔ"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNArray{X: \"cdeΔ\"}",
+		Source: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"cdeΔ"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNArray{X: \"cdeΔ\"}",
+		Target: func() VNativeWireUnionNArray {
+			var native VNativeWireUnionNArray
+			wire := VWireUnionNArray(VWireUnionNArrayX{"cdeΔ"})
+			if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNPointer{X: \"cdeΔ\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{"cdeΔ"}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNSlice{X: \"\"}",
+		Target:      VNativeWireUnionNSlice(nil),
+		SourceLabel: "VWireUnionNSlice{X: \"\"}",
+		Source:      VNativeWireUnionNSlice(nil),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNSlice{X: \"\"}",
+		Target:      VNativeWireUnionNSlice(nil),
+		SourceLabel: "VWireUnionNIface{X: \"\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{}),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNSlice{X: \"\"}",
+		Target:      VNativeWireUnionNSlice(nil),
+		SourceLabel: "VWireUnionNPointer{X: \"\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNString{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNString {
+			var native VNativeWireUnionNString
+			wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStringToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNSlice{X: \"c\"}",
+		Target: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"c"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNSlice{X: \"c\"}",
+		Source: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"c"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNSlice{X: \"c\"}",
+		Target: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"c"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+		SourceLabel: "VWireUnionNIface{X: \"c\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"c"}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNPointer{X: \"\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{}),
+		SourceLabel: "VWireUnionNPointer{X: \"\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{}),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNPointer{X: \"\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{}),
+		SourceLabel: "VWireUnionNIface{X: \"\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{}),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNPointer{X: \"\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{}),
+		SourceLabel: "VWireUnionNSlice{X: \"\"}",
+		Source:      VNativeWireUnionNSlice(nil),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		SourceLabel: "VWireUnionNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"}),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNPointer{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		SourceLabel: "VWireUnionNSlice{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNSlice {
+			var native VNativeWireUnionNSlice
+			wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNPointer{X: \"ΣΦ王\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{"ΣΦ王"}),
+		SourceLabel: "VWireUnionNPointer{X: \"ΣΦ王\"}",
+		Source:      VWireUnionNPointer(VWireUnionNPointerX{"ΣΦ王"}),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNPointer{X: \"ΣΦ王\"}",
+		Target:      VWireUnionNPointer(VWireUnionNPointerX{"ΣΦ王"}),
+		SourceLabel: "VWireUnionNIface{X: \"ΣΦ王\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"ΣΦ王"}),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNIface{X: \"\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{}),
+		SourceLabel: "VWireUnionNIface{X: \"\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{}),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNIface{X: \"\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{}),
+		SourceLabel: "VWireUnionNSlice{X: \"\"}",
+		Source:      VNativeWireUnionNSlice(nil),
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireUnionNIface{X: \"\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{}),
+		SourceLabel: "VWireUnionNStruct{X: \"\"}",
+		Source:      VNativeWireUnionNStruct{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireUnionNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		SourceLabel: "VWireUnionNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"}),
+	},
+	{
+		Label:       "Full",
+		TargetLabel: "VWireUnionNIface{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"}),
+		SourceLabel: "VWireUnionNStruct{X: \"abcdeΔΘΠΣΦ王普澤世界\"}",
+		Source: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNIface{X: \"deΔΘΠΣ\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{"deΔΘΠΣ"}),
+		SourceLabel: "VWireUnionNIface{X: \"deΔΘΠΣ\"}",
+		Source:      VWireUnionNIface(VWireUnionNIfaceX{"deΔΘΠΣ"}),
+	},
+	{
+		Label:       "Random0",
+		TargetLabel: "VWireUnionNIface{X: \"deΔΘΠΣ\"}",
+		Target:      VWireUnionNIface(VWireUnionNIfaceX{"deΔΘΠΣ"}),
+		SourceLabel: "VWireUnionNStruct{X: \"deΔΘΠΣ\"}",
+		Source: func() VNativeWireUnionNStruct {
+			var native VNativeWireUnionNStruct
+			wire := VWireUnionNStruct(VWireUnionNStructX{"deΔΘΠΣ"})
+			if err := VWireUnionNStructToNative(wire, &native); err != nil {
+				panic(err)
+			}
+			return native
+		}(),
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "VWireAll{}",
+		Target: VWireAll{
+			UnionNPointer: VWireUnionNPointerX{},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+		SourceLabel: "VWireAll{}",
+		Source: VWireAll{
+			UnionNPointer: VWireUnionNPointerX{},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireAll{}",
+		Target: VWireAll{
+			UnionNPointer: VWireUnionNPointerX{},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+		SourceLabel: "?VStructEmpty{}",
+		Source:      &VStructEmpty{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "VWireAll{}",
+		Target: VWireAll{
+			UnionNPointer: VWireUnionNPointerX{},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+		SourceLabel: "VStructEmpty{}",
+		Source:      VStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "VWireAll{BoolNBool: true, BoolNString: true, BoolNStruct: true, IntNInt: -123, IntNString: -123, IntNStruct: -123, StringNString: \"abcdeΔΘΠΣΦ王普澤世界\", StringNStruct: \"abcdeΔΘΠΣΦ王普澤世界\", ArrayNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ArrayNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, StructNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}}",
+		Target: VWireAll{
+			BoolNBool: func() VNativeWireBoolNBool {
+				var native VNativeWireBoolNBool
+				wire := VWireBoolNBool(true)
+				if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNString: func() VNativeWireBoolNString {
+				var native VNativeWireBoolNString
+				wire := VWireBoolNString(true)
+				if err := VWireBoolNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNStruct: func() VNativeWireBoolNStruct {
+				var native VNativeWireBoolNStruct
+				wire := VWireBoolNStruct(true)
+				if err := VWireBoolNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNInt: func() VNativeWireIntNInt {
+				var native VNativeWireIntNInt
+				wire := VWireIntNInt(-123)
+				if err := VWireIntNIntToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNString: func() VNativeWireIntNString {
+				var native VNativeWireIntNString
+				wire := VWireIntNString(-123)
+				if err := VWireIntNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNStruct: func() VNativeWireIntNStruct {
+				var native VNativeWireIntNStruct
+				wire := VWireIntNStruct(-123)
+				if err := VWireIntNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNString: func() VNativeWireStringNString {
+				var native VNativeWireStringNString
+				wire := VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+				if err := VWireStringNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNStruct: func() VNativeWireStringNStruct {
+				var native VNativeWireStringNStruct
+				wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+				if err := VWireStringNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNString: func() VNativeWireArrayNString {
+				var native VNativeWireArrayNString
+				wire := VWireArrayNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireArrayNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNStruct: func() VNativeWireArrayNStruct {
+				var native VNativeWireArrayNStruct
+				wire := VWireArrayNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireArrayNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNString: func() VNativeWireListNString {
+				var native VNativeWireListNString
+				wire := VWireListNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireListNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNStruct: func() VNativeWireListNStruct {
+				var native VNativeWireListNStruct
+				wire := VWireListNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireListNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNString: func() VNativeWireStructNString {
+				var native VNativeWireStructNString
+				wire := VWireStructNString{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNStruct: func() VNativeWireStructNStruct {
+				var native VNativeWireStructNStruct
+				wire := VWireStructNStruct{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNArray: func() VNativeWireStructNArray {
+				var native VNativeWireStructNArray
+				wire := VWireStructNArray{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNSlice: func() VNativeWireStructNSlice {
+				var native VNativeWireStructNSlice
+				wire := VWireStructNSlice{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNPointer: VWireStructNPointer{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			StructNIface: VWireStructNIface{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			UnionNString: func() VNativeWireUnionNString {
+				var native VNativeWireUnionNString
+				wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNStruct: func() VNativeWireUnionNStruct {
+				var native VNativeWireUnionNStruct
+				wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNArray: func() VNativeWireUnionNArray {
+				var native VNativeWireUnionNArray
+				wire := VWireUnionNArray(VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNSlice: func() VNativeWireUnionNSlice {
+				var native VNativeWireUnionNSlice
+				wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNPointer: VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"},
+			UnionNIface:   VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"},
+		},
+		SourceLabel: "VWireAll{BoolNBool: true, BoolNString: true, BoolNStruct: true, IntNInt: -123, IntNString: -123, IntNStruct: -123, StringNString: \"abcdeΔΘΠΣΦ王普澤世界\", StringNStruct: \"abcdeΔΘΠΣΦ王普澤世界\", ArrayNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ArrayNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNString: {\"abcdeΔΘΠΣΦ王普澤世界\"}, ListNStruct: {\"abcdeΔΘΠΣΦ王普澤世界\"}, StructNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, StructNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNString: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNStruct: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNArray: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNSlice: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNPointer: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}, UnionNIface: {X: \"abcdeΔΘΠΣΦ王普澤世界\"}}",
+		Source: VWireAll{
+			BoolNBool: func() VNativeWireBoolNBool {
+				var native VNativeWireBoolNBool
+				wire := VWireBoolNBool(true)
+				if err := VWireBoolNBoolToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNString: func() VNativeWireBoolNString {
+				var native VNativeWireBoolNString
+				wire := VWireBoolNString(true)
+				if err := VWireBoolNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			BoolNStruct: func() VNativeWireBoolNStruct {
+				var native VNativeWireBoolNStruct
+				wire := VWireBoolNStruct(true)
+				if err := VWireBoolNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNInt: func() VNativeWireIntNInt {
+				var native VNativeWireIntNInt
+				wire := VWireIntNInt(-123)
+				if err := VWireIntNIntToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNString: func() VNativeWireIntNString {
+				var native VNativeWireIntNString
+				wire := VWireIntNString(-123)
+				if err := VWireIntNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNStruct: func() VNativeWireIntNStruct {
+				var native VNativeWireIntNStruct
+				wire := VWireIntNStruct(-123)
+				if err := VWireIntNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNString: func() VNativeWireStringNString {
+				var native VNativeWireStringNString
+				wire := VWireStringNString("abcdeΔΘΠΣΦ王普澤世界")
+				if err := VWireStringNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNStruct: func() VNativeWireStringNStruct {
+				var native VNativeWireStringNStruct
+				wire := VWireStringNStruct("abcdeΔΘΠΣΦ王普澤世界")
+				if err := VWireStringNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNString: func() VNativeWireArrayNString {
+				var native VNativeWireArrayNString
+				wire := VWireArrayNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireArrayNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNStruct: func() VNativeWireArrayNStruct {
+				var native VNativeWireArrayNStruct
+				wire := VWireArrayNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireArrayNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNString: func() VNativeWireListNString {
+				var native VNativeWireListNString
+				wire := VWireListNString{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireListNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNStruct: func() VNativeWireListNStruct {
+				var native VNativeWireListNStruct
+				wire := VWireListNStruct{
+					"abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireListNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNString: func() VNativeWireStructNString {
+				var native VNativeWireStructNString
+				wire := VWireStructNString{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNStruct: func() VNativeWireStructNStruct {
+				var native VNativeWireStructNStruct
+				wire := VWireStructNStruct{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNArray: func() VNativeWireStructNArray {
+				var native VNativeWireStructNArray
+				wire := VWireStructNArray{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNSlice: func() VNativeWireStructNSlice {
+				var native VNativeWireStructNSlice
+				wire := VWireStructNSlice{
+					X: "abcdeΔΘΠΣΦ王普澤世界",
+				}
+				if err := VWireStructNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNPointer: VWireStructNPointer{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			StructNIface: VWireStructNIface{
+				X: "abcdeΔΘΠΣΦ王普澤世界",
+			},
+			UnionNString: func() VNativeWireUnionNString {
+				var native VNativeWireUnionNString
+				wire := VWireUnionNString(VWireUnionNStringX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNStruct: func() VNativeWireUnionNStruct {
+				var native VNativeWireUnionNStruct
+				wire := VWireUnionNStruct(VWireUnionNStructX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNArray: func() VNativeWireUnionNArray {
+				var native VNativeWireUnionNArray
+				wire := VWireUnionNArray(VWireUnionNArrayX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNSlice: func() VNativeWireUnionNSlice {
+				var native VNativeWireUnionNSlice
+				wire := VWireUnionNSlice(VWireUnionNSliceX{"abcdeΔΘΠΣΦ王普澤世界"})
+				if err := VWireUnionNSliceToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNPointer: VWireUnionNPointerX{"abcdeΔΘΠΣΦ王普澤世界"},
+			UnionNIface:   VWireUnionNIfaceX{"abcdeΔΘΠΣΦ王普澤世界"},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "VWireAll{BoolNString: true, IntNInt: -255070853, IntNString: 535047732, IntNStruct: 492803907, StringNString: \"abcdeΔ\", StringNStruct: \"ΔΘΠΣΦ王\", ArrayNString: {\"abcdeΔΘΠ\"}, ArrayNStruct: {\"普澤世\"}, ListNStruct: {\"deΔΘ\", \"\"}, StructNString: {X: \"ΔΘΠΣΦ王普澤\"}, StructNStruct: {X: \"cdeΔΘ\"}, StructNArray: {X: \"bcde\"}, StructNIface: {X: \"澤世界\"}, UnionNString: {X: \"cdeΔΘΠΣΦ\"}, UnionNPointer: {X: \"bc\"}}",
+		Target: VWireAll{
+			BoolNString: func() VNativeWireBoolNString {
+				var native VNativeWireBoolNString
+				wire := VWireBoolNString(true)
+				if err := VWireBoolNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNInt: func() VNativeWireIntNInt {
+				var native VNativeWireIntNInt
+				wire := VWireIntNInt(-255070853)
+				if err := VWireIntNIntToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNString: func() VNativeWireIntNString {
+				var native VNativeWireIntNString
+				wire := VWireIntNString(535047732)
+				if err := VWireIntNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNStruct: func() VNativeWireIntNStruct {
+				var native VNativeWireIntNStruct
+				wire := VWireIntNStruct(492803907)
+				if err := VWireIntNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNString: func() VNativeWireStringNString {
+				var native VNativeWireStringNString
+				wire := VWireStringNString("abcdeΔ")
+				if err := VWireStringNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNStruct: func() VNativeWireStringNStruct {
+				var native VNativeWireStringNStruct
+				wire := VWireStringNStruct("ΔΘΠΣΦ王")
+				if err := VWireStringNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNString: func() VNativeWireArrayNString {
+				var native VNativeWireArrayNString
+				wire := VWireArrayNString{
+					"abcdeΔΘΠ",
+				}
+				if err := VWireArrayNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNStruct: func() VNativeWireArrayNStruct {
+				var native VNativeWireArrayNStruct
+				wire := VWireArrayNStruct{
+					"普澤世",
+				}
+				if err := VWireArrayNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNStruct: func() VNativeWireListNStruct {
+				var native VNativeWireListNStruct
+				wire := VWireListNStruct{
+					"deΔΘ",
+					"",
+				}
+				if err := VWireListNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNString: func() VNativeWireStructNString {
+				var native VNativeWireStructNString
+				wire := VWireStructNString{
+					X: "ΔΘΠΣΦ王普澤",
+				}
+				if err := VWireStructNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNStruct: func() VNativeWireStructNStruct {
+				var native VNativeWireStructNStruct
+				wire := VWireStructNStruct{
+					X: "cdeΔΘ",
+				}
+				if err := VWireStructNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNArray: func() VNativeWireStructNArray {
+				var native VNativeWireStructNArray
+				wire := VWireStructNArray{
+					X: "bcde",
+				}
+				if err := VWireStructNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNIface: VWireStructNIface{
+				X: "澤世界",
+			},
+			UnionNString: func() VNativeWireUnionNString {
+				var native VNativeWireUnionNString
+				wire := VWireUnionNString(VWireUnionNStringX{"cdeΔΘΠΣΦ"})
+				if err := VWireUnionNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNPointer: VWireUnionNPointerX{"bc"},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+		SourceLabel: "VWireAll{BoolNString: true, IntNInt: -255070853, IntNString: 535047732, IntNStruct: 492803907, StringNString: \"abcdeΔ\", StringNStruct: \"ΔΘΠΣΦ王\", ArrayNString: {\"abcdeΔΘΠ\"}, ArrayNStruct: {\"普澤世\"}, ListNStruct: {\"deΔΘ\", \"\"}, StructNString: {X: \"ΔΘΠΣΦ王普澤\"}, StructNStruct: {X: \"cdeΔΘ\"}, StructNArray: {X: \"bcde\"}, StructNIface: {X: \"澤世界\"}, UnionNString: {X: \"cdeΔΘΠΣΦ\"}, UnionNPointer: {X: \"bc\"}}",
+		Source: VWireAll{
+			BoolNString: func() VNativeWireBoolNString {
+				var native VNativeWireBoolNString
+				wire := VWireBoolNString(true)
+				if err := VWireBoolNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNInt: func() VNativeWireIntNInt {
+				var native VNativeWireIntNInt
+				wire := VWireIntNInt(-255070853)
+				if err := VWireIntNIntToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNString: func() VNativeWireIntNString {
+				var native VNativeWireIntNString
+				wire := VWireIntNString(535047732)
+				if err := VWireIntNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			IntNStruct: func() VNativeWireIntNStruct {
+				var native VNativeWireIntNStruct
+				wire := VWireIntNStruct(492803907)
+				if err := VWireIntNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNString: func() VNativeWireStringNString {
+				var native VNativeWireStringNString
+				wire := VWireStringNString("abcdeΔ")
+				if err := VWireStringNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StringNStruct: func() VNativeWireStringNStruct {
+				var native VNativeWireStringNStruct
+				wire := VWireStringNStruct("ΔΘΠΣΦ王")
+				if err := VWireStringNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNString: func() VNativeWireArrayNString {
+				var native VNativeWireArrayNString
+				wire := VWireArrayNString{
+					"abcdeΔΘΠ",
+				}
+				if err := VWireArrayNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ArrayNStruct: func() VNativeWireArrayNStruct {
+				var native VNativeWireArrayNStruct
+				wire := VWireArrayNStruct{
+					"普澤世",
+				}
+				if err := VWireArrayNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			ListNStruct: func() VNativeWireListNStruct {
+				var native VNativeWireListNStruct
+				wire := VWireListNStruct{
+					"deΔΘ",
+					"",
+				}
+				if err := VWireListNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNString: func() VNativeWireStructNString {
+				var native VNativeWireStructNString
+				wire := VWireStructNString{
+					X: "ΔΘΠΣΦ王普澤",
+				}
+				if err := VWireStructNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNStruct: func() VNativeWireStructNStruct {
+				var native VNativeWireStructNStruct
+				wire := VWireStructNStruct{
+					X: "cdeΔΘ",
+				}
+				if err := VWireStructNStructToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNArray: func() VNativeWireStructNArray {
+				var native VNativeWireStructNArray
+				wire := VWireStructNArray{
+					X: "bcde",
+				}
+				if err := VWireStructNArrayToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			StructNIface: VWireStructNIface{
+				X: "澤世界",
+			},
+			UnionNString: func() VNativeWireUnionNString {
+				var native VNativeWireUnionNString
+				wire := VWireUnionNString(VWireUnionNStringX{"cdeΔΘΠΣΦ"})
+				if err := VWireUnionNStringToNative(wire, &native); err != nil {
+					panic(err)
+				}
+				return native
+			}(),
+			UnionNPointer: VWireUnionNPointerX{"bc"},
+			UnionNIface:   VWireUnionNIfaceX{},
+		},
+	},
 }
 var xAllFail = []vdlEntry(nil)
 var xAllPass = []vdlEntry{
@@ -87281,6 +95115,206 @@ var xAllPass = []vdlEntry{
 			},
 		},
 	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "XSelfCycle{}",
+		Target:      XSelfCycle{},
+		SourceLabel: "XSelfCycle{}",
+		Source:      XSelfCycle{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XSelfCycle{}",
+		Target:      XSelfCycle{},
+		SourceLabel: "XMutualCycleB{}",
+		Source:      XMutualCycleB{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XSelfCycle{}",
+		Target:      XSelfCycle{},
+		SourceLabel: "XStructEmpty{}",
+		Source:      XStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Target: XSelfCycle{
+			Data: -123,
+			Next: &XSelfCycle{
+				Data: -123,
+				Next: &XSelfCycle{
+					Data: -123,
+					Next: &XSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "XSelfCycle{Data: -123, Next: {Data: -123, Next: {Data: -123, Next: {Data: -123}}}}",
+		Source: XSelfCycle{
+			Data: -123,
+			Next: &XSelfCycle{
+				Data: -123,
+				Next: &XSelfCycle{
+					Data: -123,
+					Next: &XSelfCycle{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}}",
+		Target: XSelfCycle{
+			Next: &XSelfCycle{
+				Data: 2253179390369614770,
+				Next: &XSelfCycle{},
+			},
+		},
+		SourceLabel: "XSelfCycle{Next: {Data: 2253179390369614770, Next: {}}}",
+		Source: XSelfCycle{
+			Next: &XSelfCycle{
+				Data: 2253179390369614770,
+				Next: &XSelfCycle{},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleB{}",
+		Target:      XMutualCycleB{},
+		SourceLabel: "XMutualCycleB{}",
+		Source:      XMutualCycleB{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleB{}",
+		Target:      XMutualCycleB{},
+		SourceLabel: "?XStructEmpty{}",
+		Source:      &XStructEmpty{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleB{}",
+		Target:      XMutualCycleB{},
+		SourceLabel: "XStructEmpty{}",
+		Source:      XStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Target: XMutualCycleB{
+			Data: -123,
+			A: &XMutualCycleA{
+				Data: -123,
+				B: &XMutualCycleB{
+					Data: -123,
+					A: &XMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "XMutualCycleB{Data: -123, A: {Data: -123, B: {Data: -123, A: {Data: -123}}}}",
+		Source: XMutualCycleB{
+			Data: -123,
+			A: &XMutualCycleA{
+				Data: -123,
+				B: &XMutualCycleB{
+					Data: -123,
+					A: &XMutualCycleA{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "XMutualCycleB{A: {}}",
+		Target: XMutualCycleB{
+			A: &XMutualCycleA{},
+		},
+		SourceLabel: "XMutualCycleB{A: {}}",
+		Source: XMutualCycleB{
+			A: &XMutualCycleA{},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleA{}",
+		Target:      XMutualCycleA{},
+		SourceLabel: "XMutualCycleA{}",
+		Source:      XMutualCycleA{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleA{}",
+		Target:      XMutualCycleA{},
+		SourceLabel: "XSelfCycle{}",
+		Source:      XSelfCycle{},
+	},
+	{
+		Label:       "Zero",
+		TargetLabel: "XMutualCycleA{}",
+		Target:      XMutualCycleA{},
+		SourceLabel: "XStructEmpty{}",
+		Source:      XStructEmpty{},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Full",
+		TargetLabel: "XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Target: XMutualCycleA{
+			Data: -123,
+			B: &XMutualCycleB{
+				Data: -123,
+				A: &XMutualCycleA{
+					Data: -123,
+					B: &XMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+		SourceLabel: "XMutualCycleA{Data: -123, B: {Data: -123, A: {Data: -123, B: {Data: -123}}}}",
+		Source: XMutualCycleA{
+			Data: -123,
+			B: &XMutualCycleB{
+				Data: -123,
+				A: &XMutualCycleA{
+					Data: -123,
+					B: &XMutualCycleB{
+						Data: -123,
+					},
+				},
+			},
+		},
+	},
+	{
+		IsCanonical: true,
+		Label:       "Random0",
+		TargetLabel: "XMutualCycleA{Data: -1006823554338124716, B: {}}",
+		Target: XMutualCycleA{
+			Data: -1006823554338124716,
+			B:    &XMutualCycleB{},
+		},
+		SourceLabel: "XMutualCycleA{Data: -1006823554338124716, B: {}}",
+		Source: XMutualCycleA{
+			Data: -1006823554338124716,
+			B:    &XMutualCycleB{},
+		},
+	},
 }
 
 var __VDLInitCalled bool
@@ -87303,6 +95337,28 @@ func __VDLInit() struct{} {
 		return struct{}{}
 	}
 	__VDLInitCalled = true
+
+	// Register native type conversions first, so that vdl.TypeOf works.
+	vdl.RegisterNative(VWireArrayNStringToNative, VWireArrayNStringFromNative)
+	vdl.RegisterNative(VWireArrayNStructToNative, VWireArrayNStructFromNative)
+	vdl.RegisterNative(VWireBoolNBoolToNative, VWireBoolNBoolFromNative)
+	vdl.RegisterNative(VWireBoolNStringToNative, VWireBoolNStringFromNative)
+	vdl.RegisterNative(VWireBoolNStructToNative, VWireBoolNStructFromNative)
+	vdl.RegisterNative(VWireIntNIntToNative, VWireIntNIntFromNative)
+	vdl.RegisterNative(VWireIntNStringToNative, VWireIntNStringFromNative)
+	vdl.RegisterNative(VWireIntNStructToNative, VWireIntNStructFromNative)
+	vdl.RegisterNative(VWireListNStringToNative, VWireListNStringFromNative)
+	vdl.RegisterNative(VWireListNStructToNative, VWireListNStructFromNative)
+	vdl.RegisterNative(VWireStringNStringToNative, VWireStringNStringFromNative)
+	vdl.RegisterNative(VWireStringNStructToNative, VWireStringNStructFromNative)
+	vdl.RegisterNative(VWireStructNArrayToNative, VWireStructNArrayFromNative)
+	vdl.RegisterNative(VWireStructNSliceToNative, VWireStructNSliceFromNative)
+	vdl.RegisterNative(VWireStructNStringToNative, VWireStructNStringFromNative)
+	vdl.RegisterNative(VWireStructNStructToNative, VWireStructNStructFromNative)
+	vdl.RegisterNative(VWireUnionNArrayToNative, VWireUnionNArrayFromNative)
+	vdl.RegisterNative(VWireUnionNSliceToNative, VWireUnionNSliceFromNative)
+	vdl.RegisterNative(VWireUnionNStringToNative, VWireUnionNStringFromNative)
+	vdl.RegisterNative(VWireUnionNStructToNative, VWireUnionNStructFromNative)
 
 	// Register types.
 	vdl.Register((*vdlEntry)(nil))
@@ -87538,6 +95594,34 @@ func __VDLInit() struct{} {
 	vdl.Register((*VUnionDepth3_VStructDepth2_All)(nil))
 	vdl.Register((*VUnionDepth3_VUnionDepth2_All)(nil))
 	vdl.Register((*VUnionDepth3_OptVStructDepth2_Set_Float64)(nil))
+	vdl.Register((*VSelfCycle)(nil))
+	vdl.Register((*VMutualCycleB)(nil))
+	vdl.Register((*VMutualCycleA)(nil))
+	vdl.Register((*VWireBoolNBool)(nil))
+	vdl.Register((*VWireBoolNString)(nil))
+	vdl.Register((*VWireBoolNStruct)(nil))
+	vdl.Register((*VWireIntNInt)(nil))
+	vdl.Register((*VWireIntNString)(nil))
+	vdl.Register((*VWireIntNStruct)(nil))
+	vdl.Register((*VWireStringNString)(nil))
+	vdl.Register((*VWireStringNStruct)(nil))
+	vdl.Register((*VWireArrayNString)(nil))
+	vdl.Register((*VWireArrayNStruct)(nil))
+	vdl.Register((*VWireListNString)(nil))
+	vdl.Register((*VWireListNStruct)(nil))
+	vdl.Register((*VWireStructNString)(nil))
+	vdl.Register((*VWireStructNStruct)(nil))
+	vdl.Register((*VWireStructNArray)(nil))
+	vdl.Register((*VWireStructNSlice)(nil))
+	vdl.Register((*VWireStructNPointer)(nil))
+	vdl.Register((*VWireStructNIface)(nil))
+	vdl.Register((*VWireUnionNString)(nil))
+	vdl.Register((*VWireUnionNStruct)(nil))
+	vdl.Register((*VWireUnionNArray)(nil))
+	vdl.Register((*VWireUnionNSlice)(nil))
+	vdl.Register((*VWireUnionNPointer)(nil))
+	vdl.Register((*VWireUnionNIface)(nil))
+	vdl.Register((*VWireAll)(nil))
 	vdl.Register((*XBool)(nil))
 	vdl.Register((*XString)(nil))
 	vdl.Register((*XByte)(nil))
@@ -87770,6 +95854,9 @@ func __VDLInit() struct{} {
 	vdl.Register((*XUnionDepth3_XStructDepth2_All)(nil))
 	vdl.Register((*XUnionDepth3_XUnionDepth2_All)(nil))
 	vdl.Register((*XUnionDepth3_OptXStructDepth2_Set_Float64)(nil))
+	vdl.Register((*XSelfCycle)(nil))
+	vdl.Register((*XMutualCycleB)(nil))
+	vdl.Register((*XMutualCycleA)(nil))
 
 	return struct{}{}
 }

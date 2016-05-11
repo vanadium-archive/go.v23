@@ -62,24 +62,25 @@ type GoType struct {
 	// Kind is the kind of Type.
 	Kind GoKind
 	// Type is the Go type to use in generated code, instead of the VDL type.
-	//
-	// If the Go type requires additional imports, specify the type using the
-	// standard local package name here, and also specify the import package in
-	// Imports.  E.g. to specify the native type time.Duration:
-	//   Kind:    Number
-	//   Type:    "time.Duration",
-	//   Imports: {{Path: "time", Name: "time"}},
-	//   Zero:    {Mode: Unique}
 	Type string
-	// ToNative and FromNative override the default name for the native conversion
-	// function with a custom function.
-	// e.g. "verror.ErrorToNative"
+	// Zero specifies zero value setting and checking behavior.
+	Zero GoZero
+	// ToNative and FromNative overrides the names of the native conversion
+	// functions.  If unspecified, the default functions are of the form:
+	//   WireTypeToNative(wire WireType, native *NativeType) error
+	//   WireTypeFromNative(wire *WireType, native NativeType) error
 	ToNative string
 	FromNative string
-	// Imports are the Go imports required by the Type, used in generated code.
+	// Imports are the Go imports referenced by the Type, ToNative and FromNative
+	// fields.  In each field, use the standard local package name, and specify
+	// the import package here.  E.g. to specify the native type time.Time:
+	//   GoType{
+	//     Kind:    Struct,
+	//     Type:    "time.Time",
+	//     Zero:    {Mode: Canonical, IsZero: ".IsZero()"},
+	//     Imports: {{Path: "time", Name: "time"}},
+	//   }
 	Imports []GoImport
-	// Zero specifies special behavior for zero value setting and checking.
-	Zero GoZero
 }
 
 // GoKind describes the kind of Go type.
@@ -119,16 +120,13 @@ type GoZero struct {
 	// apply the IsZero string verbatim to expressions of the native type.
 	//
 	// If IsZero doesn't start with a dot(.), it is assumed to be a function whose
-	// return type must be bool.  Generated code will call the function with all
-	// occurrences of XXX replaced with an expression of the native type.
+	// return type must be bool.  Generated code will call the function with a
+	// single argument that is an expression of the native type.
 	//
-	// TODO(toddw): The function form of IsZero isn't implemented, and also needs
-	// another field to handle imports:
-	//    IsZeroImports []GoImport
+	// TODO(toddw): The function form of IsZero isn't implemented.
 	IsZero string
 	// TODO(toddw): Add a SetZero field, which is like IsZero, but returns an
-	// expression that sets the zero value.  It also needs a []GoImport field to
-	// handle imports.
+	// expression that sets the zero value.
 }
 
 // GoZeroMode describes the relationship between the Go zero value of the native

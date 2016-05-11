@@ -14,16 +14,11 @@ file is generated:
 This tool does not run the vdl tool on the generated *.vdl files; you must do
 that yourself, typically via "jiri go install".
 
-Instead of running this tool manually, it is typically invoked via:
-
+Do not run this tool manually.  Instead invoke it via:
    $ jiri run go generate v.io/v23/vom/vomtest
 
 Usage:
    vomtestgen [flags]
-
-The vomtestgen flags are:
- -data81=data81_gen.vdl
-   Name of the generated data file for version 81.
 
 The global flags are:
  -metadata=<just specify -metadata to activate>

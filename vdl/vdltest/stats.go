@@ -490,6 +490,9 @@ func PrintEntryStats(w io.Writer, entries ...EntryValue) error {
 	stats.Collect("IsBytes", func(e EntryValue) bool {
 		return e.Source.Type().IsBytes()
 	})
+	stats.Collect("IsPartOfCycle", func(e EntryValue) bool {
+		return e.Source.Type().IsPartOfCycle()
+	})
 	// Print stats table.
 	if err := fp(w, "Entries: %d\n", len(entries)); err != nil {
 		return err

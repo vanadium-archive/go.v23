@@ -462,7 +462,7 @@ func (x DevModeUpdateVClockOpts) VDLIsZero() bool {
 	if !x.Now.IsZero() {
 		return false
 	}
-	if x.ElapsedTime != time.Duration(0) {
+	if x.ElapsedTime != 0 {
 		return false
 	}
 	if x.DoNtpUpdate {
@@ -504,7 +504,7 @@ func (x DevModeUpdateVClockOpts) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if x.ElapsedTime != time.Duration(0) {
+	if x.ElapsedTime != 0 {
 		if err := enc.NextField("ElapsedTime"); err != nil {
 			return err
 		}

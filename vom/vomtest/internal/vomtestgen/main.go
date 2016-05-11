@@ -36,26 +36,24 @@ file is generated:
 This tool does not run the vdl tool on the generated *.vdl files; you must do
 that yourself, typically via "jiri go install".
 
-Instead of running this tool manually, it is typically invoked via:
-
+Do not run this tool manually.  Instead invoke it via:
    $ jiri run go generate v.io/v23/vom/vomtest
 `,
 }
 
 func main() {
-	cmdGen.Flags.StringVar(&flagData81, "data81", "data81_gen.vdl", "Name of the generated data file for version 81.")
 	cmdline.Main(cmdGen)
 }
 
-var (
-	flagData81 string
+const (
+	dataFileSuffix = "_gen.vdl"
 )
 
 func runGen(_ *cmdline.Env, _ []string) error {
 	allCanonical := vdltest.AllPassFunc(func(e vdltest.Entry) bool {
 		return e.IsCanonical
 	})
-	writeFileVomTest(flagData81, "data81", vdltest.ToEntryValues(allCanonical))
+	writeFileVomTest("data81", vdltest.ToEntryValues(allCanonical))
 	return nil
 }
 
@@ -92,8 +90,9 @@ package vomtest
 `)
 }
 
-func writeFileVomTest(fileName, constName string, entries []vdltest.EntryValue) {
+func writeFileVomTest(constName string, entries []vdltest.EntryValue) {
 	const version vom.Version = vom.Version81
+	fileName := constName + dataFileSuffix
 	// We skip all random entries for now, since they may contain multiple set and
 	// map elements, which would cause non-deterministic output.
 	//

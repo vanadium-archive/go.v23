@@ -85,8 +85,54 @@ pkg vdltest, func VDLReadVUnionDepth3_VArray3_OptVStructDepth1_VFloat32(vdl.Deco
 pkg vdltest, func VDLReadVUnionDepth3_VMap_VStructDepth1_VBool_VStructDepth1_VBool(vdl.Decoder, *VUnionDepth3_VMap_VStructDepth1_VBool_VStructDepth1_VBool) error
 pkg vdltest, func VDLReadVUnionDepth3_VStructDepth2_All(vdl.Decoder, *VUnionDepth3_VStructDepth2_All) error
 pkg vdltest, func VDLReadVUnionDepth3_VUnionDepth2_All(vdl.Decoder, *VUnionDepth3_VUnionDepth2_All) error
+pkg vdltest, func VDLReadVWireUnionNArray(vdl.Decoder, *VWireUnionNArray) error
+pkg vdltest, func VDLReadVWireUnionNIface(vdl.Decoder, *VWireUnionNIface) error
+pkg vdltest, func VDLReadVWireUnionNPointer(vdl.Decoder, *VWireUnionNPointer) error
+pkg vdltest, func VDLReadVWireUnionNSlice(vdl.Decoder, *VWireUnionNSlice) error
+pkg vdltest, func VDLReadVWireUnionNString(vdl.Decoder, *VWireUnionNString) error
+pkg vdltest, func VDLReadVWireUnionNStruct(vdl.Decoder, *VWireUnionNStruct) error
 pkg vdltest, func VEnumAbcFromString(string) (VEnumAbc, error)
 pkg vdltest, func VEnumBcdFromString(string) (VEnumBcd, error)
+pkg vdltest, func VWireArrayNStringFromNative(*VWireArrayNString, VNativeWireArrayNString) error
+pkg vdltest, func VWireArrayNStringToNative(VWireArrayNString, *VNativeWireArrayNString) error
+pkg vdltest, func VWireArrayNStructFromNative(*VWireArrayNStruct, VNativeWireArrayNStruct) error
+pkg vdltest, func VWireArrayNStructToNative(VWireArrayNStruct, *VNativeWireArrayNStruct) error
+pkg vdltest, func VWireBoolNBoolFromNative(*VWireBoolNBool, VNativeWireBoolNBool) error
+pkg vdltest, func VWireBoolNBoolToNative(VWireBoolNBool, *VNativeWireBoolNBool) error
+pkg vdltest, func VWireBoolNStringFromNative(*VWireBoolNString, VNativeWireBoolNString) error
+pkg vdltest, func VWireBoolNStringToNative(VWireBoolNString, *VNativeWireBoolNString) error
+pkg vdltest, func VWireBoolNStructFromNative(*VWireBoolNStruct, VNativeWireBoolNStruct) error
+pkg vdltest, func VWireBoolNStructToNative(VWireBoolNStruct, *VNativeWireBoolNStruct) error
+pkg vdltest, func VWireIntNIntFromNative(*VWireIntNInt, VNativeWireIntNInt) error
+pkg vdltest, func VWireIntNIntToNative(VWireIntNInt, *VNativeWireIntNInt) error
+pkg vdltest, func VWireIntNStringFromNative(*VWireIntNString, VNativeWireIntNString) error
+pkg vdltest, func VWireIntNStringToNative(VWireIntNString, *VNativeWireIntNString) error
+pkg vdltest, func VWireIntNStructFromNative(*VWireIntNStruct, VNativeWireIntNStruct) error
+pkg vdltest, func VWireIntNStructToNative(VWireIntNStruct, *VNativeWireIntNStruct) error
+pkg vdltest, func VWireListNStringFromNative(*VWireListNString, VNativeWireListNString) error
+pkg vdltest, func VWireListNStringToNative(VWireListNString, *VNativeWireListNString) error
+pkg vdltest, func VWireListNStructFromNative(*VWireListNStruct, VNativeWireListNStruct) error
+pkg vdltest, func VWireListNStructToNative(VWireListNStruct, *VNativeWireListNStruct) error
+pkg vdltest, func VWireStringNStringFromNative(*VWireStringNString, VNativeWireStringNString) error
+pkg vdltest, func VWireStringNStringToNative(VWireStringNString, *VNativeWireStringNString) error
+pkg vdltest, func VWireStringNStructFromNative(*VWireStringNStruct, VNativeWireStringNStruct) error
+pkg vdltest, func VWireStringNStructToNative(VWireStringNStruct, *VNativeWireStringNStruct) error
+pkg vdltest, func VWireStructNArrayFromNative(*VWireStructNArray, VNativeWireStructNArray) error
+pkg vdltest, func VWireStructNArrayToNative(VWireStructNArray, *VNativeWireStructNArray) error
+pkg vdltest, func VWireStructNSliceFromNative(*VWireStructNSlice, VNativeWireStructNSlice) error
+pkg vdltest, func VWireStructNSliceToNative(VWireStructNSlice, *VNativeWireStructNSlice) error
+pkg vdltest, func VWireStructNStringFromNative(*VWireStructNString, VNativeWireStructNString) error
+pkg vdltest, func VWireStructNStringToNative(VWireStructNString, *VNativeWireStructNString) error
+pkg vdltest, func VWireStructNStructFromNative(*VWireStructNStruct, VNativeWireStructNStruct) error
+pkg vdltest, func VWireStructNStructToNative(VWireStructNStruct, *VNativeWireStructNStruct) error
+pkg vdltest, func VWireUnionNArrayFromNative(*VWireUnionNArray, VNativeWireUnionNArray) error
+pkg vdltest, func VWireUnionNArrayToNative(VWireUnionNArray, *VNativeWireUnionNArray) error
+pkg vdltest, func VWireUnionNSliceFromNative(*VWireUnionNSlice, VNativeWireUnionNSlice) error
+pkg vdltest, func VWireUnionNSliceToNative(VWireUnionNSlice, *VNativeWireUnionNSlice) error
+pkg vdltest, func VWireUnionNStringFromNative(*VWireUnionNString, VNativeWireUnionNString) error
+pkg vdltest, func VWireUnionNStringToNative(VWireUnionNString, *VNativeWireUnionNString) error
+pkg vdltest, func VWireUnionNStructFromNative(*VWireUnionNStruct, VNativeWireUnionNStruct) error
+pkg vdltest, func VWireUnionNStructToNative(VWireUnionNStruct, *VNativeWireUnionNStruct) error
 pkg vdltest, func XEnumAbcFromString(string) (XEnumAbc, error)
 pkg vdltest, func XEnumBcdFromString(string) (XEnumBcd, error)
 pkg vdltest, method (*EntryGenerator) GenAllFail([]*vdl.Type) []EntryValue
@@ -191,7 +237,10 @@ pkg vdltest, method (*VMap_VStructEmpty_VStructEmpty) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VMap_VUint32_VUint32) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMutualCycleA) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VMutualCycleB) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VNamedError) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VSelfCycle) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VSet_Bool) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VSet_Byte) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VSet_Float32) VDLRead(vdl.Decoder) error
@@ -273,6 +322,25 @@ pkg vdltest, method (*VStructEmpty) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VUint16) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VUint32) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*VUint64) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireAll) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireArrayNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireArrayNStruct) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireBoolNBool) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireBoolNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireBoolNStruct) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireIntNInt) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireIntNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireIntNStruct) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireListNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireListNStruct) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStringNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStringNStruct) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNArray) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNIface) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNPointer) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNSlice) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNString) VDLRead(vdl.Decoder) error
+pkg vdltest, method (*VWireStructNStruct) VDLRead(vdl.Decoder) error
 pkg vdltest, method (*ValueGenerator) Gen(*vdl.Type, GenMode) *vdl.Value
 pkg vdltest, method (*ValueGenerator) RandSeed(int64)
 pkg vdltest, method (*XEnumAbc) Set(string) error
@@ -469,8 +537,16 @@ pkg vdltest, method (VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64) VDLIsZero()
 pkg vdltest, method (VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte) VDLIsZero() bool
 pkg vdltest, method (VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMutualCycleA) VDLIsZero() bool
+pkg vdltest, method (VMutualCycleA) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VMutualCycleB) VDLIsZero() bool
+pkg vdltest, method (VMutualCycleB) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (VNamedError) VDLIsZero() bool
 pkg vdltest, method (VNamedError) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VNativeWireStructNSlice) IsZero() bool
+pkg vdltest, method (VNativeWireUnionNSlice) IsZero() bool
+pkg vdltest, method (VSelfCycle) VDLIsZero() bool
+pkg vdltest, method (VSelfCycle) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (VSet_Bool) VDLIsZero() bool
 pkg vdltest, method (VSet_Bool) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (VSet_Byte) VDLIsZero() bool
@@ -1173,6 +1249,74 @@ pkg vdltest, method (VUnionDepth3_VUnionDepth2_AllF5) Interface() interface{}
 pkg vdltest, method (VUnionDepth3_VUnionDepth2_AllF5) Name() string
 pkg vdltest, method (VUnionDepth3_VUnionDepth2_AllF5) VDLIsZero() bool
 pkg vdltest, method (VUnionDepth3_VUnionDepth2_AllF5) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireAll) VDLIsZero() bool
+pkg vdltest, method (VWireAll) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireArrayNString) VDLIsZero() bool
+pkg vdltest, method (VWireArrayNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireArrayNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireArrayNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireBoolNBool) VDLIsZero() bool
+pkg vdltest, method (VWireBoolNBool) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireBoolNString) VDLIsZero() bool
+pkg vdltest, method (VWireBoolNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireBoolNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireBoolNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireIntNInt) VDLIsZero() bool
+pkg vdltest, method (VWireIntNInt) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireIntNString) VDLIsZero() bool
+pkg vdltest, method (VWireIntNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireIntNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireIntNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireListNString) VDLIsZero() bool
+pkg vdltest, method (VWireListNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireListNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireListNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStringNString) VDLIsZero() bool
+pkg vdltest, method (VWireStringNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStringNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireStringNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNArray) VDLIsZero() bool
+pkg vdltest, method (VWireStructNArray) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNIface) VDLIsZero() bool
+pkg vdltest, method (VWireStructNIface) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNPointer) VDLIsZero() bool
+pkg vdltest, method (VWireStructNPointer) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNSlice) VDLIsZero() bool
+pkg vdltest, method (VWireStructNSlice) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNString) VDLIsZero() bool
+pkg vdltest, method (VWireStructNString) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireStructNStruct) VDLIsZero() bool
+pkg vdltest, method (VWireStructNStruct) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNArrayX) Index() int
+pkg vdltest, method (VWireUnionNArrayX) Interface() interface{}
+pkg vdltest, method (VWireUnionNArrayX) Name() string
+pkg vdltest, method (VWireUnionNArrayX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNArrayX) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNIfaceX) Index() int
+pkg vdltest, method (VWireUnionNIfaceX) Interface() interface{}
+pkg vdltest, method (VWireUnionNIfaceX) Name() string
+pkg vdltest, method (VWireUnionNIfaceX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNIfaceX) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNPointerX) Index() int
+pkg vdltest, method (VWireUnionNPointerX) Interface() interface{}
+pkg vdltest, method (VWireUnionNPointerX) Name() string
+pkg vdltest, method (VWireUnionNPointerX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNPointerX) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNSliceX) Index() int
+pkg vdltest, method (VWireUnionNSliceX) Interface() interface{}
+pkg vdltest, method (VWireUnionNSliceX) Name() string
+pkg vdltest, method (VWireUnionNSliceX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNSliceX) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNStringX) Index() int
+pkg vdltest, method (VWireUnionNStringX) Interface() interface{}
+pkg vdltest, method (VWireUnionNStringX) Name() string
+pkg vdltest, method (VWireUnionNStringX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNStringX) VDLWrite(vdl.Encoder) error
+pkg vdltest, method (VWireUnionNStructX) Index() int
+pkg vdltest, method (VWireUnionNStructX) Interface() interface{}
+pkg vdltest, method (VWireUnionNStructX) Name() string
+pkg vdltest, method (VWireUnionNStructX) VDLIsZero() bool
+pkg vdltest, method (VWireUnionNStructX) VDLWrite(vdl.Encoder) error
 pkg vdltest, method (XEnumAbc) String() string
 pkg vdltest, method (XEnumBcd) String() string
 pkg vdltest, method (XUnionDepth1_AllF0) Index() int
@@ -1616,9 +1760,45 @@ pkg vdltest, type VMap_VStructEmpty_VStructEmpty map[VStructEmpty]VStructEmpty
 pkg vdltest, type VMap_VUint32_VUint32 map[VUint32]VUint32
 pkg vdltest, type VMap_VUnionDepth1_VUint64_VUnionDepth1_VUint64 map[VUnionDepth1_VUint64]VUnionDepth1_VUint64
 pkg vdltest, type VMap_VUnionDepth2_VArray2_VByte_VUnionDepth2_VArray2_VByte map[VUnionDepth2_VArray2_VByte]VUnionDepth2_VArray2_VByte
+pkg vdltest, type VMutualCycleA struct
+pkg vdltest, type VMutualCycleA struct, B *VMutualCycleB
+pkg vdltest, type VMutualCycleA struct, Data int64
+pkg vdltest, type VMutualCycleB struct
+pkg vdltest, type VMutualCycleB struct, A *VMutualCycleA
+pkg vdltest, type VMutualCycleB struct, Data int64
 pkg vdltest, type VNamedError struct
 pkg vdltest, type VNamedError struct, Id string
 pkg vdltest, type VNamedError struct, Msg string
+pkg vdltest, type VNativeWireArrayNString string
+pkg vdltest, type VNativeWireArrayNStruct struct
+pkg vdltest, type VNativeWireArrayNStruct struct, X string
+pkg vdltest, type VNativeWireBoolNBool bool
+pkg vdltest, type VNativeWireBoolNString string
+pkg vdltest, type VNativeWireBoolNStruct struct
+pkg vdltest, type VNativeWireBoolNStruct struct, X string
+pkg vdltest, type VNativeWireIntNInt int
+pkg vdltest, type VNativeWireIntNString string
+pkg vdltest, type VNativeWireIntNStruct struct
+pkg vdltest, type VNativeWireIntNStruct struct, X string
+pkg vdltest, type VNativeWireListNString string
+pkg vdltest, type VNativeWireListNStruct struct
+pkg vdltest, type VNativeWireListNStruct struct, X string
+pkg vdltest, type VNativeWireStringNString string
+pkg vdltest, type VNativeWireStringNStruct struct
+pkg vdltest, type VNativeWireStringNStruct struct, X string
+pkg vdltest, type VNativeWireStructNArray [1]string
+pkg vdltest, type VNativeWireStructNSlice []string
+pkg vdltest, type VNativeWireStructNString string
+pkg vdltest, type VNativeWireStructNStruct struct
+pkg vdltest, type VNativeWireStructNStruct struct, X string
+pkg vdltest, type VNativeWireUnionNArray [1]string
+pkg vdltest, type VNativeWireUnionNSlice []string
+pkg vdltest, type VNativeWireUnionNString string
+pkg vdltest, type VNativeWireUnionNStruct struct
+pkg vdltest, type VNativeWireUnionNStruct struct, X string
+pkg vdltest, type VSelfCycle struct
+pkg vdltest, type VSelfCycle struct, Data int64
+pkg vdltest, type VSelfCycle struct, Next *VSelfCycle
 pkg vdltest, type VSet_Bool map[bool]struct{}
 pkg vdltest, type VSet_Byte map[byte]struct{}
 pkg vdltest, type VSet_Float32 map[float32]struct{}
@@ -2366,6 +2546,103 @@ pkg vdltest, type VUnionDepth3_VUnionDepth2_All interface, VDLWrite(vdl.Encoder)
 pkg vdltest, type VUnionDepth3_VUnionDepth2_All interface, unexported methods
 pkg vdltest, type VUnionDepth3_VUnionDepth2_AllF5 struct
 pkg vdltest, type VUnionDepth3_VUnionDepth2_AllF5 struct, Value VUnionDepth2_All
+pkg vdltest, type VWireAll struct
+pkg vdltest, type VWireAll struct, ArrayNString VNativeWireArrayNString
+pkg vdltest, type VWireAll struct, ArrayNStruct VNativeWireArrayNStruct
+pkg vdltest, type VWireAll struct, BoolNBool VNativeWireBoolNBool
+pkg vdltest, type VWireAll struct, BoolNString VNativeWireBoolNString
+pkg vdltest, type VWireAll struct, BoolNStruct VNativeWireBoolNStruct
+pkg vdltest, type VWireAll struct, IntNInt VNativeWireIntNInt
+pkg vdltest, type VWireAll struct, IntNString VNativeWireIntNString
+pkg vdltest, type VWireAll struct, IntNStruct VNativeWireIntNStruct
+pkg vdltest, type VWireAll struct, ListNString VNativeWireListNString
+pkg vdltest, type VWireAll struct, ListNStruct VNativeWireListNStruct
+pkg vdltest, type VWireAll struct, StringNString VNativeWireStringNString
+pkg vdltest, type VWireAll struct, StringNStruct VNativeWireStringNStruct
+pkg vdltest, type VWireAll struct, StructNArray VNativeWireStructNArray
+pkg vdltest, type VWireAll struct, StructNIface VWireStructNIface
+pkg vdltest, type VWireAll struct, StructNPointer VWireStructNPointer
+pkg vdltest, type VWireAll struct, StructNSlice VNativeWireStructNSlice
+pkg vdltest, type VWireAll struct, StructNString VNativeWireStructNString
+pkg vdltest, type VWireAll struct, StructNStruct VNativeWireStructNStruct
+pkg vdltest, type VWireAll struct, UnionNArray VNativeWireUnionNArray
+pkg vdltest, type VWireAll struct, UnionNIface VWireUnionNIface
+pkg vdltest, type VWireAll struct, UnionNPointer VWireUnionNPointer
+pkg vdltest, type VWireAll struct, UnionNSlice VNativeWireUnionNSlice
+pkg vdltest, type VWireAll struct, UnionNString VNativeWireUnionNString
+pkg vdltest, type VWireAll struct, UnionNStruct VNativeWireUnionNStruct
+pkg vdltest, type VWireArrayNString [1]string
+pkg vdltest, type VWireArrayNStruct [1]string
+pkg vdltest, type VWireBoolNBool bool
+pkg vdltest, type VWireBoolNString bool
+pkg vdltest, type VWireBoolNStruct bool
+pkg vdltest, type VWireIntNInt int32
+pkg vdltest, type VWireIntNString int32
+pkg vdltest, type VWireIntNStruct int32
+pkg vdltest, type VWireListNString []string
+pkg vdltest, type VWireListNStruct []string
+pkg vdltest, type VWireStringNString string
+pkg vdltest, type VWireStringNStruct string
+pkg vdltest, type VWireStructNArray struct
+pkg vdltest, type VWireStructNArray struct, X string
+pkg vdltest, type VWireStructNIface struct
+pkg vdltest, type VWireStructNIface struct, X string
+pkg vdltest, type VWireStructNPointer struct
+pkg vdltest, type VWireStructNPointer struct, X string
+pkg vdltest, type VWireStructNSlice struct
+pkg vdltest, type VWireStructNSlice struct, X string
+pkg vdltest, type VWireStructNString struct
+pkg vdltest, type VWireStructNString struct, X string
+pkg vdltest, type VWireStructNStruct struct
+pkg vdltest, type VWireStructNStruct struct, X string
+pkg vdltest, type VWireUnionNArray interface, Index() int
+pkg vdltest, type VWireUnionNArray interface, Interface() interface{}
+pkg vdltest, type VWireUnionNArray interface, Name() string
+pkg vdltest, type VWireUnionNArray interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNArray interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNArray interface, unexported methods
+pkg vdltest, type VWireUnionNArrayX struct
+pkg vdltest, type VWireUnionNArrayX struct, Value string
+pkg vdltest, type VWireUnionNIface interface, Index() int
+pkg vdltest, type VWireUnionNIface interface, Interface() interface{}
+pkg vdltest, type VWireUnionNIface interface, Name() string
+pkg vdltest, type VWireUnionNIface interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNIface interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNIface interface, unexported methods
+pkg vdltest, type VWireUnionNIfaceX struct
+pkg vdltest, type VWireUnionNIfaceX struct, Value string
+pkg vdltest, type VWireUnionNPointer interface, Index() int
+pkg vdltest, type VWireUnionNPointer interface, Interface() interface{}
+pkg vdltest, type VWireUnionNPointer interface, Name() string
+pkg vdltest, type VWireUnionNPointer interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNPointer interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNPointer interface, unexported methods
+pkg vdltest, type VWireUnionNPointerX struct
+pkg vdltest, type VWireUnionNPointerX struct, Value string
+pkg vdltest, type VWireUnionNSlice interface, Index() int
+pkg vdltest, type VWireUnionNSlice interface, Interface() interface{}
+pkg vdltest, type VWireUnionNSlice interface, Name() string
+pkg vdltest, type VWireUnionNSlice interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNSlice interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNSlice interface, unexported methods
+pkg vdltest, type VWireUnionNSliceX struct
+pkg vdltest, type VWireUnionNSliceX struct, Value string
+pkg vdltest, type VWireUnionNString interface, Index() int
+pkg vdltest, type VWireUnionNString interface, Interface() interface{}
+pkg vdltest, type VWireUnionNString interface, Name() string
+pkg vdltest, type VWireUnionNString interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNString interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNString interface, unexported methods
+pkg vdltest, type VWireUnionNStringX struct
+pkg vdltest, type VWireUnionNStringX struct, Value string
+pkg vdltest, type VWireUnionNStruct interface, Index() int
+pkg vdltest, type VWireUnionNStruct interface, Interface() interface{}
+pkg vdltest, type VWireUnionNStruct interface, Name() string
+pkg vdltest, type VWireUnionNStruct interface, VDLIsZero() bool
+pkg vdltest, type VWireUnionNStruct interface, VDLWrite(vdl.Encoder) error
+pkg vdltest, type VWireUnionNStruct interface, unexported methods
+pkg vdltest, type VWireUnionNStructX struct
+pkg vdltest, type VWireUnionNStructX struct, Value string
 pkg vdltest, type ValueGenerator struct
 pkg vdltest, type ValueGenerator struct, MaxCycleDepth int
 pkg vdltest, type ValueGenerator struct, MaxLen int
@@ -2464,9 +2741,18 @@ pkg vdltest, type XMap_XStructEmpty_XStructEmpty map[XStructEmpty]XStructEmpty
 pkg vdltest, type XMap_XUint32_XUint32 map[XUint32]XUint32
 pkg vdltest, type XMap_XUnionDepth1_XUint64_XUnionDepth1_XUint64 map[XUnionDepth1_XUint64]XUnionDepth1_XUint64
 pkg vdltest, type XMap_XUnionDepth2_XArray2_XByte_XUnionDepth2_XArray2_XByte map[XUnionDepth2_XArray2_XByte]XUnionDepth2_XArray2_XByte
+pkg vdltest, type XMutualCycleA struct
+pkg vdltest, type XMutualCycleA struct, B *XMutualCycleB
+pkg vdltest, type XMutualCycleA struct, Data int64
+pkg vdltest, type XMutualCycleB struct
+pkg vdltest, type XMutualCycleB struct, A *XMutualCycleA
+pkg vdltest, type XMutualCycleB struct, Data int64
 pkg vdltest, type XNamedError struct
 pkg vdltest, type XNamedError struct, Id string
 pkg vdltest, type XNamedError struct, Msg string
+pkg vdltest, type XSelfCycle struct
+pkg vdltest, type XSelfCycle struct, Data int64
+pkg vdltest, type XSelfCycle struct, Next *XSelfCycle
 pkg vdltest, type XSet_Bool map[bool]struct{}
 pkg vdltest, type XSet_Byte map[byte]struct{}
 pkg vdltest, type XSet_Float32 map[float32]struct{}

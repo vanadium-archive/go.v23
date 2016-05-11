@@ -586,7 +586,7 @@ func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(vdl.TypeOf((*WireDeadline)(nil)).Elem()); err != nil {
 		return err
 	}
-	if x.FromNow != time.Duration(0) {
+	if x.FromNow != 0 {
 		if err := enc.NextField("FromNow"); err != nil {
 			return err
 		}

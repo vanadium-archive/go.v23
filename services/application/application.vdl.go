@@ -829,7 +829,7 @@ func (x Envelope) VDLIsZero() bool {
 	if x.Restarts != 0 {
 		return false
 	}
-	if x.RestartTimeWindow != time.Duration(0) {
+	if x.RestartTimeWindow != 0 {
 		return false
 	}
 	return true
@@ -911,7 +911,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if x.RestartTimeWindow != time.Duration(0) {
+	if x.RestartTimeWindow != 0 {
 		if err := enc.NextField("RestartTimeWindow"); err != nil {
 			return err
 		}
