@@ -35,6 +35,7 @@ pkg syncbase, func NewErrBlobNotCommitted(*context.T) error
 pkg syncbase, func NewErrConcurrentBatch(*context.T) error
 pkg syncbase, func NewErrCorruptDatabase(*context.T, string) error
 pkg syncbase, func NewErrInvalidName(*context.T, string) error
+pkg syncbase, func NewErrInvalidPermissionsChange(*context.T) error
 pkg syncbase, func NewErrNotBoundToBatch(*context.T) error
 pkg syncbase, func NewErrNotInDevMode(*context.T) error
 pkg syncbase, func NewErrReadOnlyBatch(*context.T) error
@@ -984,6 +985,7 @@ pkg syncbase, var ErrBlobNotCommitted unknown-type
 pkg syncbase, var ErrConcurrentBatch unknown-type
 pkg syncbase, var ErrCorruptDatabase unknown-type
 pkg syncbase, var ErrInvalidName unknown-type
+pkg syncbase, var ErrInvalidPermissionsChange unknown-type
 pkg syncbase, var ErrNotBoundToBatch unknown-type
 pkg syncbase, var ErrNotInDevMode unknown-type
 pkg syncbase, var ErrReadOnlyBatch unknown-type

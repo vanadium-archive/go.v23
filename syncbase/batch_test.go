@@ -50,6 +50,68 @@ func TestName(t *testing.T) {
 	}
 }
 
+// Test that a batch cannot add a permission, make a change, and remove a permission
+// since that change isn't able to be validated by remote syncbases.
+func TestMakeCollectionInBatch(test *testing.T) {
+	ctx, serverName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	service := syncbase.NewService(serverName)
+	db := tu.CreateDatabase(test, ctx, service, "d")
+
+	batch, err := db.BeginBatch(ctx, wire.BatchOptions{})
+	if err != nil {
+		test.Fatalf("d.BeginBatch() failed: %v", err)
+	}
+
+	// Create the collection, ensuring that the initial perms do not have write permission.
+	dbperms, _, err := db.GetPermissions(ctx)
+	if err != nil {
+		test.Fatalf("d.GetPermissions() failed: %v", err)
+	}
+	dbperms.Clear("root:client", "Write")
+	if err := batch.Collection(ctx, "newname").Create(ctx, dbperms); err != nil {
+		test.Fatalf("batch.Collection().Create() failed, %v", err)
+	}
+	batchCollection := batch.CollectionForId(tu.CxId("newname"))
+
+	// Add the Write permission.
+	perms, err := batchCollection.GetPermissions(ctx)
+	if err != nil {
+		test.Fatalf("d.GetPermissions() failed: %v", err)
+	}
+	perms.Add("root:client", "Write")
+	if err := batchCollection.SetPermissions(ctx, perms); err != nil {
+		test.Fatalf("SetPermissions() failed: %v", err)
+	}
+
+	// Attempt a Put.
+	if err := batchCollection.Put(ctx, "fooKey", "fooValue"); err != nil {
+		test.Fatalf("Put() failed: %v", err)
+	}
+
+	// Remove the Write permission.
+	perms, err = batchCollection.GetPermissions(ctx)
+	perms.Clear("root:client", "Write")
+	if err := batchCollection.SetPermissions(ctx, perms); err != nil {
+		test.Fatalf("SetPermissions() failed: %v", err)
+	}
+
+	// Commit the batch
+	err = batch.Commit(ctx)
+	if err == nil {
+		test.Fatalf("commit should have failed but instead it succeeded")
+	}
+
+	collection := db.CollectionForId(tu.CxId("newname"))
+	exists, err := collection.Exists(ctx)
+	if err != nil {
+		test.Fatalf("Exists() failed, %v", err)
+	}
+	if exists {
+		test.Fatalf("the collection should not exist since the commit failed")
+	}
+}
+
 // Tests basic functionality of BatchDatabase.
 func TestBatchBasics(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)

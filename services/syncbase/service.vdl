@@ -390,4 +390,5 @@ error (
 	BlobNotCommitted() {"en": "blob is not yet committed"}
 	SyncgroupJoinFailed() {"en": "syncgroup join failed{:_}"}
 	BadExecStreamHeader() {"en": "Exec stream header improperly formatted"}
+	InvalidPermissionsChange() {"en": "the sequence of permission changes is invalid"}
 )
