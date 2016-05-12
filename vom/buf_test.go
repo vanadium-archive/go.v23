@@ -138,10 +138,10 @@ func TestDecbufReadSmall(t *testing.T) {
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 	}
-	for _, mode := range allReadModes {
-		fn(mode.String(), newDecbuf(mode.testReader(abcReader(10))))
+	for _, mode := range AllReadModes {
+		fn(mode.String(), newDecbuf(mode.TestReader(ABCReader(10))))
 	}
-	fn("fromBytes", newDecbufFromBytes(abcBytes(10)))
+	fn("fromBytes", newDecbufFromBytes(ABCBytes(10)))
 }
 
 func TestDecbufSkip(t *testing.T) {
@@ -156,10 +156,10 @@ func TestDecbufSkip(t *testing.T) {
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 	}
-	for _, mode := range allReadModes {
-		fn(mode.String(), newDecbuf(mode.testReader(abcReader(10))))
+	for _, mode := range AllReadModes {
+		fn(mode.String(), newDecbuf(mode.TestReader(ABCReader(10))))
 	}
-	fn("fromBytes", newDecbufFromBytes(abcBytes(10)))
+	fn("fromBytes", newDecbufFromBytes(ABCBytes(10)))
 }
 
 func TestDecbufPeekSmall(t *testing.T) {
@@ -184,12 +184,12 @@ func TestDecbufPeekSmall(t *testing.T) {
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 		expectPeekSmall(t, mode, b, 1, "", io.EOF)
 	}
-	for _, mode := range []readMode{readAll, readHalf, readAllEOF, readHalfEOF} {
-		fn1(mode.String(), newDecbuf(mode.testReader(abcReader(3))))
-		fn2(mode.String(), newDecbuf(mode.testReader(abcReader(4))))
+	for _, mode := range []ReadMode{ReadAll, ReadHalf, ReadAllEOF, ReadHalfEOF} {
+		fn1(mode.String(), newDecbuf(mode.TestReader(ABCReader(3))))
+		fn2(mode.String(), newDecbuf(mode.TestReader(ABCReader(4))))
 	}
-	fn1("fromBytes", newDecbufFromBytes(abcBytes(3)))
-	fn2("fromBytes", newDecbufFromBytes(abcBytes(4)))
+	fn1("fromBytes", newDecbufFromBytes(ABCBytes(3)))
+	fn2("fromBytes", newDecbufFromBytes(ABCBytes(4)))
 }
 
 func TestDecbufPeekSmall1(t *testing.T) {
@@ -218,9 +218,9 @@ func TestDecbufPeekSmall1(t *testing.T) {
 		expectReadSmall(t, mode, b, 1, "", io.EOF)
 		expectPeekSmall(t, mode, b, 1, "", io.EOF)
 	}
-	for _, mode := range []readMode{readOneByte, readOneByteEOF} {
-		fn1(mode.String(), newDecbuf(mode.testReader(abcReader(3))))
-		fn2(mode.String(), newDecbuf(mode.testReader(abcReader(4))))
+	for _, mode := range []ReadMode{ReadOneByte, ReadOneByteEOF} {
+		fn1(mode.String(), newDecbuf(mode.TestReader(ABCReader(3))))
+		fn2(mode.String(), newDecbuf(mode.TestReader(ABCReader(4))))
 	}
 	// Don't try newDecbufFromBytes for this test, since it requires filling the
 	// buffer one byte at a time.
@@ -234,10 +234,10 @@ func TestDecbufReadByte(t *testing.T) {
 		expectReadByte(t, mode, b, 0, io.EOF)
 		expectReadByte(t, mode, b, 0, io.EOF)
 	}
-	for _, mode := range allReadModes {
-		fn(mode.String(), newDecbuf(mode.testReader(abcReader(3))))
+	for _, mode := range AllReadModes {
+		fn(mode.String(), newDecbuf(mode.TestReader(ABCReader(3))))
 	}
-	fn("fromBytes", newDecbufFromBytes(abcBytes(3)))
+	fn("fromBytes", newDecbufFromBytes(ABCBytes(3)))
 }
 
 func TestDecbufPeekByte(t *testing.T) {
@@ -258,10 +258,10 @@ func TestDecbufPeekByte(t *testing.T) {
 		expectPeekByte(t, mode, b, 0, io.EOF)
 		expectReadByte(t, mode, b, 0, io.EOF)
 	}
-	for _, mode := range allReadModes {
-		fn(mode.String(), newDecbuf(mode.testReader(abcReader(3))))
+	for _, mode := range AllReadModes {
+		fn(mode.String(), newDecbuf(mode.TestReader(ABCReader(3))))
 	}
-	fn("fromBytes", newDecbufFromBytes(abcBytes(3)))
+	fn("fromBytes", newDecbufFromBytes(ABCBytes(3)))
 }
 
 func TestDecbufReadIntBuf(t *testing.T) {
@@ -280,10 +280,10 @@ func TestDecbufReadIntBuf(t *testing.T) {
 		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
 		expectReadIntoBuf(t, mode, b, 1, "", io.EOF)
 	}
-	for _, mode := range allReadModes {
-		fn1(mode.String(), newDecbuf(mode.testReader(abcReader(6))))
-		fn2(mode.String(), newDecbuf(mode.testReader(abcReader(6))))
+	for _, mode := range AllReadModes {
+		fn1(mode.String(), newDecbuf(mode.TestReader(ABCReader(6))))
+		fn2(mode.String(), newDecbuf(mode.TestReader(ABCReader(6))))
 	}
-	fn1("fromBytes", newDecbufFromBytes(abcBytes(6)))
-	fn2("fromBytes", newDecbufFromBytes(abcBytes(6)))
+	fn1("fromBytes", newDecbufFromBytes(ABCBytes(6)))
+	fn2("fromBytes", newDecbufFromBytes(ABCBytes(6)))
 }

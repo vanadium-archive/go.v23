@@ -31,10 +31,7 @@ var cmdGen = &cmdline.Command{
 Command vomtestgen generates test cases for the vomtest package.  The following
 file is generated:
 
-   data81_gen.vdl - Golden file containing test cases.
-
-This tool does not run the vdl tool on the generated *.vdl files; you must do
-that yourself, typically via "jiri go install".
+   pass81_gen.vdl - Golden file containing passing test cases for version 81.
 
 Do not run this tool manually.  Instead invoke it via:
    $ jiri run go generate v.io/v23/vom/vomtest
@@ -45,15 +42,11 @@ func main() {
 	cmdline.Main(cmdGen)
 }
 
-const (
-	dataFileSuffix = "_gen.vdl"
-)
-
 func runGen(_ *cmdline.Env, _ []string) error {
 	allCanonical := vdltest.AllPassFunc(func(e vdltest.Entry) bool {
 		return e.IsCanonical
 	})
-	writeFileVomTest("data81", vdltest.ToEntryValues(allCanonical))
+	writePassFile("pass81", vdltest.ToEntryValues(allCanonical))
 	return nil
 }
 
@@ -90,9 +83,9 @@ package vomtest
 `)
 }
 
-func writeFileVomTest(constName string, entries []vdltest.EntryValue) {
+func writePassFile(constName string, entries []vdltest.EntryValue) {
 	const version vom.Version = vom.Version81
-	fileName := constName + dataFileSuffix
+	fileName := constName + "_gen.vdl"
 	// We skip all random entries for now, since they may contain multiple set and
 	// map elements, which would cause non-deterministic output.
 	//
@@ -117,23 +110,23 @@ func writeFileVomTest(constName string, entries []vdltest.EntryValue) {
 	comment := textutil.PrefixLineWriter(file, "// ")
 	panicOnError(vdltest.PrintEntryStats(comment, entries...))
 	panicOnError(comment.Flush())
-	writef(file, "\nconst %[1]s = []TestCase {\n", constName)
+	writef(file, "\nconst %[1]s = []vdlEntry {\n", constName)
 	for _, e := range entries {
 		source := vdlgen.TypedConst(e.Source, "v.io/v23/vom/vomtest", imports)
-		hexVersion, hexType, hexValue, vomDump := toVomHex(version, e.Source)
+		vomDump, hexType, hexValue := toVomHex(version, e.Source)
 		writef(file, `%[1]s
 	{
 		%#[2]q,
+		%#[3]q,
 		%[3]s,
-		0x%[4]x,
-		%[5]q, %[6]q, %[7]q,
+		0x%[4]x, %[5]q, %[6]q,
 	},
-`, vomDump, e.Label+" "+source, source, byte(version), hexVersion+hexType+hexValue, hexType, hexValue)
+`, vomDump, e.Label, source, byte(version), hexType, hexValue)
 	}
 	writef(file, "}\n")
 }
 
-func toVomHex(version vom.Version, value *vdl.Value) (_, _, _, _ string) {
+func toVomHex(version vom.Version, value *vdl.Value) (_, _, _ string) {
 	var buf, bufType bytes.Buffer
 	encType := vom.NewVersionedTypeEncoder(version, &bufType)
 	enc := vom.NewVersionedEncoderWithTypeEncoder(version, &buf, encType)
@@ -151,5 +144,5 @@ func toVomHex(version vom.Version, value *vdl.Value) (_, _, _, _ string) {
 	if strings.HasSuffix(vomDump, "\n"+pre) {
 		vomDump = vomDump[:len(vomDump)-len("\n"+pre)]
 	}
-	return fmt.Sprintf("%x", versionByte), fmt.Sprintf("%x", bufType.Bytes()), fmt.Sprintf("%x", buf.Bytes()), vomDump
+	return vomDump, fmt.Sprintf("%x", bufType.Bytes()), fmt.Sprintf("%x", buf.Bytes())
 }

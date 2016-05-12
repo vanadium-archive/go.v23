@@ -113,6 +113,12 @@ pkg vom, method (*TypeId) VDLRead(vdl.Decoder) error
 pkg vom, method (*TypeIdTarget) FromFloat(float64, *vdl.Type) error
 pkg vom, method (*TypeIdTarget) FromInt(int64, *vdl.Type) error
 pkg vom, method (*TypeIdTarget) FromUint(uint64, *vdl.Type) error
+pkg vom, method (*Version) FillVDLTarget(vdl.Target, *vdl.Type) error
+pkg vom, method (*Version) MakeVDLTarget() vdl.Target
+pkg vom, method (*Version) VDLRead(vdl.Decoder) error
+pkg vom, method (*VersionTarget) FromFloat(float64, *vdl.Type) error
+pkg vom, method (*VersionTarget) FromInt(int64, *vdl.Type) error
+pkg vom, method (*VersionTarget) FromUint(uint64, *vdl.Type) error
 pkg vom, method (*XDecoder) Decode(interface{}) error
 pkg vom, method (*XDecoder) Decoder() vdl.Decoder
 pkg vom, method (*XDecoder) Ignore() error
@@ -180,6 +186,8 @@ pkg vom, method (PrimitivePUint) VDLWrite(vdl.Encoder) error
 pkg vom, method (TypeId) VDLIsZero() bool
 pkg vom, method (TypeId) VDLWrite(vdl.Encoder) error
 pkg vom, method (Version) String() string
+pkg vom, method (Version) VDLIsZero() bool
+pkg vom, method (Version) VDLWrite(vdl.Encoder) error
 pkg vom, type ControlKind int
 pkg vom, type ControlKindTarget struct
 pkg vom, type ControlKindTarget struct, Value *ControlKind
@@ -251,6 +259,9 @@ pkg vom, type TypeIdTarget struct
 pkg vom, type TypeIdTarget struct, Value *TypeId
 pkg vom, type TypeIdTarget struct, embedded vdl.TargetBase
 pkg vom, type Version byte
+pkg vom, type VersionTarget struct
+pkg vom, type VersionTarget struct, Value *Version
+pkg vom, type VersionTarget struct, embedded vdl.TargetBase
 pkg vom, type XDecoder struct
 pkg vom, type XEncoder struct
 pkg vom, var ControlKindAll [...]ControlKind

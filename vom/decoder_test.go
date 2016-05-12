@@ -69,9 +69,9 @@ func TestDecoder(t *testing.T) {
 }
 
 func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
-	for _, mode := range allReadModes {
+	for _, mode := range AllReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
+		decoder := NewDecoder(mode.TestReader(strings.NewReader(bin)))
 		if value == nil {
 			value = vdl.ZeroValue(vdl.AnyType)
 		}
@@ -105,11 +105,11 @@ func testDecodeVDLSingleShot(t *testing.T, name, bin string, value *vdl.Value) {
 }
 
 func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, value *vdl.Value) {
-	for _, mode := range allReadModes {
+	for _, mode := range AllReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		typedec := NewTypeDecoder(mode.TestReader(strings.NewReader(binversion + bintype)))
 		typedec.Start()
-		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
+		decoder := NewDecoderWithTypeDecoder(mode.TestReader(strings.NewReader(binversion+binvalue)), typedec)
 		if value == nil {
 			value = vdl.ZeroValue(vdl.AnyType)
 		}
@@ -127,9 +127,9 @@ func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binva
 }
 
 func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
-	for _, mode := range allReadModes {
+	for _, mode := range AllReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder := NewDecoder(mode.testReader(strings.NewReader(bin)))
+		decoder := NewDecoder(mode.TestReader(strings.NewReader(bin)))
 		var got interface{}
 		if rt != nil {
 			got = reflect.New(rt).Elem().Interface()
@@ -165,11 +165,11 @@ func testDecodeGoSingleShot(t *testing.T, name, bin string, rt reflect.Type, wan
 }
 
 func testDecodeGoWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, rt reflect.Type, want interface{}) {
-	for _, mode := range allReadModes {
+	for _, mode := range AllReadModes {
 		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec := NewTypeDecoder(mode.testReader(strings.NewReader(binversion + bintype)))
+		typedec := NewTypeDecoder(mode.TestReader(strings.NewReader(binversion + bintype)))
 		typedec.Start()
-		decoder := NewDecoderWithTypeDecoder(mode.testReader(strings.NewReader(binversion+binvalue)), typedec)
+		decoder := NewDecoderWithTypeDecoder(mode.TestReader(strings.NewReader(binversion+binvalue)), typedec)
 		var got interface{}
 		if rt != nil {
 			got = reflect.New(rt).Elem().Interface()

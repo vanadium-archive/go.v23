@@ -4,6 +4,16 @@
 
 package vom
 
+// Version is the vom version.
+type Version byte
+
+const (
+	Version80 = Version(0x80)
+	Version81 = Version(0x81)
+
+	DefaultVersion = Version81
+)
+
 // Built-in type Ids
 const (
 	// Primitive types.

@@ -15,60 +15,60 @@ import (
 	"v.io/v23/vdl"
 )
 
-// readMode ensures the decoder handles short reads and different EOF semantics.
-type readMode int
+// ReadMode ensures the decoder handles short reads and different EOF semantics.
+type ReadMode int
 
 const (
-	readAll        readMode = iota // Read fills all data,  EOF after final data
-	readHalf                       // Read fills half data, EOF after final data
-	readOneByte                    // Read fills one byte,  EOF after final data
-	readAllEOF                     // Read fills all data,  EOF with final data
-	readHalfEOF                    // Read fills half data, EOF with final data
-	readOneByteEOF                 // Read fills one byte,  EOF with final data
+	ReadAll        ReadMode = iota // Read fills all data,  EOF after final data
+	ReadHalf                       // Read fills half data, EOF after final data
+	ReadOneByte                    // Read fills one byte,  EOF after final data
+	ReadAllEOF                     // Read fills all data,  EOF with final data
+	ReadHalfEOF                    // Read fills half data, EOF with final data
+	ReadOneByteEOF                 // Read fills one byte,  EOF with final data
 )
 
-var allReadModes = [...]readMode{readAll, readHalf, readOneByte, readAllEOF, readHalfEOF, readOneByteEOF}
+var AllReadModes = [...]ReadMode{ReadAll, ReadHalf, ReadOneByte, ReadAllEOF, ReadHalfEOF, ReadOneByteEOF}
 
-func (m readMode) String() string {
+func (m ReadMode) String() string {
 	switch m {
-	case readAll:
-		return "readAll"
-	case readHalf:
-		return "readHalf"
-	case readOneByte:
-		return "readOneByte"
-	case readAllEOF:
-		return "readAllEOF"
-	case readHalfEOF:
-		return "readHalfEOF"
-	case readOneByteEOF:
-		return "readOneByteEOF"
+	case ReadAll:
+		return "ReadAll"
+	case ReadHalf:
+		return "ReadHalf"
+	case ReadOneByte:
+		return "ReadOneByte"
+	case ReadAllEOF:
+		return "ReadAllEOF"
+	case ReadHalfEOF:
+		return "ReadHalfEOF"
+	case ReadOneByteEOF:
+		return "ReadOneByteEOF"
 	default:
-		panic(fmt.Errorf("unknown readMode %d", m))
+		panic(fmt.Errorf("unknown ReadMode %d", m))
 	}
 }
 
-func (m readMode) testReader(r io.Reader) io.Reader {
+func (m ReadMode) TestReader(r io.Reader) io.Reader {
 	switch m {
-	case readAll:
+	case ReadAll:
 		return r
-	case readHalf:
+	case ReadHalf:
 		return iotest.HalfReader(r)
-	case readOneByte:
+	case ReadOneByte:
 		return iotest.OneByteReader(r)
-	case readAllEOF:
+	case ReadAllEOF:
 		return iotest.DataErrReader(r)
-	case readHalfEOF:
+	case ReadHalfEOF:
 		return iotest.DataErrReader(iotest.HalfReader(r))
-	case readOneByteEOF:
+	case ReadOneByteEOF:
 		return iotest.DataErrReader(iotest.OneByteReader(r))
 	default:
-		panic(fmt.Errorf("unknown readMode %d", m))
+		panic(fmt.Errorf("unknown ReadMode %d", m))
 	}
 }
 
-// abcReader returns data looping from a-z, up to lim bytes.
-func abcReader(lim int) io.Reader {
+// ABCReader returns data looping from a-z, up to lim bytes.
+func ABCReader(lim int) io.Reader {
 	return &abcRead{lim: lim}
 }
 
@@ -88,9 +88,9 @@ func (abc *abcRead) Read(p []byte) (int, error) {
 	return startlen - len(p), nil
 }
 
-func abcBytes(lim int) []byte {
+func ABCBytes(lim int) []byte {
 	b := make([]byte, lim)
-	io.ReadFull(abcReader(lim), b)
+	io.ReadFull(ABCReader(lim), b)
 	return b
 }
 

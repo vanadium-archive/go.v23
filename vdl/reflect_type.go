@@ -106,12 +106,6 @@ func normalizeType(rt reflect.Type) reflect.Type {
 		// TODO(bprosnitz) Remove this for new vdl error logic
 		return rtError
 	}
-	if rt == rtWireError || rt == rtError {
-		// Return if this is vdl.WireError or error because we want verror.E to be the
-		// type stored in reflect info.
-		// TODO(bprosnitz) Remove this special case.
-		return rtAtMostOnePtr
-	}
 	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.
 	if ri, _, _ := deriveReflectInfo(rt); ri != nil {

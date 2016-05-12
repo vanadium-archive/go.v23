@@ -202,16 +202,16 @@ func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 		return dec.FinishValue()
 	}
 	// Lookup the reflect type based on the decoder type, and create a new value
-	// to decode into.
-	rtDecode := TypeToReflect(dec.Type())
+	// to decode into.  If we decoded an optional type, ensure that we set a
+	// pointer value.  Note that if we decoded a nil, dec.Type() is already
+	// optional, so rtDecode will already be a pointer.
+	ttDecode := dec.Type()
+	if dec.IsOptional() && !dec.IsNil() {
+		ttDecode = OptionalType(ttDecode)
+	}
+	rtDecode := typeToReflectNew(ttDecode)
 	if rtDecode == nil {
 		return fmt.Errorf("vdl: %v not registered, either call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
-	}
-	// If we decoded an optional type, ensure that we set a pointer value.  Note
-	// that if we decoded a nil, dec.Type() is already optional, so rtDecode will
-	// already be a pointer.
-	if dec.IsOptional() && !dec.IsNil() {
-		rtDecode = reflect.PtrTo(rtDecode)
 	}
 	if !rtDecode.Implements(rv.Type()) {
 		return fmt.Errorf("vdl: %v doesn't implement %v", rtDecode, rv.Type())
@@ -225,7 +225,7 @@ func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	}
 	// Handle non-nil values by decoding into rvDecode, and setting rv.
 	rvDecode := reflect.New(rtDecode).Elem()
-	if err := readReflect(dec, true, rvDecode, dec.Type()); err != nil {
+	if err := readReflect(dec, true, rvDecode, ttDecode); err != nil {
 		return err
 	}
 	rv.Set(rvDecode)

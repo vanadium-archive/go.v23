@@ -13,15 +13,6 @@ import (
 	"v.io/v23/verror"
 )
 
-type Version byte
-
-const (
-	Version80 = Version(0x80)
-	Version81 = Version(0x81)
-
-	DefaultVersion = Version81
-)
-
 func (v Version) String() string {
 	return fmt.Sprintf("Version%x", byte(v))
 }

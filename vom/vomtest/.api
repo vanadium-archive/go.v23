@@ -1,24 +1,17 @@
-pkg vomtest, func Data() []TestCase
-pkg vomtest, func Data81() []TestCase
-pkg vomtest, func DataFunc(func(TestCase) bool) []TestCase
-pkg vomtest, method (*TestCase) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vomtest, method (*TestCase) MakeVDLTarget() vdl.Target
-pkg vomtest, method (*TestCase) VDLRead(vdl.Decoder) error
-pkg vomtest, method (*TestCaseTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vomtest, method (*TestCaseTarget) FinishFields(vdl.FieldsTarget) error
-pkg vomtest, method (*TestCaseTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vomtest, method (*TestCaseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vomtest, method (*TestCaseTarget) ZeroField(string) error
-pkg vomtest, method (TestCase) VDLIsZero() bool
-pkg vomtest, method (TestCase) VDLWrite(vdl.Encoder) error
-pkg vomtest, type TestCase struct
-pkg vomtest, type TestCase struct, Hex string
-pkg vomtest, type TestCase struct, HexType string
-pkg vomtest, type TestCase struct, HexValue string
-pkg vomtest, type TestCase struct, Name string
-pkg vomtest, type TestCase struct, Value interface{}
-pkg vomtest, type TestCase struct, Version byte
-pkg vomtest, type TestCaseTarget struct
-pkg vomtest, type TestCaseTarget struct, Value *TestCase
-pkg vomtest, type TestCaseTarget struct, embedded vdl.FieldsTargetBase
-pkg vomtest, type TestCaseTarget struct, embedded vdl.TargetBase
+pkg vomtest, func AllFail() []Entry
+pkg vomtest, func AllFailFunc(func(Entry) bool) []Entry
+pkg vomtest, func AllPass() []Entry
+pkg vomtest, func AllPassFunc(func(Entry) bool) []Entry
+pkg vomtest, method (Entry) Bytes() []byte
+pkg vomtest, method (Entry) Hex() string
+pkg vomtest, method (Entry) HexVersion() string
+pkg vomtest, method (Entry) Name() string
+pkg vomtest, method (Entry) TypeBytes() []byte
+pkg vomtest, method (Entry) ValueBytes() []byte
+pkg vomtest, type Entry struct
+pkg vomtest, type Entry struct, HexType string
+pkg vomtest, type Entry struct, HexValue string
+pkg vomtest, type Entry struct, Label string
+pkg vomtest, type Entry struct, Value reflect.Value
+pkg vomtest, type Entry struct, ValueLabel string
+pkg vomtest, type Entry struct, Version vom.Version

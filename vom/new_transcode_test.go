@@ -4,43 +4,43 @@
 
 // +build newvdltests
 
-package vom
+package vom_test
 
 import (
 	"bytes"
 	"testing"
 
 	"v.io/v23/vdl"
+	"v.io/v23/vom"
 	"v.io/v23/vom/vomtest"
 )
 
-func TestTranscodeXDecoderToXEncoderNew(t *testing.T) {
-	for _, test := range vomtest.Data() {
-		inBytes := hex2Bin(t, test.Hex)
+func TestTranscodeXDecoderToXEncoder(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := NewVersionedXEncoder(Version(test.Version), &buf)
-		dec := NewXDecoder(bytes.NewReader(inBytes))
+		enc := vom.NewVersionedXEncoder(test.Version, &buf)
+		dec := vom.NewXDecoder(bytes.NewReader(test.Bytes()))
 		if err := vdl.Transcode(enc.Encoder(), dec.Decoder()); err != nil {
-			t.Errorf("%s: error in transcode: %v", test.Name, err)
+			t.Errorf("%s: Transcode failed: %v", test.Name(), err)
 			continue
 		}
-		if got, want := buf.Bytes(), inBytes; !bytes.Equal(got, want) {
-			t.Errorf("%s: got %x, want %x", test.Name, got, want)
+		if got, want := buf.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
 		}
 	}
 }
 
 // TODO(bprosnitz) This is probably not the right place for this test.
-func TestTranscodeVDLValueToXEncoderNew(t *testing.T) {
-	for _, test := range vomtest.Data() {
+func TestTranscodeVDLValueToXEncoder(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := NewXEncoder(&buf)
-		if err := vdl.Write(enc.Encoder(), test.Value); err != nil {
-			t.Errorf("%s: error in transcode: %v", test.Name, err)
+		enc := vom.NewXEncoder(&buf)
+		if err := vdl.Write(enc.Encoder(), test.Value.Interface()); err != nil {
+			t.Errorf("%s: vdl.Write failed: %v", test.Name(), err)
 			continue
 		}
-		if got, want := buf.Bytes(), hex2Bin(t, test.Hex); !bytes.Equal(got, want) {
-			t.Errorf("%s: got %x, want %x", test.Name, got, want)
+		if got, want := buf.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
 		}
 	}
 }

@@ -1288,6 +1288,87 @@ func (x *DumpAtom) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+// Version is the vom version.
+type Version byte
+
+func (Version) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom.Version"`
+}) {
+}
+
+func (m *Version) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromUint(uint64((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *Version) MakeVDLTarget() vdl.Target {
+	return &VersionTarget{Value: m}
+}
+
+type VersionTarget struct {
+	Value *Version
+	vdl.TargetBase
+}
+
+func (t *VersionTarget) FromUint(src uint64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Uint64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = Version(val)
+
+	return nil
+}
+func (t *VersionTarget) FromInt(src int64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Int64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = Version(val)
+
+	return nil
+}
+func (t *VersionTarget) FromFloat(src float64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Float64ToUint8(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = Version(val)
+
+	return nil
+}
+
+func (x Version) VDLIsZero() bool {
+	return x == 0
+}
+
+func (x Version) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*Version)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeUint(uint64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *Version) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeUint(8)
+	if err != nil {
+		return err
+	}
+	*x = Version(tmp)
+	return dec.FinishValue()
+}
+
 // TypeId uniquely identifies a type definition within a vom stream.
 type TypeId uint64
 
@@ -4267,6 +4348,10 @@ func __VDLRead_wireType(dec vdl.Decoder, x *wireType) error {
 //////////////////////////////////////////////////
 // Const definitions
 
+const Version80 = Version(128)
+const Version81 = Version(129)
+const DefaultVersion = Version(129)
+
 // Primitive types.
 const WireIdBool = TypeId(1)
 const WireIdByte = TypeId(2)
@@ -4321,6 +4406,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*Primitive)(nil))
 	vdl.Register((*DumpKind)(nil))
 	vdl.Register((*DumpAtom)(nil))
+	vdl.Register((*Version)(nil))
 	vdl.Register((*TypeId)(nil))
 	vdl.Register((*wireNamed)(nil))
 	vdl.Register((*wireEnum)(nil))

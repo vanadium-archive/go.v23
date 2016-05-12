@@ -9,10 +9,7 @@
 Command vomtestgen generates test cases for the vomtest package.  The following
 file is generated:
 
-   data81_gen.vdl - Golden file containing test cases.
-
-This tool does not run the vdl tool on the generated *.vdl files; you must do
-that yourself, typically via "jiri go install".
+   pass81_gen.vdl - Golden file containing passing test cases for version 81.
 
 Do not run this tool manually.  Instead invoke it via:
    $ jiri run go generate v.io/v23/vom/vomtest
