@@ -13,15 +13,15 @@ import (
 	"v.io/v23/vdl/vdltest"
 )
 
-func TestValueReadNew(t *testing.T) {
+func TestValueReader(t *testing.T) {
 	for _, entry := range vdltest.ToEntryValues(vdltest.AllPass()) {
 		out := vdl.ZeroValue(entry.Target.Type())
 		if err := out.VDLRead(entry.Source.Decoder()); err != nil {
-			t.Errorf("%s: error in ValueRead: %v", entry.Name(), err)
+			t.Errorf("%s: VDLRead failed: %v", entry.Name(), err)
 			continue
 		}
-		if !vdl.EqualValue(entry.Target, out) {
-			t.Errorf("%s: got %v, want %v", entry.Name(), out, entry.Target)
+		if got, want := out, entry.Target; !vdl.EqualValue(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", entry.Name(), got, want)
 		}
 	}
 }

@@ -146,7 +146,11 @@ func (g *EntryGenerator) GenPass(tt *vdl.Type) []EntryValue {
 	ev := g.genPass("Zero", vdl.ZeroValue(tt), g.ZeroEntryLimit, sourceAll)
 	if tt.Kind() == vdl.Optional {
 		// Add entry to convert from any(nil) to optional(nil).
-		ev = append(ev, EntryValue{"NilAny", vdl.ZeroValue(tt), vdl.ZeroValue(vdl.AnyType)})
+		ev = append(ev, EntryValue{
+			Label:  "NilAny",
+			Target: vdl.ZeroValue(tt),
+			Source: vdl.ZeroValue(vdl.AnyType),
+		})
 	}
 	// Handle some special-cases.
 	switch {
@@ -256,7 +260,11 @@ func (g *EntryGenerator) genPass(label string, target *vdl.Value, limit int, mod
 	var ev []EntryValue
 	if mode.Canonical() {
 		// Add the canonical identity conversion for each target value.
-		ev = append(ev, EntryValue{label, target, target})
+		ev = append(ev, EntryValue{
+			Label:  label,
+			Target: target,
+			Source: target,
+		})
 	}
 	// Add up to limit conversion entries.  The strategy is to add an entry for
 	// each source type where we can create a value that can convert to the
@@ -286,7 +294,11 @@ func (g *EntryGenerator) genPass(label string, target *vdl.Value, limit int, mod
 				break
 			}
 			num++
-			ev = append(ev, EntryValue{label, target, source})
+			ev = append(ev, EntryValue{
+				Label:  label,
+				Target: target,
+				Source: source,
+			})
 		}
 	}
 	return ev

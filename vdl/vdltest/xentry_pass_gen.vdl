@@ -2498,13 +2498,8 @@ const xAllPass = []vdlEntry{
 	},
 	// Canonical
 	{ true, `Zero`, `XStructDepth1_Any{}`, XStructDepth1_Any{}, `XStructDepth1_Any{}`, XStructDepth1_Any{} },
-	{ false, `Zero`,
-	  `XStructDepth1_Any{}`,
-	  XStructDepth1_Any{},
-	  `?XStructDepth3_XArray1_Set_XEnumBcd{}`,
-	  ?XStructDepth3_XArray1_Set_XEnumBcd{},
-	},
-	{ false, `Zero`, `XStructDepth1_Any{}`, XStructDepth1_Any{}, `XStructDepth3_All{}`, XStructDepth3_All{} },
+	{ false, `Zero`, `XStructDepth1_Any{}`, XStructDepth1_Any{}, `XStructDepth1_All{}`, XStructDepth1_All{} },
+	{ false, `Zero`, `XStructDepth1_Any{}`, XStructDepth1_Any{}, `?XStructEmpty{}`, ?XStructEmpty{} },
 	// Canonical
 	{ true, `Full`,
 	  `XStructDepth1_Any{F0: int64(-123)}`,

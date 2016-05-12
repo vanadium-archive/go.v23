@@ -18,10 +18,10 @@ func TestConvertNew(t *testing.T) {
 	for _, entry := range vdltest.AllPass() {
 		rvTargetPtr := reflect.New(entry.Target.Type())
 		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err != nil {
-			t.Errorf("%s: error %v", entry.Name(), err)
+			t.Errorf("%s: Convert failed: %v", entry.Name(), err)
 		}
-		if !vdl.DeepEqualReflect(rvTargetPtr.Elem(), entry.Target) {
-			t.Errorf("%[1]s:\nGOT  %[2]v\nWANT %[3]v", entry.Name(), rvTargetPtr.Elem(), entry.Target)
+		if got, want := rvTargetPtr.Elem(), entry.Target; !vdl.DeepEqualReflect(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", entry.Name(), got, want)
 		}
 	}
 }
@@ -30,7 +30,7 @@ func TestConvertFailNew(t *testing.T) {
 	for _, entry := range vdltest.AllFail() {
 		rvTargetPtr := reflect.New(entry.Target.Type())
 		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err == nil {
-			t.Errorf("%s: expected failure", entry.Name())
+			t.Errorf("%s: Convert passed, wanted failure", entry.Name())
 		}
 	}
 }

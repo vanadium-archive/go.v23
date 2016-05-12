@@ -39270,25 +39270,15 @@ var vAllPass = []vdlEntry{
 		Label:       "Zero",
 		TargetLabel: "VStructDepth1_Any{}",
 		Target:      VStructDepth1_Any{},
-		SourceLabel: "VStructDepth2_All{}",
-		Source: VStructDepth2_All{
-			F0: VArray2_TypeObject{
-				vdl.AnyType,
-				vdl.AnyType,
-			},
-			F8: VStructDepth1_All{
-				F5: vdl.AnyType,
-			},
-			F10: VUnionDepth1_AllF0{},
-			F11: VUnionDepth1_Float64F29{},
-		},
+		SourceLabel: "?VStructEmpty{}",
+		Source:      &VStructEmpty{},
 	},
 	{
 		Label:       "Zero",
 		TargetLabel: "VStructDepth1_Any{}",
 		Target:      VStructDepth1_Any{},
-		SourceLabel: "?VStructEmpty{}",
-		Source:      &VStructEmpty{},
+		SourceLabel: "VStructEmpty{}",
+		Source:      VStructEmpty{},
 	},
 	{
 		IsCanonical: true,
@@ -47546,8 +47536,12 @@ var vAllPass = []vdlEntry{
 				vdl.AnyType,
 			},
 		},
-		SourceLabel: "VStructDepth1_All{}",
+		SourceLabel: "VStructDepth1_All{F0: VArray2_TypeObject{}}",
 		Source: VStructDepth1_All{
+			F0: VArray2_TypeObject{
+				vdl.AnyType,
+				vdl.AnyType,
+			},
 			F5: vdl.AnyType,
 		},
 	},
@@ -47560,8 +47554,13 @@ var vAllPass = []vdlEntry{
 				vdl.AnyType,
 			},
 		},
-		SourceLabel: "VStructDepth1_Any{}",
-		Source:      VStructDepth1_Any{},
+		SourceLabel: "VStructDepth1_Any{F0: VArray2_TypeObject{}}",
+		Source: VStructDepth1_Any{
+			F0: VArray2_TypeObject{
+				vdl.AnyType,
+				vdl.AnyType,
+			},
+		},
 	},
 	{
 		IsCanonical: true,
@@ -57467,8 +57466,10 @@ var vAllPass = []vdlEntry{
 		Label:       "Zero",
 		TargetLabel: "VStructDepth3_VArray1_Set_VEnumBcd{}",
 		Target:      VStructDepth3_VArray1_Set_VEnumBcd{},
-		SourceLabel: "VStructDepth1_Any{}",
-		Source:      VStructDepth1_Any{},
+		SourceLabel: "VStructDepth1_Any{F0: VArray1_Set_VEnumBcd{}}",
+		Source: VStructDepth1_Any{
+			F0: VArray1_Set_VEnumBcd{},
+		},
 	},
 	{
 		IsCanonical: true,
@@ -74904,28 +74905,17 @@ var xAllPass = []vdlEntry{
 		Label:       "Zero",
 		TargetLabel: "XStructDepth1_Any{}",
 		Target:      XStructDepth1_Any{},
-		SourceLabel: "?XStructDepth3_XArray1_Set_XEnumBcd{}",
-		Source:      &XStructDepth3_XArray1_Set_XEnumBcd{},
+		SourceLabel: "XStructDepth1_All{}",
+		Source: XStructDepth1_All{
+			F5: vdl.AnyType,
+		},
 	},
 	{
 		Label:       "Zero",
 		TargetLabel: "XStructDepth1_Any{}",
 		Target:      XStructDepth1_Any{},
-		SourceLabel: "XStructDepth3_All{}",
-		Source: XStructDepth3_All{
-			F4: XStructDepth2_All{
-				F0: XArray2_TypeObject{
-					vdl.AnyType,
-					vdl.AnyType,
-				},
-				F8: XStructDepth1_All{
-					F5: vdl.AnyType,
-				},
-				F10: XUnionDepth1_AllF0{},
-				F11: XUnionDepth1_Float64F29{},
-			},
-			F5: XUnionDepth2_AllF0{},
-		},
+		SourceLabel: "?XStructEmpty{}",
+		Source:      &XStructEmpty{},
 	},
 	{
 		IsCanonical: true,

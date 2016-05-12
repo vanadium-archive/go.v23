@@ -41,7 +41,7 @@ func TestXDecoder(t *testing.T) {
 			vv, err := vdl.ValueFromReflect(test.Value)
 			if err != nil {
 				t.Errorf("%s: ValueFromReflect failed: %v", test.Name(), err)
-				continue
+				return
 			}
 			vvWant := reflect.ValueOf(vv)
 			testXDecoder(t, "[new *vdl.Value]", test, vvWant)

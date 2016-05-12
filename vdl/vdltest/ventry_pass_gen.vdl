@@ -12,8 +12,8 @@ package vdltest
 // ------------------------------------------------------------------------------------------
 // |             |  Total  | +Max | +Min |-Max |-Min | Full  |NilAny|Random | Zero  |isZero |
 // ------------------------------------------------------------------------------------------
-// |total        |1040,1717|23,141|23,226|15,65|15,94|349,331|  0, 8|263,240|352,612|352,452| [!can max=14]
-// |isZero       | 352, 452| 0,  0| 0,  0| 0, 0| 0, 0|  0,  2|  0, 8|  0,  0|352,442|352,452| [!can max=3]
+// |total        |1040,1717|23,141|23,226|15,65|15,94|349,331|  0, 8|263,240|352,612|352,449| [!can max=14]
+// |isZero       | 352, 449| 0,  0| 0,  0| 0, 0| 0, 0|  0,  2|  0, 8|  0,  0|352,439|352,449| [!can max=3]
 // ------------------------------------------------------------------------------------------
 // |any          |   1,   8| 0,  0| 0,  0| 0, 0| 0, 0|  0,  0|  0, 8|  0,  0|  1,  0|  1,  8| [nil=9]
 // |optional     |  21,  62| 0,  0| 0,  0| 0, 0| 0, 0|  8,  4|  0, 0|  5,  4|  8, 54|  8, 11| [!can max=3] [nil=19]
@@ -35,10 +35,10 @@ package vdltest
 // |list         | 176, 348| 0,  0| 0,  0| 0, 0| 0, 0| 66, 93|  0, 0| 44, 62| 66,193| 66,132| [!can max=2] [len max=3]
 // |set          | 100, 116| 0,  0| 0,  0| 0, 0| 0, 0| 38, 32|  0, 0| 24, 20| 38, 64| 38, 64| [!can max=2] [len max=3]
 // |map          | 102, 106| 0,  0| 0,  0| 0, 0| 0, 0| 38, 28|  0, 0| 26, 16| 38, 62| 38, 62| [!can max=2] [len max=3]
-// |struct       | 193, 208| 0,  0| 0,  0| 0, 0| 0, 0| 67, 63|  0, 0| 57, 50| 69, 95| 69, 96| [!can max=2]
+// |struct       | 193, 208| 0,  0| 0,  0| 0, 0| 0, 0| 67, 63|  0, 0| 57, 50| 69, 95| 69, 93| [!can max=2]
 // |union        | 177, 187| 0,  0| 0,  0| 0, 0| 0, 0| 62, 62|  0, 0| 52, 52| 63, 73| 63, 16| [!can max=2]
 // ------------------------------------------------------------------------------------------
-// |IsNamed      | 761,1075|13, 78|13,128| 9,37| 9,56|258,226|  0, 0|199,180|260,370|260,277| [!can max=14]
+// |IsNamed      | 761,1075|13, 78|13,128| 9,37| 9,56|258,226|  0, 0|199,180|260,370|260,274| [!can max=14]
 // |IsUnnamed    | 279, 642|10, 63|10, 98| 6,28| 6,38| 91,105|  0, 8| 64, 60| 92,242| 92,175| [!can max=11]
 // |IsBytes      |  18,  15| 0,  0| 0,  0| 0, 0| 0, 0|  6,  4|  0, 0|  6,  2|  6,  9|  6,  3| [!can max=2]
 // |IsPartOfCycle|   9,   4| 0,  0| 0,  0| 0, 0| 0, 0|  3,  0|  0, 0|  3,  0|  3,  4|  3,  4| [!can max=2]
@@ -3352,8 +3352,8 @@ const vAllPass = []vdlEntry{
 	},
 	// Canonical
 	{ true, `Zero`, `VStructDepth1_Any{}`, VStructDepth1_Any{}, `VStructDepth1_Any{}`, VStructDepth1_Any{} },
-	{ false, `Zero`, `VStructDepth1_Any{}`, VStructDepth1_Any{}, `VStructDepth2_All{}`, VStructDepth2_All{} },
 	{ false, `Zero`, `VStructDepth1_Any{}`, VStructDepth1_Any{}, `?VStructEmpty{}`, ?VStructEmpty{} },
+	{ false, `Zero`, `VStructDepth1_Any{}`, VStructDepth1_Any{}, `VStructEmpty{}`, VStructEmpty{} },
 	// Canonical
 	{ true, `Full`,
 	  `VStructDepth1_Any{F0: int64(-123)}`,
@@ -6469,14 +6469,14 @@ const vAllPass = []vdlEntry{
 	{ false, `Zero`,
 	  `VStructDepth2_VArray2_TypeObject{}`,
 	  VStructDepth2_VArray2_TypeObject{},
-	  `VStructDepth1_All{}`,
-	  VStructDepth1_All{},
+	  `VStructDepth1_All{F0: VArray2_TypeObject{}}`,
+	  VStructDepth1_All{F0: VArray2_TypeObject{}},
 	},
 	{ false, `Zero`,
 	  `VStructDepth2_VArray2_TypeObject{}`,
 	  VStructDepth2_VArray2_TypeObject{},
-	  `VStructDepth1_Any{}`,
-	  VStructDepth1_Any{},
+	  `VStructDepth1_Any{F0: VArray2_TypeObject{}}`,
+	  VStructDepth1_Any{F0: VArray2_TypeObject{}},
 	},
 	// Canonical
 	{ true, `Full`,
@@ -8730,8 +8730,8 @@ const vAllPass = []vdlEntry{
 	{ false, `Zero`,
 	  `VStructDepth3_VArray1_Set_VEnumBcd{}`,
 	  VStructDepth3_VArray1_Set_VEnumBcd{},
-	  `VStructDepth1_Any{}`,
-	  VStructDepth1_Any{},
+	  `VStructDepth1_Any{F0: VArray1_Set_VEnumBcd{}}`,
+	  VStructDepth1_Any{F0: VArray1_Set_VEnumBcd{}},
 	},
 	// Canonical
 	{ true, `Full`,

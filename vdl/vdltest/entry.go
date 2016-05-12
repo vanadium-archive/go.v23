@@ -36,14 +36,24 @@ func (e Entry) Name() string {
 // EntryValue is like Entry, but represents the target and source values as
 // *vdl.Value, rather than interface{}.
 type EntryValue struct {
-	Label  string
-	Target *vdl.Value
-	Source *vdl.Value
+	Label       string
+	TargetLabel string
+	Target      *vdl.Value
+	SourceLabel string
+	Source      *vdl.Value
 }
 
 // Name returns the name of the EntryValue.
 func (e EntryValue) Name() string {
-	return e.Label + " Target(" + e.Target.String() + ") Source(" + e.Source.String() + ")"
+	tLabel := e.TargetLabel
+	if tLabel == "" {
+		tLabel = e.Target.String()
+	}
+	sLabel := e.SourceLabel
+	if sLabel == "" {
+		sLabel = e.Source.String()
+	}
+	return e.Label + " Target(" + tLabel + ") Source(" + sLabel + ")"
 }
 
 // ToEntryValue converts the Entry e into an EntryValue.
@@ -57,9 +67,11 @@ func ToEntryValue(e Entry) EntryValue {
 		panic(err)
 	}
 	return EntryValue{
-		Label:  e.Label,
-		Target: target,
-		Source: source,
+		Label:       e.Label,
+		TargetLabel: e.TargetLabel,
+		Target:      target,
+		SourceLabel: e.SourceLabel,
+		Source:      source,
 	}
 }
 

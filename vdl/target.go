@@ -172,7 +172,7 @@ func ValueFromReflect(rv reflect.Value) (*Value, error) {
 		return ZeroValue(AnyType), nil
 	}
 	var result *Value
-	err := convertPipe(&result, rv.Interface())
+	err := convertPipeReflect(reflect.ValueOf(&result), rv)
 	return result, err
 }
 

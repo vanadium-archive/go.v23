@@ -118,8 +118,14 @@ func useFastIndex(key *Type) bool {
 // fastKeyRep returns a representation of key that may be used in a regular Go
 // map.  It's only called on keys where useFastIndex returns true.
 func fastKeyRep(key *Value) interface{} {
-	if key.t.IsBytes() {
-		// Turn []byte into a string so that it can be used as a map key.
+	switch {
+	case key.Kind() == Float32:
+		// Float32 is represented as float64 in vdl.Value, but we must convert to
+		// float32 to ensure map lookups work with the correct precision.  Otherwise
+		// a single float32 may be reprsesented as different keys.
+		return float32(key.rep.(float64))
+	case key.t.IsBytes():
+		// Convert []byte into a string so that it can be used as a map key.
 		return string(key.Bytes())
 	}
 	return key.rep

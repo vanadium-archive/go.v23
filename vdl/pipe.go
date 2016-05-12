@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"sync"
 )
 
@@ -23,6 +24,14 @@ func convertPipe(dst, src interface{}) error {
 		enc.Close(Write(enc, src))
 	}()
 	return dec.Close(Read(dec, dst))
+}
+
+func convertPipeReflect(dst, src reflect.Value) error {
+	enc, dec := newPipe()
+	go func() {
+		enc.Close(WriteReflect(enc, src))
+	}()
+	return dec.Close(ReadReflect(dec, dst))
 }
 
 type pipeStackEntry struct {

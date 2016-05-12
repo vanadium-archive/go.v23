@@ -315,15 +315,15 @@ func mimicStruct(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 	value := vdl.ZeroValue(tt)
 	for ix := 0; ix < base.Type().NumField(); ix++ {
 		baseField := base.StructField(ix)
-		if baseField.IsZero() {
-			// Skip zero base fields.  It's fine for the base field to be missing from
-			// tt, as long as the base field is zero, since Convert(dst, src) sets all
-			// dst (which has type base.Type) fields to zero before setting each
-			// matching field in src (which has type tt).
-			continue
-		}
 		ttField, ttIndex := tt.FieldByName(base.Type().Field(ix).Name)
 		if ttIndex == -1 {
+			if baseField.IsZero() {
+				// Skip zero base fields.  It's fine for the base field to be missing
+				// from tt, as long as the base field is zero, since Convert(dst, src)
+				// sets all dst (which has type base.Type) fields to zero before setting
+				// each matching field in src (which has type tt).
+				continue
+			}
 			// This is a non-zero base field that doesn't exist in tt.  There's no way
 			// to create a value of type tt that converts to exactly the base value.
 			return nil

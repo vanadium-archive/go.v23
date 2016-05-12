@@ -354,7 +354,15 @@ func EqualValue(a, b *Value) bool {
 	case int64:
 		return arep == b.rep.(int64)
 	case float64:
-		return arep == b.rep.(float64)
+		// Float32 is represented as float64, but we must convert to float32 for
+		// equality comparisons.  Otherwise a single float32 may be represented as
+		// different values, causing equality failures.
+		switch a.t.kind {
+		case Float32:
+			return float32(arep) == float32(b.rep.(float64))
+		default:
+			return arep == b.rep.(float64)
+		}
 	case string:
 		return arep == b.rep.(string)
 	case enumIndex:

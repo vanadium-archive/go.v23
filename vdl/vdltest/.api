@@ -1660,7 +1660,9 @@ pkg vdltest, type EntryGenerator struct, ZeroEntryLimit int
 pkg vdltest, type EntryValue struct
 pkg vdltest, type EntryValue struct, Label string
 pkg vdltest, type EntryValue struct, Source *vdl.Value
+pkg vdltest, type EntryValue struct, SourceLabel string
 pkg vdltest, type EntryValue struct, Target *vdl.Value
+pkg vdltest, type EntryValue struct, TargetLabel string
 pkg vdltest, type GenMode int
 pkg vdltest, type TypeGenerator struct
 pkg vdltest, type TypeGenerator struct, BaseTypesPerKind []int
