@@ -246,7 +246,7 @@ func (c *cancelState) addChild(child *cancelState) {
 
 func (c *cancelState) removeChild(child *cancelState) {
 	c.mu.Lock()
-	delete(c.children, c)
+	delete(c.children, child)
 	c.mu.Unlock()
 }
 
