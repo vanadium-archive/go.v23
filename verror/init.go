@@ -42,6 +42,9 @@ func ErrorFromNative(wire **vdl.WireError, native error) error {
 		*wire = nil
 		return nil
 	}
+	if *wire == nil {
+		*wire = new(vdl.WireError)
+	}
 	return WireFromNative(*wire, native)
 }
 

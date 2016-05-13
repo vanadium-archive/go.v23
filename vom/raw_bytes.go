@@ -35,13 +35,32 @@ func RawBytesOf(value interface{}) *RawBytes {
 
 func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 	// TODO(bprosnitz) This implementation is temporary - we should make it faster
-	dat, err := Encode(value)
+	data, err := Encode(value)
 	if err != nil {
 		return nil, err
 	}
-	var rb RawBytes
-	err = Decode(dat, &rb)
-	return &rb, err
+	rb := new(RawBytes)
+	if err := Decode(data, rb); err != nil {
+		return nil, err
+	}
+	return rb, nil
+}
+
+// XRawBytesFromValue is a mirror of RawBytesFromValue, but uses the new
+// XEncoder and XDecoder.  It's only exposed to allow for testing.
+//
+// TODO(toddw): Remove this function after we've switched to XEncoder and
+// XDecoder, and thus it's no longer needed.
+func XRawBytesFromValue(value interface{}) (*RawBytes, error) {
+	data, err := VersionedXEncode(DefaultVersion, value)
+	if err != nil {
+		return nil, err
+	}
+	rb := new(RawBytes)
+	if err := XDecode(data, rb); err != nil {
+		return nil, err
+	}
+	return rb, nil
 }
 
 // String outputs a string representation of RawBytes of the form
@@ -149,7 +168,12 @@ func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 }
 
 func (rb *RawBytes) VDLWrite(enc vdl.Encoder) error {
-	if e, ok := enc.(*xEncoder); ok && e.version == rb.Version {
+	// We can only write directly if the versions are the same and if the encoder
+	// hasn't written any other values yet, since otherwise rb.Data needs to be
+	// re-written to account for the differences.
+	//
+	// TODO(toddw): Code a variant that performs the re-writing.
+	if e, ok := enc.(*xEncoder); ok && e.version == rb.Version && len(e.stack) == 0 {
 		return e.writeRawBytes(rb)
 	}
 	return vdl.Transcode(enc, rb.Decoder())

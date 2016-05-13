@@ -27,7 +27,7 @@ type Entry struct {
 // Name returns the name of the entry, which combines the entry and value
 // labels.
 func (e Entry) Name() string {
-	return e.Label + " (" + e.ValueLabel + ")"
+	return e.Label + " " + e.ValueLabel
 }
 
 // HexVersion returns the version as hex bytes.

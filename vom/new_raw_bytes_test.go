@@ -16,6 +16,8 @@ import (
 	"v.io/v23/vom/vomtest"
 )
 
+// TODO(toddw): Clean up these tests.
+
 func TestXRawBytesDecodeEncode(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
 		// Interleaved
@@ -33,7 +35,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		var out bytes.Buffer
 		enc := vom.NewVersionedXEncoder(test.Version, &out)
 		if err := enc.Encode(&rb); err != nil {
-			t.Errorf("%s: encode %v failed: %v", test.Name(), rb, err)
+			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
 			continue
 		}
 		if got, want := out.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
@@ -65,7 +67,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		typeEnc := vom.NewVersionedTypeEncoder(test.Version, &typeOut)
 		enc = vom.NewVersionedXEncoderWithTypeEncoder(test.Version, &out, typeEnc)
 		if err := enc.Encode(&rb); err != nil {
-			t.Errorf("%s: encode %v failed: %v", test.Name(), rb, err)
+			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
 			continue
 		}
 		if got, want := typeOut.Bytes(), test.TypeBytes(); !bytes.Equal(got, want) {
@@ -77,15 +79,17 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 	}
 }
 
-func TestRawBytesToFromValueNew(t *testing.T) {
+func TestXRawBytesToFromValue(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
-		rb, err := vom.RawBytesFromValue(test.Value.Interface())
+		rb, err := vom.XRawBytesFromValue(test.Value.Interface())
 		if err != nil {
-			t.Fatalf("%v %s: RawBytesFromValue failed: %v", test.Version, test.Name(), err)
+			t.Errorf("%v %s: XRawBytesFromValue failed: %v", test.Version, test.Name(), err)
+			continue
 		}
 		var vv *vdl.Value
 		if err := rb.ToValue(&vv); err != nil {
-			t.Fatalf("%v %s: rb.ToValue failed: %v", test.Version, test.Name(), err)
+			t.Errorf("%v %s: rb.ToValue failed: %v", test.Version, test.Name(), err)
+			continue
 		}
 		if got, want := vv, vdl.ValueOf(test.Value.Interface()); !vdl.EqualValue(got, want) {
 			t.Errorf("%v %s\nGOT  %v\nWANT %v", test.Version, test.Name(), got, want)
@@ -93,12 +97,21 @@ func TestRawBytesToFromValueNew(t *testing.T) {
 	}
 }
 
-func TestRawBytesDecoderNew(t *testing.T) {
+func TestXRawBytesDecoder(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
-		in := vom.RawBytesOf(test.Value.Interface())
-		out := vdl.ZeroValue(vdl.TypeOf(test.Value.Interface()))
+		tt, err := vdl.TypeFromReflect(test.Value.Type())
+		if err != nil {
+			t.Errorf("%s: TypeFromReflect failed: %v", test.Name(), err)
+			continue
+		}
+		in, err := vom.XRawBytesFromValue(test.Value.Interface())
+		if err != nil {
+			t.Errorf("%s: XRawBytesFromValue failed: %v", test.Name(), err)
+			continue
+		}
+		out := vdl.ZeroValue(tt)
 		if err := out.VDLRead(in.Decoder()); err != nil {
-			t.Errorf("%s: ValueRead failed: %v", test.Name(), err)
+			t.Errorf("%s: VDLRead failed: %v", test.Name(), err)
 			continue
 		}
 		if got, want := out, vdl.ValueOf(test.Value.Interface()); !vdl.EqualValue(got, want) {
@@ -107,11 +120,16 @@ func TestRawBytesDecoderNew(t *testing.T) {
 	}
 }
 
-func TestRawBytesWriterNew(t *testing.T) {
+func TestXRawBytesWriter(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
 		enc := vom.NewXEncoder(&buf)
-		if err := vom.RawBytesOf(test.Value.Interface()).VDLWrite(enc.Encoder()); err != nil {
+		rb, err := vom.XRawBytesFromValue(test.Value.Interface())
+		if err != nil {
+			t.Errorf("%s: XRawBytesFromValue failed: %v", test.Name(), err)
+			continue
+		}
+		if err := rb.VDLWrite(enc.Encoder()); err != nil {
 			t.Errorf("%s: VDLWrite failed: %v", test.Name(), err)
 			continue
 		}

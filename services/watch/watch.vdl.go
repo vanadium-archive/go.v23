@@ -766,6 +766,7 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Value":
+			x.Value = new(vom.RawBytes)
 			if err := x.Value.VDLRead(dec); err != nil {
 				return err
 			}

@@ -30,16 +30,8 @@ func NewXEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *XEncoder {
 }
 
 func NewVersionedXEncoder(version Version, w io.Writer) *XEncoder {
-	if !isAllowedVersion(version) {
-		panic(fmt.Sprintf("unsupported VOM version: %x", version))
-	}
-	return &XEncoder{xEncoder{
-		writer:          w,
-		buf:             newEncbuf(),
-		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
-		sentVersionByte: false,
-		version:         version,
-	}}
+	typeEnc := newTypeEncoderWithoutVersionByte(version, w)
+	return NewVersionedXEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
 func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *XEncoder {
@@ -55,6 +47,34 @@ func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *
 	}}
 }
 
+// TODO(toddw): Flip useOldEncoderForTypes=false to enable XEncoder for types.
+const useOldEncoderForTypes = true
+
+func newXEncoderForTypes(version Version, w io.Writer) *xEncoder {
+	if !isAllowedVersion(version) {
+		panic(fmt.Sprintf("unsupported VOM version: %x", version))
+	}
+	buf := newEncbuf()
+	e := &xEncoder{
+		writer:          w,
+		buf:             buf,
+		sentVersionByte: true,
+		version:         version,
+		onlyForTypes:    true,
+	}
+	if useOldEncoderForTypes {
+		// TEMPORARY HACK: Create the old encoder if we're using it for types.
+		e.old = &encoder{
+			writer:          w,
+			buf:             buf,
+			typeStack:       make([]typeStackEntry, 0, 10),
+			sentVersionByte: true,
+			version:         version,
+		}
+	}
+	return e
+}
+
 func (e *XEncoder) Encoder() vdl.Encoder {
 	return &e.enc
 }
@@ -64,12 +84,14 @@ func (e *XEncoder) Encode(v interface{}) error {
 }
 
 type xEncoder struct {
-	writer io.Writer
+	stack []encoderStackEntry
 	// We use buf to buffer up the encoded value. The buffering is necessary so
 	// that we can compute the total message length.
 	buf *encbuf
 	// Buffer for the header of messages with any or typeobject.
 	bufHeader *encbuf
+	// Underlying writer.
+	writer io.Writer
 	// All types are sent through typeEnc.
 	typeEnc         *TypeEncoder
 	sentVersionByte bool
@@ -77,13 +99,21 @@ type xEncoder struct {
 
 	tids    *typeIDList
 	anyLens *anyLenList
+
 	// TODO(bprosnitz) get rid of these fields
 	hasLen, hasAny, hasTypeObject bool
 	typeIncomplete                bool
 	mid                           int64
 	nextStartValueOptional        bool
 
-	stack []encoderStackEntry
+	// onlyForTypes is true iff this xEncoder is embedded in the TypeEncoder.
+	onlyForTypes bool
+
+	// As a temporary hack, before we've switched to the XEncoder for everything,
+	// we still need to support the old encoder.
+	//
+	// TODO(toddw): Remove this when the switch to XEncoder is complete.
+	old *encoder
 }
 
 type encoderStackEntry struct {
@@ -125,6 +155,22 @@ func (e *xEncoder) top() *encoderStackEntry {
 	return &e.stack[len(e.stack)-1]
 }
 
+func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
+	if useOldEncoderForTypes {
+		return e.old.encodeWireType(tid, wt, typeIncomplete)
+	}
+	// Set up the state that would normally be set in startMessage, and use
+	// VDLWrite to encode wt as a regular value.
+	e.mid = int64(-tid)
+	e.typeIncomplete = typeIncomplete
+	e.hasAny = false
+	e.hasTypeObject = false
+	e.hasLen = true
+	e.tids = nil
+	e.anyLens = nil
+	return wt.VDLWrite(e)
+}
+
 func (e *xEncoder) SetNextStartValueIsOptional() {
 	e.nextStartValueOptional = true
 }
@@ -163,6 +209,7 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 			return err
 		}
 	}
+	e.nextStartValueOptional = false
 	return nil
 }
 
@@ -209,11 +256,17 @@ func (e *xEncoder) StartValue(tt *vdl.Type) error {
 		LenHint: -1,
 	})
 	e.nextStartValueOptional = false
-
 	return nil
 }
 
 func (e *xEncoder) startMessage(tt *vdl.Type) error {
+	e.buf.Reset()
+	e.buf.Grow(paddingLen)
+	if e.onlyForTypes {
+		// If this is the encoder for types, we've already set up the state in
+		// encodeWireType.
+		return nil
+	}
 	if !e.sentVersionByte {
 		if _, err := e.writer.Write([]byte{byte(e.version)}); err != nil {
 			return err
@@ -224,8 +277,6 @@ func (e *xEncoder) startMessage(tt *vdl.Type) error {
 	if err != nil {
 		return err
 	}
-	e.buf.Reset()
-	e.buf.Grow(paddingLen)
 	e.hasLen = hasChunkLen(tt)
 	e.hasAny = containsAny(tt)
 	e.hasTypeObject = containsTypeObject(tt)
@@ -426,19 +477,26 @@ func (e *xEncoder) EncodeTypeObject(v *vdl.Type) error {
 	return nil
 }
 
+// writeRawBytes writes rb to e.  This only works if e at the top-level; if it
+// has already encoded some values, rb.Data needs to be re-written with new
+// indices for type ids and any lengths.
+//
+// REQUIRES: e.version == rb.Version && len(e.stack) == 0
+//
+// TODO(toddw): Code a variant of this that performs the re-writing.
 func (e *xEncoder) writeRawBytes(rb *RawBytes) error {
-	if e.version != rb.Version {
-		return fmt.Errorf("version mismatch: %v and %v", e.version, rb.Version)
-	}
-
 	if rb.IsNil() {
 		return e.NilValue(rb.Type)
 	}
-
-	if err := e.StartValue(rb.Type); err != nil {
+	tt := rb.Type
+	if tt.Kind() == vdl.Optional {
+		e.SetNextStartValueIsOptional()
+		tt = tt.Elem()
+	}
+	if err := e.StartValue(tt); err != nil {
 		return err
 	}
-	if containsTypeObject(rb.Type) || containsAny(rb.Type) {
+	if containsAny(tt) || containsTypeObject(tt) {
 		for _, refType := range rb.RefTypes {
 			tid, err := e.typeEnc.encode(refType)
 			if err != nil {
@@ -447,7 +505,7 @@ func (e *xEncoder) writeRawBytes(rb *RawBytes) error {
 			e.tids.ReferenceTypeID(tid)
 		}
 	}
-	if containsAny(rb.Type) {
+	if containsAny(tt) {
 		e.anyLens.lens = rb.AnyLengths
 	}
 	e.buf.Write(rb.Data)

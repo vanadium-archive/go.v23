@@ -1082,6 +1082,7 @@ func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Value":
+			x.Value = new(vom.RawBytes)
 			if err := x.Value.VDLRead(dec); err != nil {
 				return err
 			}
@@ -2917,6 +2918,7 @@ func (x *Value) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Bytes":
+			x.Bytes = new(vom.RawBytes)
 			if err := x.Bytes.VDLRead(dec); err != nil {
 				return err
 			}
@@ -6347,6 +6349,7 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Value":
+			x.Value = new(vom.RawBytes)
 			if err := x.Value.VDLRead(dec); err != nil {
 				return err
 			}

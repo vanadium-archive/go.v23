@@ -102,9 +102,10 @@ func ReadReflect(dec Decoder, rv reflect.Value) error {
 // success we guarantee that StartValue / FinishValue has been called on dec.
 // If calledStart is true, StartValue has already been called.
 func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) error {
-	// Handle decoding into an any value first, since vom.RawBytes.VDLRead doesn't
-	// support IgnoreNextStartValue, and requires that StartValue hasn't been
-	// called yet.
+	// Handle decoding into an any rv value first, since vom.RawBytes.VDLRead
+	// doesn't support IgnoreNextStartValue, and requires that StartValue hasn't
+	// been called yet.  Note that cases where the dec value is any but the rv
+	// value isn't any will pass through.
 	if tt == AnyType {
 		return readIntoAny(dec, calledStart, rv)
 	}
@@ -117,7 +118,8 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 			return err
 		}
 	}
-	// Handle nil decoded values next, to simplify the rest of the cases.
+	// Handle nil decoded values next, to simplify the rest of the cases.  This
+	// handles cases where the dec value is either any(nil) or optional(nil).
 	if dec.IsNil() {
 		return readFromNil(dec, rv, tt)
 	}
@@ -202,28 +204,62 @@ func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 		return dec.FinishValue()
 	}
 	// Lookup the reflect type based on the decoder type, and create a new value
-	// to decode into.  If we decoded an optional type, ensure that we set a
-	// pointer value.  Note that if we decoded a nil, dec.Type() is already
-	// optional, so rtDecode will already be a pointer.
+	// to decode into.  If the dec value is optional, ensure that we lookup based
+	// on an optional type.  Note that if the dec value is nil, dec.Type() is
+	// already optional, so rtDecode will already be a pointer.
 	ttDecode := dec.Type()
 	if dec.IsOptional() && !dec.IsNil() {
 		ttDecode = OptionalType(ttDecode)
 	}
 	rtDecode := typeToReflectNew(ttDecode)
+	// Handle top-level "v.io/v23/vdl.WireError" types.  TypeToReflect will find
+	// vdl.WireError based on regular wire type registration, and will find the Go
+	// error interface based on regular native type registration, and these are
+	// fine for nested error types.
+	//
+	// But this is the case where we're decoding into a top-level Go interface,
+	// and we'll lose type information if the dec value is nil.  So instead we
+	// return the registered verror.E type.  Examples:
+	//
+	//   ttDecode  ->  rtDecode
+	//   -----------------------
+	//   WireError     verror.E
+	//   ?WireError    *verror.E
+	//   []WireError   []vdl.WireError (1)
+	//   []?WireError  []error
+	//
+	// TODO(toddw): The (1) case above is weird; we would like to return verror.E,
+	// but that's hard because the native conversion we've registered doesn't
+	// currently include the verror.E type:
+	//
+	//    ToNative(wire *vdl.WireError, native *error)
+	//    FromNative(wire **vdl.WireError, native error)
+	//
+	// We could make this more consistent by registering a pair of conversion
+	// functions instead:
+	//
+	//    ToNative(wire vdl.WireError, native *verror.E)
+	//    FromNative(wire *vdl.WireError, native verror.E)
+	//
+	//    ToNative(wire *verror.E, native *error)
+	//    FromNative(wire **verror.E, native error)
+	if ttDecode.NonOptional().Name() == ErrorType.Elem().Name() {
+		if ni, err := nativeInfoForError(); err == nil {
+			if ttDecode.Kind() == Optional {
+				rtDecode = reflect.PtrTo(ni.NativeType)
+			} else {
+				rtDecode = ni.NativeType
+			}
+		}
+	}
 	if rtDecode == nil {
 		return fmt.Errorf("vdl: %v not registered, either call vdl.Register, or use vdl.Value or vom.RawBytes instead", dec.Type())
 	}
 	if !rtDecode.Implements(rv.Type()) {
 		return fmt.Errorf("vdl: %v doesn't implement %v", rtDecode, rv.Type())
 	}
-	// Handle decoding optional(nil), by setting the rv interface to a nil pointer
-	// of the concrete type.  We know that rtDecode must be a pointer, since
-	// dec.Type() is optional.
-	if dec.Type().Kind() == Optional {
-		rv.Set(reflect.Zero(rtDecode))
-		return dec.FinishValue()
-	}
-	// Handle non-nil values by decoding into rvDecode, and setting rv.
+	// Handle both nil and non-nil values by decoding into rvDecode, and setting
+	// rv.  Both nil and non-nil values are handled in the readReflect call.
 	rvDecode := reflect.New(rtDecode).Elem()
 	if err := readReflect(dec, true, rvDecode, ttDecode); err != nil {
 		return err

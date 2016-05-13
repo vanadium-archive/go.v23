@@ -102,8 +102,12 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	if hasPtr {
 		rtAtMostOnePtr = reflect.PtrTo(rt)
 	}
-	if rt.ConvertibleTo(rtError) || rtAtMostOnePtr.ConvertibleTo(rtError) {
-		// TODO(bprosnitz) Remove this for new vdl error logic
+	// Handle errors that are implemented by arbitrary rv values.  E.g. the Go
+	// standard errors.errorString implements the error interface, but is an
+	// invalid vdl type since it doesn't have any exported fields.
+	//
+	// See corresponding special-case in reflect_writer.go
+	if rt.Implements(rtError) || rtAtMostOnePtr.Implements(rtError) {
 		return rtError
 	}
 	// Handle special cases.  Union may be either an interface or a struct, and
@@ -442,6 +446,7 @@ var (
 	rtNamer              = reflect.TypeOf((*namer)(nil)).Elem()
 	rtIndexer            = reflect.TypeOf((*indexer)(nil)).Elem()
 	rtIsZeroer           = reflect.TypeOf((*IsZeroer)(nil)).Elem()
+	rtVDLWriter          = reflect.TypeOf((*Writer)(nil)).Elem()
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
 	typeFromRTKind = [...]*Type{

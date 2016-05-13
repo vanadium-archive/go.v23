@@ -95,7 +95,6 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 			}
 			return fmt.Errorf("vdl: can't encode nil from non-any non-optional %v", tt)
 		}
-
 		rv = rv.Elem()
 		// Recompute tt as we pass interface boundaries.  There's no need to
 		// recompute as we traverse pointers, since tt won't change.
@@ -106,20 +105,29 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 			}
 		}
 	}
-	// Now we know that rv isn't nil.  Deal with optional types.
 	if tt.Kind() == Optional {
 		enc.SetNextStartValueIsOptional()
-		tt = tt.Elem()
 	}
 	// Check for faster non-reflect support, which also handles vdl.Value and
 	// vom.RawBytes, and any other special-cases.
-	if rv.CanAddr() {
-		if err := writeNonReflect(enc, rv.Addr().Interface()); err != errWriteMustReflect {
-			return err
-		}
-	}
 	if err := writeNonReflect(enc, rv.Interface()); err != errWriteMustReflect {
 		return err
+	}
+	if reflect.PtrTo(rv.Type()).Implements(rtVDLWriter) {
+		if rv.CanAddr() {
+			return writeNonReflect(enc, rv.Addr().Interface())
+		} else {
+			// This handles the case where rv implements VDLWrite with a pointer
+			// receiver, but we can't address rv to get a pointer.  E.g.
+			//    type Foo string
+			//    func (x *Foo) VDLWrite(enc vdl.Encoder) error {...}
+			//    rv := Foo{}
+			//
+			// TODO(toddw): Do we need to handle this case?
+			rvPtr := reflect.New(rv.Type())
+			rvPtr.Elem().Set(rv)
+			return writeNonReflect(enc, rvPtr.Interface())
+		}
 	}
 	// Handle marshaling from native type to wire type.
 	if ni := nativeInfoFromNative(rv.Type()); ni != nil {
@@ -129,7 +137,21 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 		}
 		return writeReflect(enc, rvWirePtr.Elem(), tt)
 	}
+	// Handle errors that are implemented by arbitrary rv values.  E.g. the Go
+	// standard errors.errorString implements the error interface, but is an
+	// invalid vdl type since it doesn't have any exported fields.
+	//
+	// See corresponding special-case in reflect_type.go
+	if tt == ErrorType {
+		if rv.Type().Implements(rtError) {
+			return writeNonNilError(enc, rv)
+		}
+		if rv.CanAddr() && rv.Addr().Type().Implements(rtError) {
+			return writeNonNilError(enc, rv.Addr())
+		}
+	}
 	// Handle regular non-nil values.
+	tt = tt.NonOptional()
 	if err := enc.StartValue(tt); err != nil {
 		return err
 	}
@@ -137,6 +159,20 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 		return err
 	}
 	return enc.FinishValue()
+}
+
+// writeNonNilError writes rvNative, which must be a non-nil implementation of
+// the Go error interface, out to enc.
+func writeNonNilError(enc Encoder, rvNative reflect.Value) error {
+	ni := nativeInfoFromNative(rtError)
+	if ni == nil {
+		return errNoRegisterNativeError
+	}
+	rvWirePtr := reflect.New(ni.WireType)
+	if err := ni.FromNative(rvWirePtr, rvNative); err != nil {
+		return err
+	}
+	return writeReflect(enc, rvWirePtr.Elem(), ErrorType)
 }
 
 func writeNonNilValue(enc Encoder, rv reflect.Value, tt *Type) error {
@@ -233,6 +269,9 @@ func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
 	for ix := 0; ix < tt.NumField(); ix++ {
 		field := tt.Field(ix)
 		rvField := rv.FieldByName(field.Name)
+		if !rvField.IsValid() {
+			panic(fmt.Errorf("vdl: reflect type %v doesn't have field %q, vdl field %d of type %v", rv.Type(), field.Name, ix, tt))
+		}
 		switch isZero, err := rvIsZeroValue(rvField, field.Type); {
 		case err != nil:
 			return err

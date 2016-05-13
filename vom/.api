@@ -67,6 +67,7 @@ pkg vom, func VDLReadPrimitive(vdl.Decoder, *Primitive) error
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
 pkg vom, func VersionedXEncode(Version, interface{}) ([]byte, error)
 pkg vom, func XDecode([]byte, interface{}) error
+pkg vom, func XRawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, method (*ControlKind) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*ControlKind) MakeVDLTarget() vdl.Target
 pkg vom, method (*ControlKind) Set(string) error

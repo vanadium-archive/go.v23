@@ -17,8 +17,11 @@ import (
 
 var flagVOMTest string
 
+// TODO(toddw): There seems to be a bug in the Go toolchain that prevents this
+// init func from being run from the v.io/v23/vom tests, so the flag isn't
+// registered.  Investigate this.
 func init() {
-	flag.StringVar(&flagVOMTest, "vomtest", "", `Filter vomtest.Data to only return entries that contain the given substring.  If the value starts with "!", only returns entries that don't contain the given substring.`)
+	flag.StringVar(&flagVOMTest, "vomtest", "", `Filter vomtest.All to only return entries that contain the given substring.  If the value starts with "!", only returns entries that don't contain the given substring.`)
 }
 
 func filter() (bool, string) {

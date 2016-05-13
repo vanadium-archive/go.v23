@@ -2197,6 +2197,7 @@ func __VDLReadAnon_list_3(dec vdl.Decoder, x *[]*vom.RawBytes) error {
 			return dec.FinishValue()
 		}
 		var elem *vom.RawBytes
+		elem = new(vom.RawBytes)
 		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}

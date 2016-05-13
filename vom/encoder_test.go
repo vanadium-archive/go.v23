@@ -9,14 +9,9 @@ import (
 	"fmt"
 	"testing"
 
-	"v.io/v23/vom/testdata/data80"
 	"v.io/v23/vom/testdata/data81"
 	"v.io/v23/vom/testdata/types"
 )
-
-func TestEncoder80(t *testing.T) {
-	testEncoder(t, Version80, data80.Tests)
-}
 
 func TestEncoder81(t *testing.T) {
 	testEncoder(t, Version81, data81.Tests)
