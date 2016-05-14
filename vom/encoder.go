@@ -99,17 +99,8 @@ func NewEncoder(w io.Writer) *Encoder {
 // NewVersionedEncoder returns a new Encoder that writes to the given writer with
 // the specified VOM version.
 func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
-	if !isAllowedVersion(version) {
-		panic(fmt.Sprintf("unsupported VOM version: %x", version))
-	}
-	return &Encoder{encoder{
-		writer:          w,
-		buf:             newEncbuf(),
-		typeStack:       make([]typeStackEntry, 0, 10),
-		typeEnc:         newTypeEncoderWithoutVersionByte(version, w),
-		sentVersionByte: false,
-		version:         version,
-	}}
+	typeEnc := newTypeEncoderInternal(version, newXEncoderForTypes(version, w))
+	return NewVersionedEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
 // NewEncoderWithTypeEncoder returns a new Encoder that writes to the given
@@ -134,20 +125,6 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 		sentVersionByte: false,
 		version:         version,
 	}}
-}
-
-func newEncoderWithoutVersionByte(version Version, w io.Writer, typeEnc *TypeEncoder) *encoder {
-	if !isAllowedVersion(version) {
-		panic(fmt.Sprintf("unsupported VOM version: %x", version))
-	}
-	return &encoder{
-		writer:          w,
-		buf:             newEncbuf(),
-		typeStack:       make([]typeStackEntry, 0, 10),
-		typeEnc:         typeEnc,
-		sentVersionByte: true,
-		version:         version,
-	}
 }
 
 // Encode transmits the value v. Values of type T are encodable as long as the

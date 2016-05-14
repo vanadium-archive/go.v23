@@ -39,10 +39,6 @@ func NewTypeEncoder(w io.Writer) *TypeEncoder {
 // NewTypeEncoderVersion returns a new TypeEncoder that writes types to the given
 // writer in the specified VOM version.
 func NewVersionedTypeEncoder(version Version, w io.Writer) *TypeEncoder {
-	return newTypeEncoderWithVersionByte(version, w)
-}
-
-func newTypeEncoderWithVersionByte(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,
@@ -51,11 +47,11 @@ func newTypeEncoderWithVersionByte(version Version, w io.Writer) *TypeEncoder {
 	}
 }
 
-func newTypeEncoderWithoutVersionByte(version Version, w io.Writer) *TypeEncoder {
+func newTypeEncoderInternal(version Version, enc *xEncoder) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,
-		enc:             newXEncoderForTypes(version, w),
+		enc:             enc,
 		sentVersionByte: true,
 	}
 }
@@ -224,4 +220,15 @@ func (e *TypeEncoder) lookupOrAssignTypeId(tt *vdl.Type) (TypeId, bool, error) {
 	e.typeToId[tt] = newId
 	e.typeMu.Unlock()
 	return newId, true, nil
+}
+
+func (e *TypeEncoder) makeIdToTypeUnlocked() map[TypeId]*vdl.Type {
+	if len(e.typeToId) == 0 {
+		return nil
+	}
+	result := make(map[TypeId]*vdl.Type, len(e.typeToId))
+	for tt, id := range e.typeToId {
+		result[id] = tt
+	}
+	return result
 }

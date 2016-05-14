@@ -291,6 +291,7 @@ func (d *xDecoder) dfsNextType() (*vdl.Type, error) {
 	case vdl.Set:
 		return top.Type.Key(), nil
 	case vdl.Map:
+		// NumStarted is already incremented by the time we check it.
 		if top.NumStarted%2 == 1 {
 			return top.Type.Key(), nil
 		} else {

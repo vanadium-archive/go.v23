@@ -153,14 +153,16 @@ func TestDecodeToRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
 		bytes, err := Encode(test.goValue)
 		if err != nil {
-			t.Fatalf("%s: error in encode %v", test.name, err)
+			t.Errorf("%s: Encode failed: %v", test.name, err)
+			continue
 		}
 		var rb RawBytes
 		if err := Decode(bytes, &rb); err != nil {
-			t.Fatalf("%s: error decoding into raw bytes: %v", test.name, err)
+			t.Errorf("%s: Decode failed: %v", test.name, err)
+			continue
 		}
-		if !reflect.DeepEqual(rb, test.rawBytes) {
-			t.Errorf("%s: got %#v, want %#v", test.name, rb, test.rawBytes)
+		if got, want := rb, test.rawBytes; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", test.name, got, want)
 		}
 	}
 }
@@ -169,14 +171,16 @@ func TestEncodeFromRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
 		fullBytes, err := Encode(test.goValue)
 		if err != nil {
-			t.Fatalf("%s: error in encode %v", test.name, err)
+			t.Errorf("%s: Encode goValue failed: %v", test.name, err)
+			continue
 		}
 		fullBytesFromRaw, err := Encode(&test.rawBytes)
 		if err != nil {
-			t.Fatalf("%s: error in encode %v", test.name, err)
+			t.Errorf("%s: Encode RawBytes failed: %v", test.name, err)
+			continue
 		}
-		if !bytes.Equal(fullBytes, fullBytesFromRaw) {
-			t.Errorf("%s: got %x, want %x", test.name, fullBytesFromRaw, fullBytes)
+		if got, want := fullBytesFromRaw, fullBytes; !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.name, got, want)
 		}
 	}
 }
@@ -290,40 +294,44 @@ func TestWrappedRawBytes(t *testing.T) {
 		unwrapped := rawBytesTestCases[i]
 		wrappedBytes, err := Encode(structAny{&unwrapped.rawBytes})
 		if err != nil {
-			t.Fatalf("%s: error in encode %v", test.name, err)
+			t.Errorf("%s: Encode failed: %v", test.name, err)
+			continue
 		}
 		var any structAny
 		if err := Decode(wrappedBytes, &any); err != nil {
-			t.Fatalf("%s: error in decode %v", test.name, err)
+			t.Errorf("%s: Decode failed: %v", test.name, err)
+			continue
 		}
-		if !reflect.DeepEqual(any.X, &test.rawBytes) {
-			t.Errorf("%s: got %#v, want %#v", test.name, any.X, &test.rawBytes)
+		if got, want := any.X, &test.rawBytes; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", test.name, got, want)
 		}
 	}
 }
 
 func TestEncodeNilRawBytes(t *testing.T) {
 	// Top-level
-	expectedBytes, err := Encode(vdl.ZeroValue(vdl.AnyType))
+	want, err := Encode(vdl.ZeroValue(vdl.AnyType))
 	if err != nil {
 		t.Fatal(err)
 	}
-	encodedBytes, err := Encode((*RawBytes)(nil))
+	got, err := Encode((*RawBytes)(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(encodedBytes, expectedBytes) {
-		t.Errorf("encoding nil RawBytes: got %x, expected %x", encodedBytes, expectedBytes)
+	if !bytes.Equal(got, want) {
+		t.Errorf("top-level\nGOT  %x\nWANT %x", got, want)
 	}
-
 	// Within an object.
-	expectedBytes, err = Encode([]*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
+	want, err = Encode([]*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	encodedBytes, err = Encode([]*RawBytes{nil})
+	got, err = Encode([]*RawBytes{nil})
 	if err != nil {
 		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Errorf("[]any\nGOT  %x\nWANT %x", got, want)
 	}
 }
 

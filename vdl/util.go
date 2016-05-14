@@ -82,36 +82,98 @@ type indexer interface {
 	Index() int
 }
 
+// rvFlattenPointers repeatedly dereferences pointers, creating new values if
+// the pointer is nil, and returns the final non-pointer reflect value.  As a
+// special-case, *Type is returned as a pointer.
+func rvFlattenPointers(rv reflect.Value) reflect.Value {
+	for rv.Kind() == reflect.Ptr {
+		if rv.Type() == rtPtrToType {
+			// Special-case to stop at *Type, which is filled in via readNonReflect by
+			// the reader, or by rvZeroValue.
+			return rv
+		}
+		if rv.IsNil() {
+			rv.Set(reflect.New(rv.Type().Elem()))
+		}
+		rv = rv.Elem()
+	}
+	return rv
+}
+
+// zeroDecoder is a decoder that only returns zero values.
+type zeroDecoder struct{ tt *Type }
+
+func (z zeroDecoder) StartValue() error          { return nil }
+func (z zeroDecoder) FinishValue() error         { return nil }
+func (z zeroDecoder) StackDepth() int            { return 0 }
+func (z zeroDecoder) SkipValue() error           { return nil }
+func (z zeroDecoder) IgnoreNextStartValue()      {}
+func (z zeroDecoder) NextEntry() (bool, error)   { return true, nil }
+func (z zeroDecoder) NextField() (string, error) { return "", nil }
+func (z zeroDecoder) Type() *Type                { return z.tt }
+func (z zeroDecoder) IsAny() bool                { return z.tt == AnyType }
+func (z zeroDecoder) IsOptional() bool           { return z.tt.Kind() == Optional }
+func (z zeroDecoder) IsNil() bool                { return z.IsAny() || z.IsOptional() }
+func (z zeroDecoder) Index() int                 { return 0 }
+func (z zeroDecoder) LenHint() int               { return 0 }
+
+func (z zeroDecoder) DecodeBool() (bool, error)               { return false, nil }
+func (z zeroDecoder) DecodeString() (string, error)           { return "", nil }
+func (z zeroDecoder) DecodeTypeObject() (*Type, error)        { return AnyType, nil }
+func (z zeroDecoder) DecodeUint(bitlen int) (uint64, error)   { return 0, nil }
+func (z zeroDecoder) DecodeInt(bitlen int) (int64, error)     { return 0, nil }
+func (z zeroDecoder) DecodeFloat(bitlen int) (float64, error) { return 0, nil }
+func (z zeroDecoder) DecodeBytes(fixedlen int, x *[]byte) error {
+	*x = nil
+	return nil
+}
+
 var (
-	rvAnyType            = reflect.ValueOf(AnyType)
-	kkTypeObjectOrUnion  = []Kind{TypeObject, Union}
-	kkZeroValueNotUnique = []Kind{Any, TypeObject, Union, List, Set, Map}
+	rvAnyType               = reflect.ValueOf(AnyType)
+	kkZeroValueNotCanonical = []Kind{Any, TypeObject, Union}
+	kkZeroValueNotUnique    = []Kind{Any, TypeObject, Union, List, Set, Map}
 )
 
 // rvZeroValue returns the zero value of rt, using the vdl zero rules.
 //
 // VDL and Go define zero values differently.  According to VDL:
+//    Any:        nil
 //    TypeObject: AnyType
 //    Union:      zero value of the type at index 0
-// But according to go:
+// The Go zero value isn't always right.  Here are the Go zero values:
+//    Any:        interface{}(nil), *vom.RawBytes(nil) or *vdl.Value(nil)
 //    TypeObject: (*Type)(nil)
 //    Union:      UnionInterface(nil)
+// Here are the Go values we actually want:
+//    Any:        *vom.RawBytes or *vdl.Value representing any(nil)
+//    TypeObject: AnyType
+//    Union:      UnionStruct0
 //
 // Thus we must special-case values of these types, or any types that contain
-// these types inline.  E.g. if an array, struct, or union contains one of these
+// these types inline.  I.e. if an array, struct, or union contains one of these
 // types, it will show up in the zero value, and needs special-casing.
 //
 // TODO(toddw): Cache the generated zero values, if it's too expensive to
 // generate them each time.
 func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
-	// Easy fastpath; if the type doesn't contain inline typeobject or union, the
+	// Easy fastpath; if the type doesn't contain the hard types inline, the
 	// regular Go zero value is sufficient.
-	if !tt.ContainsKind(WalkInline, kkTypeObjectOrUnion...) {
+	if !tt.ContainsKind(WalkInline, kkZeroValueNotCanonical...) {
 		return reflect.Zero(rt), nil
 	}
-	// Handle typeobject, which has the AnyType zero value.
-	if rt == rtPtrToType {
-		return rvAnyType, nil
+	// Create the result we'll return.
+	result := reflect.New(rt).Elem()
+	// Flatten pointers and check for fast non-reflect support.  We re-use the
+	// readNonReflect logic with a decoder that only produces zero values.  This
+	// handles vom.RawBytes/vdl.Value, as well as TypeObject.
+	rv := rvFlattenPointers(result)
+	rt = rv.Type()
+	if err := readNonReflect(zeroDecoder{tt}, false, rv.Addr().Interface()); err != errReadMustReflect {
+		return result, err
+	}
+	// The only representation left for Any types is nil interfaces
+	if tt == AnyType && rt.Kind() == reflect.Interface {
+		return result, nil
 	}
 	// Handle native types by returning the native value filled in with a zero
 	// value of the wire type.
@@ -127,28 +189,28 @@ func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
 		default:
 			rvWire.Set(zero)
 		}
-		rvNativePtr := reflect.New(rt)
-		if err := ni.ToNative(rvWire, rvNativePtr); err != nil {
+		if err := ni.ToNative(rvWire, rv.Addr()); err != nil {
 			return reflect.Value{}, err
 		}
-		return rvNativePtr.Elem(), nil
+		return result, nil
 	}
 	// Handle composite types with inline subtypes.
-	rv := reflect.New(rt).Elem()
 	switch {
-	case tt.Kind() == Union:
+	case tt.Kind() == Union && rt.Kind() == reflect.Interface:
 		// Set the union interface with the zero value of the type at index 0.
 		ri, _, err := deriveReflectInfo(rt)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		switch zero, err := rvZeroValue(ri.UnionFields[0].RepType, tt.Field(0).Type); {
+		rvFieldStruct := reflect.New(ri.UnionFields[0].RepType).Elem()
+		switch zero, err := rvZeroValue(rvFieldStruct.Field(0).Type(), tt.Field(0).Type); {
 		case err != nil:
 			return reflect.Value{}, err
 		default:
-			rv.Set(zero)
+			rvFieldStruct.Field(0).Set(zero)
+			rv.Set(rvFieldStruct)
 		}
-	case rt.Kind() == reflect.Array:
+	case tt.Kind() == Array && rt.Kind() == reflect.Array:
 		for ix := 0; ix < rt.Len(); ix++ {
 			switch zero, err := rvZeroValue(rt.Elem(), tt.Elem()); {
 			case err != nil:
@@ -157,7 +219,7 @@ func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
 				rv.Index(ix).Set(zero)
 			}
 		}
-	case rt.Kind() == reflect.Struct:
+	case tt.Kind() == Struct && rt.Kind() == reflect.Struct:
 		for ix := 0; ix < tt.NumField(); ix++ {
 			field := tt.Field(ix)
 			rvField := rv.FieldByName(field.Name)
@@ -171,7 +233,7 @@ func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
 	default:
 		return reflect.Value{}, fmt.Errorf("vdl: rvZeroValue unhandled rt: %v tt: %v", rt, tt)
 	}
-	return rv, nil
+	return result, nil
 }
 
 // rvIsZeroValue returns true iff rv represents the VDL zero value.  Here are
@@ -192,10 +254,14 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		}
 		rv = rv.Elem()
 	}
+	// Optional types can only be zero via a nil pointer or interface.
+	if tt.Kind() == Optional {
+		return false, nil
+	}
 	rt := rv.Type()
-	// Now we know that rv isn't a pointer or interface, and also can't be nil.
-	// Call VDLIsZero if it exists.  This handles the vdl.Value/vom.RawBytes
-	// cases, as well generated code and user-implemented VDLIsZero methods.
+	// Now we know that rv isn't a pointer or interface, and also isn't nil.  Call
+	// VDLIsZero if it exists.  This handles the vdl.Value/vom.RawBytes cases, as
+	// well generated code and user-implemented VDLIsZero methods.
 	if rt.Implements(rtIsZeroer) {
 		return rv.Interface().(IsZeroer).VDLIsZero(), nil
 	}
@@ -219,9 +285,8 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		}
 		return rvIsZeroValue(rvWirePtr.Elem(), tt)
 	}
-	// Optional is only zero if it is a nil pointer, which was handled above.  The
-	// interface form of any was also handled above, while the non-interface forms
-	// were handled via VDLIsZero.
+	// The interface form of any was handled above in the nil checks, while the
+	// non-interface forms were handled via VDLIsZero.
 	if tt.Kind() == Optional || tt.Kind() == Any {
 		return false, nil
 	}

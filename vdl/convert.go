@@ -372,7 +372,7 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 	rv := reflect.New(rt).Elem()
 	// Easy fastpath; if the type doesn't contain inline typeobject or union, the
 	// regular Go zero value is good enough.
-	if !tt.ContainsKind(WalkInline, kkTypeObjectOrUnion...) {
+	if !tt.ContainsKind(WalkInline, TypeObject, Union) {
 		return rv
 	}
 	// Handle typeobject, which has the zero value of AnyType.

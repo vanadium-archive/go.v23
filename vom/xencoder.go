@@ -30,7 +30,7 @@ func NewXEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *XEncoder {
 }
 
 func NewVersionedXEncoder(version Version, w io.Writer) *XEncoder {
-	typeEnc := newTypeEncoderWithoutVersionByte(version, w)
+	typeEnc := newTypeEncoderInternal(version, newXEncoderForTypes(version, w))
 	return NewVersionedXEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
@@ -60,7 +60,7 @@ func newXEncoderForTypes(version Version, w io.Writer) *xEncoder {
 		buf:             buf,
 		sentVersionByte: true,
 		version:         version,
-		onlyForTypes:    true,
+		mode:            encoderForTypes,
 	}
 	if useOldEncoderForTypes {
 		// TEMPORARY HACK: Create the old encoder if we're using it for types.
@@ -75,6 +75,25 @@ func newXEncoderForTypes(version Version, w io.Writer) *xEncoder {
 	return e
 }
 
+func newXEncoderForRawBytes(w io.Writer) *xEncoder {
+	// RawBytes doesn't need the types to be encoded, since it holds the in-memory
+	// representation.  We still need a type encoder to collect the unique types,
+	// but we give it a dummy encoder that doesn't have any state set up.
+	typeEnc := newTypeEncoderInternal(DefaultVersion, &xEncoder{
+		sentVersionByte: true,
+		version:         DefaultVersion,
+		mode:            encoderForRawBytes,
+	})
+	return &xEncoder{
+		writer:          w,
+		buf:             newEncbuf(),
+		typeEnc:         typeEnc,
+		sentVersionByte: true,
+		version:         DefaultVersion,
+		mode:            encoderForRawBytes,
+	}
+}
+
 func (e *XEncoder) Encoder() vdl.Encoder {
 	return &e.enc
 }
@@ -82,6 +101,14 @@ func (e *XEncoder) Encoder() vdl.Encoder {
 func (e *XEncoder) Encode(v interface{}) error {
 	return vdl.Write(&e.enc, v)
 }
+
+type encoderMode int
+
+const (
+	encoderRegular     encoderMode = iota
+	encoderForTypes                // xEncoder is embedded in TypeEncoder
+	encoderForRawBytes             // xEncoder is used to encode RawBytes
+)
 
 type xEncoder struct {
 	stack []encoderStackEntry
@@ -106,8 +133,11 @@ type xEncoder struct {
 	mid                           int64
 	nextStartValueOptional        bool
 
-	// onlyForTypes is true iff this xEncoder is embedded in the TypeEncoder.
-	onlyForTypes bool
+	// msgType captures the type of the top-level value.  Unlike stack[0].Type, it
+	// also captures optionality for non-nil types.
+	msgType *vdl.Type
+
+	mode encoderMode
 
 	// As a temporary hack, before we've switched to the XEncoder for everything,
 	// we still need to support the old encoder.
@@ -136,10 +166,10 @@ func (entry *encoderStackEntry) nextValueIsAny() bool {
 	case vdl.Set:
 		return entry.Type.Key() == vdl.AnyType
 	case vdl.Map:
-		switch entry.NumStarted % 2 {
-		case 0:
+		// NumStarted is already incremented by the time we check it.
+		if entry.NumStarted%2 == 1 {
 			return entry.Type.Key() == vdl.AnyType
-		case 1:
+		} else {
 			return entry.Type.Elem() == vdl.AnyType
 		}
 	case vdl.Struct, vdl.Union:
@@ -158,6 +188,11 @@ func (e *xEncoder) top() *encoderStackEntry {
 func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
 	if useOldEncoderForTypes {
 		return e.old.encodeWireType(tid, wt, typeIncomplete)
+	}
+	// RawBytes doesn't need type messages to be encoded, since it holds the types
+	// in-memory.
+	if e.mode == encoderForRawBytes {
+		return nil
 	}
 	// Set up the state that would normally be set in startMessage, and use
 	// VDLWrite to encode wt as a regular value.
@@ -262,9 +297,9 @@ func (e *xEncoder) StartValue(tt *vdl.Type) error {
 func (e *xEncoder) startMessage(tt *vdl.Type) error {
 	e.buf.Reset()
 	e.buf.Grow(paddingLen)
-	if e.onlyForTypes {
-		// If this is the encoder for types, we've already set up the state in
-		// encodeWireType.
+	e.msgType = tt
+	if e.mode == encoderForTypes {
+		// We've already set up the state in encodeWireType.
 		return nil
 	}
 	if !e.sentVersionByte {
@@ -313,6 +348,12 @@ func (e *xEncoder) FinishValue() error {
 }
 
 func (e *xEncoder) finishMessage() error {
+	if e.mode == encoderForRawBytes {
+		// Only encode the value portion for RawBytes.
+		msg := e.buf.Bytes()
+		_, err := e.writer.Write(msg[paddingLen:])
+		return err
+	}
 	if e.typeIncomplete {
 		if _, err := e.writer.Write([]byte{WireCtrlTypeIncomplete}); err != nil {
 			return err

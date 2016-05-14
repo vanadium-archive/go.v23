@@ -125,7 +125,7 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	}
 	// Now we know that the decoded value isn't nil.  Flatten pointers and check
 	// for fast non-reflect support.
-	rv = readFlattenPointers(rv)
+	rv = rvFlattenPointers(rv)
 	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
@@ -150,23 +150,6 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	return dec.FinishValue()
 }
 
-// readFlattenPointers repeatedly dereferences pointers, creating new values if
-// the pointer is nil, and returns the final non-pointer reflect value.  As a
-// special-case, *Type is returned as a pointer.
-func readFlattenPointers(rv reflect.Value) reflect.Value {
-	for rv.Kind() == reflect.Ptr {
-		if rv.Type() == rtPtrToType {
-			// Special-case to stop at *Type, which is filled in via readNonReflect.
-			return rv
-		}
-		if rv.IsNil() {
-			rv.Set(reflect.New(rv.Type().Elem()))
-		}
-		rv = rv.Elem()
-	}
-	return rv
-}
-
 // readIntoAny uses dec to decode a value into rv, which has VDL type any.
 func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	if calledStart {
@@ -183,7 +166,7 @@ func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	}
 	// Flatten pointers and check for fast non-reflect support, which handles
 	// vdl.Value and vom.RawBytes, and any other special-cases.
-	rv = readFlattenPointers(rv)
+	rv = rvFlattenPointers(rv)
 	if err := readNonReflect(dec, false, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}

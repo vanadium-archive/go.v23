@@ -22,10 +22,13 @@ func Write(enc Encoder, v interface{}) error {
 		return enc.NilValue(AnyType)
 	}
 	rv := reflect.ValueOf(v)
+	// Fastpath check for non-reflect support.  Unfortunately we must use
+	// reflection to detect the case where v is a pointer, which is handled by the
+	// more complicated optional-checking logic in writeReflect.
+	//
+	// TODO(toddw): *vom.RawBytes is 50% faster if we could special-case it here,
+	// without breaking support for optional types.
 	if rv.Kind() != reflect.Ptr {
-		// Fastpath check for non-reflect support.  Unfortunately we must use
-		// reflection to detect the case where v is a pointer, which is handled by
-		// the more complicated optional-checking logic in writeReflect.
 		if err := writeNonReflect(enc, v); err != errWriteMustReflect {
 			return err
 		}
@@ -73,6 +76,15 @@ func WriteReflect(enc Encoder, rv reflect.Value) error {
 }
 
 func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
+	// Fastpath check for non-reflect support.  Optional types are tricky, since
+	// they may be nil, and need SetNextStartValueIsOptional() to be set, so they
+	// can't use this fastpath.  This handles the non-nil *vom.RawBytes and
+	// *vdl.Value cases, and avoids an expensive copy of all their fields.
+	if tt.Kind() != Optional && (rv.Kind() != reflect.Ptr || !rv.IsNil()) {
+		if err := writeNonReflect(enc, rv.Interface()); err != errWriteMustReflect {
+			return err
+		}
+	}
 	// Walk pointers and interfaces in rv, and handle nil values.
 	for {
 		isPtr, isIface := rv.Kind() == reflect.Ptr, rv.Kind() == reflect.Interface

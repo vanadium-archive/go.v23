@@ -164,18 +164,49 @@ func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 		return d.readRawBytes(rb)
 	}
 	// Slowpath: the bytes are not available, we must encode new bytes.
-	return fmt.Errorf("vom: RawBytes.VDLRead slowpath not implemented")
+	var buf bytes.Buffer
+	enc := newXEncoderForRawBytes(&buf)
+	if err := vdl.Transcode(enc, dec); err != nil {
+		return err
+	}
+	// Fill in rb with the results of the transcoding, captured in enc.
+	rb.Version = enc.version
+	rb.Type = enc.msgType
+	if enc.tids == nil || len(enc.tids.tids) == 0 {
+		rb.RefTypes = nil
+	} else {
+		tids, idToType := enc.tids.tids, enc.typeEnc.makeIdToTypeUnlocked()
+		rb.RefTypes = make([]*vdl.Type, len(tids))
+		for i, tid := range tids {
+			tt := bootstrapIdToType[tid]
+			if tt == nil {
+				if tt = idToType[tid]; tt == nil {
+					return fmt.Errorf("vom: internal error, type id %d in %v doesn't exist in %v", i, tids, idToType)
+				}
+			}
+			rb.RefTypes[i] = tt
+		}
+	}
+	if enc.anyLens == nil || len(enc.anyLens.lens) == 0 {
+		rb.AnyLengths = nil
+	} else {
+		rb.AnyLengths = enc.anyLens.lens
+	}
+	rb.Data = buf.Bytes()
+	return nil
 }
 
 func (rb *RawBytes) VDLWrite(enc vdl.Encoder) error {
-	// We can only write directly if the versions are the same and if the encoder
-	// hasn't written any other values yet, since otherwise rb.Data needs to be
-	// re-written to account for the differences.
+	// Fastpath: we're trying to encode into an xEncoder.  We can only write
+	// directly if the versions are the same and if the encoder hasn't written any
+	// other values yet, since otherwise rb.Data needs to be re-written to account
+	// for the differences.
 	//
 	// TODO(toddw): Code a variant that performs the re-writing.
 	if e, ok := enc.(*xEncoder); ok && e.version == rb.Version && len(e.stack) == 0 {
 		return e.writeRawBytes(rb)
 	}
+	// Slowpath: decodes bytes from rb and fill in enc.
 	return vdl.Transcode(enc, rb.Decoder())
 }
 
