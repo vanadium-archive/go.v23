@@ -422,50 +422,6 @@ func BenchmarkVerifyCertificateIntegrity_NoCaching(b *testing.B) {
 	BenchmarkVerifyCertificateIntegrity(b)
 }
 
-func BenchmarkVomEncodeTypicalBlessings(b *testing.B) {
-	blessings := typicalBlessings(b)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		if _, err := vom.Encode(blessings); err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-func BenchmarkVomDecodeTypicalBlessings(b *testing.B) {
-	encoded, err := vom.Encode(typicalBlessings(b))
-	if err != nil {
-		b.Fatal(err)
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		var blessings Blessings
-		if err := vom.Decode(encoded, &blessings); err != nil {
-			b.Fatal(err)
-		}
-	}
-}
-
-// typicalBlessings creates a blessings with certificate structures and caveats
-// that are "common": a chain of 3 certificates for the user, with a
-// third-party caveat used for revocation.
-//
-// TODO(ashankar): This should be moved to a utility library and used in the
-// RPC benchmarks in v.io/x/ref/runtime/internal/rpc/benchmark?
-func typicalBlessings(t testing.TB) Blessings {
-	var (
-		p1, _  = CreatePrincipal(newSigner(), nil, nil)
-		p2, _  = CreatePrincipal(newSigner(), nil, nil)
-		p3, _  = CreatePrincipal(newSigner(), nil, nil)
-		tpc, _ = NewPublicKeyCaveat(p2.PublicKey(), "some_location", ThirdPartyRequirements{}, UnconstrainedUse())
-
-		b1, _ = p1.BlessSelf("root")
-		b2, _ = p1.Bless(p2.PublicKey(), b1, "u", UnconstrainedUse())
-		b3, _ = p2.Bless(p3.PublicKey(), b2, "user", tpc)
-	)
-	return b3
-}
-
 func makeBlessings(t testing.TB, ncerts int) Blessings {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {

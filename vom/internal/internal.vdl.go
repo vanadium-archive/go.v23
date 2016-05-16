@@ -1,4 +1,4 @@
-// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Copyright 2016 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,7 +9,10 @@ package internal
 
 import (
 	"fmt"
+	"reflect"
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlconv"
+	"v.io/v23/vom"
 )
 
 var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
@@ -17,35 +20,1107 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 //////////////////////////////////////////////////
 // Type definitions
 
-type AddressInfo struct {
-	Street string
-	City   string
-	State  string
-	Zip    string
-}
+type VNumber int32
 
-func (AddressInfo) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.AddressInfo"`
+func (VNumber) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VNumber"`
 }) {
 }
 
-func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m *VNumber) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromInt(int64((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VNumber) MakeVDLTarget() vdl.Target {
+	return &VNumberTarget{Value: m}
+}
+
+type VNumberTarget struct {
+	Value *VNumber
+	vdl.TargetBase
+}
+
+func (t *VNumberTarget) FromUint(src uint64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Uint64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = VNumber(val)
+
+	return nil
+}
+func (t *VNumberTarget) FromInt(src int64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Int64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = VNumber(val)
+
+	return nil
+}
+func (t *VNumberTarget) FromFloat(src float64, tt *vdl.Type) error {
+
+	val, err := vdlconv.Float64ToInt32(src)
+	if err != nil {
+		return err
+	}
+	*t.Value = VNumber(val)
+
+	return nil
+}
+
+func (x VNumber) VDLIsZero() bool {
+	return x == 0
+}
+
+func (x VNumber) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VNumber)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeInt(int64(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VNumber) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeInt(32)
+	if err != nil {
+		return err
+	}
+	*x = VNumber(tmp)
+	return dec.FinishValue()
+}
+
+type VString string
+
+func (VString) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VString"`
+}) {
+}
+
+func (m *VString) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromString(string((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VString) MakeVDLTarget() vdl.Target {
+	return &VStringTarget{Value: m}
+}
+
+type VStringTarget struct {
+	Value *VString
+	vdl.TargetBase
+}
+
+func (t *VStringTarget) FromString(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*VString)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = VString(src)
+
+	return nil
+}
+
+func (x VString) VDLIsZero() bool {
+	return x == ""
+}
+
+func (x VString) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VString)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(string(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VString) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	tmp, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	*x = VString(tmp)
+	return dec.FinishValue()
+}
+
+type VEnum int
+
+const (
+	VEnumA VEnum = iota
+	VEnumB
+	VEnumC
+)
+
+// VEnumAll holds all labels for VEnum.
+var VEnumAll = [...]VEnum{VEnumA, VEnumB, VEnumC}
+
+// VEnumFromString creates a VEnum from a string label.
+func VEnumFromString(label string) (x VEnum, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *VEnum) Set(label string) error {
+	switch label {
+	case "A", "a":
+		*x = VEnumA
+		return nil
+	case "B", "b":
+		*x = VEnumB
+		return nil
+	case "C", "c":
+		*x = VEnumC
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in internal.VEnum", label)
+}
+
+// String returns the string label of x.
+func (x VEnum) String() string {
+	switch x {
+	case VEnumA:
+		return "A"
+	case VEnumB:
+		return "B"
+	case VEnumC:
+		return "C"
+	}
+	return ""
+}
+
+func (VEnum) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VEnum"`
+	Enum struct{ A, B, C string }
+}) {
+}
+
+func (m *VEnum) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VEnum) MakeVDLTarget() vdl.Target {
+	return &VEnumTarget{Value: m}
+}
+
+type VEnumTarget struct {
+	Value *VEnum
+	vdl.TargetBase
+}
+
+func (t *VEnumTarget) FromEnumLabel(src string, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*VEnum)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	switch src {
+	case "A":
+		*t.Value = 0
+	case "B":
+		*t.Value = 1
+	case "C":
+		*t.Value = 2
+	default:
+		return fmt.Errorf("label %s not in enum VEnum", src)
+	}
+
+	return nil
+}
+
+func (x VEnum) VDLIsZero() bool {
+	return x == VEnumA
+}
+
+func (x VEnum) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VEnum)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.String()); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VEnum) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	enum, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	if err := x.Set(enum); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
+type VByteList []byte
+
+func (VByteList) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VByteList"`
+}) {
+}
+
+func (m *VByteList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VByteList) MakeVDLTarget() vdl.Target {
+	return &VByteListTarget{Value: m}
+}
+
+type VByteListTarget struct {
+	Value *VByteList
+	vdl.TargetBase
+}
+
+func (t *VByteListTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*VByteList)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if len(src) == 0 {
+		*t.Value = nil
+	} else {
+		*t.Value = make([]byte, len(src))
+		copy(*t.Value, src)
+	}
+
+	return nil
+}
+
+func (x VByteList) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VByteList) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VByteList)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x)); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VByteList) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	var bytes []byte
+	if err := dec.DecodeBytes(-1, &bytes); err != nil {
+		return err
+	}
+	*x = bytes
+	return dec.FinishValue()
+}
+
+type VByteArray [3]byte
+
+func (VByteArray) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VByteArray"`
+}) {
+}
+
+func (m *VByteArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	if err := t.FromBytes([]byte((*m)[:]), tt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VByteArray) MakeVDLTarget() vdl.Target {
+	return &VByteArrayTarget{Value: m}
+}
+
+type VByteArrayTarget struct {
+	Value *VByteArray
+	vdl.TargetBase
+}
+
+func (t *VByteArrayTarget) FromBytes(src []byte, tt *vdl.Type) error {
+
+	if ttWant := vdl.TypeOf((*VByteArray)(nil)); !vdl.Compatible(tt, ttWant) {
+		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	copy((*t.Value)[:], src)
+
+	return nil
+}
+
+func (x VByteArray) VDLIsZero() bool {
+	return x == VByteArray{}
+}
+
+func (x VByteArray) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VByteArray)(nil))); err != nil {
+		return err
+	}
+	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VByteArray) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	bytes := x[:]
+	if err := dec.DecodeBytes(3, &bytes); err != nil {
+		return err
+	}
+	return dec.FinishValue()
+}
+
+type VArray [3]int32
+
+func (VArray) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VArray"`
+}) {
+}
+
+func (m *VArray) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(tt, 3)
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range *m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromInt(int64(elem3), tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VArray) MakeVDLTarget() vdl.Target {
+	return &VArrayTarget{Value: m}
+}
+
+// VArray
+type VArrayTarget struct {
+	Value      *VArray
+	elemTarget vdl.Int32Target
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *VArrayTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VArray)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *VArrayTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *VArrayTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *VArrayTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+func (x VArray) VDLIsZero() bool {
+	return x == VArray{}
+}
+
+func (x VArray) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VArray)(nil))); err != nil {
+		return err
+	}
+	for i := 0; i < 3; i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x[i])); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VArray) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible array %T, from %v", *x, dec.Type())
+	}
+	index := 0
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done != (index >= len(*x)):
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
+		case done:
+			return dec.FinishValue()
+		}
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		tmp, err := dec.DecodeInt(32)
+		if err != nil {
+			return err
+		}
+		x[index] = int32(tmp)
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		index++
+	}
+}
+
+type VList []int32
+
+func (VList) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VList"`
+}) {
+}
+
+func (m *VList) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range *m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+		if err := elemTarget2.FromInt(int64(elem3), tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VList) MakeVDLTarget() vdl.Target {
+	return &VListTarget{Value: m}
+}
+
+// VList
+type VListTarget struct {
+	Value      *VList
+	elemTarget vdl.Int32Target
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *VListTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VList)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(VList, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *VListTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	t.elemTarget.Value = &(*t.Value)[index]
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *VListTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *VListTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+func (x VList) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VList) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VList)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x[i])); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VList) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len > 0:
+		*x = make(VList, 0, len)
+	default:
+		*x = nil
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem int32
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		tmp, err := dec.DecodeInt(32)
+		if err != nil {
+			return err
+		}
+		elem = int32(tmp)
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+type VListAny []*vom.RawBytes
+
+func (VListAny) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VListAny"`
+}) {
+}
+
+func (m *VListAny) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	listTarget1, err := t.StartList(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for i, elem3 := range *m {
+		elemTarget2, err := listTarget1.StartElem(i)
+		if err != nil {
+			return err
+		}
+
+		if err := elem3.FillVDLTarget(elemTarget2, tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := listTarget1.FinishElem(elemTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishList(listTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VListAny) MakeVDLTarget() vdl.Target {
+	return &VListAnyTarget{Value: m}
+}
+
+// VListAny
+type VListAnyTarget struct {
+	Value *VListAny
+
+	vdl.TargetBase
+	vdl.ListTargetBase
+}
+
+func (t *VListAnyTarget) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VListAny)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	if cap(*t.Value) < len {
+		*t.Value = make(VListAny, len)
+	} else {
+		*t.Value = (*t.Value)[:len]
+	}
+	return t, nil
+}
+func (t *VListAnyTarget) StartElem(index int) (elem vdl.Target, _ error) {
+	target, err := vdl.ReflectTarget(reflect.ValueOf(&(*t.Value)[index]))
+	return target, err
+}
+func (t *VListAnyTarget) FinishElem(elem vdl.Target) error {
+	return nil
+}
+func (t *VListAnyTarget) FinishList(elem vdl.ListTarget) error {
+
+	return nil
+}
+
+func (x VListAny) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VListAny) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VListAny)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for i := 0; i < len(x); i++ {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if x[i] == nil {
+			if err := enc.NilValue(vdl.AnyType); err != nil {
+				return err
+			}
+		} else {
+			if err := x[i].VDLWrite(enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VListAny) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
+	}
+	switch len := dec.LenHint(); {
+	case len > 0:
+		*x = make(VListAny, 0, len)
+	default:
+		*x = nil
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			return dec.FinishValue()
+		}
+		var elem *vom.RawBytes
+		elem = new(vom.RawBytes)
+		if err := elem.VDLRead(dec); err != nil {
+			return err
+		}
+		*x = append(*x, elem)
+	}
+}
+
+type VSet map[string]struct{}
+
+func (VSet) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VSet"`
+}) {
+}
+
+func (m *VSet) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	setTarget1, err := t.StartSet(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for key3 := range *m {
+		keyTarget2, err := setTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
+			return err
+		}
+		if err := setTarget1.FinishKey(keyTarget2); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishSet(setTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VSet) MakeVDLTarget() vdl.Target {
+	return &VSetTarget{Value: m}
+}
+
+type VSetTarget struct {
+	Value     *VSet
+	currKey   string
+	keyTarget vdl.StringTarget
+	vdl.TargetBase
+	vdl.SetTargetBase
+}
+
+func (t *VSetTarget) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VSet)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(VSet)
+	return t, nil
+}
+func (t *VSetTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *VSetTarget) FinishKey(key vdl.Target) error {
+	(*t.Value)[t.currKey] = struct{}{}
+	return nil
+}
+func (t *VSetTarget) FinishSet(list vdl.SetTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+func (x VSet) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VSet) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSet)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VSet) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible set %T, from %v", *x, dec.Type())
+	}
+	var tmpMap VSet
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(VSet, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			*x = tmpMap
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		if tmpMap == nil {
+			tmpMap = make(VSet)
+		}
+		tmpMap[key] = struct{}{}
+	}
+}
+
+type VMap map[string]bool
+
+func (VMap) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VMap"`
+}) {
+}
+
+func (m *VMap) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	mapTarget1, err := t.StartMap(tt, len((*m)))
+	if err != nil {
+		return err
+	}
+	for key3, value5 := range *m {
+		keyTarget2, err := mapTarget1.StartKey()
+		if err != nil {
+			return err
+		}
+		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
+			return err
+		}
+		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
+		if err != nil {
+			return err
+		}
+		if err := valueTarget4.FromBool(bool(value5), tt.NonOptional().Elem()); err != nil {
+			return err
+		}
+		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
+			return err
+		}
+	}
+	if err := t.FinishMap(mapTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VMap) MakeVDLTarget() vdl.Target {
+	return &VMapTarget{Value: m}
+}
+
+type VMapTarget struct {
+	Value      *VMap
+	currKey    string
+	currElem   bool
+	keyTarget  vdl.StringTarget
+	elemTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.MapTargetBase
+}
+
+func (t *VMapTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VMap)(nil)); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	*t.Value = make(VMap)
+	return t, nil
+}
+func (t *VMapTarget) StartKey() (key vdl.Target, _ error) {
+	t.currKey = ""
+	t.keyTarget.Value = &t.currKey
+	target, err := &t.keyTarget, error(nil)
+	return target, err
+}
+func (t *VMapTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
+	t.currElem = false
+	t.elemTarget.Value = &t.currElem
+	target, err := &t.elemTarget, error(nil)
+	return target, err
+}
+func (t *VMapTarget) FinishField(key, field vdl.Target) error {
+	(*t.Value)[t.currKey] = t.currElem
+	return nil
+}
+func (t *VMapTarget) FinishMap(elem vdl.MapTarget) error {
+	if len(*t.Value) == 0 {
+		*t.Value = nil
+	}
+
+	return nil
+}
+
+func (x VMap) VDLIsZero() bool {
+	return len(x) == 0
+}
+
+func (x VMap) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VMap)(nil))); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for key, elem := range x {
+		if err := enc.NextEntry(false); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(key); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.BoolType); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(elem); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VMap) VDLRead(dec vdl.Decoder) error {
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
+	}
+	var tmpMap VMap
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(VMap, len)
+	}
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case done:
+			*x = tmpMap
+			return dec.FinishValue()
+		}
+		var key string
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if key, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		var elem bool
+		{
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if elem, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		}
+		if tmpMap == nil {
+			tmpMap = make(VMap)
+		}
+		tmpMap[key] = elem
+	}
+}
+
+type VSmallStruct struct {
+	A int32
+	B string
+	C bool
+}
+
+func (VSmallStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VSmallStruct"`
+}) {
+}
+
+func (m *VSmallStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
-	var4 := (m.Street == "")
+	var4 := (m.A == int32(0))
 	if var4 {
-		if err := fieldsTarget1.ZeroField("Street"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("A"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Street")
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("A")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget3.FromString(string(m.Street), tt.NonOptional().Field(0).Type); err != nil {
+			if err := fieldTarget3.FromInt(int64(m.A), tt.NonOptional().Field(0).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -53,18 +1128,18 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var7 := (m.City == "")
+	var7 := (m.B == "")
 	if var7 {
-		if err := fieldsTarget1.ZeroField("City"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("B"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("City")
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("B")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget6.FromString(string(m.City), tt.NonOptional().Field(1).Type); err != nil {
+			if err := fieldTarget6.FromString(string(m.B), tt.NonOptional().Field(1).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
@@ -72,18 +1147,18 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var10 := (m.State == "")
+	var10 := (m.C == false)
 	if var10 {
-		if err := fieldsTarget1.ZeroField("State"); err != nil && err != vdl.ErrFieldNoExist {
+		if err := fieldsTarget1.ZeroField("C"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("State")
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("C")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget9.FromString(string(m.State), tt.NonOptional().Field(2).Type); err != nil {
+			if err := fieldTarget9.FromBool(bool(m.C), tt.NonOptional().Field(2).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
@@ -91,18 +1166,319 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	var13 := (m.Zip == "")
-	if var13 {
-		if err := fieldsTarget1.ZeroField("Zip"); err != nil && err != vdl.ErrFieldNoExist {
+	if err := t.FinishFields(fieldsTarget1); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *VSmallStruct) MakeVDLTarget() vdl.Target {
+	return &VSmallStructTarget{Value: m}
+}
+
+type VSmallStructTarget struct {
+	Value   *VSmallStruct
+	aTarget vdl.Int32Target
+	bTarget vdl.StringTarget
+	cTarget vdl.BoolTarget
+	vdl.TargetBase
+	vdl.FieldsTargetBase
+}
+
+func (t *VSmallStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+
+	if ttWant := vdl.TypeOf((*VSmallStruct)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
+	}
+	return t, nil
+}
+func (t *VSmallStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
+	switch name {
+	case "A":
+		t.aTarget.Value = &t.Value.A
+		target, err := &t.aTarget, error(nil)
+		return nil, target, err
+	case "B":
+		t.bTarget.Value = &t.Value.B
+		target, err := &t.bTarget, error(nil)
+		return nil, target, err
+	case "C":
+		t.cTarget.Value = &t.Value.C
+		target, err := &t.cTarget, error(nil)
+		return nil, target, err
+	default:
+		return nil, nil, vdl.ErrFieldNoExist
+	}
+}
+func (t *VSmallStructTarget) FinishField(_, _ vdl.Target) error {
+	return nil
+}
+func (t *VSmallStructTarget) ZeroField(name string) error {
+	switch name {
+	case "A":
+		t.Value.A = int32(0)
+		return nil
+	case "B":
+		t.Value.B = ""
+		return nil
+	case "C":
+		t.Value.C = false
+		return nil
+	default:
+		return vdl.ErrFieldNoExist
+	}
+}
+func (t *VSmallStructTarget) FinishFields(_ vdl.FieldsTarget) error {
+
+	return nil
+}
+
+func (x VSmallStruct) VDLIsZero() bool {
+	return x == VSmallStruct{}
+}
+
+func (x VSmallStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSmallStruct)(nil)).Elem()); err != nil {
+		return err
+	}
+	if x.A != 0 {
+		if err := enc.NextField("A"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.A)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.B != "" {
+		if err := enc.NextField("B"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.B); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.C {
+		if err := enc.NextField("C"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.BoolType); err != nil {
+			return err
+		}
+		if err := enc.EncodeBool(x.C); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *VSmallStruct) VDLRead(dec vdl.Decoder) error {
+	*x = VSmallStruct{}
+	if err := dec.StartValue(); err != nil {
+		return err
+	}
+	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
+		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "A":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.A = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "B":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.B, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "C":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			var err error
+			if x.C, err = dec.DecodeBool(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+type VLargeStruct struct {
+	F1  int32
+	F2  int32
+	F3  int32
+	F4  int32
+	F5  int32
+	F6  int32
+	F7  int32
+	F8  int32
+	F9  int32
+	F10 int32
+	F11 int32
+	F12 int32
+	F13 int32
+	F14 int32
+	F15 int32
+	F16 int32
+	F17 int32
+	F18 int32
+	F19 int32
+	F20 int32
+	F21 int32
+	F22 int32
+	F23 int32
+	F24 int32
+	F25 int32
+	F26 int32
+	F27 int32
+	F28 int32
+	F29 int32
+	F30 int32
+	F31 int32
+	F32 int32
+	F33 int32
+	F34 int32
+	F35 int32
+	F36 int32
+	F37 int32
+	F38 int32
+	F39 int32
+	F40 int32
+	F41 int32
+	F42 int32
+	F43 int32
+	F44 int32
+	F45 int32
+	F46 int32
+	F47 int32
+	F48 int32
+	F49 int32
+	F50 int32
+}
+
+func (VLargeStruct) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/vom/internal.VLargeStruct"`
+}) {
+}
+
+func (m *VLargeStruct) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+	fieldsTarget1, err := t.StartFields(tt)
+	if err != nil {
+		return err
+	}
+	var4 := (m.F1 == int32(0))
+	if var4 {
+		if err := fieldsTarget1.ZeroField("F1"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Zip")
+		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("F1")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget12.FromString(string(m.Zip), tt.NonOptional().Field(3).Type); err != nil {
+			if err := fieldTarget3.FromInt(int64(m.F1), tt.NonOptional().Field(0).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+				return err
+			}
+		}
+	}
+	var7 := (m.F2 == int32(0))
+	if var7 {
+		if err := fieldsTarget1.ZeroField("F2"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("F2")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget6.FromInt(int64(m.F2), tt.NonOptional().Field(1).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
+				return err
+			}
+		}
+	}
+	var10 := (m.F3 == int32(0))
+	if var10 {
+		if err := fieldsTarget1.ZeroField("F3"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("F3")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget9.FromInt(int64(m.F3), tt.NonOptional().Field(2).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
+				return err
+			}
+		}
+	}
+	var13 := (m.F4 == int32(0))
+	if var13 {
+		if err := fieldsTarget1.ZeroField("F4"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("F4")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget12.FromInt(int64(m.F4), tt.NonOptional().Field(3).Type); err != nil {
 				return err
 			}
 			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
@@ -110,472 +1486,876 @@ func (m *AddressInfo) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 			}
 		}
 	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *AddressInfo) MakeVDLTarget() vdl.Target {
-	return &AddressInfoTarget{Value: m}
-}
-
-type AddressInfoTarget struct {
-	Value        *AddressInfo
-	streetTarget vdl.StringTarget
-	cityTarget   vdl.StringTarget
-	stateTarget  vdl.StringTarget
-	zipTarget    vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *AddressInfoTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*AddressInfo)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *AddressInfoTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Street":
-		t.streetTarget.Value = &t.Value.Street
-		target, err := &t.streetTarget, error(nil)
-		return nil, target, err
-	case "City":
-		t.cityTarget.Value = &t.Value.City
-		target, err := &t.cityTarget, error(nil)
-		return nil, target, err
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Zip":
-		t.zipTarget.Value = &t.Value.Zip
-		target, err := &t.zipTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *AddressInfoTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *AddressInfoTarget) ZeroField(name string) error {
-	switch name {
-	case "Street":
-		t.Value.Street = ""
-		return nil
-	case "City":
-		t.Value.City = ""
-		return nil
-	case "State":
-		t.Value.State = ""
-		return nil
-	case "Zip":
-		t.Value.Zip = ""
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *AddressInfoTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-func (x AddressInfo) VDLIsZero() bool {
-	return x == AddressInfo{}
-}
-
-func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AddressInfo)(nil)).Elem()); err != nil {
-		return err
-	}
-	if x.Street != "" {
-		if err := enc.NextField("Street"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Street); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.City != "" {
-		if err := enc.NextField("City"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.City); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.State != "" {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.State); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.Zip != "" {
-		if err := enc.NextField("Zip"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Zip); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *AddressInfo) VDLRead(dec vdl.Decoder) error {
-	*x = AddressInfo{}
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Street":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.Street, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "City":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.City, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "State":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.State, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Zip":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.Zip, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-type CreditAgency int
-
-const (
-	CreditAgencyEquifax CreditAgency = iota
-	CreditAgencyExperian
-	CreditAgencyTransUnion
-)
-
-// CreditAgencyAll holds all labels for CreditAgency.
-var CreditAgencyAll = [...]CreditAgency{CreditAgencyEquifax, CreditAgencyExperian, CreditAgencyTransUnion}
-
-// CreditAgencyFromString creates a CreditAgency from a string label.
-func CreditAgencyFromString(label string) (x CreditAgency, err error) {
-	err = x.Set(label)
-	return
-}
-
-// Set assigns label to x.
-func (x *CreditAgency) Set(label string) error {
-	switch label {
-	case "Equifax", "equifax":
-		*x = CreditAgencyEquifax
-		return nil
-	case "Experian", "experian":
-		*x = CreditAgencyExperian
-		return nil
-	case "TransUnion", "transunion":
-		*x = CreditAgencyTransUnion
-		return nil
-	}
-	*x = -1
-	return fmt.Errorf("unknown label %q in internal.CreditAgency", label)
-}
-
-// String returns the string label of x.
-func (x CreditAgency) String() string {
-	switch x {
-	case CreditAgencyEquifax:
-		return "Equifax"
-	case CreditAgencyExperian:
-		return "Experian"
-	case CreditAgencyTransUnion:
-		return "TransUnion"
-	}
-	return ""
-}
-
-func (CreditAgency) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.CreditAgency"`
-	Enum struct{ Equifax, Experian, TransUnion string }
-}) {
-}
-
-func (m *CreditAgency) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *CreditAgency) MakeVDLTarget() vdl.Target {
-	return &CreditAgencyTarget{Value: m}
-}
-
-type CreditAgencyTarget struct {
-	Value *CreditAgency
-	vdl.TargetBase
-}
-
-func (t *CreditAgencyTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*CreditAgency)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Equifax":
-		*t.Value = 0
-	case "Experian":
-		*t.Value = 1
-	case "TransUnion":
-		*t.Value = 2
-	default:
-		return fmt.Errorf("label %s not in enum CreditAgency", src)
-	}
-
-	return nil
-}
-
-func (x CreditAgency) VDLIsZero() bool {
-	return x == CreditAgencyEquifax
-}
-
-func (x CreditAgency) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*CreditAgency)(nil))); err != nil {
-		return err
-	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *CreditAgency) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
-}
-
-type ExperianRating int
-
-const (
-	ExperianRatingGood ExperianRating = iota
-	ExperianRatingBad
-)
-
-// ExperianRatingAll holds all labels for ExperianRating.
-var ExperianRatingAll = [...]ExperianRating{ExperianRatingGood, ExperianRatingBad}
-
-// ExperianRatingFromString creates a ExperianRating from a string label.
-func ExperianRatingFromString(label string) (x ExperianRating, err error) {
-	err = x.Set(label)
-	return
-}
-
-// Set assigns label to x.
-func (x *ExperianRating) Set(label string) error {
-	switch label {
-	case "Good", "good":
-		*x = ExperianRatingGood
-		return nil
-	case "Bad", "bad":
-		*x = ExperianRatingBad
-		return nil
-	}
-	*x = -1
-	return fmt.Errorf("unknown label %q in internal.ExperianRating", label)
-}
-
-// String returns the string label of x.
-func (x ExperianRating) String() string {
-	switch x {
-	case ExperianRatingGood:
-		return "Good"
-	case ExperianRatingBad:
-		return "Bad"
-	}
-	return ""
-}
-
-func (ExperianRating) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.ExperianRating"`
-	Enum struct{ Good, Bad string }
-}) {
-}
-
-func (m *ExperianRating) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ExperianRating) MakeVDLTarget() vdl.Target {
-	return &ExperianRatingTarget{Value: m}
-}
-
-type ExperianRatingTarget struct {
-	Value *ExperianRating
-	vdl.TargetBase
-}
-
-func (t *ExperianRatingTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*ExperianRating)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Good":
-		*t.Value = 0
-	case "Bad":
-		*t.Value = 1
-	default:
-		return fmt.Errorf("label %s not in enum ExperianRating", src)
-	}
-
-	return nil
-}
-
-func (x ExperianRating) VDLIsZero() bool {
-	return x == ExperianRatingGood
-}
-
-func (x ExperianRating) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*ExperianRating)(nil))); err != nil {
-		return err
-	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *ExperianRating) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
-}
-
-type EquifaxCreditReport struct {
-	Rating byte
-}
-
-func (EquifaxCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.EquifaxCreditReport"`
-}) {
-}
-
-func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Rating == byte(0))
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Rating"); err != nil && err != vdl.ErrFieldNoExist {
+	var16 := (m.F5 == int32(0))
+	if var16 {
+		if err := fieldsTarget1.ZeroField("F5"); err != nil && err != vdl.ErrFieldNoExist {
 			return err
 		}
 	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
+		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("F5")
 		if err != vdl.ErrFieldNoExist {
 			if err != nil {
 				return err
 			}
-			if err := fieldTarget3.FromUint(uint64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
+			if err := fieldTarget15.FromInt(int64(m.F5), tt.NonOptional().Field(4).Type); err != nil {
 				return err
 			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
+			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
+				return err
+			}
+		}
+	}
+	var19 := (m.F6 == int32(0))
+	if var19 {
+		if err := fieldsTarget1.ZeroField("F6"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget17, fieldTarget18, err := fieldsTarget1.StartField("F6")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget18.FromInt(int64(m.F6), tt.NonOptional().Field(5).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget17, fieldTarget18); err != nil {
+				return err
+			}
+		}
+	}
+	var22 := (m.F7 == int32(0))
+	if var22 {
+		if err := fieldsTarget1.ZeroField("F7"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget20, fieldTarget21, err := fieldsTarget1.StartField("F7")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget21.FromInt(int64(m.F7), tt.NonOptional().Field(6).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget20, fieldTarget21); err != nil {
+				return err
+			}
+		}
+	}
+	var25 := (m.F8 == int32(0))
+	if var25 {
+		if err := fieldsTarget1.ZeroField("F8"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget23, fieldTarget24, err := fieldsTarget1.StartField("F8")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget24.FromInt(int64(m.F8), tt.NonOptional().Field(7).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget23, fieldTarget24); err != nil {
+				return err
+			}
+		}
+	}
+	var28 := (m.F9 == int32(0))
+	if var28 {
+		if err := fieldsTarget1.ZeroField("F9"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget26, fieldTarget27, err := fieldsTarget1.StartField("F9")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget27.FromInt(int64(m.F9), tt.NonOptional().Field(8).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget26, fieldTarget27); err != nil {
+				return err
+			}
+		}
+	}
+	var31 := (m.F10 == int32(0))
+	if var31 {
+		if err := fieldsTarget1.ZeroField("F10"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget29, fieldTarget30, err := fieldsTarget1.StartField("F10")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget30.FromInt(int64(m.F10), tt.NonOptional().Field(9).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget29, fieldTarget30); err != nil {
+				return err
+			}
+		}
+	}
+	var34 := (m.F11 == int32(0))
+	if var34 {
+		if err := fieldsTarget1.ZeroField("F11"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget32, fieldTarget33, err := fieldsTarget1.StartField("F11")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget33.FromInt(int64(m.F11), tt.NonOptional().Field(10).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget32, fieldTarget33); err != nil {
+				return err
+			}
+		}
+	}
+	var37 := (m.F12 == int32(0))
+	if var37 {
+		if err := fieldsTarget1.ZeroField("F12"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget35, fieldTarget36, err := fieldsTarget1.StartField("F12")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget36.FromInt(int64(m.F12), tt.NonOptional().Field(11).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget35, fieldTarget36); err != nil {
+				return err
+			}
+		}
+	}
+	var40 := (m.F13 == int32(0))
+	if var40 {
+		if err := fieldsTarget1.ZeroField("F13"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget38, fieldTarget39, err := fieldsTarget1.StartField("F13")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget39.FromInt(int64(m.F13), tt.NonOptional().Field(12).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget38, fieldTarget39); err != nil {
+				return err
+			}
+		}
+	}
+	var43 := (m.F14 == int32(0))
+	if var43 {
+		if err := fieldsTarget1.ZeroField("F14"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget41, fieldTarget42, err := fieldsTarget1.StartField("F14")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget42.FromInt(int64(m.F14), tt.NonOptional().Field(13).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget41, fieldTarget42); err != nil {
+				return err
+			}
+		}
+	}
+	var46 := (m.F15 == int32(0))
+	if var46 {
+		if err := fieldsTarget1.ZeroField("F15"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget44, fieldTarget45, err := fieldsTarget1.StartField("F15")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget45.FromInt(int64(m.F15), tt.NonOptional().Field(14).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget44, fieldTarget45); err != nil {
+				return err
+			}
+		}
+	}
+	var49 := (m.F16 == int32(0))
+	if var49 {
+		if err := fieldsTarget1.ZeroField("F16"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget47, fieldTarget48, err := fieldsTarget1.StartField("F16")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget48.FromInt(int64(m.F16), tt.NonOptional().Field(15).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget47, fieldTarget48); err != nil {
+				return err
+			}
+		}
+	}
+	var52 := (m.F17 == int32(0))
+	if var52 {
+		if err := fieldsTarget1.ZeroField("F17"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget50, fieldTarget51, err := fieldsTarget1.StartField("F17")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget51.FromInt(int64(m.F17), tt.NonOptional().Field(16).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget50, fieldTarget51); err != nil {
+				return err
+			}
+		}
+	}
+	var55 := (m.F18 == int32(0))
+	if var55 {
+		if err := fieldsTarget1.ZeroField("F18"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget53, fieldTarget54, err := fieldsTarget1.StartField("F18")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget54.FromInt(int64(m.F18), tt.NonOptional().Field(17).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget53, fieldTarget54); err != nil {
+				return err
+			}
+		}
+	}
+	var58 := (m.F19 == int32(0))
+	if var58 {
+		if err := fieldsTarget1.ZeroField("F19"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget56, fieldTarget57, err := fieldsTarget1.StartField("F19")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget57.FromInt(int64(m.F19), tt.NonOptional().Field(18).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget56, fieldTarget57); err != nil {
+				return err
+			}
+		}
+	}
+	var61 := (m.F20 == int32(0))
+	if var61 {
+		if err := fieldsTarget1.ZeroField("F20"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget59, fieldTarget60, err := fieldsTarget1.StartField("F20")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget60.FromInt(int64(m.F20), tt.NonOptional().Field(19).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget59, fieldTarget60); err != nil {
+				return err
+			}
+		}
+	}
+	var64 := (m.F21 == int32(0))
+	if var64 {
+		if err := fieldsTarget1.ZeroField("F21"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget62, fieldTarget63, err := fieldsTarget1.StartField("F21")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget63.FromInt(int64(m.F21), tt.NonOptional().Field(20).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget62, fieldTarget63); err != nil {
+				return err
+			}
+		}
+	}
+	var67 := (m.F22 == int32(0))
+	if var67 {
+		if err := fieldsTarget1.ZeroField("F22"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget65, fieldTarget66, err := fieldsTarget1.StartField("F22")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget66.FromInt(int64(m.F22), tt.NonOptional().Field(21).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget65, fieldTarget66); err != nil {
+				return err
+			}
+		}
+	}
+	var70 := (m.F23 == int32(0))
+	if var70 {
+		if err := fieldsTarget1.ZeroField("F23"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget68, fieldTarget69, err := fieldsTarget1.StartField("F23")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget69.FromInt(int64(m.F23), tt.NonOptional().Field(22).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget68, fieldTarget69); err != nil {
+				return err
+			}
+		}
+	}
+	var73 := (m.F24 == int32(0))
+	if var73 {
+		if err := fieldsTarget1.ZeroField("F24"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget71, fieldTarget72, err := fieldsTarget1.StartField("F24")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget72.FromInt(int64(m.F24), tt.NonOptional().Field(23).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget71, fieldTarget72); err != nil {
+				return err
+			}
+		}
+	}
+	var76 := (m.F25 == int32(0))
+	if var76 {
+		if err := fieldsTarget1.ZeroField("F25"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget74, fieldTarget75, err := fieldsTarget1.StartField("F25")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget75.FromInt(int64(m.F25), tt.NonOptional().Field(24).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget74, fieldTarget75); err != nil {
+				return err
+			}
+		}
+	}
+	var79 := (m.F26 == int32(0))
+	if var79 {
+		if err := fieldsTarget1.ZeroField("F26"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget77, fieldTarget78, err := fieldsTarget1.StartField("F26")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget78.FromInt(int64(m.F26), tt.NonOptional().Field(25).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget77, fieldTarget78); err != nil {
+				return err
+			}
+		}
+	}
+	var82 := (m.F27 == int32(0))
+	if var82 {
+		if err := fieldsTarget1.ZeroField("F27"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget80, fieldTarget81, err := fieldsTarget1.StartField("F27")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget81.FromInt(int64(m.F27), tt.NonOptional().Field(26).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget80, fieldTarget81); err != nil {
+				return err
+			}
+		}
+	}
+	var85 := (m.F28 == int32(0))
+	if var85 {
+		if err := fieldsTarget1.ZeroField("F28"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget83, fieldTarget84, err := fieldsTarget1.StartField("F28")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget84.FromInt(int64(m.F28), tt.NonOptional().Field(27).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget83, fieldTarget84); err != nil {
+				return err
+			}
+		}
+	}
+	var88 := (m.F29 == int32(0))
+	if var88 {
+		if err := fieldsTarget1.ZeroField("F29"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget86, fieldTarget87, err := fieldsTarget1.StartField("F29")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget87.FromInt(int64(m.F29), tt.NonOptional().Field(28).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget86, fieldTarget87); err != nil {
+				return err
+			}
+		}
+	}
+	var91 := (m.F30 == int32(0))
+	if var91 {
+		if err := fieldsTarget1.ZeroField("F30"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget89, fieldTarget90, err := fieldsTarget1.StartField("F30")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget90.FromInt(int64(m.F30), tt.NonOptional().Field(29).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget89, fieldTarget90); err != nil {
+				return err
+			}
+		}
+	}
+	var94 := (m.F31 == int32(0))
+	if var94 {
+		if err := fieldsTarget1.ZeroField("F31"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget92, fieldTarget93, err := fieldsTarget1.StartField("F31")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget93.FromInt(int64(m.F31), tt.NonOptional().Field(30).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget92, fieldTarget93); err != nil {
+				return err
+			}
+		}
+	}
+	var97 := (m.F32 == int32(0))
+	if var97 {
+		if err := fieldsTarget1.ZeroField("F32"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget95, fieldTarget96, err := fieldsTarget1.StartField("F32")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget96.FromInt(int64(m.F32), tt.NonOptional().Field(31).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget95, fieldTarget96); err != nil {
+				return err
+			}
+		}
+	}
+	var100 := (m.F33 == int32(0))
+	if var100 {
+		if err := fieldsTarget1.ZeroField("F33"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget98, fieldTarget99, err := fieldsTarget1.StartField("F33")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget99.FromInt(int64(m.F33), tt.NonOptional().Field(32).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget98, fieldTarget99); err != nil {
+				return err
+			}
+		}
+	}
+	var103 := (m.F34 == int32(0))
+	if var103 {
+		if err := fieldsTarget1.ZeroField("F34"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget101, fieldTarget102, err := fieldsTarget1.StartField("F34")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget102.FromInt(int64(m.F34), tt.NonOptional().Field(33).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget101, fieldTarget102); err != nil {
+				return err
+			}
+		}
+	}
+	var106 := (m.F35 == int32(0))
+	if var106 {
+		if err := fieldsTarget1.ZeroField("F35"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget104, fieldTarget105, err := fieldsTarget1.StartField("F35")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget105.FromInt(int64(m.F35), tt.NonOptional().Field(34).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget104, fieldTarget105); err != nil {
+				return err
+			}
+		}
+	}
+	var109 := (m.F36 == int32(0))
+	if var109 {
+		if err := fieldsTarget1.ZeroField("F36"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget107, fieldTarget108, err := fieldsTarget1.StartField("F36")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget108.FromInt(int64(m.F36), tt.NonOptional().Field(35).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget107, fieldTarget108); err != nil {
+				return err
+			}
+		}
+	}
+	var112 := (m.F37 == int32(0))
+	if var112 {
+		if err := fieldsTarget1.ZeroField("F37"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget110, fieldTarget111, err := fieldsTarget1.StartField("F37")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget111.FromInt(int64(m.F37), tt.NonOptional().Field(36).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget110, fieldTarget111); err != nil {
+				return err
+			}
+		}
+	}
+	var115 := (m.F38 == int32(0))
+	if var115 {
+		if err := fieldsTarget1.ZeroField("F38"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget113, fieldTarget114, err := fieldsTarget1.StartField("F38")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget114.FromInt(int64(m.F38), tt.NonOptional().Field(37).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget113, fieldTarget114); err != nil {
+				return err
+			}
+		}
+	}
+	var118 := (m.F39 == int32(0))
+	if var118 {
+		if err := fieldsTarget1.ZeroField("F39"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget116, fieldTarget117, err := fieldsTarget1.StartField("F39")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget117.FromInt(int64(m.F39), tt.NonOptional().Field(38).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget116, fieldTarget117); err != nil {
+				return err
+			}
+		}
+	}
+	var121 := (m.F40 == int32(0))
+	if var121 {
+		if err := fieldsTarget1.ZeroField("F40"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget119, fieldTarget120, err := fieldsTarget1.StartField("F40")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget120.FromInt(int64(m.F40), tt.NonOptional().Field(39).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget119, fieldTarget120); err != nil {
+				return err
+			}
+		}
+	}
+	var124 := (m.F41 == int32(0))
+	if var124 {
+		if err := fieldsTarget1.ZeroField("F41"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget122, fieldTarget123, err := fieldsTarget1.StartField("F41")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget123.FromInt(int64(m.F41), tt.NonOptional().Field(40).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget122, fieldTarget123); err != nil {
+				return err
+			}
+		}
+	}
+	var127 := (m.F42 == int32(0))
+	if var127 {
+		if err := fieldsTarget1.ZeroField("F42"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget125, fieldTarget126, err := fieldsTarget1.StartField("F42")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget126.FromInt(int64(m.F42), tt.NonOptional().Field(41).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget125, fieldTarget126); err != nil {
+				return err
+			}
+		}
+	}
+	var130 := (m.F43 == int32(0))
+	if var130 {
+		if err := fieldsTarget1.ZeroField("F43"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget128, fieldTarget129, err := fieldsTarget1.StartField("F43")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget129.FromInt(int64(m.F43), tt.NonOptional().Field(42).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget128, fieldTarget129); err != nil {
+				return err
+			}
+		}
+	}
+	var133 := (m.F44 == int32(0))
+	if var133 {
+		if err := fieldsTarget1.ZeroField("F44"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget131, fieldTarget132, err := fieldsTarget1.StartField("F44")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget132.FromInt(int64(m.F44), tt.NonOptional().Field(43).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget131, fieldTarget132); err != nil {
+				return err
+			}
+		}
+	}
+	var136 := (m.F45 == int32(0))
+	if var136 {
+		if err := fieldsTarget1.ZeroField("F45"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget134, fieldTarget135, err := fieldsTarget1.StartField("F45")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget135.FromInt(int64(m.F45), tt.NonOptional().Field(44).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget134, fieldTarget135); err != nil {
+				return err
+			}
+		}
+	}
+	var139 := (m.F46 == int32(0))
+	if var139 {
+		if err := fieldsTarget1.ZeroField("F46"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget137, fieldTarget138, err := fieldsTarget1.StartField("F46")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget138.FromInt(int64(m.F46), tt.NonOptional().Field(45).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget137, fieldTarget138); err != nil {
+				return err
+			}
+		}
+	}
+	var142 := (m.F47 == int32(0))
+	if var142 {
+		if err := fieldsTarget1.ZeroField("F47"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget140, fieldTarget141, err := fieldsTarget1.StartField("F47")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget141.FromInt(int64(m.F47), tt.NonOptional().Field(46).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget140, fieldTarget141); err != nil {
+				return err
+			}
+		}
+	}
+	var145 := (m.F48 == int32(0))
+	if var145 {
+		if err := fieldsTarget1.ZeroField("F48"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget143, fieldTarget144, err := fieldsTarget1.StartField("F48")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget144.FromInt(int64(m.F48), tt.NonOptional().Field(47).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget143, fieldTarget144); err != nil {
+				return err
+			}
+		}
+	}
+	var148 := (m.F49 == int32(0))
+	if var148 {
+		if err := fieldsTarget1.ZeroField("F49"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget146, fieldTarget147, err := fieldsTarget1.StartField("F49")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget147.FromInt(int64(m.F49), tt.NonOptional().Field(48).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget146, fieldTarget147); err != nil {
+				return err
+			}
+		}
+	}
+	var151 := (m.F50 == int32(0))
+	if var151 {
+		if err := fieldsTarget1.ZeroField("F50"); err != nil && err != vdl.ErrFieldNoExist {
+			return err
+		}
+	} else {
+		keyTarget149, fieldTarget150, err := fieldsTarget1.StartField("F50")
+		if err != vdl.ErrFieldNoExist {
+			if err != nil {
+				return err
+			}
+			if err := fieldTarget150.FromInt(int64(m.F50), tt.NonOptional().Field(49).Type); err != nil {
+				return err
+			}
+			if err := fieldsTarget1.FinishField(keyTarget149, fieldTarget150); err != nil {
 				return err
 			}
 		}
@@ -586,67 +2366,1145 @@ func (m *EquifaxCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	return nil
 }
 
-func (m *EquifaxCreditReport) MakeVDLTarget() vdl.Target {
-	return &EquifaxCreditReportTarget{Value: m}
+func (m *VLargeStruct) MakeVDLTarget() vdl.Target {
+	return &VLargeStructTarget{Value: m}
 }
 
-type EquifaxCreditReportTarget struct {
-	Value        *EquifaxCreditReport
-	ratingTarget vdl.ByteTarget
+type VLargeStructTarget struct {
+	Value     *VLargeStruct
+	f1Target  vdl.Int32Target
+	f2Target  vdl.Int32Target
+	f3Target  vdl.Int32Target
+	f4Target  vdl.Int32Target
+	f5Target  vdl.Int32Target
+	f6Target  vdl.Int32Target
+	f7Target  vdl.Int32Target
+	f8Target  vdl.Int32Target
+	f9Target  vdl.Int32Target
+	f10Target vdl.Int32Target
+	f11Target vdl.Int32Target
+	f12Target vdl.Int32Target
+	f13Target vdl.Int32Target
+	f14Target vdl.Int32Target
+	f15Target vdl.Int32Target
+	f16Target vdl.Int32Target
+	f17Target vdl.Int32Target
+	f18Target vdl.Int32Target
+	f19Target vdl.Int32Target
+	f20Target vdl.Int32Target
+	f21Target vdl.Int32Target
+	f22Target vdl.Int32Target
+	f23Target vdl.Int32Target
+	f24Target vdl.Int32Target
+	f25Target vdl.Int32Target
+	f26Target vdl.Int32Target
+	f27Target vdl.Int32Target
+	f28Target vdl.Int32Target
+	f29Target vdl.Int32Target
+	f30Target vdl.Int32Target
+	f31Target vdl.Int32Target
+	f32Target vdl.Int32Target
+	f33Target vdl.Int32Target
+	f34Target vdl.Int32Target
+	f35Target vdl.Int32Target
+	f36Target vdl.Int32Target
+	f37Target vdl.Int32Target
+	f38Target vdl.Int32Target
+	f39Target vdl.Int32Target
+	f40Target vdl.Int32Target
+	f41Target vdl.Int32Target
+	f42Target vdl.Int32Target
+	f43Target vdl.Int32Target
+	f44Target vdl.Int32Target
+	f45Target vdl.Int32Target
+	f46Target vdl.Int32Target
+	f47Target vdl.Int32Target
+	f48Target vdl.Int32Target
+	f49Target vdl.Int32Target
+	f50Target vdl.Int32Target
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *EquifaxCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+func (t *VLargeStructTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 
-	if ttWant := vdl.TypeOf((*EquifaxCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
+	if ttWant := vdl.TypeOf((*VLargeStruct)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 	return t, nil
 }
-func (t *EquifaxCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+func (t *VLargeStructTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	switch name {
-	case "Rating":
-		t.ratingTarget.Value = &t.Value.Rating
-		target, err := &t.ratingTarget, error(nil)
+	case "F1":
+		t.f1Target.Value = &t.Value.F1
+		target, err := &t.f1Target, error(nil)
+		return nil, target, err
+	case "F2":
+		t.f2Target.Value = &t.Value.F2
+		target, err := &t.f2Target, error(nil)
+		return nil, target, err
+	case "F3":
+		t.f3Target.Value = &t.Value.F3
+		target, err := &t.f3Target, error(nil)
+		return nil, target, err
+	case "F4":
+		t.f4Target.Value = &t.Value.F4
+		target, err := &t.f4Target, error(nil)
+		return nil, target, err
+	case "F5":
+		t.f5Target.Value = &t.Value.F5
+		target, err := &t.f5Target, error(nil)
+		return nil, target, err
+	case "F6":
+		t.f6Target.Value = &t.Value.F6
+		target, err := &t.f6Target, error(nil)
+		return nil, target, err
+	case "F7":
+		t.f7Target.Value = &t.Value.F7
+		target, err := &t.f7Target, error(nil)
+		return nil, target, err
+	case "F8":
+		t.f8Target.Value = &t.Value.F8
+		target, err := &t.f8Target, error(nil)
+		return nil, target, err
+	case "F9":
+		t.f9Target.Value = &t.Value.F9
+		target, err := &t.f9Target, error(nil)
+		return nil, target, err
+	case "F10":
+		t.f10Target.Value = &t.Value.F10
+		target, err := &t.f10Target, error(nil)
+		return nil, target, err
+	case "F11":
+		t.f11Target.Value = &t.Value.F11
+		target, err := &t.f11Target, error(nil)
+		return nil, target, err
+	case "F12":
+		t.f12Target.Value = &t.Value.F12
+		target, err := &t.f12Target, error(nil)
+		return nil, target, err
+	case "F13":
+		t.f13Target.Value = &t.Value.F13
+		target, err := &t.f13Target, error(nil)
+		return nil, target, err
+	case "F14":
+		t.f14Target.Value = &t.Value.F14
+		target, err := &t.f14Target, error(nil)
+		return nil, target, err
+	case "F15":
+		t.f15Target.Value = &t.Value.F15
+		target, err := &t.f15Target, error(nil)
+		return nil, target, err
+	case "F16":
+		t.f16Target.Value = &t.Value.F16
+		target, err := &t.f16Target, error(nil)
+		return nil, target, err
+	case "F17":
+		t.f17Target.Value = &t.Value.F17
+		target, err := &t.f17Target, error(nil)
+		return nil, target, err
+	case "F18":
+		t.f18Target.Value = &t.Value.F18
+		target, err := &t.f18Target, error(nil)
+		return nil, target, err
+	case "F19":
+		t.f19Target.Value = &t.Value.F19
+		target, err := &t.f19Target, error(nil)
+		return nil, target, err
+	case "F20":
+		t.f20Target.Value = &t.Value.F20
+		target, err := &t.f20Target, error(nil)
+		return nil, target, err
+	case "F21":
+		t.f21Target.Value = &t.Value.F21
+		target, err := &t.f21Target, error(nil)
+		return nil, target, err
+	case "F22":
+		t.f22Target.Value = &t.Value.F22
+		target, err := &t.f22Target, error(nil)
+		return nil, target, err
+	case "F23":
+		t.f23Target.Value = &t.Value.F23
+		target, err := &t.f23Target, error(nil)
+		return nil, target, err
+	case "F24":
+		t.f24Target.Value = &t.Value.F24
+		target, err := &t.f24Target, error(nil)
+		return nil, target, err
+	case "F25":
+		t.f25Target.Value = &t.Value.F25
+		target, err := &t.f25Target, error(nil)
+		return nil, target, err
+	case "F26":
+		t.f26Target.Value = &t.Value.F26
+		target, err := &t.f26Target, error(nil)
+		return nil, target, err
+	case "F27":
+		t.f27Target.Value = &t.Value.F27
+		target, err := &t.f27Target, error(nil)
+		return nil, target, err
+	case "F28":
+		t.f28Target.Value = &t.Value.F28
+		target, err := &t.f28Target, error(nil)
+		return nil, target, err
+	case "F29":
+		t.f29Target.Value = &t.Value.F29
+		target, err := &t.f29Target, error(nil)
+		return nil, target, err
+	case "F30":
+		t.f30Target.Value = &t.Value.F30
+		target, err := &t.f30Target, error(nil)
+		return nil, target, err
+	case "F31":
+		t.f31Target.Value = &t.Value.F31
+		target, err := &t.f31Target, error(nil)
+		return nil, target, err
+	case "F32":
+		t.f32Target.Value = &t.Value.F32
+		target, err := &t.f32Target, error(nil)
+		return nil, target, err
+	case "F33":
+		t.f33Target.Value = &t.Value.F33
+		target, err := &t.f33Target, error(nil)
+		return nil, target, err
+	case "F34":
+		t.f34Target.Value = &t.Value.F34
+		target, err := &t.f34Target, error(nil)
+		return nil, target, err
+	case "F35":
+		t.f35Target.Value = &t.Value.F35
+		target, err := &t.f35Target, error(nil)
+		return nil, target, err
+	case "F36":
+		t.f36Target.Value = &t.Value.F36
+		target, err := &t.f36Target, error(nil)
+		return nil, target, err
+	case "F37":
+		t.f37Target.Value = &t.Value.F37
+		target, err := &t.f37Target, error(nil)
+		return nil, target, err
+	case "F38":
+		t.f38Target.Value = &t.Value.F38
+		target, err := &t.f38Target, error(nil)
+		return nil, target, err
+	case "F39":
+		t.f39Target.Value = &t.Value.F39
+		target, err := &t.f39Target, error(nil)
+		return nil, target, err
+	case "F40":
+		t.f40Target.Value = &t.Value.F40
+		target, err := &t.f40Target, error(nil)
+		return nil, target, err
+	case "F41":
+		t.f41Target.Value = &t.Value.F41
+		target, err := &t.f41Target, error(nil)
+		return nil, target, err
+	case "F42":
+		t.f42Target.Value = &t.Value.F42
+		target, err := &t.f42Target, error(nil)
+		return nil, target, err
+	case "F43":
+		t.f43Target.Value = &t.Value.F43
+		target, err := &t.f43Target, error(nil)
+		return nil, target, err
+	case "F44":
+		t.f44Target.Value = &t.Value.F44
+		target, err := &t.f44Target, error(nil)
+		return nil, target, err
+	case "F45":
+		t.f45Target.Value = &t.Value.F45
+		target, err := &t.f45Target, error(nil)
+		return nil, target, err
+	case "F46":
+		t.f46Target.Value = &t.Value.F46
+		target, err := &t.f46Target, error(nil)
+		return nil, target, err
+	case "F47":
+		t.f47Target.Value = &t.Value.F47
+		target, err := &t.f47Target, error(nil)
+		return nil, target, err
+	case "F48":
+		t.f48Target.Value = &t.Value.F48
+		target, err := &t.f48Target, error(nil)
+		return nil, target, err
+	case "F49":
+		t.f49Target.Value = &t.Value.F49
+		target, err := &t.f49Target, error(nil)
+		return nil, target, err
+	case "F50":
+		t.f50Target.Value = &t.Value.F50
+		target, err := &t.f50Target, error(nil)
 		return nil, target, err
 	default:
 		return nil, nil, vdl.ErrFieldNoExist
 	}
 }
-func (t *EquifaxCreditReportTarget) FinishField(_, _ vdl.Target) error {
+func (t *VLargeStructTarget) FinishField(_, _ vdl.Target) error {
 	return nil
 }
-func (t *EquifaxCreditReportTarget) ZeroField(name string) error {
+func (t *VLargeStructTarget) ZeroField(name string) error {
 	switch name {
-	case "Rating":
-		t.Value.Rating = byte(0)
+	case "F1":
+		t.Value.F1 = int32(0)
+		return nil
+	case "F2":
+		t.Value.F2 = int32(0)
+		return nil
+	case "F3":
+		t.Value.F3 = int32(0)
+		return nil
+	case "F4":
+		t.Value.F4 = int32(0)
+		return nil
+	case "F5":
+		t.Value.F5 = int32(0)
+		return nil
+	case "F6":
+		t.Value.F6 = int32(0)
+		return nil
+	case "F7":
+		t.Value.F7 = int32(0)
+		return nil
+	case "F8":
+		t.Value.F8 = int32(0)
+		return nil
+	case "F9":
+		t.Value.F9 = int32(0)
+		return nil
+	case "F10":
+		t.Value.F10 = int32(0)
+		return nil
+	case "F11":
+		t.Value.F11 = int32(0)
+		return nil
+	case "F12":
+		t.Value.F12 = int32(0)
+		return nil
+	case "F13":
+		t.Value.F13 = int32(0)
+		return nil
+	case "F14":
+		t.Value.F14 = int32(0)
+		return nil
+	case "F15":
+		t.Value.F15 = int32(0)
+		return nil
+	case "F16":
+		t.Value.F16 = int32(0)
+		return nil
+	case "F17":
+		t.Value.F17 = int32(0)
+		return nil
+	case "F18":
+		t.Value.F18 = int32(0)
+		return nil
+	case "F19":
+		t.Value.F19 = int32(0)
+		return nil
+	case "F20":
+		t.Value.F20 = int32(0)
+		return nil
+	case "F21":
+		t.Value.F21 = int32(0)
+		return nil
+	case "F22":
+		t.Value.F22 = int32(0)
+		return nil
+	case "F23":
+		t.Value.F23 = int32(0)
+		return nil
+	case "F24":
+		t.Value.F24 = int32(0)
+		return nil
+	case "F25":
+		t.Value.F25 = int32(0)
+		return nil
+	case "F26":
+		t.Value.F26 = int32(0)
+		return nil
+	case "F27":
+		t.Value.F27 = int32(0)
+		return nil
+	case "F28":
+		t.Value.F28 = int32(0)
+		return nil
+	case "F29":
+		t.Value.F29 = int32(0)
+		return nil
+	case "F30":
+		t.Value.F30 = int32(0)
+		return nil
+	case "F31":
+		t.Value.F31 = int32(0)
+		return nil
+	case "F32":
+		t.Value.F32 = int32(0)
+		return nil
+	case "F33":
+		t.Value.F33 = int32(0)
+		return nil
+	case "F34":
+		t.Value.F34 = int32(0)
+		return nil
+	case "F35":
+		t.Value.F35 = int32(0)
+		return nil
+	case "F36":
+		t.Value.F36 = int32(0)
+		return nil
+	case "F37":
+		t.Value.F37 = int32(0)
+		return nil
+	case "F38":
+		t.Value.F38 = int32(0)
+		return nil
+	case "F39":
+		t.Value.F39 = int32(0)
+		return nil
+	case "F40":
+		t.Value.F40 = int32(0)
+		return nil
+	case "F41":
+		t.Value.F41 = int32(0)
+		return nil
+	case "F42":
+		t.Value.F42 = int32(0)
+		return nil
+	case "F43":
+		t.Value.F43 = int32(0)
+		return nil
+	case "F44":
+		t.Value.F44 = int32(0)
+		return nil
+	case "F45":
+		t.Value.F45 = int32(0)
+		return nil
+	case "F46":
+		t.Value.F46 = int32(0)
+		return nil
+	case "F47":
+		t.Value.F47 = int32(0)
+		return nil
+	case "F48":
+		t.Value.F48 = int32(0)
+		return nil
+	case "F49":
+		t.Value.F49 = int32(0)
+		return nil
+	case "F50":
+		t.Value.F50 = int32(0)
 		return nil
 	default:
 		return vdl.ErrFieldNoExist
 	}
 }
-func (t *EquifaxCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+func (t *VLargeStructTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
 
-func (x EquifaxCreditReport) VDLIsZero() bool {
-	return x == EquifaxCreditReport{}
+func (x VLargeStruct) VDLIsZero() bool {
+	return x == VLargeStruct{}
 }
 
-func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*EquifaxCreditReport)(nil)).Elem()); err != nil {
+func (x VLargeStruct) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VLargeStruct)(nil)).Elem()); err != nil {
 		return err
 	}
-	if x.Rating != 0 {
-		if err := enc.NextField("Rating"); err != nil {
+	if x.F1 != 0 {
+		if err := enc.NextField("F1"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
 			return err
 		}
-		if err := enc.EncodeUint(uint64(x.Rating)); err != nil {
+		if err := enc.EncodeInt(int64(x.F1)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F2 != 0 {
+		if err := enc.NextField("F2"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F2)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F3 != 0 {
+		if err := enc.NextField("F3"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F3)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F4 != 0 {
+		if err := enc.NextField("F4"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F4)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F5 != 0 {
+		if err := enc.NextField("F5"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F5)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F6 != 0 {
+		if err := enc.NextField("F6"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F6)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F7 != 0 {
+		if err := enc.NextField("F7"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F7)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F8 != 0 {
+		if err := enc.NextField("F8"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F8)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F9 != 0 {
+		if err := enc.NextField("F9"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F9)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F10 != 0 {
+		if err := enc.NextField("F10"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F10)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F11 != 0 {
+		if err := enc.NextField("F11"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F11)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F12 != 0 {
+		if err := enc.NextField("F12"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F12)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F13 != 0 {
+		if err := enc.NextField("F13"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F13)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F14 != 0 {
+		if err := enc.NextField("F14"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F14)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F15 != 0 {
+		if err := enc.NextField("F15"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F15)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F16 != 0 {
+		if err := enc.NextField("F16"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F16)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F17 != 0 {
+		if err := enc.NextField("F17"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F17)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F18 != 0 {
+		if err := enc.NextField("F18"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F18)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F19 != 0 {
+		if err := enc.NextField("F19"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F19)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F20 != 0 {
+		if err := enc.NextField("F20"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F20)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F21 != 0 {
+		if err := enc.NextField("F21"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F21)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F22 != 0 {
+		if err := enc.NextField("F22"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F22)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F23 != 0 {
+		if err := enc.NextField("F23"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F23)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F24 != 0 {
+		if err := enc.NextField("F24"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F24)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F25 != 0 {
+		if err := enc.NextField("F25"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F25)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F26 != 0 {
+		if err := enc.NextField("F26"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F26)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F27 != 0 {
+		if err := enc.NextField("F27"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F27)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F28 != 0 {
+		if err := enc.NextField("F28"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F28)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F29 != 0 {
+		if err := enc.NextField("F29"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F29)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F30 != 0 {
+		if err := enc.NextField("F30"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F30)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F31 != 0 {
+		if err := enc.NextField("F31"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F31)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F32 != 0 {
+		if err := enc.NextField("F32"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F32)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F33 != 0 {
+		if err := enc.NextField("F33"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F33)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F34 != 0 {
+		if err := enc.NextField("F34"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F34)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F35 != 0 {
+		if err := enc.NextField("F35"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F35)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F36 != 0 {
+		if err := enc.NextField("F36"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F36)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F37 != 0 {
+		if err := enc.NextField("F37"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F37)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F38 != 0 {
+		if err := enc.NextField("F38"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F38)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F39 != 0 {
+		if err := enc.NextField("F39"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F39)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F40 != 0 {
+		if err := enc.NextField("F40"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F40)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F41 != 0 {
+		if err := enc.NextField("F41"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F41)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F42 != 0 {
+		if err := enc.NextField("F42"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F42)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F43 != 0 {
+		if err := enc.NextField("F43"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F43)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F44 != 0 {
+		if err := enc.NextField("F44"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F44)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F45 != 0 {
+		if err := enc.NextField("F45"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F45)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F46 != 0 {
+		if err := enc.NextField("F46"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F46)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F47 != 0 {
+		if err := enc.NextField("F47"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F47)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F48 != 0 {
+		if err := enc.NextField("F48"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F48)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F49 != 0 {
+		if err := enc.NextField("F49"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F49)); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.F50 != 0 {
+		if err := enc.NextField("F50"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.Int32Type); err != nil {
+			return err
+		}
+		if err := enc.EncodeInt(int64(x.F50)); err != nil {
 			return err
 		}
 		if err := enc.FinishValue(); err != nil {
@@ -659,8 +3517,8 @@ func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
-	*x = EquifaxCreditReport{}
+func (x *VLargeStruct) VDLRead(dec vdl.Decoder) error {
+	*x = VLargeStruct{}
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -675,298 +3533,603 @@ func (x *EquifaxCreditReport) VDLRead(dec vdl.Decoder) error {
 		switch f {
 		case "":
 			return dec.FinishValue()
-		case "Rating":
+		case "F1":
 			if err := dec.StartValue(); err != nil {
 				return err
 			}
-			tmp, err := dec.DecodeUint(8)
+			tmp, err := dec.DecodeInt(32)
 			if err != nil {
 				return err
 			}
-			x.Rating = byte(tmp)
+			x.F1 = int32(tmp)
 			if err := dec.FinishValue(); err != nil {
 				return err
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-type ExperianCreditReport struct {
-	Rating ExperianRating
-}
-
-func (ExperianCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.ExperianCreditReport"`
-}) {
-}
-
-func (m *ExperianCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Rating == ExperianRatingGood)
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Rating"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.Rating.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ExperianCreditReport) MakeVDLTarget() vdl.Target {
-	return &ExperianCreditReportTarget{Value: m}
-}
-
-type ExperianCreditReportTarget struct {
-	Value        *ExperianCreditReport
-	ratingTarget ExperianRatingTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ExperianCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*ExperianCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *ExperianCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Rating":
-		t.ratingTarget.Value = &t.Value.Rating
-		target, err := &t.ratingTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *ExperianCreditReportTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *ExperianCreditReportTarget) ZeroField(name string) error {
-	switch name {
-	case "Rating":
-		t.Value.Rating = ExperianRatingGood
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *ExperianCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-func (x ExperianCreditReport) VDLIsZero() bool {
-	return x == ExperianCreditReport{}
-}
-
-func (x ExperianCreditReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*ExperianCreditReport)(nil)).Elem()); err != nil {
-		return err
-	}
-	if x.Rating != ExperianRatingGood {
-		if err := enc.NextField("Rating"); err != nil {
-			return err
-		}
-		if err := x.Rating.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *ExperianCreditReport) VDLRead(dec vdl.Decoder) error {
-	*x = ExperianCreditReport{}
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Rating":
-			if err := x.Rating.VDLRead(dec); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-type TransUnionCreditReport struct {
-	Rating int16
-}
-
-func (TransUnionCreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.TransUnionCreditReport"`
-}) {
-}
-
-func (m *TransUnionCreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Rating == int16(0))
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Rating"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Rating")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromInt(int64(m.Rating), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *TransUnionCreditReport) MakeVDLTarget() vdl.Target {
-	return &TransUnionCreditReportTarget{Value: m}
-}
-
-type TransUnionCreditReportTarget struct {
-	Value        *TransUnionCreditReport
-	ratingTarget vdl.Int16Target
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *TransUnionCreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*TransUnionCreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *TransUnionCreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Rating":
-		t.ratingTarget.Value = &t.Value.Rating
-		target, err := &t.ratingTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *TransUnionCreditReportTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *TransUnionCreditReportTarget) ZeroField(name string) error {
-	switch name {
-	case "Rating":
-		t.Value.Rating = int16(0)
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *TransUnionCreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-func (x TransUnionCreditReport) VDLIsZero() bool {
-	return x == TransUnionCreditReport{}
-}
-
-func (x TransUnionCreditReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*TransUnionCreditReport)(nil)).Elem()); err != nil {
-		return err
-	}
-	if x.Rating != 0 {
-		if err := enc.NextField("Rating"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Rating)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
-	*x = TransUnionCreditReport{}
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Rating":
+		case "F2":
 			if err := dec.StartValue(); err != nil {
 				return err
 			}
-			tmp, err := dec.DecodeInt(16)
+			tmp, err := dec.DecodeInt(32)
 			if err != nil {
 				return err
 			}
-			x.Rating = int16(tmp)
+			x.F2 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F3":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F3 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F4":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F4 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F5":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F5 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F6":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F6 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F7":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F7 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F8":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F8 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F9":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F9 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F10":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F10 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F11":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F11 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F12":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F12 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F13":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F13 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F14":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F14 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F15":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F15 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F16":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F16 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F17":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F17 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F18":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F18 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F19":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F19 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F20":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F20 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F21":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F21 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F22":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F22 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F23":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F23 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F24":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F24 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F25":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F25 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F26":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F26 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F27":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F27 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F28":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F28 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F29":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F29 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F30":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F30 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F31":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F31 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F32":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F32 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F33":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F33 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F34":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F34 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F35":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F35 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F36":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F36 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F37":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F37 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F38":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F38 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F39":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F39 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F40":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F40 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F41":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F41 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F42":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F42 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F43":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F43 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F44":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F44 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F45":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F45 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F46":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F46 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F47":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F47 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F48":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F48 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F49":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F49 = int32(tmp)
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "F50":
+			if err := dec.StartValue(); err != nil {
+				return err
+			}
+			tmp, err := dec.DecodeInt(32)
+			if err != nil {
+				return err
+			}
+			x.F50 = int32(tmp)
 			if err := dec.FinishValue(); err != nil {
 				return err
 			}
@@ -979,55 +4142,54 @@ func (x *TransUnionCreditReport) VDLRead(dec vdl.Decoder) error {
 }
 
 type (
-	// AgencyReport represents any single field of the AgencyReport union type.
-	AgencyReport interface {
+	// VSmallUnion represents any single field of the VSmallUnion union type.
+	VSmallUnion interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the AgencyReport union type.
-		__VDLReflect(__AgencyReportReflect)
+		// __VDLReflect describes the VSmallUnion union type.
+		__VDLReflect(__VSmallUnionReflect)
 		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
-	// AgencyReportEquifaxReport represents field EquifaxReport of the AgencyReport union type.
-	AgencyReportEquifaxReport struct{ Value EquifaxCreditReport }
-	// AgencyReportExperianReport represents field ExperianReport of the AgencyReport union type.
-	AgencyReportExperianReport struct{ Value ExperianCreditReport }
-	// AgencyReportTransUnionReport represents field TransUnionReport of the AgencyReport union type.
-	AgencyReportTransUnionReport struct{ Value TransUnionCreditReport }
-	// __AgencyReportReflect describes the AgencyReport union type.
-	__AgencyReportReflect struct {
-		Name               string `vdl:"v.io/v23/vom/internal.AgencyReport"`
-		Type               AgencyReport
-		UnionTargetFactory agencyReportTargetFactory
+	// VSmallUnionA represents field A of the VSmallUnion union type.
+	VSmallUnionA struct{ Value int32 }
+	// VSmallUnionB represents field B of the VSmallUnion union type.
+	VSmallUnionB struct{ Value string }
+	// VSmallUnionC represents field C of the VSmallUnion union type.
+	VSmallUnionC struct{ Value bool }
+	// __VSmallUnionReflect describes the VSmallUnion union type.
+	__VSmallUnionReflect struct {
+		Name               string `vdl:"v.io/v23/vom/internal.VSmallUnion"`
+		Type               VSmallUnion
+		UnionTargetFactory vSmallUnionTargetFactory
 		Union              struct {
-			EquifaxReport    AgencyReportEquifaxReport
-			ExperianReport   AgencyReportExperianReport
-			TransUnionReport AgencyReportTransUnionReport
+			A VSmallUnionA
+			B VSmallUnionB
+			C VSmallUnionC
 		}
 	}
 )
 
-func (x AgencyReportEquifaxReport) Index() int                         { return 0 }
-func (x AgencyReportEquifaxReport) Interface() interface{}             { return x.Value }
-func (x AgencyReportEquifaxReport) Name() string                       { return "EquifaxReport" }
-func (x AgencyReportEquifaxReport) __VDLReflect(__AgencyReportReflect) {}
+func (x VSmallUnionA) Index() int                        { return 0 }
+func (x VSmallUnionA) Interface() interface{}            { return x.Value }
+func (x VSmallUnionA) Name() string                      { return "A" }
+func (x VSmallUnionA) __VDLReflect(__VSmallUnionReflect) {}
 
-func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m VSmallUnionA) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("EquifaxReport")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("A")
 	if err != nil {
 		return err
 	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
+	if err := fieldTarget3.FromInt(int64(m.Value), tt.NonOptional().Field(0).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1040,26 +4202,25 @@ func (m AgencyReportEquifaxReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) err
 	return nil
 }
 
-func (m AgencyReportEquifaxReport) MakeVDLTarget() vdl.Target {
+func (m VSmallUnionA) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (x AgencyReportExperianReport) Index() int                         { return 1 }
-func (x AgencyReportExperianReport) Interface() interface{}             { return x.Value }
-func (x AgencyReportExperianReport) Name() string                       { return "ExperianReport" }
-func (x AgencyReportExperianReport) __VDLReflect(__AgencyReportReflect) {}
+func (x VSmallUnionB) Index() int                        { return 1 }
+func (x VSmallUnionB) Interface() interface{}            { return x.Value }
+func (x VSmallUnionB) Name() string                      { return "B" }
+func (x VSmallUnionB) __VDLReflect(__VSmallUnionReflect) {}
 
-func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m VSmallUnionB) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("ExperianReport")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("B")
 	if err != nil {
 		return err
 	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
+	if err := fieldTarget3.FromString(string(m.Value), tt.NonOptional().Field(1).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1072,26 +4233,25 @@ func (m AgencyReportExperianReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) er
 	return nil
 }
 
-func (m AgencyReportExperianReport) MakeVDLTarget() vdl.Target {
+func (m VSmallUnionB) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-func (x AgencyReportTransUnionReport) Index() int                         { return 2 }
-func (x AgencyReportTransUnionReport) Interface() interface{}             { return x.Value }
-func (x AgencyReportTransUnionReport) Name() string                       { return "TransUnionReport" }
-func (x AgencyReportTransUnionReport) __VDLReflect(__AgencyReportReflect) {}
+func (x VSmallUnionC) Index() int                        { return 2 }
+func (x VSmallUnionC) Interface() interface{}            { return x.Value }
+func (x VSmallUnionC) Name() string                      { return "C" }
+func (x VSmallUnionC) __VDLReflect(__VSmallUnionReflect) {}
 
-func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
+func (m VSmallUnionC) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
 	fieldsTarget1, err := t.StartFields(tt)
 	if err != nil {
 		return err
 	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("TransUnionReport")
+	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("C")
 	if err != nil {
 		return err
 	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(2).Type); err != nil {
+	if err := fieldTarget3.FromBool(bool(m.Value), tt.NonOptional().Field(2).Type); err != nil {
 		return err
 	}
 	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
@@ -1104,102 +4264,92 @@ func (m AgencyReportTransUnionReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) 
 	return nil
 }
 
-func (m AgencyReportTransUnionReport) MakeVDLTarget() vdl.Target {
+func (m VSmallUnionC) MakeVDLTarget() vdl.Target {
 	return nil
 }
 
-type AgencyReportTarget struct {
-	Value     *AgencyReport
+type VSmallUnionTarget struct {
+	Value     *VSmallUnion
 	fieldName string
 
 	vdl.TargetBase
 	vdl.FieldsTargetBase
 }
 
-func (t *AgencyReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*AgencyReport)(nil)); !vdl.Compatible(tt, ttWant) {
+func (t *VSmallUnionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
+	if ttWant := vdl.TypeOf((*VSmallUnion)(nil)); !vdl.Compatible(tt, ttWant) {
 		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
 	}
 
 	return t, nil
 }
-func (t *AgencyReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
+func (t *VSmallUnionTarget) StartField(name string) (key, field vdl.Target, _ error) {
 	t.fieldName = name
 	switch name {
-	case "EquifaxReport":
-		val := EquifaxCreditReport{}
-		return nil, &EquifaxCreditReportTarget{Value: &val}, nil
-	case "ExperianReport":
-		val := ExperianCreditReport{}
-		return nil, &ExperianCreditReportTarget{Value: &val}, nil
-	case "TransUnionReport":
-		val := TransUnionCreditReport{}
-		return nil, &TransUnionCreditReportTarget{Value: &val}, nil
+	case "A":
+		val := int32(0)
+		return nil, &vdl.Int32Target{Value: &val}, nil
+	case "B":
+		val := ""
+		return nil, &vdl.StringTarget{Value: &val}, nil
+	case "C":
+		val := false
+		return nil, &vdl.BoolTarget{Value: &val}, nil
 	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom/internal.AgencyReport", name)
+		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/vom/internal.VSmallUnion", name)
 	}
 }
-func (t *AgencyReportTarget) FinishField(_, fieldTarget vdl.Target) error {
+func (t *VSmallUnionTarget) FinishField(_, fieldTarget vdl.Target) error {
 	switch t.fieldName {
-	case "EquifaxReport":
-		*t.Value = AgencyReportEquifaxReport{*(fieldTarget.(*EquifaxCreditReportTarget)).Value}
-	case "ExperianReport":
-		*t.Value = AgencyReportExperianReport{*(fieldTarget.(*ExperianCreditReportTarget)).Value}
-	case "TransUnionReport":
-		*t.Value = AgencyReportTransUnionReport{*(fieldTarget.(*TransUnionCreditReportTarget)).Value}
+	case "A":
+		*t.Value = VSmallUnionA{*(fieldTarget.(*vdl.Int32Target)).Value}
+	case "B":
+		*t.Value = VSmallUnionB{*(fieldTarget.(*vdl.StringTarget)).Value}
+	case "C":
+		*t.Value = VSmallUnionC{*(fieldTarget.(*vdl.BoolTarget)).Value}
 	}
 	return nil
 }
-func (t *AgencyReportTarget) FinishFields(_ vdl.FieldsTarget) error {
+func (t *VSmallUnionTarget) FinishFields(_ vdl.FieldsTarget) error {
 
 	return nil
 }
 
-type agencyReportTargetFactory struct{}
+type vSmallUnionTargetFactory struct{}
 
-func (t agencyReportTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*AgencyReport); ok {
-		return &AgencyReportTarget{Value: typedUnion}, nil
+func (t vSmallUnionTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
+	if typedUnion, ok := union.(*VSmallUnion); ok {
+		return &VSmallUnionTarget{Value: typedUnion}, nil
 	}
-	return nil, fmt.Errorf("got %T, want *AgencyReport", union)
+	return nil, fmt.Errorf("got %T, want *VSmallUnion", union)
 }
 
-func (x AgencyReportEquifaxReport) VDLIsZero() bool {
-	return x.Value == EquifaxCreditReport{}
+func (x VSmallUnionA) VDLIsZero() bool {
+	return x.Value == 0
 }
 
-func (x AgencyReportExperianReport) VDLIsZero() bool {
+func (x VSmallUnionB) VDLIsZero() bool {
 	return false
 }
 
-func (x AgencyReportTransUnionReport) VDLIsZero() bool {
+func (x VSmallUnionC) VDLIsZero() bool {
 	return false
 }
 
-func (x AgencyReportEquifaxReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
+func (x VSmallUnionA) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSmallUnion)(nil))); err != nil {
 		return err
 	}
-	if err := enc.NextField("EquifaxReport"); err != nil {
+	if err := enc.NextField("A"); err != nil {
 		return err
 	}
-	if err := x.Value.VDLWrite(enc); err != nil {
+	if err := enc.StartValue(vdl.Int32Type); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.EncodeInt(int64(x.Value)); err != nil {
 		return err
 	}
-	return enc.FinishValue()
-}
-
-func (x AgencyReportExperianReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
-		return err
-	}
-	if err := enc.NextField("ExperianReport"); err != nil {
-		return err
-	}
-	if err := x.Value.VDLWrite(enc); err != nil {
+	if err := enc.FinishValue(); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -1208,14 +4358,20 @@ func (x AgencyReportExperianReport) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func (x AgencyReportTransUnionReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AgencyReport)(nil))); err != nil {
+func (x VSmallUnionB) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSmallUnion)(nil))); err != nil {
 		return err
 	}
-	if err := enc.NextField("TransUnionReport"); err != nil {
+	if err := enc.NextField("B"); err != nil {
 		return err
 	}
-	if err := x.Value.VDLWrite(enc); err != nil {
+	if err := enc.StartValue(vdl.StringType); err != nil {
+		return err
+	}
+	if err := enc.EncodeString(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -1224,7 +4380,29 @@ func (x AgencyReportTransUnionReport) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func VDLReadAgencyReport(dec vdl.Decoder, x *AgencyReport) error {
+func (x VSmallUnionC) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(vdl.TypeOf((*VSmallUnion)(nil))); err != nil {
+		return err
+	}
+	if err := enc.NextField("C"); err != nil {
+		return err
+	}
+	if err := enc.StartValue(vdl.BoolType); err != nil {
+		return err
+	}
+	if err := enc.EncodeBool(x.Value); err != nil {
+		return err
+	}
+	if err := enc.FinishValue(); err != nil {
+		return err
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 	if err := dec.StartValue(); err != nil {
 		return err
 	}
@@ -1236,21 +4414,43 @@ func VDLReadAgencyReport(dec vdl.Decoder, x *AgencyReport) error {
 		return err
 	}
 	switch f {
-	case "EquifaxReport":
-		var field AgencyReportEquifaxReport
-		if err := field.Value.VDLRead(dec); err != nil {
+	case "A":
+		var field VSmallUnionA
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		tmp, err := dec.DecodeInt(32)
+		if err != nil {
+			return err
+		}
+		field.Value = int32(tmp)
+		if err := dec.FinishValue(); err != nil {
 			return err
 		}
 		*x = field
-	case "ExperianReport":
-		var field AgencyReportExperianReport
-		if err := field.Value.VDLRead(dec); err != nil {
+	case "B":
+		var field VSmallUnionB
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeString(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
 			return err
 		}
 		*x = field
-	case "TransUnionReport":
-		var field AgencyReportTransUnionReport
-		if err := field.Value.VDLRead(dec); err != nil {
+	case "C":
+		var field VSmallUnionC
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		var err error
+		if field.Value, err = dec.DecodeBool(); err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
 			return err
 		}
 		*x = field
@@ -1266,557 +4466,6 @@ func VDLReadAgencyReport(dec vdl.Decoder, x *AgencyReport) error {
 		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
 	}
 	return dec.FinishValue()
-}
-
-type CreditReport struct {
-	Agency CreditAgency
-	Report AgencyReport
-}
-
-func (CreditReport) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.CreditReport"`
-}) {
-}
-
-func (m *CreditReport) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Agency == CreditAgencyEquifax)
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Agency"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Agency")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.Agency.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var var7 bool
-	if field, ok := m.Report.(AgencyReportEquifaxReport); ok {
-
-		var8 := (field.Value == EquifaxCreditReport{})
-		var7 = var8
-	}
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Report"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Report")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			unionValue9 := m.Report
-			if unionValue9 == nil {
-				unionValue9 = AgencyReportEquifaxReport{}
-			}
-			if err := unionValue9.FillVDLTarget(fieldTarget6, tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *CreditReport) MakeVDLTarget() vdl.Target {
-	return &CreditReportTarget{Value: m}
-}
-
-type CreditReportTarget struct {
-	Value        *CreditReport
-	agencyTarget CreditAgencyTarget
-	reportTarget AgencyReportTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *CreditReportTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*CreditReport)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *CreditReportTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Agency":
-		t.agencyTarget.Value = &t.Value.Agency
-		target, err := &t.agencyTarget, error(nil)
-		return nil, target, err
-	case "Report":
-		t.reportTarget.Value = &t.Value.Report
-		target, err := &t.reportTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *CreditReportTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *CreditReportTarget) ZeroField(name string) error {
-	switch name {
-	case "Agency":
-		t.Value.Agency = CreditAgencyEquifax
-		return nil
-	case "Report":
-		t.Value.Report = AgencyReport(AgencyReportEquifaxReport{})
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *CreditReportTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-func (x CreditReport) VDLIsZero() bool {
-	if x.Agency != CreditAgencyEquifax {
-		return false
-	}
-	if x.Report != nil && !x.Report.VDLIsZero() {
-		return false
-	}
-	return true
-}
-
-func (x CreditReport) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*CreditReport)(nil)).Elem()); err != nil {
-		return err
-	}
-	if x.Agency != CreditAgencyEquifax {
-		if err := enc.NextField("Agency"); err != nil {
-			return err
-		}
-		if err := x.Agency.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if x.Report != nil && !x.Report.VDLIsZero() {
-		if err := enc.NextField("Report"); err != nil {
-			return err
-		}
-		if err := x.Report.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *CreditReport) VDLRead(dec vdl.Decoder) error {
-	*x = CreditReport{
-		Report: AgencyReportEquifaxReport{},
-	}
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Agency":
-			if err := x.Agency.VDLRead(dec); err != nil {
-				return err
-			}
-		case "Report":
-			if err := VDLReadAgencyReport(dec, &x.Report); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-type Customer struct {
-	Name    string
-	Id      int64
-	Active  bool
-	Address AddressInfo
-	Credit  CreditReport
-}
-
-func (Customer) __VDLReflect(struct {
-	Name string `vdl:"v.io/v23/vom/internal.Customer"`
-}) {
-}
-
-func (m *Customer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Name == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.Id == int64(0))
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Id"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Id")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget6.FromInt(int64(m.Id), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	var10 := (m.Active == false)
-	if var10 {
-		if err := fieldsTarget1.ZeroField("Active"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget8, fieldTarget9, err := fieldsTarget1.StartField("Active")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget9.FromBool(bool(m.Active), tt.NonOptional().Field(2).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget8, fieldTarget9); err != nil {
-				return err
-			}
-		}
-	}
-	var13 := (m.Address == AddressInfo{})
-	if var13 {
-		if err := fieldsTarget1.ZeroField("Address"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("Address")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.Address.FillVDLTarget(fieldTarget12, tt.NonOptional().Field(3).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
-				return err
-			}
-		}
-	}
-	var16 := (m.Credit == CreditReport{
-		Report: AgencyReportEquifaxReport{},
-	})
-	if var16 {
-		if err := fieldsTarget1.ZeroField("Credit"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("Credit")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.Credit.FillVDLTarget(fieldTarget15, tt.NonOptional().Field(4).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Customer) MakeVDLTarget() vdl.Target {
-	return &CustomerTarget{Value: m}
-}
-
-type CustomerTarget struct {
-	Value         *Customer
-	nameTarget    vdl.StringTarget
-	idTarget      vdl.Int64Target
-	activeTarget  vdl.BoolTarget
-	addressTarget AddressInfoTarget
-	creditTarget  CreditReportTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *CustomerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*Customer)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *CustomerTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "Id":
-		t.idTarget.Value = &t.Value.Id
-		target, err := &t.idTarget, error(nil)
-		return nil, target, err
-	case "Active":
-		t.activeTarget.Value = &t.Value.Active
-		target, err := &t.activeTarget, error(nil)
-		return nil, target, err
-	case "Address":
-		t.addressTarget.Value = &t.Value.Address
-		target, err := &t.addressTarget, error(nil)
-		return nil, target, err
-	case "Credit":
-		t.creditTarget.Value = &t.Value.Credit
-		target, err := &t.creditTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *CustomerTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *CustomerTarget) ZeroField(name string) error {
-	switch name {
-	case "Name":
-		t.Value.Name = ""
-		return nil
-	case "Id":
-		t.Value.Id = int64(0)
-		return nil
-	case "Active":
-		t.Value.Active = false
-		return nil
-	case "Address":
-		t.Value.Address = AddressInfo{}
-		return nil
-	case "Credit":
-		t.Value.Credit = CreditReport{
-			Report: AgencyReportEquifaxReport{},
-		}
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *CustomerTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-func (x Customer) VDLIsZero() bool {
-	if x.Name != "" {
-		return false
-	}
-	if x.Id != 0 {
-		return false
-	}
-	if x.Active {
-		return false
-	}
-	if x.Address != (AddressInfo{}) {
-		return false
-	}
-	if !x.Credit.VDLIsZero() {
-		return false
-	}
-	return true
-}
-
-func (x Customer) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Customer)(nil)).Elem()); err != nil {
-		return err
-	}
-	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.Id != 0 {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Id); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.Active {
-		if err := enc.NextField("Active"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.Active); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-	}
-	if x.Address != (AddressInfo{}) {
-		if err := enc.NextField("Address"); err != nil {
-			return err
-		}
-		if err := x.Address.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if !x.Credit.VDLIsZero() {
-		if err := enc.NextField("Credit"); err != nil {
-			return err
-		}
-		if err := x.Credit.VDLWrite(enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.NextField(""); err != nil {
-		return err
-	}
-	return enc.FinishValue()
-}
-
-func (x *Customer) VDLRead(dec vdl.Decoder) error {
-	*x = Customer{
-		Credit: CreditReport{
-			Report: AgencyReportEquifaxReport{},
-		},
-	}
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
-	}
-	for {
-		f, err := dec.NextField()
-		if err != nil {
-			return err
-		}
-		switch f {
-		case "":
-			return dec.FinishValue()
-		case "Name":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Id":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.Id, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Active":
-			if err := dec.StartValue(); err != nil {
-				return err
-			}
-			var err error
-			if x.Active, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "Address":
-			if err := x.Address.VDLRead(dec); err != nil {
-				return err
-			}
-		case "Credit":
-			if err := x.Credit.VDLRead(dec); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
 }
 
 var __VDLInitCalled bool
@@ -1841,15 +4490,19 @@ func __VDLInit() struct{} {
 	__VDLInitCalled = true
 
 	// Register types.
-	vdl.Register((*AddressInfo)(nil))
-	vdl.Register((*CreditAgency)(nil))
-	vdl.Register((*ExperianRating)(nil))
-	vdl.Register((*EquifaxCreditReport)(nil))
-	vdl.Register((*ExperianCreditReport)(nil))
-	vdl.Register((*TransUnionCreditReport)(nil))
-	vdl.Register((*AgencyReport)(nil))
-	vdl.Register((*CreditReport)(nil))
-	vdl.Register((*Customer)(nil))
+	vdl.Register((*VNumber)(nil))
+	vdl.Register((*VString)(nil))
+	vdl.Register((*VEnum)(nil))
+	vdl.Register((*VByteList)(nil))
+	vdl.Register((*VByteArray)(nil))
+	vdl.Register((*VArray)(nil))
+	vdl.Register((*VList)(nil))
+	vdl.Register((*VListAny)(nil))
+	vdl.Register((*VSet)(nil))
+	vdl.Register((*VMap)(nil))
+	vdl.Register((*VSmallStruct)(nil))
+	vdl.Register((*VLargeStruct)(nil))
+	vdl.Register((*VSmallUnion)(nil))
 
 	return struct{}{}
 }

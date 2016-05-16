@@ -21,6 +21,10 @@ func Encode(v interface{}) ([]byte, error) {
 	return VersionedEncode(DefaultVersion, v)
 }
 
+func XEncode(v interface{}) ([]byte, error) {
+	return VersionedXEncode(DefaultVersion, v)
+}
+
 // VersionedEncode performs single-shot encoding to a specific version of VOM
 func VersionedEncode(version Version, v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
