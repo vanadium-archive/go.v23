@@ -29,7 +29,11 @@ import (
 type Manager interface {
 	// Listen causes the Manager to accept flows from the provided protocol and address.
 	// Listen may be called muliple times.
-	Listen(ctx *context.T, protocol, address string) error
+	// If err != nil, creating a net.Listener to the address failed.
+	// Otherwise, if error == nil, the returned chan will block until the
+	// net.Listener fails while accepting connections. The caller may then
+	// choose to relisten on the protocol and address.
+	Listen(ctx *context.T, protocol, address string) (<-chan struct{}, error)
 
 	// ProxyListen causes the Manager to accept flows from the specified endpoint.
 	// The endpoint must correspond to a vanadium proxy.
@@ -108,6 +112,11 @@ type ListenStatus struct {
 	// Manager's RoutingID will be returned for use in bidirectional RPC.
 	// Returned endpoints all have the Manager's unique RoutingID.
 	Endpoints []naming.Endpoint
+
+	// ListenErrors contains the set of errors encountered when listening on
+	// the network or accepting a connection from a listener. Entries are keyed by
+	// the protocol, address specified in the ListenSpec.
+	ListenErrors map[struct{ Protocol, Address string }]error
 
 	// ProxyErrors contains the set of errors encountered when listening on
 	// proxies. Entries are keyed by the name provided to ProxyListen. If the

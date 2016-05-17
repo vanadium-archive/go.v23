@@ -35,6 +35,7 @@ pkg flow, type Flow interface, WriteMsgAndClose(...[]byte) (int, error)
 pkg flow, type ListenStatus struct
 pkg flow, type ListenStatus struct, Dirty <-chan struct{}
 pkg flow, type ListenStatus struct, Endpoints []naming.Endpoint
+pkg flow, type ListenStatus struct, ListenErrors map[struct{ Protocol, Address string }]error
 pkg flow, type ListenStatus struct, ProxyErrors map[string]error
 pkg flow, type Listener interface { Accept, Addr, Close }
 pkg flow, type Listener interface, Accept(*context.T) (Conn, error)
@@ -57,7 +58,7 @@ pkg flow, type Manager interface, Closed() <-chan struct{}
 pkg flow, type Manager interface, Dial(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
 pkg flow, type Manager interface, DialCached(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
 pkg flow, type Manager interface, DialSideChannel(*context.T, naming.Endpoint, PeerAuthorizer, time.Duration) (Flow, error)
-pkg flow, type Manager interface, Listen(*context.T, string, string) error
+pkg flow, type Manager interface, Listen(*context.T, string, string) (<-chan struct{}, error)
 pkg flow, type Manager interface, ProxyListen(*context.T, string, naming.Endpoint) (<-chan struct{}, error)
 pkg flow, type Manager interface, RoutingID() naming.RoutingID
 pkg flow, type Manager interface, Status() ListenStatus
