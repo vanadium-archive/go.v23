@@ -320,7 +320,7 @@ func (d *valueDecoder) DecodeBytes(fixedlen int, v *[]byte) error {
 		return errEmptyDecoderStack
 	}
 	if !top.Value.Type().IsBytes() {
-		return bytesVDLRead(fixedlen, v, d)
+		return DecodeConvertedBytes(d, fixedlen, v)
 	}
 	if fixedlen >= 0 && top.Value.Len() != fixedlen {
 		return fmt.Errorf("vdl: %v got %v bytes, want fixed len %v", top.Value.Type(), top.Value.Len(), fixedlen)

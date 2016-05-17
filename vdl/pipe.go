@@ -681,7 +681,7 @@ func (e *pipeEncoder) EncodeBytes(v []byte) error {
 
 func (d *pipeDecoder) DecodeBytes(fixedLen int, b *[]byte) error {
 	if !d.Enc.IsBytes {
-		if err := bytesVDLRead(fixedLen, b, d); err != nil {
+		if err := DecodeConvertedBytes(d, fixedLen, b); err != nil {
 			return d.Enc.closeLocked(err)
 		}
 		return nil
@@ -696,41 +696,4 @@ func (d *pipeDecoder) DecodeBytes(fixedLen int, b *[]byte) error {
 	}
 	copy(*b, d.Enc.ArgBytes)
 	return d.Enc.Err
-}
-
-func bytesVDLRead(fixedlen int, b *[]byte, d Decoder) error {
-	var err error
-	switch len := d.LenHint(); {
-	case fixedlen >= 0:
-		*b = (*b)[:0]
-	case len > 0:
-		*b = make([]byte, 0, len)
-	default:
-		*b = (*b)[:0]
-	}
-	index := 0
-	for {
-		switch done, err := d.NextEntry(); {
-		case err != nil:
-			return err
-		case fixedlen >= 0 && done != (index >= fixedlen):
-			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T", done, index, len(*b), *b)
-		case done:
-			return nil
-		}
-		var elem byte
-		if err = d.StartValue(); err != nil {
-			return err
-		}
-		tmp, err := d.DecodeUint(8)
-		if err != nil {
-			return err
-		}
-		elem = byte(tmp)
-		if err = d.FinishValue(); err != nil {
-			return err
-		}
-		*b = append(*b, elem)
-		index++
-	}
 }

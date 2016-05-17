@@ -17,23 +17,34 @@ var (
 	errEmptyEncoderStack = errors.New("vom: empty encoder stack")
 )
 
+// Encoder manages the transmission and marshaling of typed values to the other
+// side of a connection.
 type XEncoder struct {
 	enc xEncoder
 }
 
+// NewEncoder returns a new Encoder that writes to the given writer in the VOM
+// binary format.  The binary format is compact and fast.
 func NewXEncoder(w io.Writer) *XEncoder {
 	return NewVersionedXEncoder(DefaultVersion, w)
 }
 
-func NewXEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *XEncoder {
-	return NewVersionedXEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
-}
-
+// NewVersionedEncoder returns a new Encoder that writes to the given writer with
+// the specified version.
 func NewVersionedXEncoder(version Version, w io.Writer) *XEncoder {
 	typeEnc := newTypeEncoderInternal(version, newXEncoderForTypes(version, w))
 	return NewVersionedXEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
+// NewEncoderWithTypeEncoder returns a new Encoder that writes to the given
+// writer, where types are encoded separately through the typeEnc.
+func NewXEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *XEncoder {
+	return NewVersionedXEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
+}
+
+// NewVersionedEncoderWithTypeEncoder returns a new Encoder that writes to the
+// given writer with the specified version, where types are encoded separately
+// through the typeEnc.
 func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *XEncoder {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
@@ -94,10 +105,13 @@ func newXEncoderForRawBytes(w io.Writer) *xEncoder {
 	}
 }
 
+// Encoder returns e as a vdl.Encoder.
 func (e *XEncoder) Encoder() vdl.Encoder {
 	return &e.enc
 }
 
+// Encode transmits the value v.  Values of type T are encodable as long as the
+// T is a valid vdl type.
 func (e *XEncoder) Encode(v interface{}) error {
 	return vdl.Write(&e.enc, v)
 }
@@ -462,18 +476,33 @@ func (e *xEncoder) EncodeBool(v bool) error {
 	binaryEncodeBool(e.buf, v)
 	return nil
 }
+
 func (e *xEncoder) EncodeUint(v uint64) error {
+	// Handle a special-case where normally single bytes are written out as
+	// variable sized numbers, which use 2 bytes to encode bytes > 127.  But each
+	// byte contained in a list or array is written out as one byte.  E.g.
+	//   byte(0x81)         -> 0xFF81   : single byte with variable-size
+	//   []byte("\x81\x82") -> 0x028182 : each elem byte encoded as one byte
+	if stackTop2 := len(e.stack) - 2; stackTop2 >= 0 {
+		if top2 := e.stack[stackTop2]; top2.Type.IsBytes() {
+			e.buf.WriteOneByte(byte(v))
+			return nil
+		}
+	}
 	binaryEncodeUint(e.buf, v)
 	return nil
 }
+
 func (e *xEncoder) EncodeInt(v int64) error {
 	binaryEncodeInt(e.buf, v)
 	return nil
 }
+
 func (e *xEncoder) EncodeFloat(v float64) error {
 	binaryEncodeFloat(e.buf, v)
 	return nil
 }
+
 func (e *xEncoder) EncodeBytes(v []byte) error {
 	top := e.top()
 	if top == nil {
@@ -490,6 +519,7 @@ func (e *xEncoder) EncodeBytes(v []byte) error {
 	e.buf.Write(v)
 	return nil
 }
+
 func (e *xEncoder) EncodeString(v string) error {
 	top := e.top()
 	if top == nil {
@@ -509,6 +539,7 @@ func (e *xEncoder) EncodeString(v string) error {
 	}
 	return nil
 }
+
 func (e *xEncoder) EncodeTypeObject(v *vdl.Type) error {
 	tid, err := e.typeEnc.encode(v)
 	if err != nil {

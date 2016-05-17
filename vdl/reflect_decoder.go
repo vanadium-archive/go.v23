@@ -478,7 +478,7 @@ func (d *reflectDecoder) DecodeBytes(fixedlen int, v *[]byte) error {
 		return fmt.Errorf("vdl: %v got %v bytes, want fixed len %v", top.Type, top.ReflectValue.Len(), fixedlen)
 	}
 	if !top.Type.IsBytes() {
-		return bytesVDLRead(fixedlen, v, d)
+		return DecodeConvertedBytes(d, fixedlen, v)
 	}
 	if cap(*v) < top.ReflectValue.Len() {
 		*v = make([]byte, top.ReflectValue.Len())

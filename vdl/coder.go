@@ -32,74 +32,156 @@ type ReadWriter interface {
 	Writer
 }
 
-// Decoder defines the interface for a decoder of vdl values.
+// Decoder defines the interface for a decoder of vdl values.  The Decoder is
+// passed as the argument to VDLRead.  An example of an implementation of this
+// interface is vom.Decoder.
 //
-// TODO(toddw): This is a work in progress.  Update the comments.
+// The Decoder provides an API to read vdl values of all types in depth-first
+// order.  The ordering is based on the type of the value being read.
+// E.g. given the following value:
+//    type MyStruct struct {
+//      A []string
+//      B map[int64]bool
+//      C any
+//    }
+//    value := MyStruct{
+//      A: {"abc", "def"},
+//      B: {123: true, 456: false},
+//      C: float32(1.5),
+//    }
+// The values will be read in the following order:
+//    "abc"
+//    "def"
+//    (123, true)
+//    (456, false)
+//    1.5
 type Decoder interface {
+	// StartValue must be called before decoding each value, for both scalar and
+	// composite values.  Each call pushes the type of the next value on to the
+	// stack.
 	StartValue() error
+	// FinishValue must be called after decoding each value, for both scalar and
+	// composite values.  Each call pops the type of the top value off of the
+	// stack.
 	FinishValue() error
-	StackDepth() int
+	// SkipValue skips the next value; logically it behaves as if a full sequence
+	// of StartValue / ...Decode*... / FinishValue were called.  It enables
+	// optimizations when the caller doesn't care about the next value.
 	SkipValue() error
+	// IgnoreNextStartValue instructs the Decoder to ignore the next call to
+	// StartValue.  It is used to simplify implementations of VDLRead; e.g. a
+	// caller might call StartValue to check for nil values, and subsequently call
+	// StartValue again to read non-nil values.  IgnoreNextStartValue is used to
+	// ignore the second StartValue call.
 	IgnoreNextStartValue()
 
-	NextEntry() (bool, error)
-	NextField() (string, error)
+	// StackDepth returns the stack depth of the current value.  Returns 0 if
+	// StartValue hasn't been called for the next top-level value.
+	StackDepth() int
 
+	// NextEntry instructs the Decoder to move to the next element of an Array or
+	// List, the next key of a Set, or the next (key,elem) pair of a Map.  Returns
+	// done=true when there are no remaining entries.
+	NextEntry() (done bool, _ error)
+	// NextField instructs the Decoder to move to the next field of a Struct or
+	// Union.  Returns the name of the next field, or the empty string when there
+	// are no remaining fields.
+	NextField() (name string, _ error)
+
+	// Type returns the type of the top value on the stack, corresponding to the
+	// previous call of StartValue.  Returns nil when the stack depth is 0.  The
+	// returned type is only Any or Optional iff the value is nil; non-nil values
+	// are "auto-dereferenced" to their underlying element value.
 	Type() *Type
+	// IsAny returns true iff the type of the top value on the stack was Any,
+	// despite the "auto-dereference" behavior of non-nil values.
 	IsAny() bool
+	// IsOptional returns true iff the type of the top value on the stack was
+	// Optional, despite the "auto-dereference" behavior of non-nil values.
 	IsOptional() bool
+	// IsNil returns true iff the top value on the stack is nil.  It is equivalent
+	// to Type() == AnyType || Type().Kind() == Optional.
 	IsNil() bool
+	// Index returns the index of the current entry or field of the top value on
+	// the stack.  Returns -1 if the top value is a scalar, or if NextEntry /
+	// NextField has not been called.
 	Index() int
+	// LenHint returns the length of the top value on the stack, if it is
+	// available.  Returns -1 if the top value is a scalar, or if the length is
+	// not available.
 	LenHint() int
 
-	// DecodeBool decodes and returns a bool.
+	// DecodeBool returns the top value on the stack as a bool.
 	DecodeBool() (bool, error)
-	// DecodeString decodes and returns a string.
+	// DecodeString returns the top value on the stack as a string.
 	DecodeString() (string, error)
-	// DecodeTypeObject decodes and returns a type.
-	DecodeTypeObject() (*Type, error)
-	// DecodeUint decodes and returns a uint, where the result has bitlen bits.
-	// Errors are returned on loss of precision.
+	// DecodeUint returns the top value on the stack as a uint, where the result
+	// has bitlen bits.  Errors are returned on loss of precision.
 	DecodeUint(bitlen int) (uint64, error)
-	// DecodeInt decodes and returns an int, where the result has bitlen bits.
-	// Errors are returned on loss of precision.
+	// DecodeInt returns the top value on the stack as an int, where the result
+	// has bitlen bits.  Errors are returned on loss of precision.
 	DecodeInt(bitlen int) (int64, error)
-	// DecodeFloat decodes and returns a float, where the result has bitlen bits.
-	// Errors are returned on loss of precision.
+	// DecodeFloat returns the top value on the stack as a float, where the result
+	// has bitlen bits.  Errors are returned on loss of precision.
 	DecodeFloat(bitlen int) (float64, error)
-	// DecodeBytes decodes bytes into x.  If fixedlen >= 0 the decoded bytes must
-	// be exactly that length, otherwise there is no restriction on the number of
-	// decoded bytes.  If cap(*x) is not large enough to fit the decoded bytes, a
-	// new byte slice is assigned to *x.
+	// DecodeBytes decodes the top value on the stack as bytes, into x.  If
+	// fixedlen >= 0 the decoded bytes must be exactly that length, otherwise
+	// there is no restriction on the number of decoded bytes.  If cap(*x) is not
+	// large enough to fit the decoded bytes, a new byte slice is assigned to *x.
 	DecodeBytes(fixedlen int, x *[]byte) error
+	// DecodeTypeObject returns the top value on the stack as a type.
+	DecodeTypeObject() (*Type, error)
 }
 
-// Encoder defines the interface for an encoder of vdl values.
+// Encoder defines the interface for an encoder of vdl values.  The Encoder is
+// passed as the argument to VDLWrite.  An example of an implementation of this
+// interface is vom.Encoder.
 //
-// TODO(toddw): This is a work in progress.  Update the comments.
+// The Encoder provides an API to write vdl values of all types in depth-first
+// order.  The ordering is based on the type of the value being written; see
+// Decoder for examples.
 type Encoder interface {
-	SetNextStartValueIsOptional()
-	// {Start,Finish}Value must be called before / after every concrete value
-	// tt must be non-any and non-optional
+	// StartValue must be called before encoding each non-nil value, for both
+	// scalar and composite values.  The tt type cannot be Any or Optional; use
+	// NilValue to encode nil values.
 	StartValue(tt *Type) error
+	// FinishValue must be called after encoding each non-nil value, for both
+	// scalar and composite values.
 	FinishValue() error
-	// NilValue takes the place of StartValue and FinishValue for nil values.
+	// NilValue encodes a nil value.  The tt type must be Any or Optional.
 	NilValue(tt *Type) error
+	// SetNextStartValueIsOptional instructs the encoder that the next call to
+	// StartValue represents a value with an Optional type.
+	SetNextStartValueIsOptional()
 
-	// NextEntry must be called for every entry.
+	// NextEntry instructs the Encoder to move to the next element of an Array or
+	// List, the next key of a Set, or the next (key,elem) pair of a Map.  Set
+	// done=true when there are no remaining entries.
 	NextEntry(done bool) error
-	// NextField must be called for every field.
+	// NextField instructs the Encoder to move to the next field of a Struct or
+	// Union.  Set name to the name of the next field, or set name="" when there
+	// are no remaining fields.
 	NextField(name string) error
 
+	// SetLenHint sets the length of the List, Set or Map value.  It may only be
+	// called immediately after StartValue, before NextEntry has been called.  Do
+	// not call this method if the length is not known.
 	SetLenHint(lenHint int) error
 
-	EncodeBool(v bool) error        // bool
-	EncodeUint(v uint64) error      // byte, uint16, uint32, uint64
-	EncodeInt(v int64) error        // int8, int16, int32, int64
-	EncodeFloat(v float64) error    // float32, float64
-	EncodeBytes(v []byte) error     // []byte
-	EncodeString(v string) error    // string, enum
-	EncodeTypeObject(v *Type) error // *Type
+	// EncodeBool encodes a bool value.
+	EncodeBool(v bool) error
+	// EncodeString encodes a string value.
+	EncodeString(v string) error
+	// EncodeUint encodes a uint value.
+	EncodeUint(v uint64) error
+	// EncodeInt encodes an int value.
+	EncodeInt(v int64) error
+	// EncodeFloat encodes a float value.
+	EncodeFloat(v float64) error
+	// EncodeBytes encodes a bytes value; either an array or list of bytes.
+	EncodeBytes(v []byte) error
+	// EncodeTypeObject encodes a type.
+	EncodeTypeObject(v *Type) error
 }
 
 func decoderCompatible(dec Decoder, tt *Type) error {
@@ -107,4 +189,47 @@ func decoderCompatible(dec Decoder, tt *Type) error {
 		return fmt.Errorf("incompatible %v, from %v", tt, dec.Type())
 	}
 	return nil
+}
+
+var ttByteList = ListType(ByteType)
+
+// DecodeConvertedBytes is a helper function for implementations of
+// Decoder.DecodeBytes, to deal with cases where the decoder value is
+// convertible to []byte.  E.g. if the decoder value is []float64, we need to
+// decode each element as a uint8, performing conversion checks.
+//
+// Since this is meant to be used in the implementation of DecodeBytes, there is
+// no outer call to StartValue/FinishValue.
+func DecodeConvertedBytes(dec Decoder, fixedlen int, buf *[]byte) error {
+	if err := decoderCompatible(dec, ttByteList); err != nil {
+		return err
+	}
+	if len := dec.LenHint(); len >= 0 && cap(*buf) < len {
+		*buf = make([]byte, 0, len)
+	} else {
+		*buf = (*buf)[:0]
+	}
+	index := 0
+	for {
+		switch done, err := dec.NextEntry(); {
+		case err != nil:
+			return err
+		case fixedlen >= 0 && done != (index >= fixedlen):
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d", done, index, fixedlen)
+		case done:
+			return nil
+		}
+		if err := dec.StartValue(); err != nil {
+			return err
+		}
+		elem, err := dec.DecodeUint(8)
+		if err != nil {
+			return err
+		}
+		if err := dec.FinishValue(); err != nil {
+			return err
+		}
+		*buf = append(*buf, byte(elem))
+		index++
+	}
 }
