@@ -157,6 +157,15 @@ func (rb *RawBytes) VDLIsZero() bool {
 	return rb == nil || (rb.Type == vdl.AnyType && rb.IsNil())
 }
 
+// TODO(toddw) This is slow - we should fix this.
+func (rb *RawBytes) VDLEqual(x interface{}) bool {
+	orb, ok := x.(*RawBytes)
+	if !ok {
+		return false
+	}
+	return vdl.EqualValue(vdl.ValueOf(rb), vdl.ValueOf(orb))
+}
+
 func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 	// Fastpath: the bytes are already available in the xDecoder.  Note that this
 	// also handles the case where dec is RawBytes.Decoder().
