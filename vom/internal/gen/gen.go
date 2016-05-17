@@ -260,7 +260,7 @@ var benchmarks []GeneratorEntry = []GeneratorEntry{
 	},
 }
 
-func genDecodeBenchmark(name string, value string, t string, isReflect bool) string {
+func genDecodeBenchmark(name, value, t string, isReflect bool) string {
 	var extra string
 	if isReflect {
 		extra = "Reflect"
@@ -276,7 +276,7 @@ func Benchmark%[1]sRepeatedDecode%[2]s(b *testing.B) {
 }`, name, extra, value, t)
 }
 
-func genEncodeBenchmark(name string, value string, isReflect bool) string {
+func genEncodeBenchmark(name, value string, isReflect bool) string {
 	var extra string
 	if isReflect {
 		extra = "Reflect"
@@ -290,11 +290,23 @@ func Benchmark%[1]sRepeatedEncode%[2]s(b *testing.B) {
 }`, name, extra, value)
 }
 
+func genGobBenchmark(name, value, t string) string {
+	return fmt.Sprintf(`
+func Benchmark%[1]sGobEncode(b *testing.B) {
+	 benchmarkGobEncode(b, %[2]s)
+}
+func Benchmark%[1]sGobDecode(b *testing.B) {
+	var tofill %[3]s
+	benchmarkGobDecode(b, &tofill, %[2]s)
+}`, name, value, t)
+}
+
 func genBenchmark(entry GeneratorEntry) string {
 	var str string
 	if entry.ReflectValue != "" {
 		str += genEncodeBenchmark(entry.Name, entry.ReflectValue, true)
 		str += genDecodeBenchmark(entry.Name, entry.ReflectValue, entry.ReflectType, true)
+		str += genGobBenchmark(entry.Name, entry.ReflectValue, entry.ReflectType)
 	}
 	if entry.GenValue != "" {
 		str += genEncodeBenchmark(entry.Name, entry.GenValue, false)

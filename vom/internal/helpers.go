@@ -9,6 +9,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"encoding/gob"
 	"strings"
 	"testing"
 	"v.io/v23/security"
@@ -33,8 +34,9 @@ func benchmarkRepeatedEncode(b *testing.B, value interface{}) {
 
 func benchmarkSingleShotDecode(b *testing.B, tofill, value interface{}) {
 	bytes, _ := vom.Encode(value)
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vom.Decode(bytes, &tofill)
+		vom.Decode(bytes, tofill)
 	}
 }
 
@@ -45,10 +47,27 @@ func benchmarkRepeatedDecode(b *testing.B, tofill, value interface{}) {
 		enc.Encode(value)
 	}
 	dec := vom.NewDecoder(&buf)
-	dec.Decode(&tofill)
+	dec.Decode(tofill)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		dec.Decode(&tofill)
+		dec.Decode(tofill)
+	}
+}
+
+func benchmarkGobEncode(b *testing.B, value interface{}) {
+	for i := 0; i < b.N; i++ {
+		var buf bytes.Buffer
+		gob.NewEncoder(&buf).Encode(value)
+	}
+}
+
+func benchmarkGobDecode(b *testing.B, tofill, value interface{}) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	enc.Encode(value)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		gob.NewDecoder(&buf).Decode(tofill)
 	}
 }
 

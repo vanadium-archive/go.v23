@@ -34,6 +34,13 @@ func BenchmarkNumberRepeatedDecodeReflect(b *testing.B) {
 	var tofill XNumber
 	benchmarkRepeatedDecode(b, &tofill, XNumber(2))
 }
+func BenchmarkNumberGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XNumber(2))
+}
+func BenchmarkNumberGobDecode(b *testing.B) {
+	var tofill XNumber
+	benchmarkGobDecode(b, &tofill, XNumber(2))
+}
 func BenchmarkNumberSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VNumber(2))
 }
@@ -62,6 +69,13 @@ func BenchmarkSmallStringRepeatedDecodeReflect(b *testing.B) {
 	var tofill XString
 	benchmarkRepeatedDecode(b, &tofill, XString("abc"))
 }
+func BenchmarkSmallStringGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XString("abc"))
+}
+func BenchmarkSmallStringGobDecode(b *testing.B) {
+	var tofill XString
+	benchmarkGobDecode(b, &tofill, XString("abc"))
+}
 func BenchmarkSmallStringSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VString("abc"))
 }
@@ -89,6 +103,13 @@ func BenchmarkLargeStringSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkLargeStringRepeatedDecodeReflect(b *testing.B) {
 	var tofill XString
 	benchmarkRepeatedDecode(b, &tofill, XString(createString(65536)))
+}
+func BenchmarkLargeStringGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XString(createString(65536)))
+}
+func BenchmarkLargeStringGobDecode(b *testing.B) {
+	var tofill XString
+	benchmarkGobDecode(b, &tofill, XString(createString(65536)))
 }
 func BenchmarkLargeStringSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VString(createString(65536)))
@@ -132,6 +153,13 @@ func BenchmarkSmallByteListRepeatedDecodeReflect(b *testing.B) {
 	var tofill XByteList
 	benchmarkRepeatedDecode(b, &tofill, XByteList{1, 2, 3})
 }
+func BenchmarkSmallByteListGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XByteList{1, 2, 3})
+}
+func BenchmarkSmallByteListGobDecode(b *testing.B) {
+	var tofill XByteList
+	benchmarkGobDecode(b, &tofill, XByteList{1, 2, 3})
+}
 func BenchmarkSmallByteListSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VByteList{1, 2, 3})
 }
@@ -159,6 +187,13 @@ func BenchmarkLargeByteListSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkLargeByteListRepeatedDecodeReflect(b *testing.B) {
 	var tofill XByteList
 	benchmarkRepeatedDecode(b, &tofill, XByteList(createByteList(65536)))
+}
+func BenchmarkLargeByteListGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XByteList(createByteList(65536)))
+}
+func BenchmarkLargeByteListGobDecode(b *testing.B) {
+	var tofill XByteList
+	benchmarkGobDecode(b, &tofill, XByteList(createByteList(65536)))
 }
 func BenchmarkLargeByteListSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VByteList(createByteList(65536)))
@@ -188,6 +223,13 @@ func BenchmarkByteArrayRepeatedDecodeReflect(b *testing.B) {
 	var tofill XByteArray
 	benchmarkRepeatedDecode(b, &tofill, XByteArray{1, 2, 3})
 }
+func BenchmarkByteArrayGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XByteArray{1, 2, 3})
+}
+func BenchmarkByteArrayGobDecode(b *testing.B) {
+	var tofill XByteArray
+	benchmarkGobDecode(b, &tofill, XByteArray{1, 2, 3})
+}
 func BenchmarkByteArraySingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VByteArray{1, 2, 3})
 }
@@ -215,6 +257,13 @@ func BenchmarkArraySingleShotDecodeReflect(b *testing.B) {
 func BenchmarkArrayRepeatedDecodeReflect(b *testing.B) {
 	var tofill XArray
 	benchmarkRepeatedDecode(b, &tofill, XArray{1, 2, 3})
+}
+func BenchmarkArrayGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XArray{1, 2, 3})
+}
+func BenchmarkArrayGobDecode(b *testing.B) {
+	var tofill XArray
+	benchmarkGobDecode(b, &tofill, XArray{1, 2, 3})
 }
 func BenchmarkArraySingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VArray{1, 2, 3})
@@ -244,6 +293,13 @@ func BenchmarkSmallListRepeatedDecodeReflect(b *testing.B) {
 	var tofill XList
 	benchmarkRepeatedDecode(b, &tofill, XList{1, 2, 3})
 }
+func BenchmarkSmallListGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XList{1, 2, 3})
+}
+func BenchmarkSmallListGobDecode(b *testing.B) {
+	var tofill XList
+	benchmarkGobDecode(b, &tofill, XList{1, 2, 3})
+}
 func BenchmarkSmallListSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VList{1, 2, 3})
 }
@@ -271,6 +327,13 @@ func BenchmarkLargeListSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkLargeListRepeatedDecodeReflect(b *testing.B) {
 	var tofill XList
 	benchmarkRepeatedDecode(b, &tofill, XList(createList(65536)))
+}
+func BenchmarkLargeListGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XList(createList(65536)))
+}
+func BenchmarkLargeListGobDecode(b *testing.B) {
+	var tofill XList
+	benchmarkGobDecode(b, &tofill, XList(createList(65536)))
 }
 func BenchmarkLargeListSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VList(createList(65536)))
@@ -300,6 +363,13 @@ func BenchmarkSmallListAnyRepeatedDecodeReflect(b *testing.B) {
 	var tofill XListAny
 	benchmarkRepeatedDecode(b, &tofill, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
 }
+func BenchmarkSmallListAnyGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+}
+func BenchmarkSmallListAnyGobDecode(b *testing.B) {
+	var tofill XListAny
+	benchmarkGobDecode(b, &tofill, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+}
 func BenchmarkSmallListAnySingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
 }
@@ -327,6 +397,13 @@ func BenchmarkLargeListAnySingleShotDecodeReflect(b *testing.B) {
 func BenchmarkLargeListAnyRepeatedDecodeReflect(b *testing.B) {
 	var tofill XListAny
 	benchmarkRepeatedDecode(b, &tofill, XListAny(createListAny(65536)))
+}
+func BenchmarkLargeListAnyGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XListAny(createListAny(65536)))
+}
+func BenchmarkLargeListAnyGobDecode(b *testing.B) {
+	var tofill XListAny
+	benchmarkGobDecode(b, &tofill, XListAny(createListAny(65536)))
 }
 func BenchmarkLargeListAnySingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VListAny(createListAny(65536)))
@@ -370,6 +447,13 @@ func BenchmarkMapRepeatedDecodeReflect(b *testing.B) {
 	var tofill XMap
 	benchmarkRepeatedDecode(b, &tofill, XMap{"A": true, "B": false, "C": true})
 }
+func BenchmarkMapGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XMap{"A": true, "B": false, "C": true})
+}
+func BenchmarkMapGobDecode(b *testing.B) {
+	var tofill XMap
+	benchmarkGobDecode(b, &tofill, XMap{"A": true, "B": false, "C": true})
+}
 func BenchmarkMapSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VMap{"A": true, "B": false, "C": true})
 }
@@ -397,6 +481,13 @@ func BenchmarkSmallStructSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkSmallStructRepeatedDecodeReflect(b *testing.B) {
 	var tofill XSmallStruct
 	benchmarkRepeatedDecode(b, &tofill, XSmallStruct{1, "A", true})
+}
+func BenchmarkSmallStructGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, XSmallStruct{1, "A", true})
+}
+func BenchmarkSmallStructGobDecode(b *testing.B) {
+	var tofill XSmallStruct
+	benchmarkGobDecode(b, &tofill, XSmallStruct{1, "A", true})
 }
 func BenchmarkSmallStructSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VSmallStruct{1, "A", true})
@@ -426,6 +517,13 @@ func BenchmarkLargeStructRepeatedDecodeReflect(b *testing.B) {
 	var tofill VLargeStruct
 	benchmarkRepeatedDecode(b, &tofill, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
 }
+func BenchmarkLargeStructGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+}
+func BenchmarkLargeStructGobDecode(b *testing.B) {
+	var tofill VLargeStruct
+	benchmarkGobDecode(b, &tofill, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+}
 func BenchmarkLargeStructSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
 }
@@ -453,6 +551,13 @@ func BenchmarkLargeStructZeroFieldsSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkLargeStructZeroFieldsRepeatedDecodeReflect(b *testing.B) {
 	var tofill VLargeStruct
 	benchmarkRepeatedDecode(b, &tofill, VLargeStruct{})
+}
+func BenchmarkLargeStructZeroFieldsGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, VLargeStruct{})
+}
+func BenchmarkLargeStructZeroFieldsGobDecode(b *testing.B) {
+	var tofill VLargeStruct
+	benchmarkGobDecode(b, &tofill, VLargeStruct{})
 }
 func BenchmarkLargeStructZeroFieldsSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, VLargeStruct{})
@@ -496,6 +601,13 @@ func BenchmarkTimeRepeatedDecodeReflect(b *testing.B) {
 	var tofill time.Time
 	benchmarkRepeatedDecode(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
 }
+func BenchmarkTimeGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+}
+func BenchmarkTimeGobDecode(b *testing.B) {
+	var tofill time.Time
+	benchmarkGobDecode(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+}
 func BenchmarkBlessingsSingleShotEncodeReflect(b *testing.B) {
 	benchmarkSingleShotEncode(b, createTypicalBlessings())
 }
@@ -509,6 +621,13 @@ func BenchmarkBlessingsSingleShotDecodeReflect(b *testing.B) {
 func BenchmarkBlessingsRepeatedDecodeReflect(b *testing.B) {
 	var tofill security.Blessings
 	benchmarkRepeatedDecode(b, &tofill, createTypicalBlessings())
+}
+func BenchmarkBlessingsGobEncode(b *testing.B) {
+	benchmarkGobEncode(b, createTypicalBlessings())
+}
+func BenchmarkBlessingsGobDecode(b *testing.B) {
+	var tofill security.Blessings
+	benchmarkGobDecode(b, &tofill, createTypicalBlessings())
 }
 func BenchmarkRpcRequestZeroSingleShotEncode(b *testing.B) {
 	benchmarkSingleShotEncode(b, rpc.Request{})
