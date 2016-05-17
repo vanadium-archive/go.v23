@@ -69,19 +69,18 @@ func WireToNative(wire vdl.WireError, native *E) error {
 		Action: retryToAction(wire.RetryCode),
 		Msg:    wire.Msg,
 	}
-	for _, p := range wire.ParamList {
+	for _, pWire := range wire.ParamList {
 		var pNative interface{}
-		if err := vdl.Convert(&pNative, p); err != nil {
-			// It's questionable what to do if the conversion fails, or similarly if
-			// the conversion ends up with a *vdl.Value, rather than a native Go
-			// value.
+		if err := vdl.Convert(&pNative, pWire); err != nil {
+			// It's questionable what to do if the conversion fails, rather than
+			// ending up with a native Go value.
 			//
-			// At the moment, for both cases we plug the *vdl.Value or conversion
-			// error into the native params.  The idea is that this will still be more
-			// useful to the user, since they'll still have the error Id and Action.
+			// At the moment, we plug the *vdl.Value into the native params.  The idea
+			// is that this will still be more useful to the user, since they'll still
+			// have the error Id and Action.
 			//
 			// TODO(toddw): Consider whether there is a better strategy.
-			pNative = err
+			pNative = pWire
 		}
 		native.ParamList = append(native.ParamList, pNative)
 	}
@@ -100,9 +99,9 @@ func WireFromNative(wire *vdl.WireError, native error) error {
 		RetryCode: retryFromAction(Action(e)),
 		Msg:       e.Error(),
 	}
-	for _, p := range params(e) {
+	for _, pNative := range params(e) {
 		var pWire *vdl.Value
-		if err := vdl.Convert(&pWire, p); err != nil {
+		if err := vdl.Convert(&pWire, pNative); err != nil {
 			// It's questionable what to do here if the conversion fails, similarly to
 			// the conversion failure above in WireToNative.
 			//
