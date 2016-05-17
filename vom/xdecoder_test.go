@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build newvdltests
-
 package vom_test
 
 import (
@@ -80,7 +78,7 @@ func testXDecoderFunc(t *testing.T, pre string, test vomtest.Entry, rvWant refle
 			name := fmt.Sprintf("%s (%s) %s", pre, mode, test.Name())
 			rvGot := rvNew()
 			reader := mode.TestReader(bytes.NewReader(test.Bytes()))
-			dec := vom.NewXDecoder(reader)
+			dec := vom.NewDecoder(reader)
 			if err := dec.Decode(rvGot.Interface()); err != nil {
 				t.Errorf("%s: Decode failed: %v", name, err)
 				return
@@ -101,7 +99,7 @@ func testXDecoderFunc(t *testing.T, pre string, test vomtest.Entry, rvWant refle
 			decT := vom.NewTypeDecoder(readerT)
 			decT.Start()
 			reader := mode.TestReader(bytes.NewReader(test.ValueBytes()))
-			dec := vom.NewXDecoderWithTypeDecoder(reader, decT)
+			dec := vom.NewDecoderWithTypeDecoder(reader, decT)
 			err := dec.Decode(rvGot.Interface())
 			decT.Stop()
 			if err != nil {
@@ -124,7 +122,7 @@ func testXDecoderFunc(t *testing.T, pre string, test vomtest.Entry, rvWant refle
 	for i := 0; i < 2; i++ {
 		name := fmt.Sprintf("%s (single-shot %d) %s", pre, i, test.Name())
 		rvGot := rvNew()
-		if err := vom.XDecode(test.Bytes(), rvGot.Interface()); err != nil {
+		if err := vom.Decode(test.Bytes(), rvGot.Interface()); err != nil {
 			t.Errorf("%s: Decode failed: %v", name, err)
 			return
 		}

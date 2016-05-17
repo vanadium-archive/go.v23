@@ -38,8 +38,8 @@ func TestTranscodeXDecoderToXEncoder(t *testing.T) {
 
 		inBytes := hex2Bin(t, test.Hex)
 		var buf bytes.Buffer
-		enc := NewXEncoder(&buf)
-		dec := NewXDecoder(bytes.NewReader(inBytes))
+		enc := NewEncoder(&buf)
+		dec := NewDecoder(bytes.NewReader(inBytes))
 		if err := vdl.Transcode(enc.Encoder(), dec.Decoder()); err != nil {
 			t.Errorf("%s: error in transcode: %v", test.Name, err)
 			continue
@@ -59,7 +59,7 @@ func TestTranscodeVDLValueToXEncoder(t *testing.T) {
 		}
 
 		var buf bytes.Buffer
-		enc := NewXEncoder(&buf)
+		enc := NewEncoder(&buf)
 		if err := test.Value.VDLWrite(enc.Encoder()); err != nil {
 			t.Errorf("%s: error in transcode: %v", test.Name, err)
 			continue

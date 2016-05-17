@@ -55,19 +55,16 @@ pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
 pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
 pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
-pkg vom, func NewVersionedXEncoder(Version, io.Writer) *XEncoder
-pkg vom, func NewVersionedXEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *XEncoder
-pkg vom, func NewXDecoder(io.Reader) *XDecoder
-pkg vom, func NewXDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *XDecoder
-pkg vom, func NewXEncoder(io.Writer) *XEncoder
-pkg vom, func NewXEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *XEncoder
+pkg vom, func NewVersionedZEncoder(Version, io.Writer) *ZEncoder
+pkg vom, func NewVersionedZEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *ZEncoder
+pkg vom, func NewZDecoder(io.Reader) *ZDecoder
+pkg vom, func NewZDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *ZDecoder
+pkg vom, func NewZEncoder(io.Writer) *ZEncoder
+pkg vom, func NewZEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *ZEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VDLReadPrimitive(vdl.Decoder, *Primitive) error
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
-pkg vom, func VersionedXEncode(Version, interface{}) ([]byte, error)
-pkg vom, func XDecode([]byte, interface{}) error
-pkg vom, func XEncode(interface{}) ([]byte, error)
 pkg vom, func XRawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, method (*ControlKind) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*ControlKind) MakeVDLTarget() vdl.Target
@@ -75,6 +72,7 @@ pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*ControlKind) VDLRead(vdl.Decoder) error
 pkg vom, method (*ControlKindTarget) FromEnumLabel(string, *vdl.Type) error
 pkg vom, method (*Decoder) Decode(interface{}) error
+pkg vom, method (*Decoder) Decoder() vdl.Decoder
 pkg vom, method (*Decoder) Ignore() error
 pkg vom, method (*DumpAtom) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*DumpAtom) MakeVDLTarget() vdl.Target
@@ -94,6 +92,7 @@ pkg vom, method (*Dumper) Flush() error
 pkg vom, method (*Dumper) Status()
 pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
+pkg vom, method (*Encoder) Encoder() vdl.Encoder
 pkg vom, method (*PrimitiveTarget) FinishField(vdl.Target, vdl.Target) error
 pkg vom, method (*PrimitiveTarget) FinishFields(vdl.FieldsTarget) error
 pkg vom, method (*PrimitiveTarget) StartField(string) (vdl.Target, vdl.Target, error)
@@ -122,11 +121,9 @@ pkg vom, method (*Version) VDLRead(vdl.Decoder) error
 pkg vom, method (*VersionTarget) FromFloat(float64, *vdl.Type) error
 pkg vom, method (*VersionTarget) FromInt(int64, *vdl.Type) error
 pkg vom, method (*VersionTarget) FromUint(uint64, *vdl.Type) error
-pkg vom, method (*XDecoder) Decode(interface{}) error
-pkg vom, method (*XDecoder) Decoder() vdl.Decoder
-pkg vom, method (*XDecoder) Ignore() error
-pkg vom, method (*XEncoder) Encode(interface{}) error
-pkg vom, method (*XEncoder) Encoder() vdl.Encoder
+pkg vom, method (*ZDecoder) Decode(interface{}) error
+pkg vom, method (*ZDecoder) Ignore() error
+pkg vom, method (*ZEncoder) Encode(interface{}) error
 pkg vom, method (ControlKind) String() string
 pkg vom, method (ControlKind) VDLIsZero() bool
 pkg vom, method (ControlKind) VDLWrite(vdl.Encoder) error
@@ -265,7 +262,7 @@ pkg vom, type Version byte
 pkg vom, type VersionTarget struct
 pkg vom, type VersionTarget struct, Value *Version
 pkg vom, type VersionTarget struct, embedded vdl.TargetBase
-pkg vom, type XDecoder struct
-pkg vom, type XEncoder struct
+pkg vom, type ZDecoder struct
+pkg vom, type ZEncoder struct
 pkg vom, var ControlKindAll [...]ControlKind
 pkg vom, var DumpKindAll [...]DumpKind

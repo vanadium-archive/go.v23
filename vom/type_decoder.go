@@ -52,7 +52,7 @@ func newTypeDecoderInternal(buf *decbuf) *TypeDecoder {
 	td := &TypeDecoder{
 		idToType: make(map[TypeId]*vdl.Type),
 		idToWire: make(map[TypeId]wireType),
-		dec:      &xDecoder{old: &Decoder{buf: buf}},
+		dec:      &xDecoder{old: &ZDecoder{buf: buf}},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td
@@ -62,7 +62,7 @@ func newDerivedTypeDecoderInternal(buf *decbuf, orig *TypeDecoder) *TypeDecoder 
 	td := &TypeDecoder{
 		idToType: orig.idToType,
 		idToWire: orig.idToWire,
-		dec:      &xDecoder{old: &Decoder{buf: buf}},
+		dec:      &xDecoder{old: &ZDecoder{buf: buf}},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td

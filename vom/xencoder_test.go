@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build newvdltests
-
 package vom_test
 
 import (
@@ -33,7 +31,7 @@ func testXEncoder(t *testing.T, pre string, test vomtest.Entry, value interface{
 	{
 		var buf bytes.Buffer
 		name := fmt.Sprintf("%s %s", pre, test.Name())
-		enc := vom.NewVersionedXEncoder(test.Version, &buf)
+		enc := vom.NewVersionedEncoder(test.Version, &buf)
 		if err := enc.Encode(value); err != nil {
 			t.Errorf("%s: Encode failed: %v", name, err)
 			return
@@ -48,7 +46,7 @@ func testXEncoder(t *testing.T, pre string, test vomtest.Entry, value interface{
 		var buf, bufT bytes.Buffer
 		name := fmt.Sprintf("%s (with TypeEncoder) %s", pre, test.Name())
 		encT := vom.NewVersionedTypeEncoder(test.Version, &bufT)
-		enc := vom.NewVersionedXEncoderWithTypeEncoder(test.Version, &buf, encT)
+		enc := vom.NewVersionedEncoderWithTypeEncoder(test.Version, &buf, encT)
 		if err := enc.Encode(value); err != nil {
 			t.Errorf("%s: Encode failed: %v", name, err)
 			return
@@ -65,7 +63,7 @@ func testXEncoder(t *testing.T, pre string, test vomtest.Entry, value interface{
 	// Test single-shot vom.XEncode.
 	{
 		name := fmt.Sprintf("%s (single-shot) %s", pre, test.Name())
-		buf, err := vom.VersionedXEncode(test.Version, value)
+		buf, err := vom.VersionedEncode(test.Version, value)
 		if err != nil {
 			t.Errorf("%s: Encode failed: %v", name, err)
 			return

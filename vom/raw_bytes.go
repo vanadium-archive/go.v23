@@ -52,12 +52,12 @@ func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 // TODO(toddw): Remove this function after we've switched to XEncoder and
 // XDecoder, and thus it's no longer needed.
 func XRawBytesFromValue(value interface{}) (*RawBytes, error) {
-	data, err := VersionedXEncode(DefaultVersion, value)
+	data, err := VersionedEncode(DefaultVersion, value)
 	if err != nil {
 		return nil, err
 	}
 	rb := new(RawBytes)
-	if err := XDecode(data, rb); err != nil {
+	if err := Decode(data, rb); err != nil {
 		return nil, err
 	}
 	return rb, nil
@@ -114,11 +114,11 @@ func (rb *RawBytes) FillVDLTarget(target vdl.Target, _ *vdl.Type) error {
 		return vdl.FromValue(target, vdl.ZeroValue(vdl.AnyType))
 	}
 	var buf bytes.Buffer
-	enc := NewVersionedEncoder(rb.Version, &buf)
+	enc := NewVersionedZEncoder(rb.Version, &buf)
 	if err := enc.enc.encodeRaw(rb); err != nil {
 		return err
 	}
-	dec := NewDecoder(bytes.NewReader(buf.Bytes()))
+	dec := NewZDecoder(bytes.NewReader(buf.Bytes()))
 	return dec.decodeToTarget(target)
 }
 
@@ -133,7 +133,7 @@ func (rb *RawBytes) IsNil() bool {
 }
 
 func (rb *RawBytes) Decoder() vdl.Decoder {
-	dec := NewDecoder(bytes.NewReader(rb.Data))
+	dec := NewZDecoder(bytes.NewReader(rb.Data))
 	dec.buf.version = rb.Version
 	dec.refTypes.tids = make([]TypeId, len(rb.RefTypes))
 	for i, refType := range rb.RefTypes {
@@ -235,7 +235,7 @@ func (r *rbTarget) start(tt *vdl.Type) error {
 	}
 
 	r.buf = bytes.NewBuffer(nil)
-	e := NewEncoder(r.buf)
+	e := NewZEncoder(r.buf)
 	r.enc = &e.enc
 	if _, err := r.enc.writer.Write([]byte{byte(r.enc.version)}); err != nil {
 		return err

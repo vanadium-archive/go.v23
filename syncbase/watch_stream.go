@@ -6,14 +6,12 @@ package syncbase
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
 
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
-	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
 
@@ -106,12 +104,8 @@ func ToWatchChange(c watch.Change) WatchChange {
 	}
 	// Parse the store change.
 	var storeChange wire.StoreChange
-	rtarget, err := vdl.ReflectTarget(reflect.ValueOf(&storeChange))
-	if err != nil {
-		panic(err)
-	}
-	if err := c.Value.FillVDLTarget(rtarget, c.Value.Type); err != nil {
-		panic(err)
+	if err := c.Value.ToValue(&storeChange); err != nil {
+		panic(fmt.Errorf("ToValue failed: %v, RawBytes: %#v", err, c.Value))
 	}
 	// Parse the state.
 	var changeType ChangeType

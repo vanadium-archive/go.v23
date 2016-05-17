@@ -42,7 +42,7 @@ func NewVersionedTypeEncoder(version Version, w io.Writer) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,
-		enc:             newXEncoderForTypes(version, w),
+		enc:             newEncoderForTypes(version, w),
 		sentVersionByte: false,
 	}
 }

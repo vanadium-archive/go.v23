@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build newvdltests
-
 package vom_test
 
 import (
@@ -105,12 +103,12 @@ func testConvert(target, source interface{}, encT *vom.TypeEncoder, decT *vom.Ty
 
 func testConvertCoder(target, source interface{}) error {
 	var buf bytes.Buffer
-	enc := vom.NewXEncoder(&buf)
+	enc := vom.NewEncoder(&buf)
 	if err := enc.Encode(source); err != nil {
 		return fmt.Errorf("Encode failed: %v", err)
 	}
 	data := buf.Bytes()
-	dec := vom.NewXDecoder(&buf)
+	dec := vom.NewDecoder(&buf)
 	if err := dec.Decode(target); err != nil {
 		return fmt.Errorf("Decode failed: %v\nDATA %x", err, data)
 	}
@@ -118,11 +116,11 @@ func testConvertCoder(target, source interface{}) error {
 }
 
 func testConvertSingleShot(target, source interface{}) error {
-	data, err := vom.XEncode(source)
+	data, err := vom.Encode(source)
 	if err != nil {
 		return fmt.Errorf("(single-shot) Encode failed: %v", err)
 	}
-	if err := vom.XDecode(data, target); err != nil {
+	if err := vom.Decode(data, target); err != nil {
 		return fmt.Errorf("(single-shot) Decode failed: %v\nDATA %x", err, data)
 	}
 	return nil
@@ -130,12 +128,12 @@ func testConvertSingleShot(target, source interface{}) error {
 
 func testConvertWithTypeCoder(target, source interface{}, encT *vom.TypeEncoder, decT *vom.TypeDecoder) error {
 	var buf bytes.Buffer
-	enc := vom.NewXEncoderWithTypeEncoder(&buf, encT)
+	enc := vom.NewEncoderWithTypeEncoder(&buf, encT)
 	if err := enc.Encode(source); err != nil {
 		return fmt.Errorf("(with TypeEncoder) Encode failed: %v", err)
 	}
 	data := buf.Bytes()
-	dec := vom.NewXDecoderWithTypeDecoder(&buf, decT)
+	dec := vom.NewDecoderWithTypeDecoder(&buf, decT)
 	if err := dec.Decode(target); err != nil {
 		return fmt.Errorf("(with TypeDecoder) Decode failed: %v\nDATA %x", err, data)
 	}

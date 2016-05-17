@@ -53,9 +53,9 @@ var (
 	_ vdl.FieldsTarget = (*encoder)(nil)
 )
 
-// Encoder manages the transmission and marshaling of typed values to the other
+// ZEncoder manages the transmission and marshaling of typed values to the other
 // side of a connection.
-type Encoder struct {
+type ZEncoder struct {
 	// The underlying implementation is hidden to avoid exposing the Target
 	// interface methods.
 	enc encoder
@@ -90,34 +90,34 @@ type typeStackEntry struct {
 	anyStartRef *anyStartRef // only non-nil for any
 }
 
-// NewEncoder returns a new Encoder that writes to the given writer in the
+// NewZEncoder returns a new Encoder that writes to the given writer in the
 // binary format. The binary format is compact and fast.
-func NewEncoder(w io.Writer) *Encoder {
-	return NewVersionedEncoder(DefaultVersion, w)
+func NewZEncoder(w io.Writer) *ZEncoder {
+	return NewVersionedZEncoder(DefaultVersion, w)
 }
 
-// NewVersionedEncoder returns a new Encoder that writes to the given writer with
+// NewVersionedZEncoder returns a new Encoder that writes to the given writer with
 // the specified VOM version.
-func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
-	typeEnc := newTypeEncoderInternal(version, newXEncoderForTypes(version, w))
-	return NewVersionedEncoderWithTypeEncoder(version, w, typeEnc)
+func NewVersionedZEncoder(version Version, w io.Writer) *ZEncoder {
+	typeEnc := newTypeEncoderInternal(version, newEncoderForTypes(version, w))
+	return NewVersionedZEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
-// NewEncoderWithTypeEncoder returns a new Encoder that writes to the given
+// NewZEncoderWithTypeEncoder returns a new ZEncoder that writes to the given
 // writer in the binary format. Types will be encoded separately through the
 // given typeEncoder.
-func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
-	return NewVersionedEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
+func NewZEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *ZEncoder {
+	return NewVersionedZEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
 }
 
-// NewVersionedEncoderWithTypeEncoder returns a new Encoder that writes to the given
+// NewVersionedZEncoderWithTypeEncoder returns a new ZEncoder that writes to the given
 // writer in the binary format. Types will be encoded separately through the
 // given typeEncoder.
-func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *Encoder {
+func NewVersionedZEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *ZEncoder {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
 	}
-	return &Encoder{encoder{
+	return &ZEncoder{encoder{
 		writer:          w,
 		buf:             newEncbuf(),
 		typeStack:       make([]typeStackEntry, 0, 10),
@@ -140,7 +140,7 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 //
 // Encode(nil) is a special case that encodes the zero value of the any type.
 // See the discussion of zero values in the Value documentation.
-func (e *Encoder) Encode(v interface{}) error {
+func (e *ZEncoder) Encode(v interface{}) error {
 	if e.enc.version == Version80 {
 		return verror.New(errDeprecatedVersionUsed, nil)
 	}

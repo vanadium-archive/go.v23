@@ -13,7 +13,7 @@ import (
 )
 
 // TODO(toddw) Reduce the number of functions and optimize.
-const pkgPath = "v.io/v23/vom3"
+const pkgPath = "v.io/v23/vom"
 
 var (
 	errInvalid                = verror.Register(pkgPath+".errInvalid", verror.NoRetry, "{1:}{2:} vom: invalid encoding{:_}")

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !newvdltests
-
 package vom
 
 import (
@@ -462,10 +460,10 @@ func TestConvertRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
 		var rb *RawBytes
 		if err := vdl.Convert(&rb, test.goValue); err != nil {
-			t.Errorf("vdl.Convert %#v to RawBytes: %v", test.goValue, err)
+			t.Errorf("%s: Convert failed: %v", test.name, err)
 		}
-		if !reflect.DeepEqual(rb, &test.rawBytes) {
-			t.Errorf("vdl.Convert to RawBytes %s: got %v, want %v", test.name, rb, test.rawBytes)
+		if got, want := rb, &test.rawBytes; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", test.name, got, want)
 		}
 	}
 }
@@ -477,12 +475,13 @@ type structAnyInterface struct {
 func TestConvertRawBytesWrapped(t *testing.T) {
 	for _, test := range rawBytesTestCases {
 		var any structAny
-		if err := vdl.Convert(&any, structAnyInterface{test.goValue}); err != nil {
-			t.Errorf("vdl.Convert %#v to RawBytes: %v", structAnyInterface{test.goValue}, err)
+		src := structAnyInterface{test.goValue}
+		if err := vdl.Convert(&any, src); err != nil {
+			t.Errorf("%s: Convert failed: %v", test.name, err)
 		}
 		got, want := any, structAny{&test.rawBytes}
 		if !reflect.DeepEqual(got, want) {
-			t.Errorf("vdl.Convert to RawBytes %s: got %v, want %v", test.name, got, want)
+			t.Errorf("%s\nGOT  %v\nWANT %v", test.name, got, want)
 		}
 	}
 }
@@ -647,7 +646,7 @@ func TestRawBytesWriter(t *testing.T) {
 		}
 
 		var buf bytes.Buffer
-		enc := NewXEncoder(&buf)
+		enc := NewEncoder(&buf)
 		if err := RawBytesOf(test.Value).VDLWrite(enc.Encoder()); err != nil {
 			t.Errorf("%s: error in transcode: %v", test.Name, err)
 			continue

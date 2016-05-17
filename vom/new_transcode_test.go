@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build newvdltests
-
 package vom_test
 
 import (
@@ -18,8 +16,8 @@ import (
 func TestTranscodeXDecoderToXEncoder(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := vom.NewVersionedXEncoder(test.Version, &buf)
-		dec := vom.NewXDecoder(bytes.NewReader(test.Bytes()))
+		enc := vom.NewVersionedEncoder(test.Version, &buf)
+		dec := vom.NewDecoder(bytes.NewReader(test.Bytes()))
 		if err := vdl.Transcode(enc.Encoder(), dec.Decoder()); err != nil {
 			t.Errorf("%s: Transcode failed: %v", test.Name(), err)
 			continue
@@ -34,7 +32,7 @@ func TestTranscodeXDecoderToXEncoder(t *testing.T) {
 func TestTranscodeVDLValueToXEncoder(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := vom.NewXEncoder(&buf)
+		enc := vom.NewEncoder(&buf)
 		if err := vdl.Write(enc.Encoder(), test.Value.Interface()); err != nil {
 			t.Errorf("%s: vdl.Write failed: %v", test.Name(), err)
 			continue

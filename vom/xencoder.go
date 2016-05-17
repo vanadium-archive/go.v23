@@ -19,37 +19,37 @@ var (
 
 // Encoder manages the transmission and marshaling of typed values to the other
 // side of a connection.
-type XEncoder struct {
+type Encoder struct {
 	enc xEncoder
 }
 
 // NewEncoder returns a new Encoder that writes to the given writer in the VOM
 // binary format.  The binary format is compact and fast.
-func NewXEncoder(w io.Writer) *XEncoder {
-	return NewVersionedXEncoder(DefaultVersion, w)
+func NewEncoder(w io.Writer) *Encoder {
+	return NewVersionedEncoder(DefaultVersion, w)
 }
 
 // NewVersionedEncoder returns a new Encoder that writes to the given writer with
 // the specified version.
-func NewVersionedXEncoder(version Version, w io.Writer) *XEncoder {
-	typeEnc := newTypeEncoderInternal(version, newXEncoderForTypes(version, w))
-	return NewVersionedXEncoderWithTypeEncoder(version, w, typeEnc)
+func NewVersionedEncoder(version Version, w io.Writer) *Encoder {
+	typeEnc := newTypeEncoderInternal(version, newEncoderForTypes(version, w))
+	return NewVersionedEncoderWithTypeEncoder(version, w, typeEnc)
 }
 
 // NewEncoderWithTypeEncoder returns a new Encoder that writes to the given
 // writer, where types are encoded separately through the typeEnc.
-func NewXEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *XEncoder {
-	return NewVersionedXEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
+func NewEncoderWithTypeEncoder(w io.Writer, typeEnc *TypeEncoder) *Encoder {
+	return NewVersionedEncoderWithTypeEncoder(DefaultVersion, w, typeEnc)
 }
 
 // NewVersionedEncoderWithTypeEncoder returns a new Encoder that writes to the
 // given writer with the specified version, where types are encoded separately
 // through the typeEnc.
-func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *XEncoder {
+func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *TypeEncoder) *Encoder {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
 	}
-	return &XEncoder{xEncoder{
+	return &Encoder{xEncoder{
 		writer:          w,
 		buf:             newEncbuf(),
 		typeEnc:         typeEnc,
@@ -58,10 +58,10 @@ func NewVersionedXEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *
 	}}
 }
 
-// TODO(toddw): Flip useOldEncoderForTypes=false to enable XEncoder for types.
-const useOldEncoderForTypes = true
+// TODO(toddw): Flip useOldEncoderForTypes=false to enable Encoder for types.
+const useOldEncoderForTypes = false
 
-func newXEncoderForTypes(version Version, w io.Writer) *xEncoder {
+func newEncoderForTypes(version Version, w io.Writer) *xEncoder {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
 	}
@@ -106,13 +106,13 @@ func newXEncoderForRawBytes(w io.Writer) *xEncoder {
 }
 
 // Encoder returns e as a vdl.Encoder.
-func (e *XEncoder) Encoder() vdl.Encoder {
+func (e *Encoder) Encoder() vdl.Encoder {
 	return &e.enc
 }
 
 // Encode transmits the value v.  Values of type T are encodable as long as the
 // T is a valid vdl type.
-func (e *XEncoder) Encode(v interface{}) error {
+func (e *Encoder) Encode(v interface{}) error {
 	return vdl.Write(&e.enc, v)
 }
 

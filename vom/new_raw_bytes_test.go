@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build newvdltests
-
 package vom_test
 
 import (
@@ -23,7 +21,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		// Interleaved
 		rb := vom.RawBytes{}
 		interleavedReader := bytes.NewReader(test.Bytes())
-		if err := vom.NewXDecoder(interleavedReader).Decode(&rb); err != nil {
+		if err := vom.NewDecoder(interleavedReader).Decode(&rb); err != nil {
 			t.Errorf("%s: decode failed: %v", test.Name(), err)
 			continue
 		}
@@ -33,7 +31,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		}
 
 		var out bytes.Buffer
-		enc := vom.NewVersionedXEncoder(test.Version, &out)
+		enc := vom.NewVersionedEncoder(test.Version, &out)
 		if err := enc.Encode(&rb); err != nil {
 			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
 			continue
@@ -49,7 +47,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		typeDec.Start()
 		defer typeDec.Stop()
 		valueReader := bytes.NewReader(test.ValueBytes())
-		if err := vom.NewXDecoderWithTypeDecoder(valueReader, typeDec).Decode(&rb); err != nil {
+		if err := vom.NewDecoderWithTypeDecoder(valueReader, typeDec).Decode(&rb); err != nil {
 			t.Errorf("%s: decode failed: %v", test.Name(), err)
 			continue
 		}
@@ -65,7 +63,7 @@ func TestXRawBytesDecodeEncode(t *testing.T) {
 		out.Reset()
 		var typeOut bytes.Buffer
 		typeEnc := vom.NewVersionedTypeEncoder(test.Version, &typeOut)
-		enc = vom.NewVersionedXEncoderWithTypeEncoder(test.Version, &out, typeEnc)
+		enc = vom.NewVersionedEncoderWithTypeEncoder(test.Version, &out, typeEnc)
 		if err := enc.Encode(&rb); err != nil {
 			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
 			continue
@@ -123,7 +121,7 @@ func TestXRawBytesDecoder(t *testing.T) {
 func TestXRawBytesWriter(t *testing.T) {
 	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := vom.NewXEncoder(&buf)
+		enc := vom.NewEncoder(&buf)
 		rb, err := vom.XRawBytesFromValue(test.Value.Interface())
 		if err != nil {
 			t.Errorf("%s: XRawBytesFromValue failed: %v", test.Name(), err)

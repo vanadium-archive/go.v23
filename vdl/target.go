@@ -132,7 +132,7 @@ type FieldsTarget interface {
 // ReflectTarget(reflect.ValueOf(dst)).FromReflect(reflect.ValueOf(src)).
 func Convert(dst, src interface{}) error {
 	// TODO(bprosnitz) Flip useOldConvert=false to enable the new convert.
-	const useOldConvert = true
+	const useOldConvert = false
 	if useOldConvert {
 		target, err := ReflectTarget(reflect.ValueOf(dst))
 		if err != nil {
@@ -155,7 +155,7 @@ func ValueOf(v interface{}) *Value {
 
 // ValueFromReflect returns the value corresponding to rv.
 func ValueFromReflect(rv reflect.Value) (*Value, error) {
-	const useOldConvert = true
+	const useOldConvert = false
 	if useOldConvert {
 		var result *Value
 		target, err := ReflectTarget(reflect.ValueOf(&result))
