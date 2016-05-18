@@ -17,64 +17,137 @@ import (
 	"v.io/v23/vom"
 )
 
-func benchmarkSingleShotEncode(b *testing.B, value interface{}) {
+func vomEncode(b *testing.B, value interface{}) {
+	// Try encoding once to make sure it succeeds.
+	if _, err := vom.Encode(value); err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		vom.Encode(value)
 	}
 }
 
-func benchmarkSingleShotDecode(b *testing.B, tofill, value interface{}) {
-	bytes, _ := vom.Encode(value)
+func vomDecode(b *testing.B, tofill, value interface{}) {
+	// Encode once to get the data, and decode once to make sure it succeeds.
+	data, err := vom.Encode(value)
+	if err != nil {
+		b.Fatal(err)
+	}
+	if err := vom.Decode(data, tofill); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vom.Decode(bytes, tofill)
+		vom.Decode(data, tofill)
 	}
 }
 
-func benchmarkRepeatedEncode(b *testing.B, value interface{}) {
+func vomEncodeMany(b *testing.B, value interface{}) {
 	var buf bytes.Buffer
 	enc := vom.NewEncoder(&buf)
-	enc.Encode(value) // encode the type
+	// Encode once first to write the type and value.
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		buf.Reset()
 		enc.Encode(value)
 	}
 }
 
-func benchmarkRepeatedDecode(b *testing.B, tofill, value interface{}) {
+func vomDecodeMany(b *testing.B, tofill, value interface{}) {
 	var buf bytes.Buffer
 	enc := vom.NewEncoder(&buf)
-	for i := 0; i <= b.N; i++ {
-		enc.Encode(value)
+	// Encode once first to write the type and value.
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
 	}
-	dec := vom.NewDecoder(&buf)
-	dec.Decode(tofill) // decode the type
+	// Capture the offset, and encode again to write just the value.
+	valueOffset := int64(buf.Len())
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
+	}
+	// Decode the type and value once first.
+	reader := bytes.NewReader(buf.Bytes())
+	dec := vom.NewDecoder(reader)
+	if err := dec.Decode(tofill); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		reader.Seek(valueOffset, 0)
 		dec.Decode(tofill)
 	}
 }
 
-func benchmarkGobEncode(b *testing.B, value interface{}) {
+func gobEncode(b *testing.B, value interface{}) {
+	// Try encoding once to make sure it succeeds.
 	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	enc.Encode(value) // encode the type
+	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		gob.NewEncoder(&buf).Encode(value)
+	}
+}
+
+func gobDecode(b *testing.B, tofill, value interface{}) {
+	// Encode once to get the data, and decode once to make sure it succeeds.
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
+		b.Fatal(err)
+	}
+	reader := bytes.NewReader(buf.Bytes())
+	if err := gob.NewDecoder(reader).Decode(tofill); err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		reader.Seek(0, 0)
+		gob.NewDecoder(reader).Decode(tofill)
+	}
+}
+
+func gobEncodeMany(b *testing.B, value interface{}) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	// Encode once first to write the type.
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
+	}
+	enc.Encode(value)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
 		enc.Encode(value)
 	}
 }
 
-func benchmarkGobDecode(b *testing.B, tofill, value interface{}) {
+func gobDecodeMany(b *testing.B, tofill, value interface{}) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
-	for i := 0; i <= b.N; i++ {
-		enc.Encode(value)
+	// Encode once first to write the type and value.
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
 	}
-	dec := gob.NewDecoder(&buf)
-	dec.Decode(tofill) // decode the type
+	// Capture the offset, and encode again to write just the value.
+	valueOffset := int64(buf.Len())
+	if err := enc.Encode(value); err != nil {
+		b.Fatal(err)
+	}
+	// Decode the type and value once first.
+	reader := bytes.NewReader(buf.Bytes())
+	dec := gob.NewDecoder(reader)
+	if err := dec.Decode(tofill); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		reader.Seek(valueOffset, 0)
 		dec.Decode(tofill)
 	}
 }

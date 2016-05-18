@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -56,155 +57,199 @@ import (
 // TODO(bprosnitz) Also generate JSON benchmarks with both our JSON encoder / decoder
 // and the built-in go one for comparison.
 type GeneratorEntry struct {
-	Name         string
-	ReflectValue string
-	ReflectType  string
-	GenValue     string
-	GenType      string
+	Name  string
+	Type  string
+	Value string
+	Gob   bool
 }
 
 var benchmarks []GeneratorEntry = []GeneratorEntry{
 	{
-		Name:         `Number`,
-		ReflectValue: `XNumber(2)`,
-		ReflectType:  `XNumber`,
-		GenValue:     `VNumber(2)`,
-		GenType:      `VNumber`,
+		Name:  `XNumber`,
+		Type:  `XNumber`,
+		Value: `XNumber(2)`,
 	},
 	{
-		Name:         `SmallString`,
-		ReflectValue: `XString("abc")`,
-		ReflectType:  `XString`,
-		GenValue:     `VString("abc")`,
-		GenType:      `VString`,
+		Name:  `VNumber`,
+		Type:  `VNumber`,
+		Value: `VNumber(2)`,
 	},
 	{
-		Name:         `LargeString`,
-		ReflectValue: `XString(createString(65536))`,
-		ReflectType:  `XString`,
-		GenValue:     `VString(createString(65536))`,
-		GenType:      `VString`,
+		Name:  `XStringSmall`,
+		Type:  `XString`,
+		Value: `XString("abc")`,
 	},
 	{
-		Name:     `Enum`,
-		GenValue: `VEnumA`,
-		GenType:  `VEnum`,
+		Name:  `VStringSmall`,
+		Type:  `VString`,
+		Value: `VString("abc")`,
 	},
 	{
-		Name:         `SmallByteList`,
-		ReflectValue: `XByteList{1, 2, 3}`,
-		ReflectType:  `XByteList`,
-		GenValue:     `VByteList{1, 2, 3}`,
-		GenType:      `VByteList`,
+		Name:  `XStringLarge`,
+		Type:  `XString`,
+		Value: `XString(createString(65536))`,
 	},
 	{
-		Name:         `LargeByteList`,
-		ReflectValue: `XByteList(createByteList(65536))`,
-		ReflectType:  `XByteList`,
-		GenValue:     `VByteList(createByteList(65536))`,
-		GenType:      `VByteList`,
+		Name:  `VStringLarge`,
+		Type:  `VString`,
+		Value: `VString(createString(65536))`,
 	},
 	{
-		Name:         `ByteArray`,
-		ReflectValue: `XByteArray{1, 2, 3}`,
-		ReflectType:  `XByteArray`,
-		GenValue:     `VByteArray{1, 2, 3}`,
-		GenType:      `VByteArray`,
+		Name:  `VEnum`,
+		Type:  `VEnum`,
+		Value: `VEnumA`,
 	},
 	{
-		Name:         `Array`,
-		ReflectValue: `XArray{1, 2, 3}`,
-		ReflectType:  `XArray`,
-		GenValue:     `VArray{1, 2, 3}`,
-		GenType:      `VArray`,
+		Name:  `XByteListSmall`,
+		Type:  `XByteList`,
+		Value: `XByteList{1, 2, 3}`,
 	},
 	{
-		Name:         `SmallList`,
-		ReflectValue: `XList{1, 2, 3}`,
-		ReflectType:  `XList`,
-		GenValue:     `VList{1, 2, 3}`,
-		GenType:      `VList`,
+		Name:  `VByteListSmall`,
+		Type:  `VByteList`,
+		Value: `VByteList{1, 2, 3}`,
 	},
 	{
-		Name:         `LargeList`,
-		ReflectValue: `XList(createList(65536))`,
-		ReflectType:  `XList`,
-		GenValue:     `VList(createList(65536))`,
-		GenType:      `VList`,
+		Name:  `XByteListLarge`,
+		Type:  `XByteList`,
+		Value: `XByteList(createByteList(65536))`,
+	},
+	{
+		Name:  `VByteListLarge`,
+		Type:  `VByteList`,
+		Value: `VByteList(createByteList(65536))`,
+	},
+	{
+		Name:  `XByteArray`,
+		Type:  `XByteArray`,
+		Value: `XByteArray{1, 2, 3}`,
+	},
+	{
+		Name:  `VByteArray`,
+		Type:  `VByteArray`,
+		Value: `VByteArray{1, 2, 3}`,
+	},
+	{
+		Name:  `XArray`,
+		Type:  `XArray`,
+		Value: `XArray{1, 2, 3}`,
+	},
+	{
+		Name:  `VArray`,
+		Type:  `VArray`,
+		Value: `VArray{1, 2, 3}`,
+	},
+	{
+		Name:  `XListSmall`,
+		Type:  `XList`,
+		Value: `XList{1, 2, 3}`,
+	},
+	{
+		Name:  `VListSmall`,
+		Type:  `VList`,
+		Value: `VList{1, 2, 3}`,
+	},
+	{
+		Name:  `XListLarge`,
+		Type:  `XList`,
+		Value: `XList(createList(65536))`,
+	},
+	{
+		Name:  `VListLarge`,
+		Type:  `VList`,
+		Value: `VList(createList(65536))`,
 	},
 	// We will be handling data structures with a lot of anys for JSON:
 	{
-		Name:         `SmallListAny`,
-		ReflectValue: `XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}`,
-		ReflectType:  `XListAny`,
-		GenValue:     `VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}`,
-		GenType:      `VListAny`,
+		Name:  `XListAnySmall`,
+		Type:  `XListAny`,
+		Value: `XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}`,
 	},
 	{
-		Name:         `LargeListAny`,
-		ReflectValue: `XListAny(createListAny(65536))`,
-		ReflectType:  `XListAny`,
-		GenValue:     `VListAny(createListAny(65536))`,
-		GenType:      `VListAny`,
+		Name:  `VListAnySmall`,
+		Type:  `VListAny`,
+		Value: `VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}`,
 	},
 	{
-		Name:     `Set`,
-		GenValue: `VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}}`,
-		GenType:  `VSet`,
+		Name:  `XListAnyLarge`,
+		Type:  `XListAny`,
+		Value: `XListAny(createListAny(65536))`,
 	},
 	{
-		Name:         `Map`,
-		ReflectValue: `XMap{"A": true, "B": false, "C": true}`,
-		ReflectType:  `XMap`,
-		GenValue:     `VMap{"A": true, "B": false, "C": true}`,
-		GenType:      `VMap`,
+		Name:  `VListAnyLarge`,
+		Type:  `VListAny`,
+		Value: `VListAny(createListAny(65536))`,
 	},
 	{
-		Name:         `SmallStruct`,
-		ReflectValue: `XSmallStruct{1, "A", true}`,
-		ReflectType:  `XSmallStruct`,
-		GenValue:     `VSmallStruct{1, "A", true}`,
-		GenType:      `VSmallStruct`,
+		Name:  `VSet`,
+		Type:  `VSet`,
+		Value: `VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}}`,
 	},
 	{
-		Name:         `LargeStruct`,
-		ReflectValue: `VLargeStruct{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}`,
-		ReflectType:  `VLargeStruct`,
-		GenValue:     `VLargeStruct{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}`,
-		GenType:      `VLargeStruct`,
+		Name:  `XMap`,
+		Type:  `XMap`,
+		Value: `XMap{"A": true, "B": false, "C": true}`,
 	},
 	{
-		Name:         `LargeStructZeroFields`,
-		ReflectValue: `VLargeStruct{}`,
-		ReflectType:  `VLargeStruct`,
-		GenValue:     `VLargeStruct{}`,
-		GenType:      `VLargeStruct`,
+		Name:  `VMap`,
+		Type:  `VMap`,
+		Value: `VMap{"A": true, "B": false, "C": true}`,
 	},
 	{
-		Name:     `SmallUnion`,
-		GenValue: `VSmallUnionA{1}`,
-		GenType:  `VSmallUnion`,
-	},
-
-	{
-		Name:         `Time`,
-		ReflectValue: `time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)`,
-		ReflectType:  `time.Time`,
-	},
-
-	{
-		Name:         `Blessings`,
-		ReflectValue: `createTypicalBlessings()`,
-		ReflectType:  `security.Blessings`,
+		Name:  `XSmallStruct`,
+		Type:  `XSmallStruct`,
+		Value: `XSmallStruct{1, "A", true}`,
 	},
 	{
-		Name:     `RpcRequestZero`,
-		GenValue: `rpc.Request{}`,
-		GenType:  `rpc.Request`,
+		Name:  `VSmallStruct`,
+		Type:  `VSmallStruct`,
+		Value: `VSmallStruct{1, "A", true}`,
 	},
 	{
-		Name: `RpcRequestFull`,
-		GenValue: `rpc.Request{
+		Name:  `XLargeStruct`,
+		Type:  `XLargeStruct`,
+		Value: `XLargeStruct{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}`,
+	},
+	{
+		Name:  `VLargeStruct`,
+		Type:  `VLargeStruct`,
+		Value: `VLargeStruct{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50}`,
+	},
+	{
+		Name:  `XLargeStructZero`,
+		Type:  `XLargeStruct`,
+		Value: `XLargeStruct{}`,
+	},
+	{
+		Name:  `VLargeStructZero`,
+		Type:  `VLargeStruct`,
+		Value: `VLargeStruct{}`,
+	},
+	{
+		Name:  `VSmallUnion`,
+		Type:  `VSmallUnion`,
+		Value: `VSmallUnionA{1}`,
+	},
+	{
+		Name:  `Time`,
+		Type:  `time.Time`,
+		Value: `time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)`,
+		Gob:   true,
+	},
+	{
+		Name:  `Blessings`,
+		Type:  `security.Blessings`,
+		Value: `createTypicalBlessings()`,
+	},
+	{
+		Name:  `RPCRequestZero`,
+		Type:  `rpc.Request`,
+		Value: `rpc.Request{}`,
+	},
+	{
+		Name: `RPCRequestFull`,
+		Type: `rpc.Request`,
+		Value: `rpc.Request{
 	Suffix: "a suffix",
 	Method: "a method",
 	NumPosArgs: 23,
@@ -221,16 +266,16 @@ var benchmarks []GeneratorEntry = []GeneratorEntry{
 	},
 	Language: "en-us",
 }`,
-		GenType: `rpc.Request`,
 	},
 	{
-		Name:     `RpcResponseZero`,
-		GenValue: `rpc.Response{}`,
-		GenType:  `rpc.Response`,
+		Name:  `RPCResponseZero`,
+		Type:  `rpc.Response`,
+		Value: `rpc.Response{}`,
 	},
 	{
-		Name: `RpcResponseFull`,
-		GenValue: `rpc.Response{
+		Name: `RPCResponseFull`,
+		Type: `rpc.Response`,
+		Value: `rpc.Response{
 	Error: errors.New("testerror"),
 	EndStreamResults: true,
 	NumPosResults: 4,
@@ -256,61 +301,69 @@ var benchmarks []GeneratorEntry = []GeneratorEntry{
 		},
 	},
 }`,
-		GenType: `rpc.Response`,
 	},
 }
 
-func genDecodeBenchmark(name, value, t string, isReflect bool) string {
-	var extra string
-	if isReflect {
-		extra = "Reflect"
-	}
+func genVomEncode(name, value string) string {
 	return fmt.Sprintf(`
-func Benchmark%[1]sSingleShotDecode%[2]s(b *testing.B) {
-	var tofill %[4]s
-	benchmarkSingleShotDecode(b, &tofill, %[3]s)
+func BenchmarkVom___Encode_____%[1]s(b *testing.B) {
+	 vomEncode(b, %[2]s)
 }
-func Benchmark%[1]sRepeatedDecode%[2]s(b *testing.B) {
-	var tofill %[4]s
-	benchmarkRepeatedDecode(b, &tofill, %[3]s)
-}`, name, extra, value, t)
+func BenchmarkVom___EncodeMany_%[1]s(b *testing.B) {
+	vomEncodeMany(b, %[2]s)
+}`, name, value)
 }
 
-func genEncodeBenchmark(name, value string, isReflect bool) string {
-	var extra string
-	if isReflect {
-		extra = "Reflect"
-	}
+func genVomDecode(name, typ, value string) string {
 	return fmt.Sprintf(`
-func Benchmark%[1]sSingleShotEncode%[2]s(b *testing.B) {
-	 benchmarkSingleShotEncode(b, %[3]s)
+func BenchmarkVom___Decode_____%[1]s(b *testing.B) {
+	var tofill %[2]s
+	vomDecode(b, &tofill, %[3]s)
 }
-func Benchmark%[1]sRepeatedEncode%[2]s(b *testing.B) {
-	benchmarkRepeatedEncode(b, %[3]s)
-}`, name, extra, value)
+func BenchmarkVom___DecodeMany_%[1]s(b *testing.B) {
+	var tofill %[2]s
+	vomDecodeMany(b, &tofill, %[3]s)
+}`, name, typ, value)
 }
 
-func genGobBenchmark(name, value, t string) string {
+func genGobEncode(name, value string) string {
 	return fmt.Sprintf(`
-func Benchmark%[1]sGobEncode(b *testing.B) {
-	 benchmarkGobEncode(b, %[2]s)
+func BenchmarkGob___Encode_____%[1]s(b *testing.B) {
+	 gobEncode(b, %[2]s)
 }
-func Benchmark%[1]sGobDecode(b *testing.B) {
-	var tofill %[3]s
-	benchmarkGobDecode(b, &tofill, %[2]s)
-}`, name, value, t)
+func BenchmarkGob___EncodeMany_%[1]s(b *testing.B) {
+	 gobEncodeMany(b, %[2]s)
+}`, name, value)
+}
+
+func genGobDecode(name, typ, value string) string {
+	return fmt.Sprintf(`
+func BenchmarkGob___Decode_____%[1]s(b *testing.B) {
+	var tofill %[2]s
+	gobDecode(b, &tofill, %[3]s)
+}
+func BenchmarkGob___DecodeMany_%[1]s(b *testing.B) {
+	var tofill %[2]s
+	gobDecodeMany(b, &tofill, %[3]s)
+}`, name, typ, value)
 }
 
 func genBenchmark(entry GeneratorEntry) string {
 	var str string
-	if entry.ReflectValue != "" {
-		str += genEncodeBenchmark(entry.Name, entry.ReflectValue, true)
-		str += genDecodeBenchmark(entry.Name, entry.ReflectValue, entry.ReflectType, true)
-		str += genGobBenchmark(entry.Name, entry.ReflectValue, entry.ReflectType)
+	str += genVomEncode(entry.Name, entry.Value)
+	if shouldGenGob(entry) {
+		str += genGobEncode(entry.Name, entry.Value)
 	}
-	if entry.GenValue != "" {
-		str += genEncodeBenchmark(entry.Name, entry.GenValue, false)
-		str += genDecodeBenchmark(entry.Name, entry.GenValue, entry.GenType, false)
+	str += genVomDecode(entry.Name, entry.Type, entry.Value)
+	if shouldGenGob(entry) {
+		str += genGobDecode(entry.Name, entry.Type, entry.Value)
 	}
 	return str
+}
+
+func shouldGenGob(entry GeneratorEntry) bool {
+	if entry.Gob {
+		return true
+	}
+	return strings.HasPrefix(entry.Name, "X") && !strings.Contains(entry.Name, "Any")
 }
