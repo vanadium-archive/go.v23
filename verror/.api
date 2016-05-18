@@ -45,9 +45,6 @@ pkg verror, func WireFromNative(*vdl.WireError, error) error
 pkg verror, func WireToNative(vdl.WireError, *E) error
 pkg verror, func WithComponentName(*context.T, string) *context.T
 pkg verror, method (*E) VDLRead(vdl.Decoder) error
-pkg verror, method (*ErrorTarget) FinishFields(vdl.FieldsTarget) error
-pkg verror, method (*ErrorTarget) FromNil(*vdl.Type) error
-pkg verror, method (*ErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
 pkg verror, method (ActionCode) RetryAction() ActionCode
 pkg verror, method (E) Error() string
 pkg verror, method (E) VDLEqual(interface{}) bool
@@ -60,10 +57,6 @@ pkg verror, type E struct, Action ActionCode
 pkg verror, type E struct, ID ID
 pkg verror, type E struct, Msg string
 pkg verror, type E struct, ParamList []interface{}
-pkg verror, type ErrorTarget struct
-pkg verror, type ErrorTarget struct, Value *error
-pkg verror, type ErrorTarget struct, embedded vdl.FieldsTargetBase
-pkg verror, type ErrorTarget struct, embedded vdl.TargetBase
 pkg verror, type ID string
 pkg verror, type IDAction struct
 pkg verror, type IDAction struct, Action ActionCode

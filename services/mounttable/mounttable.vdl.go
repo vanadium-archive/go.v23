@@ -19,7 +19,6 @@
 package mounttable
 
 import (
-	"fmt"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
@@ -38,32 +37,6 @@ type Tag string
 func (Tag) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/mounttable.Tag"`
 }) {
-}
-
-func (m *Tag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string((*m)), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Tag) MakeVDLTarget() vdl.Target {
-	return &TagTarget{Value: m}
-}
-
-type TagTarget struct {
-	Value *Tag
-	vdl.TargetBase
-}
-
-func (t *TagTarget) FromString(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*Tag)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = Tag(src)
-
-	return nil
 }
 
 func (x Tag) VDLIsZero() bool {

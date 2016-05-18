@@ -1,21 +1,7 @@
 pkg binary, const MissingChecksum ideal-string
 pkg binary, const MissingSize int64
-pkg binary, method (*Description) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg binary, method (*Description) MakeVDLTarget() vdl.Target
 pkg binary, method (*Description) VDLRead(vdl.Decoder) error
-pkg binary, method (*DescriptionTarget) FinishField(vdl.Target, vdl.Target) error
-pkg binary, method (*DescriptionTarget) FinishFields(vdl.FieldsTarget) error
-pkg binary, method (*DescriptionTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg binary, method (*DescriptionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg binary, method (*DescriptionTarget) ZeroField(string) error
-pkg binary, method (*PartInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg binary, method (*PartInfo) MakeVDLTarget() vdl.Target
 pkg binary, method (*PartInfo) VDLRead(vdl.Decoder) error
-pkg binary, method (*PartInfoTarget) FinishField(vdl.Target, vdl.Target) error
-pkg binary, method (*PartInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg binary, method (*PartInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg binary, method (*PartInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg binary, method (*PartInfoTarget) ZeroField(string) error
 pkg binary, method (Description) VDLIsZero() bool
 pkg binary, method (Description) VDLWrite(vdl.Encoder) error
 pkg binary, method (PartInfo) VDLIsZero() bool
@@ -23,14 +9,6 @@ pkg binary, method (PartInfo) VDLWrite(vdl.Encoder) error
 pkg binary, type Description struct
 pkg binary, type Description struct, Name string
 pkg binary, type Description struct, Profiles map[string]bool
-pkg binary, type DescriptionTarget struct
-pkg binary, type DescriptionTarget struct, Value *Description
-pkg binary, type DescriptionTarget struct, embedded vdl.FieldsTargetBase
-pkg binary, type DescriptionTarget struct, embedded vdl.TargetBase
 pkg binary, type PartInfo struct
 pkg binary, type PartInfo struct, Checksum string
 pkg binary, type PartInfo struct, Size int64
-pkg binary, type PartInfoTarget struct
-pkg binary, type PartInfoTarget struct, Value *PartInfo
-pkg binary, type PartInfoTarget struct, embedded vdl.FieldsTargetBase
-pkg binary, type PartInfoTarget struct, embedded vdl.TargetBase

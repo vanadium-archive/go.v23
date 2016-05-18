@@ -77,41 +77,6 @@ func (Architecture) __VDLReflect(struct {
 }) {
 }
 
-func (m *Architecture) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Architecture) MakeVDLTarget() vdl.Target {
-	return &ArchitectureTarget{Value: m}
-}
-
-type ArchitectureTarget struct {
-	Value *Architecture
-	vdl.TargetBase
-}
-
-func (t *ArchitectureTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*Architecture)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Amd64":
-		*t.Value = 0
-	case "Arm":
-		*t.Value = 1
-	case "X86":
-		*t.Value = 2
-	default:
-		return fmt.Errorf("label %s not in enum Architecture", src)
-	}
-
-	return nil
-}
-
 func (x Architecture) VDLIsZero() bool {
 	return x == ArchitectureAmd64
 }
@@ -192,41 +157,6 @@ func (Format) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.Format"`
 	Enum struct{ Elf, Mach, Pe string }
 }) {
-}
-
-func (m *Format) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Format) MakeVDLTarget() vdl.Target {
-	return &FormatTarget{Value: m}
-}
-
-type FormatTarget struct {
-	Value *Format
-	vdl.TargetBase
-}
-
-func (t *FormatTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*Format)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Elf":
-		*t.Value = 0
-	case "Mach":
-		*t.Value = 1
-	case "Pe":
-		*t.Value = 2
-	default:
-		return fmt.Errorf("label %s not in enum Format", src)
-	}
-
-	return nil
 }
 
 func (x Format) VDLIsZero() bool {
@@ -317,43 +247,6 @@ func (OperatingSystem) __VDLReflect(struct {
 }) {
 }
 
-func (m *OperatingSystem) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *OperatingSystem) MakeVDLTarget() vdl.Target {
-	return &OperatingSystemTarget{Value: m}
-}
-
-type OperatingSystemTarget struct {
-	Value *OperatingSystem
-	vdl.TargetBase
-}
-
-func (t *OperatingSystemTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*OperatingSystem)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Darwin":
-		*t.Value = 0
-	case "Linux":
-		*t.Value = 1
-	case "Windows":
-		*t.Value = 2
-	case "Android":
-		*t.Value = 3
-	default:
-		return fmt.Errorf("label %s not in enum OperatingSystem", src)
-	}
-
-	return nil
-}
-
 func (x OperatingSystem) VDLIsZero() bool {
 	return x == OperatingSystemDarwin
 }
@@ -391,112 +284,6 @@ type File struct {
 func (File) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.File"`
 }) {
-}
-
-func (m *File) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Name == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var var7 bool
-	if len(m.Contents) == 0 {
-		var7 = true
-	}
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Contents"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Contents")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := fieldTarget6.FromBytes([]byte(m.Contents), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *File) MakeVDLTarget() vdl.Target {
-	return &FileTarget{Value: m}
-}
-
-type FileTarget struct {
-	Value          *File
-	nameTarget     vdl.StringTarget
-	contentsTarget vdl.BytesTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *FileTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*File)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *FileTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "Contents":
-		t.contentsTarget.Value = &t.Value.Contents
-		target, err := &t.contentsTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *FileTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *FileTarget) ZeroField(name string) error {
-	switch name {
-	case "Name":
-		t.Value.Name = ""
-		return nil
-	case "Contents":
-		t.Value.Contents = []byte(nil)
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *FileTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
 }
 
 func (x File) VDLIsZero() bool {

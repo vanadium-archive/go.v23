@@ -12,52 +12,12 @@ pkg vtrace, func WithContinuedTrace(*context.T, string, Request) (*context.T, Sp
 pkg vtrace, func WithManager(*context.T, Manager) *context.T
 pkg vtrace, func WithNewSpan(*context.T, string) (*context.T, Span)
 pkg vtrace, func WithNewTrace(*context.T) (*context.T, Span)
-pkg vtrace, method (*Annotation) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Annotation) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*Annotation) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*AnnotationTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vtrace, method (*AnnotationTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*AnnotationTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vtrace, method (*AnnotationTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vtrace, method (*AnnotationTarget) ZeroField(string) error
-pkg vtrace, method (*Request) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Request) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*Request) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*RequestTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vtrace, method (*RequestTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*RequestTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vtrace, method (*RequestTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vtrace, method (*RequestTarget) ZeroField(string) error
-pkg vtrace, method (*Response) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*Response) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*Response) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*ResponseTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vtrace, method (*ResponseTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*ResponseTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vtrace, method (*ResponseTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vtrace, method (*ResponseTarget) ZeroField(string) error
-pkg vtrace, method (*SpanRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*SpanRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*SpanRecord) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*SpanRecordTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vtrace, method (*SpanRecordTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*SpanRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vtrace, method (*SpanRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vtrace, method (*SpanRecordTarget) ZeroField(string) error
-pkg vtrace, method (*TraceFlags) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*TraceFlags) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*TraceFlags) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*TraceFlagsTarget) FromFloat(float64, *vdl.Type) error
-pkg vtrace, method (*TraceFlagsTarget) FromInt(int64, *vdl.Type) error
-pkg vtrace, method (*TraceFlagsTarget) FromUint(uint64, *vdl.Type) error
-pkg vtrace, method (*TraceRecord) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg vtrace, method (*TraceRecord) MakeVDLTarget() vdl.Target
 pkg vtrace, method (*TraceRecord) VDLRead(vdl.Decoder) error
-pkg vtrace, method (*TraceRecordTarget) FinishField(vdl.Target, vdl.Target) error
-pkg vtrace, method (*TraceRecordTarget) FinishFields(vdl.FieldsTarget) error
-pkg vtrace, method (*TraceRecordTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg vtrace, method (*TraceRecordTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg vtrace, method (*TraceRecordTarget) ZeroField(string) error
 pkg vtrace, method (Annotation) VDLIsZero() bool
 pkg vtrace, method (Annotation) VDLWrite(vdl.Encoder) error
 pkg vtrace, method (Request) VDLIsZero() bool
@@ -73,10 +33,6 @@ pkg vtrace, method (TraceRecord) VDLWrite(vdl.Encoder) error
 pkg vtrace, type Annotation struct
 pkg vtrace, type Annotation struct, Message string
 pkg vtrace, type Annotation struct, When time.Time
-pkg vtrace, type AnnotationTarget struct
-pkg vtrace, type AnnotationTarget struct, Value *Annotation
-pkg vtrace, type AnnotationTarget struct, embedded vdl.FieldsTargetBase
-pkg vtrace, type AnnotationTarget struct, embedded vdl.TargetBase
 pkg vtrace, type Manager interface { GetRequest, GetResponse, GetSpan, GetStore, WithContinuedTrace, WithNewSpan, WithNewTrace }
 pkg vtrace, type Manager interface, GetRequest(*context.T) Request
 pkg vtrace, type Manager interface, GetResponse(*context.T) Response
@@ -93,17 +49,9 @@ pkg vtrace, type Request struct, Flags TraceFlags
 pkg vtrace, type Request struct, LogLevel int32
 pkg vtrace, type Request struct, SpanId uniqueid.Id
 pkg vtrace, type Request struct, TraceId uniqueid.Id
-pkg vtrace, type RequestTarget struct
-pkg vtrace, type RequestTarget struct, Value *Request
-pkg vtrace, type RequestTarget struct, embedded vdl.FieldsTargetBase
-pkg vtrace, type RequestTarget struct, embedded vdl.TargetBase
 pkg vtrace, type Response struct
 pkg vtrace, type Response struct, Flags TraceFlags
 pkg vtrace, type Response struct, Trace TraceRecord
-pkg vtrace, type ResponseTarget struct
-pkg vtrace, type ResponseTarget struct, Value *Response
-pkg vtrace, type ResponseTarget struct, embedded vdl.FieldsTargetBase
-pkg vtrace, type ResponseTarget struct, embedded vdl.TargetBase
 pkg vtrace, type Span interface { Annotate, Annotatef, Finish, ID, Name, Parent, Trace }
 pkg vtrace, type Span interface, Annotate(string)
 pkg vtrace, type Span interface, Annotatef(string, ...interface{})
@@ -119,23 +67,12 @@ pkg vtrace, type SpanRecord struct, Id uniqueid.Id
 pkg vtrace, type SpanRecord struct, Name string
 pkg vtrace, type SpanRecord struct, Parent uniqueid.Id
 pkg vtrace, type SpanRecord struct, Start time.Time
-pkg vtrace, type SpanRecordTarget struct
-pkg vtrace, type SpanRecordTarget struct, Value *SpanRecord
-pkg vtrace, type SpanRecordTarget struct, embedded vdl.FieldsTargetBase
-pkg vtrace, type SpanRecordTarget struct, embedded vdl.TargetBase
 pkg vtrace, type Store interface { ForceCollect, Merge, TraceRecord, TraceRecords }
 pkg vtrace, type Store interface, ForceCollect(uniqueid.Id, int)
 pkg vtrace, type Store interface, Merge(Response)
 pkg vtrace, type Store interface, TraceRecord(uniqueid.Id) *TraceRecord
 pkg vtrace, type Store interface, TraceRecords() []TraceRecord
 pkg vtrace, type TraceFlags int32
-pkg vtrace, type TraceFlagsTarget struct
-pkg vtrace, type TraceFlagsTarget struct, Value *TraceFlags
-pkg vtrace, type TraceFlagsTarget struct, embedded vdl.TargetBase
 pkg vtrace, type TraceRecord struct
 pkg vtrace, type TraceRecord struct, Id uniqueid.Id
 pkg vtrace, type TraceRecord struct, Spans []SpanRecord
-pkg vtrace, type TraceRecordTarget struct
-pkg vtrace, type TraceRecordTarget struct, Value *TraceRecord
-pkg vtrace, type TraceRecordTarget struct, embedded vdl.FieldsTargetBase
-pkg vtrace, type TraceRecordTarget struct, embedded vdl.TargetBase

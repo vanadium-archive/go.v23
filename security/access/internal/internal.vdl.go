@@ -10,7 +10,6 @@
 package internal
 
 import (
-	"fmt"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/rpc"
@@ -29,32 +28,6 @@ type MyTag string
 func (MyTag) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/security/access/internal.MyTag"`
 }) {
-}
-
-func (m *MyTag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromString(string((*m)), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *MyTag) MakeVDLTarget() vdl.Target {
-	return &MyTagTarget{Value: m}
-}
-
-type MyTagTarget struct {
-	Value *MyTag
-	vdl.TargetBase
-}
-
-func (t *MyTagTarget) FromString(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*MyTag)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = MyTag(src)
-
-	return nil
 }
 
 func (x MyTag) VDLIsZero() bool {

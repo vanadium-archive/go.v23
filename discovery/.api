@@ -1,33 +1,9 @@
 pkg discovery, func NewAdId() (AdId, error)
 pkg discovery, func ParseAdId(string) (AdId, error)
-pkg discovery, method (*AdId) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg discovery, method (*AdId) MakeVDLTarget() vdl.Target
 pkg discovery, method (*AdId) VDLRead(vdl.Decoder) error
-pkg discovery, method (*AdIdTarget) FromBytes([]byte, *vdl.Type) error
-pkg discovery, method (*Advertisement) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg discovery, method (*Advertisement) MakeVDLTarget() vdl.Target
 pkg discovery, method (*Advertisement) VDLRead(vdl.Decoder) error
-pkg discovery, method (*AdvertisementTarget) FinishField(vdl.Target, vdl.Target) error
-pkg discovery, method (*AdvertisementTarget) FinishFields(vdl.FieldsTarget) error
-pkg discovery, method (*AdvertisementTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg discovery, method (*AdvertisementTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg discovery, method (*AdvertisementTarget) ZeroField(string) error
-pkg discovery, method (*Attachments) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg discovery, method (*Attachments) MakeVDLTarget() vdl.Target
 pkg discovery, method (*Attachments) VDLRead(vdl.Decoder) error
-pkg discovery, method (*AttachmentsTarget) FinishField(vdl.Target, vdl.Target) error
-pkg discovery, method (*AttachmentsTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
-pkg discovery, method (*AttachmentsTarget) FinishMap(vdl.MapTarget) error
-pkg discovery, method (*AttachmentsTarget) StartKey() (vdl.Target, error)
-pkg discovery, method (*AttachmentsTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
-pkg discovery, method (*Attributes) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg discovery, method (*Attributes) MakeVDLTarget() vdl.Target
 pkg discovery, method (*Attributes) VDLRead(vdl.Decoder) error
-pkg discovery, method (*AttributesTarget) FinishField(vdl.Target, vdl.Target) error
-pkg discovery, method (*AttributesTarget) FinishKeyStartField(vdl.Target) (vdl.Target, error)
-pkg discovery, method (*AttributesTarget) FinishMap(vdl.MapTarget) error
-pkg discovery, method (*AttributesTarget) StartKey() (vdl.Target, error)
-pkg discovery, method (*AttributesTarget) StartMap(*vdl.Type, int) (vdl.MapTarget, error)
 pkg discovery, method (AdId) IsValid() bool
 pkg discovery, method (AdId) String() string
 pkg discovery, method (AdId) VDLIsZero() bool
@@ -39,29 +15,14 @@ pkg discovery, method (Attachments) VDLWrite(vdl.Encoder) error
 pkg discovery, method (Attributes) VDLIsZero() bool
 pkg discovery, method (Attributes) VDLWrite(vdl.Encoder) error
 pkg discovery, type AdId [16]byte
-pkg discovery, type AdIdTarget struct
-pkg discovery, type AdIdTarget struct, Value *AdId
-pkg discovery, type AdIdTarget struct, embedded vdl.TargetBase
 pkg discovery, type Advertisement struct
 pkg discovery, type Advertisement struct, Addresses []string
 pkg discovery, type Advertisement struct, Attachments Attachments
 pkg discovery, type Advertisement struct, Attributes Attributes
 pkg discovery, type Advertisement struct, Id AdId
 pkg discovery, type Advertisement struct, InterfaceName string
-pkg discovery, type AdvertisementTarget struct
-pkg discovery, type AdvertisementTarget struct, Value *Advertisement
-pkg discovery, type AdvertisementTarget struct, embedded vdl.FieldsTargetBase
-pkg discovery, type AdvertisementTarget struct, embedded vdl.TargetBase
 pkg discovery, type Attachments map[string][]byte
-pkg discovery, type AttachmentsTarget struct
-pkg discovery, type AttachmentsTarget struct, Value *Attachments
-pkg discovery, type AttachmentsTarget struct, embedded vdl.MapTargetBase
-pkg discovery, type AttachmentsTarget struct, embedded vdl.TargetBase
 pkg discovery, type Attributes map[string]string
-pkg discovery, type AttributesTarget struct
-pkg discovery, type AttributesTarget struct, Value *Attributes
-pkg discovery, type AttributesTarget struct, embedded vdl.MapTargetBase
-pkg discovery, type AttributesTarget struct, embedded vdl.TargetBase
 pkg discovery, type DataOrError struct
 pkg discovery, type DataOrError struct, Data []byte
 pkg discovery, type DataOrError struct, Error error

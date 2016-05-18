@@ -867,33 +867,3 @@ func debugStringInternal(err error, prefix string, name string) string {
 func DebugString(err error) string {
 	return debugStringInternal(err, "", "")
 }
-
-// ErrorTarget is a vdl.Target that assigns to a go error.
-// It differs from vdl.WireErrorTarget because it assigns to a native
-// go error rather than a WireError.
-type ErrorTarget struct {
-	Value *error
-	wire  vdl.WireError
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *ErrorTarget) FromNil(tt *vdl.Type) error {
-	if !vdl.Compatible(tt, vdl.ErrorType) {
-		return fmt.Errorf("Type %v incompatible with expected type %v", tt, vdl.ErrorType)
-	}
-	*t.Value = nil
-	return nil
-}
-func (t *ErrorTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if !vdl.Compatible(tt, vdl.ErrorType) {
-		return nil, fmt.Errorf("Type %v incompatible with expected type %v", tt, vdl.ErrorType)
-	}
-	return t.wire.MakeVDLTarget().StartFields(tt)
-}
-func (t *ErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
-	var e E
-	err := WireToNative(t.wire, &e)
-	*t.Value = &e
-	return err
-}

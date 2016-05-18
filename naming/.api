@@ -23,45 +23,11 @@ pkg naming, func TrimSuffix(string, string) string
 pkg naming, func Unescape(string) (string, bool)
 pkg naming, func VDLReadGlobChildrenReply(vdl.Decoder, *GlobChildrenReply) error
 pkg naming, func VDLReadGlobReply(vdl.Decoder, *GlobReply) error
-pkg naming, method (*GlobChildrenReplyTarget) FinishField(vdl.Target, vdl.Target) error
-pkg naming, method (*GlobChildrenReplyTarget) FinishFields(vdl.FieldsTarget) error
-pkg naming, method (*GlobChildrenReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg naming, method (*GlobChildrenReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg naming, method (*GlobError) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg naming, method (*GlobError) MakeVDLTarget() vdl.Target
 pkg naming, method (*GlobError) VDLRead(vdl.Decoder) error
-pkg naming, method (*GlobErrorTarget) FinishField(vdl.Target, vdl.Target) error
-pkg naming, method (*GlobErrorTarget) FinishFields(vdl.FieldsTarget) error
-pkg naming, method (*GlobErrorTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg naming, method (*GlobErrorTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg naming, method (*GlobErrorTarget) ZeroField(string) error
-pkg naming, method (*GlobReplyTarget) FinishField(vdl.Target, vdl.Target) error
-pkg naming, method (*GlobReplyTarget) FinishFields(vdl.FieldsTarget) error
-pkg naming, method (*GlobReplyTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg naming, method (*GlobReplyTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg naming, method (*MountEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg naming, method (*MountEntry) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountEntry) Names() []string
 pkg naming, method (*MountEntry) VDLRead(vdl.Decoder) error
-pkg naming, method (*MountEntryTarget) FinishField(vdl.Target, vdl.Target) error
-pkg naming, method (*MountEntryTarget) FinishFields(vdl.FieldsTarget) error
-pkg naming, method (*MountEntryTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg naming, method (*MountEntryTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg naming, method (*MountEntryTarget) ZeroField(string) error
-pkg naming, method (*MountFlag) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg naming, method (*MountFlag) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountFlag) VDLRead(vdl.Decoder) error
-pkg naming, method (*MountFlagTarget) FromFloat(float64, *vdl.Type) error
-pkg naming, method (*MountFlagTarget) FromInt(int64, *vdl.Type) error
-pkg naming, method (*MountFlagTarget) FromUint(uint64, *vdl.Type) error
-pkg naming, method (*MountedServer) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg naming, method (*MountedServer) MakeVDLTarget() vdl.Target
 pkg naming, method (*MountedServer) VDLRead(vdl.Decoder) error
-pkg naming, method (*MountedServerTarget) FinishField(vdl.Target, vdl.Target) error
-pkg naming, method (*MountedServerTarget) FinishFields(vdl.FieldsTarget) error
-pkg naming, method (*MountedServerTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg naming, method (*MountedServerTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg naming, method (*MountedServerTarget) ZeroField(string) error
 pkg naming, method (*RoutingID) FromString(string) error
 pkg naming, method (BlessingOpt) EndpointOpt()
 pkg naming, method (DisableCache) CacheCtl()
@@ -74,33 +40,25 @@ pkg naming, method (Endpoint) String() string
 pkg naming, method (Endpoint) VersionedString(int) string
 pkg naming, method (Endpoint) WithBlessingNames([]string) Endpoint
 pkg naming, method (Endpoint) WithRoutes([]string) Endpoint
-pkg naming, method (GlobChildrenReplyError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobChildrenReplyError) Index() int
 pkg naming, method (GlobChildrenReplyError) Interface() interface{}
-pkg naming, method (GlobChildrenReplyError) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobChildrenReplyError) Name() string
 pkg naming, method (GlobChildrenReplyError) VDLIsZero() bool
 pkg naming, method (GlobChildrenReplyError) VDLWrite(vdl.Encoder) error
-pkg naming, method (GlobChildrenReplyName) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobChildrenReplyName) Index() int
 pkg naming, method (GlobChildrenReplyName) Interface() interface{}
-pkg naming, method (GlobChildrenReplyName) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobChildrenReplyName) Name() string
 pkg naming, method (GlobChildrenReplyName) VDLIsZero() bool
 pkg naming, method (GlobChildrenReplyName) VDLWrite(vdl.Encoder) error
 pkg naming, method (GlobError) VDLIsZero() bool
 pkg naming, method (GlobError) VDLWrite(vdl.Encoder) error
-pkg naming, method (GlobReplyEntry) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobReplyEntry) Index() int
 pkg naming, method (GlobReplyEntry) Interface() interface{}
-pkg naming, method (GlobReplyEntry) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobReplyEntry) Name() string
 pkg naming, method (GlobReplyEntry) VDLIsZero() bool
 pkg naming, method (GlobReplyEntry) VDLWrite(vdl.Encoder) error
-pkg naming, method (GlobReplyError) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, method (GlobReplyError) Index() int
 pkg naming, method (GlobReplyError) Interface() interface{}
-pkg naming, method (GlobReplyError) MakeVDLTarget() vdl.Target
 pkg naming, method (GlobReplyError) Name() string
 pkg naming, method (GlobReplyError) VDLIsZero() bool
 pkg naming, method (GlobReplyError) VDLWrite(vdl.Encoder) error
@@ -130,7 +88,6 @@ pkg naming, type Endpoint struct, RoutingID RoutingID
 pkg naming, type Endpoint struct, ServesMountTable bool
 pkg naming, type EndpointOpt interface { EndpointOpt }
 pkg naming, type EndpointOpt interface, EndpointOpt()
-pkg naming, type GlobChildrenReply interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, type GlobChildrenReply interface, Index() int
 pkg naming, type GlobChildrenReply interface, Interface() interface{}
 pkg naming, type GlobChildrenReply interface, Name() string
@@ -141,18 +98,9 @@ pkg naming, type GlobChildrenReplyError struct
 pkg naming, type GlobChildrenReplyError struct, Value GlobError
 pkg naming, type GlobChildrenReplyName struct
 pkg naming, type GlobChildrenReplyName struct, Value string
-pkg naming, type GlobChildrenReplyTarget struct
-pkg naming, type GlobChildrenReplyTarget struct, Value *GlobChildrenReply
-pkg naming, type GlobChildrenReplyTarget struct, embedded vdl.FieldsTargetBase
-pkg naming, type GlobChildrenReplyTarget struct, embedded vdl.TargetBase
 pkg naming, type GlobError struct
 pkg naming, type GlobError struct, Error error
 pkg naming, type GlobError struct, Name string
-pkg naming, type GlobErrorTarget struct
-pkg naming, type GlobErrorTarget struct, Value *GlobError
-pkg naming, type GlobErrorTarget struct, embedded vdl.FieldsTargetBase
-pkg naming, type GlobErrorTarget struct, embedded vdl.TargetBase
-pkg naming, type GlobReply interface, FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg naming, type GlobReply interface, Index() int
 pkg naming, type GlobReply interface, Interface() interface{}
 pkg naming, type GlobReply interface, Name() string
@@ -163,31 +111,16 @@ pkg naming, type GlobReplyEntry struct
 pkg naming, type GlobReplyEntry struct, Value MountEntry
 pkg naming, type GlobReplyError struct
 pkg naming, type GlobReplyError struct, Value GlobError
-pkg naming, type GlobReplyTarget struct
-pkg naming, type GlobReplyTarget struct, Value *GlobReply
-pkg naming, type GlobReplyTarget struct, embedded vdl.FieldsTargetBase
-pkg naming, type GlobReplyTarget struct, embedded vdl.TargetBase
 pkg naming, type IsLeaf bool
 pkg naming, type MountEntry struct
 pkg naming, type MountEntry struct, IsLeaf bool
 pkg naming, type MountEntry struct, Name string
 pkg naming, type MountEntry struct, Servers []MountedServer
 pkg naming, type MountEntry struct, ServesMountTable bool
-pkg naming, type MountEntryTarget struct
-pkg naming, type MountEntryTarget struct, Value *MountEntry
-pkg naming, type MountEntryTarget struct, embedded vdl.FieldsTargetBase
-pkg naming, type MountEntryTarget struct, embedded vdl.TargetBase
 pkg naming, type MountFlag uint32
-pkg naming, type MountFlagTarget struct
-pkg naming, type MountFlagTarget struct, Value *MountFlag
-pkg naming, type MountFlagTarget struct, embedded vdl.TargetBase
 pkg naming, type MountedServer struct
 pkg naming, type MountedServer struct, Deadline vdltime.Deadline
 pkg naming, type MountedServer struct, Server string
-pkg naming, type MountedServerTarget struct
-pkg naming, type MountedServerTarget struct, Value *MountedServer
-pkg naming, type MountedServerTarget struct, embedded vdl.FieldsTargetBase
-pkg naming, type MountedServerTarget struct, embedded vdl.TargetBase
 pkg naming, type NamespaceOpt interface { NSOpt }
 pkg naming, type NamespaceOpt interface, NSOpt()
 pkg naming, type ReplaceMount bool

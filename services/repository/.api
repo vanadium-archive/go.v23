@@ -8,14 +8,7 @@ pkg repository, method (*BinaryDownloadServerCallStub) Init(rpc.StreamServerCall
 pkg repository, method (*BinaryDownloadServerCallStub) SendStream() interface {  Send(item []byte) error;}
 pkg repository, method (*BinaryUploadServerCallStub) Init(rpc.StreamServerCall)
 pkg repository, method (*BinaryUploadServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
-pkg repository, method (*MediaInfo) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg repository, method (*MediaInfo) MakeVDLTarget() vdl.Target
 pkg repository, method (*MediaInfo) VDLRead(vdl.Decoder) error
-pkg repository, method (*MediaInfoTarget) FinishField(vdl.Target, vdl.Target) error
-pkg repository, method (*MediaInfoTarget) FinishFields(vdl.FieldsTarget) error
-pkg repository, method (*MediaInfoTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg repository, method (*MediaInfoTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg repository, method (*MediaInfoTarget) ZeroField(string) error
 pkg repository, method (MediaInfo) VDLIsZero() bool
 pkg repository, method (MediaInfo) VDLWrite(vdl.Encoder) error
 pkg repository, type ApplicationClientMethods interface, Match(*context.T, []string, ...rpc.CallOpt) (application.Envelope, error)
@@ -88,10 +81,6 @@ pkg repository, type BinaryUploadServerStream interface, RecvStream() interface 
 pkg repository, type MediaInfo struct
 pkg repository, type MediaInfo struct, Encoding string
 pkg repository, type MediaInfo struct, Type string
-pkg repository, type MediaInfoTarget struct
-pkg repository, type MediaInfoTarget struct, Value *MediaInfo
-pkg repository, type MediaInfoTarget struct, embedded vdl.FieldsTargetBase
-pkg repository, type MediaInfoTarget struct, embedded vdl.TargetBase
 pkg repository, type ProfileClientMethods interface { Description, Label }
 pkg repository, type ProfileClientMethods interface, Description(*context.T, ...rpc.CallOpt) (string, error)
 pkg repository, type ProfileClientMethods interface, Label(*context.T, ...rpc.CallOpt) (string, error)

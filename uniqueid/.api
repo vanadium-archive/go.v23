@@ -1,16 +1,10 @@
 pkg uniqueid, func FromHexString(string) (Id, error)
 pkg uniqueid, func Random() (Id, error)
 pkg uniqueid, func Valid(Id) bool
-pkg uniqueid, method (*Id) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg uniqueid, method (*Id) MakeVDLTarget() vdl.Target
 pkg uniqueid, method (*Id) VDLRead(vdl.Decoder) error
-pkg uniqueid, method (*IdTarget) FromBytes([]byte, *vdl.Type) error
 pkg uniqueid, method (*RandomGenerator) NewID() (Id, error)
 pkg uniqueid, method (Id) String() string
 pkg uniqueid, method (Id) VDLIsZero() bool
 pkg uniqueid, method (Id) VDLWrite(vdl.Encoder) error
 pkg uniqueid, type Id [16]byte
-pkg uniqueid, type IdTarget struct
-pkg uniqueid, type IdTarget struct, Value *Id
-pkg uniqueid, type IdTarget struct, embedded vdl.TargetBase
 pkg uniqueid, type RandomGenerator struct

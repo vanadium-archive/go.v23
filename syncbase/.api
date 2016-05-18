@@ -8,68 +8,19 @@ pkg syncbase, func RunInBatch(*context.T, Database, wire.BatchOptions, func(Batc
 pkg syncbase, func SingleRow(string) RowRange
 pkg syncbase, func ToWatchChange(watch.Change) WatchChange
 pkg syncbase, func UUID() string
-pkg syncbase, method (*Conflict) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*Conflict) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*Conflict) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ConflictRow) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*ConflictRow) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictRow) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ConflictRowSet) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*ConflictRowSet) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictRowSet) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ConflictRowSetTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ConflictRowSetTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictRowSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ConflictRowSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ConflictRowSetTarget) ZeroField(string) error
-pkg syncbase, method (*ConflictRowTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ConflictRowTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ConflictRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ConflictRowTarget) ZeroField(string) error
-pkg syncbase, method (*ConflictScanSet) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*ConflictScanSet) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ConflictScanSet) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ConflictScanSetTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ConflictScanSetTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictScanSetTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ConflictScanSetTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ConflictScanSetTarget) ZeroField(string) error
-pkg syncbase, method (*ConflictTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ConflictTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ConflictTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ConflictTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ConflictTarget) ZeroField(string) error
 pkg syncbase, method (*InvalidScanStream) Advance() bool
 pkg syncbase, method (*InvalidScanStream) Cancel()
 pkg syncbase, method (*InvalidScanStream) Err() error
 pkg syncbase, method (*InvalidScanStream) Key() string
 pkg syncbase, method (*InvalidScanStream) Value(interface{}) error
-pkg syncbase, method (*Resolution) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*Resolution) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*Resolution) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ResolutionTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ResolutionTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ResolutionTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ResolutionTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ResolutionTarget) ZeroField(string) error
-pkg syncbase, method (*ResolvedRow) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg syncbase, method (*ResolvedRow) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*ResolvedRow) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ResolvedRowTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ResolvedRowTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ResolvedRowTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ResolvedRowTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ResolvedRowTarget) ZeroField(string) error
-pkg syncbase, method (*Value) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg syncbase, method (*Value) Get(interface{}) error
-pkg syncbase, method (*Value) MakeVDLTarget() vdl.Target
 pkg syncbase, method (*Value) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*ValueTarget) FinishField(vdl.Target, vdl.Target) error
-pkg syncbase, method (*ValueTarget) FinishFields(vdl.FieldsTarget) error
-pkg syncbase, method (*ValueTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg syncbase, method (*ValueTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg syncbase, method (*ValueTarget) ZeroField(string) error
 pkg syncbase, method (*WatchChange) Value(interface{}) error
 pkg syncbase, method (Conflict) VDLIsZero() bool
 pkg syncbase, method (Conflict) VDLWrite(vdl.Encoder) error
@@ -150,24 +101,8 @@ pkg syncbase, type ConflictRow struct, RemoteValue Value
 pkg syncbase, type ConflictRowSet struct
 pkg syncbase, type ConflictRowSet struct, ByBatch map[uint64][]ConflictRow
 pkg syncbase, type ConflictRowSet struct, ByKey map[string]ConflictRow
-pkg syncbase, type ConflictRowSetTarget struct
-pkg syncbase, type ConflictRowSetTarget struct, Value *ConflictRowSet
-pkg syncbase, type ConflictRowSetTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ConflictRowSetTarget struct, embedded vdl.TargetBase
-pkg syncbase, type ConflictRowTarget struct
-pkg syncbase, type ConflictRowTarget struct, Value *ConflictRow
-pkg syncbase, type ConflictRowTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ConflictRowTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ConflictScanSet struct
 pkg syncbase, type ConflictScanSet struct, ByBatch map[uint64][]syncbase.ScanOp
-pkg syncbase, type ConflictScanSetTarget struct
-pkg syncbase, type ConflictScanSetTarget struct, Value *ConflictScanSet
-pkg syncbase, type ConflictScanSetTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ConflictScanSetTarget struct, embedded vdl.TargetBase
-pkg syncbase, type ConflictTarget struct
-pkg syncbase, type ConflictTarget struct, Value *Conflict
-pkg syncbase, type ConflictTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ConflictTarget struct, embedded vdl.TargetBase
 pkg syncbase, type Database interface, BeginBatch(*context.T, wire.BatchOptions) (BatchDatabase, error)
 pkg syncbase, type Database interface, Blob(wire.BlobRef) Blob
 pkg syncbase, type Database interface, Close()
@@ -206,17 +141,9 @@ pkg syncbase, type PrefixRange interface, Prefix() string
 pkg syncbase, type PrefixRange interface, Start() string
 pkg syncbase, type Resolution struct
 pkg syncbase, type Resolution struct, ResultSet map[string]ResolvedRow
-pkg syncbase, type ResolutionTarget struct
-pkg syncbase, type ResolutionTarget struct, Value *Resolution
-pkg syncbase, type ResolutionTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ResolutionTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ResolvedRow struct
 pkg syncbase, type ResolvedRow struct, Key string
 pkg syncbase, type ResolvedRow struct, Result *Value
-pkg syncbase, type ResolvedRowTarget struct
-pkg syncbase, type ResolvedRowTarget struct, Value *ResolvedRow
-pkg syncbase, type ResolvedRowTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ResolvedRowTarget struct, embedded vdl.TargetBase
 pkg syncbase, type ResultStream interface { Advance, Cancel, Err, Result, ResultCount }
 pkg syncbase, type ResultStream interface, Advance() bool
 pkg syncbase, type ResultStream interface, Cancel()
@@ -266,10 +193,6 @@ pkg syncbase, type Value struct, Selection syncbase.ValueSelection
 pkg syncbase, type Value struct, State syncbase.ValueState
 pkg syncbase, type Value struct, Val *vom.RawBytes
 pkg syncbase, type Value struct, WriteTs time.Time
-pkg syncbase, type ValueTarget struct
-pkg syncbase, type ValueTarget struct, Value *Value
-pkg syncbase, type ValueTarget struct, embedded vdl.FieldsTargetBase
-pkg syncbase, type ValueTarget struct, embedded vdl.TargetBase
 pkg syncbase, type WatchChange struct
 pkg syncbase, type WatchChange struct, ChangeType ChangeType
 pkg syncbase, type WatchChange struct, Collection wire.Id

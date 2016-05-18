@@ -8,7 +8,6 @@
 package uniqueid
 
 import (
-	"fmt"
 	"v.io/v23/vdl"
 )
 
@@ -23,32 +22,6 @@ type Id [16]byte
 func (Id) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/uniqueid.Id"`
 }) {
-}
-
-func (m *Id) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromBytes([]byte((*m)[:]), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Id) MakeVDLTarget() vdl.Target {
-	return &IdTarget{Value: m}
-}
-
-type IdTarget struct {
-	Value *Id
-	vdl.TargetBase
-}
-
-func (t *IdTarget) FromBytes(src []byte, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*Id)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	copy((*t.Value)[:], src)
-
-	return nil
 }
 
 func (x Id) VDLIsZero() bool {

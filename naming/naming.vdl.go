@@ -10,7 +10,6 @@ package naming
 import (
 	"fmt"
 	"v.io/v23/vdl"
-	"v.io/v23/vdl/vdlconv"
 	vdltime "v.io/v23/vdlroot/time"
 	"v.io/v23/verror"
 )
@@ -26,53 +25,6 @@ type MountFlag uint32
 func (MountFlag) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/naming.MountFlag"`
 }) {
-}
-
-func (m *MountFlag) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromUint(uint64((*m)), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *MountFlag) MakeVDLTarget() vdl.Target {
-	return &MountFlagTarget{Value: m}
-}
-
-type MountFlagTarget struct {
-	Value *MountFlag
-	vdl.TargetBase
-}
-
-func (t *MountFlagTarget) FromUint(src uint64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Uint64ToUint32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = MountFlag(val)
-
-	return nil
-}
-func (t *MountFlagTarget) FromInt(src int64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Int64ToUint32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = MountFlag(val)
-
-	return nil
-}
-func (t *MountFlagTarget) FromFloat(src float64, tt *vdl.Type) error {
-
-	val, err := vdlconv.Float64ToUint32(src)
-	if err != nil {
-		return err
-	}
-	*t.Value = MountFlag(val)
-
-	return nil
 }
 
 func (x MountFlag) VDLIsZero() bool {
@@ -112,114 +64,6 @@ type MountedServer struct {
 func (MountedServer) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/naming.MountedServer"`
 }) {
-}
-
-func (m *MountedServer) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Server == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Server"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Server")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.Server), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var wireValue5 vdltime.WireDeadline
-	if err := vdltime.WireDeadlineFromNative(&wireValue5, m.Deadline); err != nil {
-		return err
-	}
-
-	var8 := (wireValue5 == vdltime.WireDeadline{})
-	if var8 {
-		if err := fieldsTarget1.ZeroField("Deadline"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget6, fieldTarget7, err := fieldsTarget1.StartField("Deadline")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := wireValue5.FillVDLTarget(fieldTarget7, tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget6, fieldTarget7); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *MountedServer) MakeVDLTarget() vdl.Target {
-	return &MountedServerTarget{Value: m}
-}
-
-type MountedServerTarget struct {
-	Value          *MountedServer
-	serverTarget   vdl.StringTarget
-	deadlineTarget vdltime.WireDeadlineTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *MountedServerTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*MountedServer)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *MountedServerTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Server":
-		t.serverTarget.Value = &t.Value.Server
-		target, err := &t.serverTarget, error(nil)
-		return nil, target, err
-	case "Deadline":
-		t.deadlineTarget.Value = &t.Value.Deadline
-		target, err := &t.deadlineTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *MountedServerTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *MountedServerTarget) ZeroField(name string) error {
-	switch name {
-	case "Server":
-		t.Value.Server = ""
-		return nil
-	case "Deadline":
-		t.Value.Deadline = vdltime.Deadline{}
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *MountedServerTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
 }
 
 func (x MountedServer) VDLIsZero() bool {
@@ -326,216 +170,6 @@ type MountEntry struct {
 func (MountEntry) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/naming.MountEntry"`
 }) {
-}
-
-func (m *MountEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Name == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var var7 bool
-	if len(m.Servers) == 0 {
-		var7 = true
-	}
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Servers"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Servers")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			listTarget8, err := fieldTarget6.StartList(tt.NonOptional().Field(1).Type, len(m.Servers))
-			if err != nil {
-				return err
-			}
-			for i, elem10 := range m.Servers {
-				elemTarget9, err := listTarget8.StartElem(i)
-				if err != nil {
-					return err
-				}
-
-				if err := elem10.FillVDLTarget(elemTarget9, tt.NonOptional().Field(1).Type.Elem()); err != nil {
-					return err
-				}
-				if err := listTarget8.FinishElem(elemTarget9); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget6.FinishList(listTarget8); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	var13 := (m.ServesMountTable == false)
-	if var13 {
-		if err := fieldsTarget1.ZeroField("ServesMountTable"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget11, fieldTarget12, err := fieldsTarget1.StartField("ServesMountTable")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget12.FromBool(bool(m.ServesMountTable), tt.NonOptional().Field(2).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget11, fieldTarget12); err != nil {
-				return err
-			}
-		}
-	}
-	var16 := (m.IsLeaf == false)
-	if var16 {
-		if err := fieldsTarget1.ZeroField("IsLeaf"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget14, fieldTarget15, err := fieldsTarget1.StartField("IsLeaf")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget15.FromBool(bool(m.IsLeaf), tt.NonOptional().Field(3).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget14, fieldTarget15); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *MountEntry) MakeVDLTarget() vdl.Target {
-	return &MountEntryTarget{Value: m}
-}
-
-type MountEntryTarget struct {
-	Value                  *MountEntry
-	nameTarget             vdl.StringTarget
-	serversTarget          __VDLTarget1_list
-	servesMountTableTarget vdl.BoolTarget
-	isLeafTarget           vdl.BoolTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *MountEntryTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*MountEntry)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *MountEntryTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "Servers":
-		t.serversTarget.Value = &t.Value.Servers
-		target, err := &t.serversTarget, error(nil)
-		return nil, target, err
-	case "ServesMountTable":
-		t.servesMountTableTarget.Value = &t.Value.ServesMountTable
-		target, err := &t.servesMountTableTarget, error(nil)
-		return nil, target, err
-	case "IsLeaf":
-		t.isLeafTarget.Value = &t.Value.IsLeaf
-		target, err := &t.isLeafTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *MountEntryTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *MountEntryTarget) ZeroField(name string) error {
-	switch name {
-	case "Name":
-		t.Value.Name = ""
-		return nil
-	case "Servers":
-		t.Value.Servers = []MountedServer(nil)
-		return nil
-	case "ServesMountTable":
-		t.Value.ServesMountTable = false
-		return nil
-	case "IsLeaf":
-		t.Value.IsLeaf = false
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *MountEntryTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// []MountedServer
-type __VDLTarget1_list struct {
-	Value      *[]MountedServer
-	elemTarget MountedServerTarget
-	vdl.TargetBase
-	vdl.ListTargetBase
-}
-
-func (t *__VDLTarget1_list) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
-
-	if ttWant := vdl.TypeOf((*[]MountedServer)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	if cap(*t.Value) < len {
-		*t.Value = make([]MountedServer, len)
-	} else {
-		*t.Value = (*t.Value)[:len]
-	}
-	return t, nil
-}
-func (t *__VDLTarget1_list) StartElem(index int) (elem vdl.Target, _ error) {
-	t.elemTarget.Value = &(*t.Value)[index]
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget1_list) FinishElem(elem vdl.Target) error {
-	return nil
-}
-func (t *__VDLTarget1_list) FinishList(elem vdl.ListTarget) error {
-
-	return nil
 }
 
 func (x MountEntry) VDLIsZero() bool {
@@ -738,114 +372,6 @@ func (GlobError) __VDLReflect(struct {
 }) {
 }
 
-func (m *GlobError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.Name == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Name"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.Name), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.Error == (error)(nil))
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Error"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Error")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			var wireError8 vdl.WireError
-			if err := verror.WireFromNative(&wireError8, m.Error); err != nil {
-				return err
-			}
-			if err := wireError8.FillVDLTarget(fieldTarget6, vdl.ErrorType); err != nil {
-				return err
-			}
-
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *GlobError) MakeVDLTarget() vdl.Target {
-	return &GlobErrorTarget{Value: m}
-}
-
-type GlobErrorTarget struct {
-	Value       *GlobError
-	nameTarget  vdl.StringTarget
-	errorTarget verror.ErrorTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *GlobErrorTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*GlobError)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *GlobErrorTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Name":
-		t.nameTarget.Value = &t.Value.Name
-		target, err := &t.nameTarget, error(nil)
-		return nil, target, err
-	case "Error":
-		t.errorTarget.Value = &t.Value.Error
-		target, err := &t.errorTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *GlobErrorTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *GlobErrorTarget) ZeroField(name string) error {
-	switch name {
-	case "Name":
-		t.Value.Name = ""
-		return nil
-	case "Error":
-		t.Value.Error = nil
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *GlobErrorTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
 func (x GlobError) VDLIsZero() bool {
 	return x == GlobError{}
 }
@@ -934,7 +460,6 @@ type (
 		Name() string
 		// __VDLReflect describes the GlobReply union type.
 		__VDLReflect(__GlobReplyReflect)
-		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -944,10 +469,9 @@ type (
 	GlobReplyError struct{ Value GlobError }
 	// __GlobReplyReflect describes the GlobReply union type.
 	__GlobReplyReflect struct {
-		Name               string `vdl:"v.io/v23/naming.GlobReply"`
-		Type               GlobReply
-		UnionTargetFactory globReplyTargetFactory
-		Union              struct {
+		Name  string `vdl:"v.io/v23/naming.GlobReply"`
+		Type  GlobReply
+		Union struct {
 			Entry GlobReplyEntry
 			Error GlobReplyError
 		}
@@ -959,115 +483,10 @@ func (x GlobReplyEntry) Interface() interface{}          { return x.Value }
 func (x GlobReplyEntry) Name() string                    { return "Entry" }
 func (x GlobReplyEntry) __VDLReflect(__GlobReplyReflect) {}
 
-func (m GlobReplyEntry) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Entry")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m GlobReplyEntry) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
 func (x GlobReplyError) Index() int                      { return 1 }
 func (x GlobReplyError) Interface() interface{}          { return x.Value }
 func (x GlobReplyError) Name() string                    { return "Error" }
 func (x GlobReplyError) __VDLReflect(__GlobReplyReflect) {}
-
-func (m GlobReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Error")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m GlobReplyError) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type GlobReplyTarget struct {
-	Value     *GlobReply
-	fieldName string
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *GlobReplyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*GlobReply)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-
-	return t, nil
-}
-func (t *GlobReplyTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	t.fieldName = name
-	switch name {
-	case "Entry":
-		val := MountEntry{}
-		return nil, &MountEntryTarget{Value: &val}, nil
-	case "Error":
-		val := GlobError{}
-		return nil, &GlobErrorTarget{Value: &val}, nil
-	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/naming.GlobReply", name)
-	}
-}
-func (t *GlobReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
-	switch t.fieldName {
-	case "Entry":
-		*t.Value = GlobReplyEntry{*(fieldTarget.(*MountEntryTarget)).Value}
-	case "Error":
-		*t.Value = GlobReplyError{*(fieldTarget.(*GlobErrorTarget)).Value}
-	}
-	return nil
-}
-func (t *GlobReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type globReplyTargetFactory struct{}
-
-func (t globReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*GlobReply); ok {
-		return &GlobReplyTarget{Value: typedUnion}, nil
-	}
-	return nil, fmt.Errorf("got %T, want *GlobReply", union)
-}
 
 func (x GlobReplyEntry) VDLIsZero() bool {
 	return x.Value.VDLIsZero()
@@ -1160,7 +579,6 @@ type (
 		Name() string
 		// __VDLReflect describes the GlobChildrenReply union type.
 		__VDLReflect(__GlobChildrenReplyReflect)
-		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1170,10 +588,9 @@ type (
 	GlobChildrenReplyError struct{ Value GlobError }
 	// __GlobChildrenReplyReflect describes the GlobChildrenReply union type.
 	__GlobChildrenReplyReflect struct {
-		Name               string `vdl:"v.io/v23/naming.GlobChildrenReply"`
-		Type               GlobChildrenReply
-		UnionTargetFactory globChildrenReplyTargetFactory
-		Union              struct {
+		Name  string `vdl:"v.io/v23/naming.GlobChildrenReply"`
+		Type  GlobChildrenReply
+		Union struct {
 			Name  GlobChildrenReplyName
 			Error GlobChildrenReplyError
 		}
@@ -1185,114 +602,10 @@ func (x GlobChildrenReplyName) Interface() interface{}                  { return
 func (x GlobChildrenReplyName) Name() string                            { return "Name" }
 func (x GlobChildrenReplyName) __VDLReflect(__GlobChildrenReplyReflect) {}
 
-func (m GlobChildrenReplyName) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Name")
-	if err != nil {
-		return err
-	}
-	if err := fieldTarget3.FromString(string(m.Value), tt.NonOptional().Field(0).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m GlobChildrenReplyName) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
 func (x GlobChildrenReplyError) Index() int                              { return 1 }
 func (x GlobChildrenReplyError) Interface() interface{}                  { return x.Value }
 func (x GlobChildrenReplyError) Name() string                            { return "Error" }
 func (x GlobChildrenReplyError) __VDLReflect(__GlobChildrenReplyReflect) {}
-
-func (m GlobChildrenReplyError) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Error")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m GlobChildrenReplyError) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type GlobChildrenReplyTarget struct {
-	Value     *GlobChildrenReply
-	fieldName string
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *GlobChildrenReplyTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*GlobChildrenReply)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-
-	return t, nil
-}
-func (t *GlobChildrenReplyTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	t.fieldName = name
-	switch name {
-	case "Name":
-		val := ""
-		return nil, &vdl.StringTarget{Value: &val}, nil
-	case "Error":
-		val := GlobError{}
-		return nil, &GlobErrorTarget{Value: &val}, nil
-	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/naming.GlobChildrenReply", name)
-	}
-}
-func (t *GlobChildrenReplyTarget) FinishField(_, fieldTarget vdl.Target) error {
-	switch t.fieldName {
-	case "Name":
-		*t.Value = GlobChildrenReplyName{*(fieldTarget.(*vdl.StringTarget)).Value}
-	case "Error":
-		*t.Value = GlobChildrenReplyError{*(fieldTarget.(*GlobErrorTarget)).Value}
-	}
-	return nil
-}
-func (t *GlobChildrenReplyTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type globChildrenReplyTargetFactory struct{}
-
-func (t globChildrenReplyTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*GlobChildrenReply); ok {
-		return &GlobChildrenReplyTarget{Value: typedUnion}, nil
-	}
-	return nil, fmt.Errorf("got %T, want *GlobChildrenReply", union)
-}
 
 func (x GlobChildrenReplyName) VDLIsZero() bool {
 	return x.Value == ""

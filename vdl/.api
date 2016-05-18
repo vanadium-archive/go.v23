@@ -460,52 +460,9 @@ pkg vdl, method (*Value) VDLEqual(interface{}) bool
 pkg vdl, method (*Value) VDLIsZero() bool
 pkg vdl, method (*Value) VDLRead(Decoder) error
 pkg vdl, method (*Value) VDLWrite(Encoder) error
-pkg vdl, method (*WireError) FillVDLTarget(Target, *Type) error
-pkg vdl, method (*WireError) MakeVDLTarget() Target
 pkg vdl, method (*WireError) VDLRead(Decoder) error
-pkg vdl, method (*WireErrorTarget) FinishField(Target, Target) error
-pkg vdl, method (*WireErrorTarget) FinishFields(FieldsTarget) error
-pkg vdl, method (*WireErrorTarget) FinishList(ListTarget) error
-pkg vdl, method (*WireErrorTarget) FinishMap(MapTarget) error
-pkg vdl, method (*WireErrorTarget) FinishSet(SetTarget) error
-pkg vdl, method (*WireErrorTarget) FromBool(bool, *Type) error
-pkg vdl, method (*WireErrorTarget) FromBytes([]byte, *Type) error
-pkg vdl, method (*WireErrorTarget) FromComplex(complex128, *Type) error
-pkg vdl, method (*WireErrorTarget) FromEnumLabel(string, *Type) error
-pkg vdl, method (*WireErrorTarget) FromFloat(float64, *Type) error
-pkg vdl, method (*WireErrorTarget) FromInt(int64, *Type) error
-pkg vdl, method (*WireErrorTarget) FromNil(*Type) error
-pkg vdl, method (*WireErrorTarget) FromString(string, *Type) error
-pkg vdl, method (*WireErrorTarget) FromTypeObject(*Type) error
-pkg vdl, method (*WireErrorTarget) FromUint(uint64, *Type) error
-pkg vdl, method (*WireErrorTarget) StartField(string) (Target, Target, error)
-pkg vdl, method (*WireErrorTarget) StartFields(*Type) (FieldsTarget, error)
-pkg vdl, method (*WireErrorTarget) StartList(*Type, int) (ListTarget, error)
-pkg vdl, method (*WireErrorTarget) StartMap(*Type, int) (MapTarget, error)
-pkg vdl, method (*WireErrorTarget) StartSet(*Type, int) (SetTarget, error)
-pkg vdl, method (*WireErrorTarget) ZeroField(string) error
-pkg vdl, method (*WireRetryCode) FillVDLTarget(Target, *Type) error
-pkg vdl, method (*WireRetryCode) MakeVDLTarget() Target
 pkg vdl, method (*WireRetryCode) Set(string) error
 pkg vdl, method (*WireRetryCode) VDLRead(Decoder) error
-pkg vdl, method (*WireRetryCodeTarget) FinishFields(FieldsTarget) error
-pkg vdl, method (*WireRetryCodeTarget) FinishList(ListTarget) error
-pkg vdl, method (*WireRetryCodeTarget) FinishMap(MapTarget) error
-pkg vdl, method (*WireRetryCodeTarget) FinishSet(SetTarget) error
-pkg vdl, method (*WireRetryCodeTarget) FromBool(bool, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromBytes([]byte, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromComplex(complex128, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromEnumLabel(string, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromFloat(float64, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromInt(int64, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromNil(*Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromString(string, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromTypeObject(*Type) error
-pkg vdl, method (*WireRetryCodeTarget) FromUint(uint64, *Type) error
-pkg vdl, method (*WireRetryCodeTarget) StartFields(*Type) (FieldsTarget, error)
-pkg vdl, method (*WireRetryCodeTarget) StartList(*Type, int) (ListTarget, error)
-pkg vdl, method (*WireRetryCodeTarget) StartMap(*Type, int) (MapTarget, error)
-pkg vdl, method (*WireRetryCodeTarget) StartSet(*Type, int) (SetTarget, error)
 pkg vdl, method (Kind) BitLen() int
 pkg vdl, method (Kind) IsNumber() bool
 pkg vdl, method (Kind) String() string
@@ -692,14 +649,7 @@ pkg vdl, type WireError struct, Id string
 pkg vdl, type WireError struct, Msg string
 pkg vdl, type WireError struct, ParamList []*Value
 pkg vdl, type WireError struct, RetryCode WireRetryCode
-pkg vdl, type WireErrorTarget struct
-pkg vdl, type WireErrorTarget struct, Value *WireError
-pkg vdl, type WireErrorTarget struct, embedded FieldsTargetBase
-pkg vdl, type WireErrorTarget struct, embedded TargetBase
 pkg vdl, type WireRetryCode int
-pkg vdl, type WireRetryCodeTarget struct
-pkg vdl, type WireRetryCodeTarget struct, Value *WireRetryCode
-pkg vdl, type WireRetryCodeTarget struct, embedded TargetBase
 pkg vdl, type Writer interface { VDLWrite }
 pkg vdl, type Writer interface, VDLWrite(Encoder) error
 pkg vdl, var AnyType *Type

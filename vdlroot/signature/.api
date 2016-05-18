@@ -7,39 +7,11 @@ pkg signature, func CopyMethod(Method) Method
 pkg signature, func CopyMethods([]Method) []Method
 pkg signature, func FirstMethod([]Interface, string) (Method, bool)
 pkg signature, func MethodNames([]Interface) []string
-pkg signature, method (*Arg) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg signature, method (*Arg) MakeVDLTarget() vdl.Target
 pkg signature, method (*Arg) VDLRead(vdl.Decoder) error
-pkg signature, method (*ArgTarget) FinishField(vdl.Target, vdl.Target) error
-pkg signature, method (*ArgTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*ArgTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg signature, method (*ArgTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg signature, method (*ArgTarget) ZeroField(string) error
-pkg signature, method (*Embed) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg signature, method (*Embed) MakeVDLTarget() vdl.Target
 pkg signature, method (*Embed) VDLRead(vdl.Decoder) error
-pkg signature, method (*EmbedTarget) FinishField(vdl.Target, vdl.Target) error
-pkg signature, method (*EmbedTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*EmbedTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg signature, method (*EmbedTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg signature, method (*EmbedTarget) ZeroField(string) error
-pkg signature, method (*Interface) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg signature, method (*Interface) FindMethod(string) (Method, bool)
-pkg signature, method (*Interface) MakeVDLTarget() vdl.Target
 pkg signature, method (*Interface) VDLRead(vdl.Decoder) error
-pkg signature, method (*InterfaceTarget) FinishField(vdl.Target, vdl.Target) error
-pkg signature, method (*InterfaceTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*InterfaceTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg signature, method (*InterfaceTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg signature, method (*InterfaceTarget) ZeroField(string) error
-pkg signature, method (*Method) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg signature, method (*Method) MakeVDLTarget() vdl.Target
 pkg signature, method (*Method) VDLRead(vdl.Decoder) error
-pkg signature, method (*MethodTarget) FinishField(vdl.Target, vdl.Target) error
-pkg signature, method (*MethodTarget) FinishFields(vdl.FieldsTarget) error
-pkg signature, method (*MethodTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg signature, method (*MethodTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg signature, method (*MethodTarget) ZeroField(string) error
 pkg signature, method (Arg) VDLIsZero() bool
 pkg signature, method (Arg) VDLWrite(vdl.Encoder) error
 pkg signature, method (Embed) VDLIsZero() bool
@@ -55,28 +27,16 @@ pkg signature, type Arg struct
 pkg signature, type Arg struct, Doc string
 pkg signature, type Arg struct, Name string
 pkg signature, type Arg struct, Type *vdl.Type
-pkg signature, type ArgTarget struct
-pkg signature, type ArgTarget struct, Value *Arg
-pkg signature, type ArgTarget struct, embedded vdl.FieldsTargetBase
-pkg signature, type ArgTarget struct, embedded vdl.TargetBase
 pkg signature, type Embed struct
 pkg signature, type Embed struct, Doc string
 pkg signature, type Embed struct, Name string
 pkg signature, type Embed struct, PkgPath string
-pkg signature, type EmbedTarget struct
-pkg signature, type EmbedTarget struct, Value *Embed
-pkg signature, type EmbedTarget struct, embedded vdl.FieldsTargetBase
-pkg signature, type EmbedTarget struct, embedded vdl.TargetBase
 pkg signature, type Interface struct
 pkg signature, type Interface struct, Doc string
 pkg signature, type Interface struct, Embeds []Embed
 pkg signature, type Interface struct, Methods []Method
 pkg signature, type Interface struct, Name string
 pkg signature, type Interface struct, PkgPath string
-pkg signature, type InterfaceTarget struct
-pkg signature, type InterfaceTarget struct, Value *Interface
-pkg signature, type InterfaceTarget struct, embedded vdl.FieldsTargetBase
-pkg signature, type InterfaceTarget struct, embedded vdl.TargetBase
 pkg signature, type Method struct
 pkg signature, type Method struct, Doc string
 pkg signature, type Method struct, InArgs []Arg
@@ -85,8 +45,4 @@ pkg signature, type Method struct, Name string
 pkg signature, type Method struct, OutArgs []Arg
 pkg signature, type Method struct, OutStream *Arg
 pkg signature, type Method struct, Tags []*vdl.Value
-pkg signature, type MethodTarget struct
-pkg signature, type MethodTarget struct, Value *Method
-pkg signature, type MethodTarget struct, embedded vdl.FieldsTargetBase
-pkg signature, type MethodTarget struct, embedded vdl.TargetBase
 pkg signature, type SortableMethods []Method

@@ -5,10 +5,7 @@ pkg mounttable, const Read Tag
 pkg mounttable, const Resolve Tag
 pkg mounttable, func MountTableClient(string) MountTableClientStub
 pkg mounttable, func MountTableServer(MountTableServerMethods) MountTableServerStub
-pkg mounttable, method (*Tag) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg mounttable, method (*Tag) MakeVDLTarget() vdl.Target
 pkg mounttable, method (*Tag) VDLRead(vdl.Decoder) error
-pkg mounttable, method (*TagTarget) FromString(string, *vdl.Type) error
 pkg mounttable, method (Tag) VDLIsZero() bool
 pkg mounttable, method (Tag) VDLWrite(vdl.Encoder) error
 pkg mounttable, type MountTableClientMethods interface, Delete(*context.T, bool, ...rpc.CallOpt) error
@@ -30,7 +27,4 @@ pkg mounttable, type MountTableServerStub interface, Describe__() []rpc.Interfac
 pkg mounttable, type MountTableServerStub interface, unexported methods
 pkg mounttable, type MountTableServerStubMethods MountTableServerMethods
 pkg mounttable, type Tag string
-pkg mounttable, type TagTarget struct
-pkg mounttable, type TagTarget struct, Value *Tag
-pkg mounttable, type TagTarget struct, embedded vdl.TargetBase
 pkg mounttable, var MountTableDesc rpc.InterfaceDesc

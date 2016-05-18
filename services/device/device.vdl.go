@@ -39,82 +39,6 @@ func (Config) __VDLReflect(struct {
 }) {
 }
 
-func (m *Config) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	mapTarget1, err := t.StartMap(tt, len((*m)))
-	if err != nil {
-		return err
-	}
-	for key3, value5 := range *m {
-		keyTarget2, err := mapTarget1.StartKey()
-		if err != nil {
-			return err
-		}
-		if err := keyTarget2.FromString(string(key3), tt.NonOptional().Key()); err != nil {
-			return err
-		}
-		valueTarget4, err := mapTarget1.FinishKeyStartField(keyTarget2)
-		if err != nil {
-			return err
-		}
-		if err := valueTarget4.FromString(string(value5), tt.NonOptional().Elem()); err != nil {
-			return err
-		}
-		if err := mapTarget1.FinishField(keyTarget2, valueTarget4); err != nil {
-			return err
-		}
-	}
-	if err := t.FinishMap(mapTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Config) MakeVDLTarget() vdl.Target {
-	return &ConfigTarget{Value: m}
-}
-
-type ConfigTarget struct {
-	Value      *Config
-	currKey    string
-	currElem   string
-	keyTarget  vdl.StringTarget
-	elemTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.MapTargetBase
-}
-
-func (t *ConfigTarget) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
-
-	if ttWant := vdl.TypeOf((*Config)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(Config)
-	return t, nil
-}
-func (t *ConfigTarget) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *ConfigTarget) FinishKeyStartField(key vdl.Target) (field vdl.Target, _ error) {
-	t.currElem = ""
-	t.elemTarget.Value = &t.currElem
-	target, err := &t.elemTarget, error(nil)
-	return target, err
-}
-func (t *ConfigTarget) FinishField(key, field vdl.Target) error {
-	(*t.Value)[t.currKey] = t.currElem
-	return nil
-}
-func (t *ConfigTarget) FinishMap(elem vdl.MapTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
-}
-
 func (x Config) VDLIsZero() bool {
 	return len(x) == 0
 }
@@ -256,39 +180,6 @@ func (InstallationState) __VDLReflect(struct {
 }) {
 }
 
-func (m *InstallationState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstallationState) MakeVDLTarget() vdl.Target {
-	return &InstallationStateTarget{Value: m}
-}
-
-type InstallationStateTarget struct {
-	Value *InstallationState
-	vdl.TargetBase
-}
-
-func (t *InstallationStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*InstallationState)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Active":
-		*t.Value = 0
-	case "Uninstalled":
-		*t.Value = 1
-	default:
-		return fmt.Errorf("label %s not in enum InstallationState", src)
-	}
-
-	return nil
-}
-
 func (x InstallationState) VDLIsZero() bool {
 	return x == InstallationStateActive
 }
@@ -390,47 +281,6 @@ func (InstanceState) __VDLReflect(struct {
 }) {
 }
 
-func (m *InstanceState) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	if err := t.FromEnumLabel((*m).String(), tt); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstanceState) MakeVDLTarget() vdl.Target {
-	return &InstanceStateTarget{Value: m}
-}
-
-type InstanceStateTarget struct {
-	Value *InstanceState
-	vdl.TargetBase
-}
-
-func (t *InstanceStateTarget) FromEnumLabel(src string, tt *vdl.Type) error {
-
-	if ttWant := vdl.TypeOf((*InstanceState)(nil)); !vdl.Compatible(tt, ttWant) {
-		return fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	switch src {
-	case "Launching":
-		*t.Value = 0
-	case "Running":
-		*t.Value = 1
-	case "Dying":
-		*t.Value = 2
-	case "NotRunning":
-		*t.Value = 3
-	case "Updating":
-		*t.Value = 4
-	case "Deleted":
-		*t.Value = 5
-	default:
-		return fmt.Errorf("label %s not in enum InstanceState", src)
-	}
-
-	return nil
-}
-
 func (x InstanceState) VDLIsZero() bool {
 	return x == InstanceStateLaunching
 }
@@ -469,109 +319,6 @@ type InstanceStatus struct {
 func (InstanceStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
 }) {
-}
-
-func (m *InstanceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.State == InstanceStateLaunching)
-	if var4 {
-		if err := fieldsTarget1.ZeroField("State"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.Version == "")
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Version"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstanceStatus) MakeVDLTarget() vdl.Target {
-	return &InstanceStatusTarget{Value: m}
-}
-
-type InstanceStatusTarget struct {
-	Value         *InstanceStatus
-	stateTarget   InstanceStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *InstanceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*InstanceStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *InstanceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *InstanceStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *InstanceStatusTarget) ZeroField(name string) error {
-	switch name {
-	case "State":
-		t.Value.State = InstanceStateLaunching
-		return nil
-	case "Version":
-		t.Value.Version = ""
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *InstanceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
 }
 
 func (x InstanceStatus) VDLIsZero() bool {
@@ -661,109 +408,6 @@ func (InstallationStatus) __VDLReflect(struct {
 }) {
 }
 
-func (m *InstallationStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.State == InstallationStateActive)
-	if var4 {
-		if err := fieldsTarget1.ZeroField("State"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.Version == "")
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Version"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *InstallationStatus) MakeVDLTarget() vdl.Target {
-	return &InstallationStatusTarget{Value: m}
-}
-
-type InstallationStatusTarget struct {
-	Value         *InstallationStatus
-	stateTarget   InstallationStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *InstallationStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*InstallationStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *InstallationStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *InstallationStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *InstallationStatusTarget) ZeroField(name string) error {
-	switch name {
-	case "State":
-		t.Value.State = InstallationStateActive
-		return nil
-	case "Version":
-		t.Value.Version = ""
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *InstallationStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
 func (x InstallationStatus) VDLIsZero() bool {
 	return x == InstallationStatus{}
 }
@@ -849,109 +493,6 @@ type DeviceStatus struct {
 func (DeviceStatus) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
 }) {
-}
-
-func (m *DeviceStatus) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.State == InstanceStateLaunching)
-	if var4 {
-		if err := fieldsTarget1.ZeroField("State"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("State")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			if err := m.State.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.Version == "")
-	if var7 {
-		if err := fieldsTarget1.ZeroField("Version"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("Version")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget6.FromString(string(m.Version), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *DeviceStatus) MakeVDLTarget() vdl.Target {
-	return &DeviceStatusTarget{Value: m}
-}
-
-type DeviceStatusTarget struct {
-	Value         *DeviceStatus
-	stateTarget   InstanceStateTarget
-	versionTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *DeviceStatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*DeviceStatus)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *DeviceStatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "State":
-		t.stateTarget.Value = &t.Value.State
-		target, err := &t.stateTarget, error(nil)
-		return nil, target, err
-	case "Version":
-		t.versionTarget.Value = &t.Value.Version
-		target, err := &t.versionTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *DeviceStatusTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *DeviceStatusTarget) ZeroField(name string) error {
-	switch name {
-	case "State":
-		t.Value.State = InstanceStateLaunching
-		return nil
-	case "Version":
-		t.Value.Version = ""
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *DeviceStatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
 }
 
 func (x DeviceStatus) VDLIsZero() bool {
@@ -1042,7 +583,6 @@ type (
 		Name() string
 		// __VDLReflect describes the Status union type.
 		__VDLReflect(__StatusReflect)
-		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1054,10 +594,9 @@ type (
 	StatusDevice struct{ Value DeviceStatus }
 	// __StatusReflect describes the Status union type.
 	__StatusReflect struct {
-		Name               string `vdl:"v.io/v23/services/device.Status"`
-		Type               Status
-		UnionTargetFactory statusTargetFactory
-		Union              struct {
+		Name  string `vdl:"v.io/v23/services/device.Status"`
+		Type  Status
+		Union struct {
 			Instance     StatusInstance
 			Installation StatusInstallation
 			Device       StatusDevice
@@ -1070,152 +609,15 @@ func (x StatusInstance) Interface() interface{}       { return x.Value }
 func (x StatusInstance) Name() string                 { return "Instance" }
 func (x StatusInstance) __VDLReflect(__StatusReflect) {}
 
-func (m StatusInstance) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Instance")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m StatusInstance) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
 func (x StatusInstallation) Index() int                   { return 1 }
 func (x StatusInstallation) Interface() interface{}       { return x.Value }
 func (x StatusInstallation) Name() string                 { return "Installation" }
 func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
 
-func (m StatusInstallation) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Installation")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(1).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m StatusInstallation) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
 func (x StatusDevice) Index() int                   { return 2 }
 func (x StatusDevice) Interface() interface{}       { return x.Value }
 func (x StatusDevice) Name() string                 { return "Device" }
 func (x StatusDevice) __VDLReflect(__StatusReflect) {}
-
-func (m StatusDevice) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Device")
-	if err != nil {
-		return err
-	}
-
-	if err := m.Value.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(2).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m StatusDevice) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type StatusTarget struct {
-	Value     *Status
-	fieldName string
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *StatusTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*Status)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-
-	return t, nil
-}
-func (t *StatusTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	t.fieldName = name
-	switch name {
-	case "Instance":
-		val := InstanceStatus{}
-		return nil, &InstanceStatusTarget{Value: &val}, nil
-	case "Installation":
-		val := InstallationStatus{}
-		return nil, &InstallationStatusTarget{Value: &val}, nil
-	case "Device":
-		val := DeviceStatus{}
-		return nil, &DeviceStatusTarget{Value: &val}, nil
-	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.Status", name)
-	}
-}
-func (t *StatusTarget) FinishField(_, fieldTarget vdl.Target) error {
-	switch t.fieldName {
-	case "Instance":
-		*t.Value = StatusInstance{*(fieldTarget.(*InstanceStatusTarget)).Value}
-	case "Installation":
-		*t.Value = StatusInstallation{*(fieldTarget.(*InstallationStatusTarget)).Value}
-	case "Device":
-		*t.Value = StatusDevice{*(fieldTarget.(*DeviceStatusTarget)).Value}
-	}
-	return nil
-}
-func (t *StatusTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type statusTargetFactory struct{}
-
-func (t statusTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*Status); ok {
-		return &StatusTarget{Value: typedUnion}, nil
-	}
-	return nil, fmt.Errorf("got %T, want *Status", union)
-}
 
 func (x StatusInstance) VDLIsZero() bool {
 	return x.Value == InstanceStatus{}
@@ -1336,7 +738,6 @@ type (
 		Name() string
 		// __VDLReflect describes the BlessServerMessage union type.
 		__VDLReflect(__BlessServerMessageReflect)
-		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1347,10 +748,9 @@ type (
 	BlessServerMessageInstancePublicKey struct{ Value []byte }
 	// __BlessServerMessageReflect describes the BlessServerMessage union type.
 	__BlessServerMessageReflect struct {
-		Name               string `vdl:"v.io/v23/services/device.BlessServerMessage"`
-		Type               BlessServerMessage
-		UnionTargetFactory blessServerMessageTargetFactory
-		Union              struct {
+		Name  string `vdl:"v.io/v23/services/device.BlessServerMessage"`
+		Type  BlessServerMessage
+		Union struct {
 			InstancePublicKey BlessServerMessageInstancePublicKey
 		}
 	}
@@ -1360,79 +760,6 @@ func (x BlessServerMessageInstancePublicKey) Index() int                        
 func (x BlessServerMessageInstancePublicKey) Interface() interface{}                   { return x.Value }
 func (x BlessServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
 func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
-
-func (m BlessServerMessageInstancePublicKey) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("InstancePublicKey")
-	if err != nil {
-		return err
-	}
-
-	if err := fieldTarget3.FromBytes([]byte(m.Value), tt.NonOptional().Field(0).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m BlessServerMessageInstancePublicKey) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type BlessServerMessageTarget struct {
-	Value     *BlessServerMessage
-	fieldName string
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *BlessServerMessageTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*BlessServerMessage)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-
-	return t, nil
-}
-func (t *BlessServerMessageTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	t.fieldName = name
-	switch name {
-	case "InstancePublicKey":
-		val := []byte(nil)
-		return nil, &vdl.BytesTarget{Value: &val}, nil
-	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.BlessServerMessage", name)
-	}
-}
-func (t *BlessServerMessageTarget) FinishField(_, fieldTarget vdl.Target) error {
-	switch t.fieldName {
-	case "InstancePublicKey":
-		*t.Value = BlessServerMessageInstancePublicKey{*(fieldTarget.(*vdl.BytesTarget)).Value}
-	}
-	return nil
-}
-func (t *BlessServerMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type blessServerMessageTargetFactory struct{}
-
-func (t blessServerMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*BlessServerMessage); ok {
-		return &BlessServerMessageTarget{Value: typedUnion}, nil
-	}
-	return nil, fmt.Errorf("got %T, want *BlessServerMessage", union)
-}
 
 func (x BlessServerMessageInstancePublicKey) VDLIsZero() bool {
 	return len(x.Value) == 0
@@ -1513,7 +840,6 @@ type (
 		Name() string
 		// __VDLReflect describes the BlessClientMessage union type.
 		__VDLReflect(__BlessClientMessageReflect)
-		FillVDLTarget(vdl.Target, *vdl.Type) error
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1523,10 +849,9 @@ type (
 	BlessClientMessageAppBlessings struct{ Value security.Blessings }
 	// __BlessClientMessageReflect describes the BlessClientMessage union type.
 	__BlessClientMessageReflect struct {
-		Name               string `vdl:"v.io/v23/services/device.BlessClientMessage"`
-		Type               BlessClientMessage
-		UnionTargetFactory blessClientMessageTargetFactory
-		Union              struct {
+		Name  string `vdl:"v.io/v23/services/device.BlessClientMessage"`
+		Type  BlessClientMessage
+		Union struct {
 			AppBlessings BlessClientMessageAppBlessings
 		}
 	}
@@ -1536,84 +861,6 @@ func (x BlessClientMessageAppBlessings) Index() int                             
 func (x BlessClientMessageAppBlessings) Interface() interface{}                   { return x.Value }
 func (x BlessClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
 func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
-
-func (m BlessClientMessageAppBlessings) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("AppBlessings")
-	if err != nil {
-		return err
-	}
-
-	var wireValue4 security.WireBlessings
-	if err := security.WireBlessingsFromNative(&wireValue4, m.Value); err != nil {
-		return err
-	}
-
-	if err := wireValue4.FillVDLTarget(fieldTarget3, tt.NonOptional().Field(0).Type); err != nil {
-		return err
-	}
-	if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-		return err
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m BlessClientMessageAppBlessings) MakeVDLTarget() vdl.Target {
-	return nil
-}
-
-type BlessClientMessageTarget struct {
-	Value     *BlessClientMessage
-	fieldName string
-
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *BlessClientMessageTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-	if ttWant := vdl.TypeOf((*BlessClientMessage)(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-
-	return t, nil
-}
-func (t *BlessClientMessageTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	t.fieldName = name
-	switch name {
-	case "AppBlessings":
-		val := security.Blessings{}
-		return nil, &security.WireBlessingsTarget{Value: &val}, nil
-	default:
-		return nil, nil, fmt.Errorf("field %s not in union v.io/v23/services/device.BlessClientMessage", name)
-	}
-}
-func (t *BlessClientMessageTarget) FinishField(_, fieldTarget vdl.Target) error {
-	switch t.fieldName {
-	case "AppBlessings":
-		*t.Value = BlessClientMessageAppBlessings{*(fieldTarget.(*security.WireBlessingsTarget)).Value}
-	}
-	return nil
-}
-func (t *BlessClientMessageTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-type blessClientMessageTargetFactory struct{}
-
-func (t blessClientMessageTargetFactory) VDLMakeUnionTarget(union interface{}) (vdl.Target, error) {
-	if typedUnion, ok := union.(*BlessClientMessage); ok {
-		return &BlessClientMessageTarget{Value: typedUnion}, nil
-	}
-	return nil, fmt.Errorf("got %T, want *BlessClientMessage", union)
-}
 
 func (x BlessClientMessageAppBlessings) VDLIsZero() bool {
 	return x.Value.IsZero()
@@ -1691,136 +938,6 @@ type Description struct {
 func (Description) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Description"`
 }) {
-}
-
-func (m *Description) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var var4 bool
-	if len(m.Profiles) == 0 {
-		var4 = true
-	}
-	if var4 {
-		if err := fieldsTarget1.ZeroField("Profiles"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("Profiles")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-
-			setTarget5, err := fieldTarget3.StartSet(tt.NonOptional().Field(0).Type, len(m.Profiles))
-			if err != nil {
-				return err
-			}
-			for key7 := range m.Profiles {
-				keyTarget6, err := setTarget5.StartKey()
-				if err != nil {
-					return err
-				}
-				if err := keyTarget6.FromString(string(key7), tt.NonOptional().Field(0).Type.Key()); err != nil {
-					return err
-				}
-				if err := setTarget5.FinishKey(keyTarget6); err != nil {
-					return err
-				}
-			}
-			if err := fieldTarget3.FinishSet(setTarget5); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Description) MakeVDLTarget() vdl.Target {
-	return &DescriptionTarget{Value: m}
-}
-
-type DescriptionTarget struct {
-	Value          *Description
-	profilesTarget __VDLTarget1_set
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *DescriptionTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*Description)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *DescriptionTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "Profiles":
-		t.profilesTarget.Value = &t.Value.Profiles
-		target, err := &t.profilesTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *DescriptionTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *DescriptionTarget) ZeroField(name string) error {
-	switch name {
-	case "Profiles":
-		t.Value.Profiles = map[string]struct{}(nil)
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *DescriptionTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
-}
-
-// map[string]struct{}
-type __VDLTarget1_set struct {
-	Value     *map[string]struct{}
-	currKey   string
-	keyTarget vdl.StringTarget
-	vdl.TargetBase
-	vdl.SetTargetBase
-}
-
-func (t *__VDLTarget1_set) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
-
-	if ttWant := vdl.TypeOf((*map[string]struct{})(nil)); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	*t.Value = make(map[string]struct{})
-	return t, nil
-}
-func (t *__VDLTarget1_set) StartKey() (key vdl.Target, _ error) {
-	t.currKey = ""
-	t.keyTarget.Value = &t.currKey
-	target, err := &t.keyTarget, error(nil)
-	return target, err
-}
-func (t *__VDLTarget1_set) FinishKey(key vdl.Target) error {
-	(*t.Value)[t.currKey] = struct{}{}
-	return nil
-}
-func (t *__VDLTarget1_set) FinishSet(list vdl.SetTarget) error {
-	if len(*t.Value) == 0 {
-		*t.Value = nil
-	}
-
-	return nil
 }
 
 func (x Description) VDLIsZero() bool {
@@ -1952,108 +1069,6 @@ type Association struct {
 func (Association) __VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Association"`
 }) {
-}
-
-func (m *Association) FillVDLTarget(t vdl.Target, tt *vdl.Type) error {
-	fieldsTarget1, err := t.StartFields(tt)
-	if err != nil {
-		return err
-	}
-	var4 := (m.IdentityName == "")
-	if var4 {
-		if err := fieldsTarget1.ZeroField("IdentityName"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget2, fieldTarget3, err := fieldsTarget1.StartField("IdentityName")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget3.FromString(string(m.IdentityName), tt.NonOptional().Field(0).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget2, fieldTarget3); err != nil {
-				return err
-			}
-		}
-	}
-	var7 := (m.AccountName == "")
-	if var7 {
-		if err := fieldsTarget1.ZeroField("AccountName"); err != nil && err != vdl.ErrFieldNoExist {
-			return err
-		}
-	} else {
-		keyTarget5, fieldTarget6, err := fieldsTarget1.StartField("AccountName")
-		if err != vdl.ErrFieldNoExist {
-			if err != nil {
-				return err
-			}
-			if err := fieldTarget6.FromString(string(m.AccountName), tt.NonOptional().Field(1).Type); err != nil {
-				return err
-			}
-			if err := fieldsTarget1.FinishField(keyTarget5, fieldTarget6); err != nil {
-				return err
-			}
-		}
-	}
-	if err := t.FinishFields(fieldsTarget1); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Association) MakeVDLTarget() vdl.Target {
-	return &AssociationTarget{Value: m}
-}
-
-type AssociationTarget struct {
-	Value              *Association
-	identityNameTarget vdl.StringTarget
-	accountNameTarget  vdl.StringTarget
-	vdl.TargetBase
-	vdl.FieldsTargetBase
-}
-
-func (t *AssociationTarget) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
-
-	if ttWant := vdl.TypeOf((*Association)(nil)).Elem(); !vdl.Compatible(tt, ttWant) {
-		return nil, fmt.Errorf("type %v incompatible with %v", tt, ttWant)
-	}
-	return t, nil
-}
-func (t *AssociationTarget) StartField(name string) (key, field vdl.Target, _ error) {
-	switch name {
-	case "IdentityName":
-		t.identityNameTarget.Value = &t.Value.IdentityName
-		target, err := &t.identityNameTarget, error(nil)
-		return nil, target, err
-	case "AccountName":
-		t.accountNameTarget.Value = &t.Value.AccountName
-		target, err := &t.accountNameTarget, error(nil)
-		return nil, target, err
-	default:
-		return nil, nil, vdl.ErrFieldNoExist
-	}
-}
-func (t *AssociationTarget) FinishField(_, _ vdl.Target) error {
-	return nil
-}
-func (t *AssociationTarget) ZeroField(name string) error {
-	switch name {
-	case "IdentityName":
-		t.Value.IdentityName = ""
-		return nil
-	case "AccountName":
-		t.Value.AccountName = ""
-		return nil
-	default:
-		return vdl.ErrFieldNoExist
-	}
-}
-func (t *AssociationTarget) FinishFields(_ vdl.FieldsTarget) error {
-
-	return nil
 }
 
 func (x Association) VDLIsZero() bool {

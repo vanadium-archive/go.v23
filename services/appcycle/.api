@@ -2,14 +2,7 @@ pkg appcycle, func AppCycleClient(string) AppCycleClientStub
 pkg appcycle, func AppCycleServer(AppCycleServerMethods) AppCycleServerStub
 pkg appcycle, method (*AppCycleStopServerCallStub) Init(rpc.StreamServerCall)
 pkg appcycle, method (*AppCycleStopServerCallStub) SendStream() interface {  Send(item Task) error;}
-pkg appcycle, method (*Task) FillVDLTarget(vdl.Target, *vdl.Type) error
-pkg appcycle, method (*Task) MakeVDLTarget() vdl.Target
 pkg appcycle, method (*Task) VDLRead(vdl.Decoder) error
-pkg appcycle, method (*TaskTarget) FinishField(vdl.Target, vdl.Target) error
-pkg appcycle, method (*TaskTarget) FinishFields(vdl.FieldsTarget) error
-pkg appcycle, method (*TaskTarget) StartField(string) (vdl.Target, vdl.Target, error)
-pkg appcycle, method (*TaskTarget) StartFields(*vdl.Type) (vdl.FieldsTarget, error)
-pkg appcycle, method (*TaskTarget) ZeroField(string) error
 pkg appcycle, method (Task) VDLIsZero() bool
 pkg appcycle, method (Task) VDLWrite(vdl.Encoder) error
 pkg appcycle, type AppCycleClientMethods interface { ForceStop, Stop }
@@ -42,8 +35,4 @@ pkg appcycle, type AppCycleStopServerStream interface, SendStream() interface { 
 pkg appcycle, type Task struct
 pkg appcycle, type Task struct, Goal int32
 pkg appcycle, type Task struct, Progress int32
-pkg appcycle, type TaskTarget struct
-pkg appcycle, type TaskTarget struct, Value *Task
-pkg appcycle, type TaskTarget struct, embedded vdl.FieldsTargetBase
-pkg appcycle, type TaskTarget struct, embedded vdl.TargetBase
 pkg appcycle, var AppCycleDesc rpc.InterfaceDesc
