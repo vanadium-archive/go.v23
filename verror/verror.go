@@ -184,8 +184,13 @@ func (x E) VDLEqual(yiface interface{}) bool {
 	return true
 }
 
+var (
+	ttWireRetryCode = vdl.ErrorType.Elem().Field(1).Type
+	ttListAny       = vdl.ListType(vdl.AnyType)
+)
+
 func (x E) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf(vdl.WireError{})); err != nil {
+	if err := enc.StartValue(vdl.ErrorType.Elem()); err != nil {
 		return err
 	}
 	if x.ID != "" {
@@ -217,7 +222,7 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("RetryCode"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf(vdl.WireRetryCodeNoRetry)); err != nil {
+		if err := enc.StartValue(ttWireRetryCode); err != nil {
 			return err
 		}
 		if err := enc.EncodeString(actionStr); err != nil {
@@ -245,7 +250,7 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("ParamList"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]*vdl.Value)(nil))); err != nil {
+		if err := enc.StartValue(ttListAny); err != nil {
 			return err
 		}
 		if err := enc.SetLenHint(len(x.ParamList)); err != nil {
@@ -280,11 +285,8 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 
 func (x *E) VDLRead(dec vdl.Decoder) error {
 	*x = E{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(vdl.ErrorType.Elem()); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -296,7 +298,7 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			if id, err := dec.DecodeString(); err != nil {
@@ -308,7 +310,7 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "RetryCode":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(ttWireRetryCode); err != nil {
 				return err
 			}
 			label, err := dec.DecodeString()
@@ -331,7 +333,7 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Msg":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -342,11 +344,8 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "ParamList":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(ttListAny); err != nil {
 				return err
-			}
-			if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x.ParamList), dec.Type()) {
-				return fmt.Errorf("incompatible list %T, from %v", x.ParamList, dec.Type())
 			}
 			switch len := dec.LenHint(); {
 			case len > 0:

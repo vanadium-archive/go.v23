@@ -82,7 +82,7 @@ func (x Architecture) VDLIsZero() bool {
 }
 
 func (x Architecture) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Architecture)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -92,7 +92,7 @@ func (x Architecture) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Architecture) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_1); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -164,7 +164,7 @@ func (x Format) VDLIsZero() bool {
 }
 
 func (x Format) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Format)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_2); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -174,7 +174,7 @@ func (x Format) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Format) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_2); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -252,7 +252,7 @@ func (x OperatingSystem) VDLIsZero() bool {
 }
 
 func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*OperatingSystem)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_3); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -262,7 +262,7 @@ func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *OperatingSystem) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_3); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -297,7 +297,7 @@ func (x File) VDLIsZero() bool {
 }
 
 func (x File) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*File)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
 	if x.Name != "" {
@@ -318,7 +318,7 @@ func (x File) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.NextField("Contents"); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+		if err := enc.StartValue(__VDLType_list_5); err != nil {
 			return err
 		}
 		if err := enc.EncodeBytes(x.Contents); err != nil {
@@ -336,11 +336,8 @@ func (x File) VDLWrite(enc vdl.Encoder) error {
 
 func (x *File) VDLRead(dec vdl.Decoder) error {
 	*x = File{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -351,7 +348,7 @@ func (x *File) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -362,7 +359,7 @@ func (x *File) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Contents":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(__VDLType_list_5); err != nil {
 				return err
 			}
 			if err := dec.DecodeBytes(-1, &x.Contents); err != nil {
@@ -716,6 +713,15 @@ func (s implBuilderBuildServerCallSend) Send(item File) error {
 	return s.s.Send(item)
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_enum_1   *vdl.Type
+	__VDLType_enum_2   *vdl.Type
+	__VDLType_enum_3   *vdl.Type
+	__VDLType_struct_4 *vdl.Type
+	__VDLType_list_5   *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -742,6 +748,13 @@ func __VDLInit() struct{} {
 	vdl.Register((*Format)(nil))
 	vdl.Register((*OperatingSystem)(nil))
 	vdl.Register((*File)(nil))
+
+	// Initialize type definitions.
+	__VDLType_enum_1 = vdl.TypeOf((*Architecture)(nil))
+	__VDLType_enum_2 = vdl.TypeOf((*Format)(nil))
+	__VDLType_enum_3 = vdl.TypeOf((*OperatingSystem)(nil))
+	__VDLType_struct_4 = vdl.TypeOf((*File)(nil)).Elem()
+	__VDLType_list_5 = vdl.TypeOf((*[]byte)(nil))
 
 	return struct{}{}
 }

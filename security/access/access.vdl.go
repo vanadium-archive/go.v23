@@ -103,7 +103,6 @@
 package access
 
 import (
-	"fmt"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
 	"v.io/v23/security"
@@ -157,7 +156,7 @@ func (x AccessList) VDLIsZero() bool {
 }
 
 func (x AccessList) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AccessList)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
 	if len(x.In) != 0 {
@@ -183,7 +182,7 @@ func (x AccessList) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc vdl.Encoder, x []security.BlessingPattern) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]security.BlessingPattern)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_2); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -204,7 +203,7 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []security.BlessingPattern) error 
 }
 
 func __VDLWriteAnon_list_2(enc vdl.Encoder, x []string) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_3); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -232,11 +231,8 @@ func __VDLWriteAnon_list_2(enc vdl.Encoder, x []string) error {
 
 func (x *AccessList) VDLRead(dec vdl.Decoder) error {
 	*x = AccessList{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -263,11 +259,8 @@ func (x *AccessList) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]security.BlessingPattern) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -291,11 +284,8 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]security.BlessingPattern) error 
 }
 
 func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]string) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -311,7 +301,7 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]string) error {
 			return dec.FinishValue()
 		}
 		var elem string
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		var err error
@@ -344,7 +334,7 @@ func (x Permissions) VDLIsZero() bool {
 }
 
 func (x Permissions) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Permissions)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_map_5); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -374,11 +364,8 @@ func (x Permissions) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Permissions) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_map_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
 	var tmpMap Permissions
 	if len := dec.LenHint(); len > 0 {
@@ -394,7 +381,7 @@ func (x *Permissions) VDLRead(dec vdl.Decoder) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -435,7 +422,7 @@ func (x Tag) VDLIsZero() bool {
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Tag)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_string_6); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(string(x)); err != nil {
@@ -445,7 +432,7 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_string_6); err != nil {
 		return err
 	}
 	tmp, err := dec.DecodeString()
@@ -485,7 +472,7 @@ var AccessTagCaveat = security.CaveatDescriptor{
 		128,
 		0,
 	},
-	ParamType: vdl.TypeOf((*[]Tag)(nil)),
+	ParamType: __VDLType_list_7,
 }
 
 //////////////////////////////////////////////////
@@ -532,6 +519,17 @@ func NewErrAccessTagCaveatValidation(ctx *context.T, methodTags []string, caveat
 	return verror.New(ErrAccessTagCaveatValidation, ctx, methodTags, caveatTags)
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_struct_1 *vdl.Type
+	__VDLType_list_2   *vdl.Type
+	__VDLType_list_3   *vdl.Type
+	__VDLType_string_4 *vdl.Type
+	__VDLType_map_5    *vdl.Type
+	__VDLType_string_6 *vdl.Type
+	__VDLType_list_7   *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -557,6 +555,15 @@ func __VDLInit() struct{} {
 	vdl.Register((*AccessList)(nil))
 	vdl.Register((*Permissions)(nil))
 	vdl.Register((*Tag)(nil))
+
+	// Initialize type definitions.
+	__VDLType_struct_1 = vdl.TypeOf((*AccessList)(nil)).Elem()
+	__VDLType_list_2 = vdl.TypeOf((*[]security.BlessingPattern)(nil))
+	__VDLType_list_3 = vdl.TypeOf((*[]string)(nil))
+	__VDLType_string_4 = vdl.TypeOf((*security.BlessingPattern)(nil))
+	__VDLType_map_5 = vdl.TypeOf((*Permissions)(nil))
+	__VDLType_string_6 = vdl.TypeOf((*Tag)(nil))
+	__VDLType_list_7 = vdl.TypeOf((*[]Tag)(nil))
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")

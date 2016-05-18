@@ -53,7 +53,7 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 		// Special-case type decoding, since we must assign the hash-consed pointer
 		// for correctness, rather than filling in a newly-created Type.
 		if !calledStart {
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(TypeObjectType); err != nil {
 				return err
 			}
 		}
@@ -67,7 +67,7 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 		// TODO(toddw): Handle other common cases.
 	case *[]byte:
 		if !calledStart {
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(ttByteList); err != nil {
 				return err
 			}
 		}
@@ -78,6 +78,8 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 	}
 	return errReadMustReflect
 }
+
+var ttByteList = ListType(ByteType)
 
 // ReadReflect is like Read, but takes a reflect.Value argument.
 func ReadReflect(dec Decoder, rv reflect.Value) error {
@@ -111,10 +113,7 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	}
 	// Now start the decoder value, if we haven't already.
 	if !calledStart {
-		if err := dec.StartValue(); err != nil {
-			return err
-		}
-		if err := decoderCompatible(dec, tt); err != nil {
+		if err := dec.StartValue(tt); err != nil {
 			return err
 		}
 	}
@@ -175,7 +174,7 @@ func readIntoAny(dec Decoder, calledStart bool, rv reflect.Value) error {
 	if rv.Kind() != reflect.Interface {
 		return errReadAnyInterfaceOnly
 	}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(AnyType); err != nil {
 		return err
 	}
 	// Handle decoding any(nil) by setting the rv interface to nil.  Note that the

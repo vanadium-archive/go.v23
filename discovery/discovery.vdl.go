@@ -8,7 +8,6 @@
 package discovery
 
 import (
-	"fmt"
 	"v.io/v23/vdl"
 )
 
@@ -30,7 +29,7 @@ func (x AdId) VDLIsZero() bool {
 }
 
 func (x AdId) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*AdId)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_array_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
@@ -40,7 +39,7 @@ func (x AdId) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *AdId) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_array_1); err != nil {
 		return err
 	}
 	bytes := x[:]
@@ -63,7 +62,7 @@ func (x Attributes) VDLIsZero() bool {
 }
 
 func (x Attributes) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Attributes)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_map_2); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -99,11 +98,8 @@ func (x Attributes) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Attributes) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_map_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
 	var tmpMap Attributes
 	if len := dec.LenHint(); len > 0 {
@@ -119,7 +115,7 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -132,7 +128,7 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 		}
 		var elem string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -163,7 +159,7 @@ func (x Attachments) VDLIsZero() bool {
 }
 
 func (x Attachments) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Attachments)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_map_3); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -182,7 +178,7 @@ func (x Attachments) VDLWrite(enc vdl.Encoder) error {
 		if err := enc.FinishValue(); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+		if err := enc.StartValue(__VDLType_list_4); err != nil {
 			return err
 		}
 		if err := enc.EncodeBytes(elem); err != nil {
@@ -199,11 +195,8 @@ func (x Attachments) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Attachments) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_map_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
 	var tmpMap Attachments
 	if len := dec.LenHint(); len > 0 {
@@ -219,7 +212,7 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -232,7 +225,7 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 		}
 		var elem []byte
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(__VDLType_list_4); err != nil {
 				return err
 			}
 			if err := dec.DecodeBytes(-1, &elem); err != nil {
@@ -311,7 +304,7 @@ func (x Advertisement) VDLIsZero() bool {
 }
 
 func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Advertisement)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
 	if x.Id != (AdId{}) {
@@ -367,7 +360,7 @@ func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_6); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -395,11 +388,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 
 func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 	*x = Advertisement{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -414,7 +404,7 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "InterfaceName":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -445,11 +435,8 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_6); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -465,7 +452,7 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 			return dec.FinishValue()
 		}
 		var elem string
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		var err error
@@ -478,6 +465,16 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 		*x = append(*x, elem)
 	}
 }
+
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_array_1  *vdl.Type
+	__VDLType_map_2    *vdl.Type
+	__VDLType_map_3    *vdl.Type
+	__VDLType_list_4   *vdl.Type
+	__VDLType_struct_5 *vdl.Type
+	__VDLType_list_6   *vdl.Type
+)
 
 var __VDLInitCalled bool
 
@@ -505,6 +502,14 @@ func __VDLInit() struct{} {
 	vdl.Register((*Attributes)(nil))
 	vdl.Register((*Attachments)(nil))
 	vdl.Register((*Advertisement)(nil))
+
+	// Initialize type definitions.
+	__VDLType_array_1 = vdl.TypeOf((*AdId)(nil))
+	__VDLType_map_2 = vdl.TypeOf((*Attributes)(nil))
+	__VDLType_map_3 = vdl.TypeOf((*Attachments)(nil))
+	__VDLType_list_4 = vdl.TypeOf((*[]byte)(nil))
+	__VDLType_struct_5 = vdl.TypeOf((*Advertisement)(nil)).Elem()
+	__VDLType_list_6 = vdl.TypeOf((*[]string)(nil))
 
 	return struct{}{}
 }

@@ -6,7 +6,7 @@ package vdl
 
 // Transcode transcodes from the decoder to the encoder.
 func Transcode(e Encoder, d Decoder) error {
-	if err := d.StartValue(); err != nil {
+	if err := d.StartValue(AnyType); err != nil {
 		return err
 	}
 	if d.IsNil() {

@@ -44,7 +44,7 @@ func (x Config) VDLIsZero() bool {
 }
 
 func (x Config) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Config)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_map_1); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -80,11 +80,8 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Config) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_map_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
 	var tmpMap Config
 	if len := dec.LenHint(); len > 0 {
@@ -100,7 +97,7 @@ func (x *Config) VDLRead(dec vdl.Decoder) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -113,7 +110,7 @@ func (x *Config) VDLRead(dec vdl.Decoder) error {
 		}
 		var elem string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -185,7 +182,7 @@ func (x InstallationState) VDLIsZero() bool {
 }
 
 func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*InstallationState)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_2); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -195,7 +192,7 @@ func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *InstallationState) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_2); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -286,7 +283,7 @@ func (x InstanceState) VDLIsZero() bool {
 }
 
 func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*InstanceState)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_3); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -296,7 +293,7 @@ func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *InstanceState) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_3); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -326,7 +323,7 @@ func (x InstanceStatus) VDLIsZero() bool {
 }
 
 func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*InstanceStatus)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
 	if x.State != InstanceStateLaunching {
@@ -359,11 +356,8 @@ func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
 
 func (x *InstanceStatus) VDLRead(dec vdl.Decoder) error {
 	*x = InstanceStatus{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -378,7 +372,7 @@ func (x *InstanceStatus) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Version":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -413,7 +407,7 @@ func (x InstallationStatus) VDLIsZero() bool {
 }
 
 func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*InstallationStatus)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
 	if x.State != InstallationStateActive {
@@ -446,11 +440,8 @@ func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
 
 func (x *InstallationStatus) VDLRead(dec vdl.Decoder) error {
 	*x = InstallationStatus{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -465,7 +456,7 @@ func (x *InstallationStatus) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Version":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -500,7 +491,7 @@ func (x DeviceStatus) VDLIsZero() bool {
 }
 
 func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*DeviceStatus)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_6); err != nil {
 		return err
 	}
 	if x.State != InstanceStateLaunching {
@@ -533,11 +524,8 @@ func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
 
 func (x *DeviceStatus) VDLRead(dec vdl.Decoder) error {
 	*x = DeviceStatus{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_6); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -552,7 +540,7 @@ func (x *DeviceStatus) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Version":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -632,7 +620,7 @@ func (x StatusDevice) VDLIsZero() bool {
 }
 
 func (x StatusInstance) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_7); err != nil {
 		return err
 	}
 	if err := enc.NextField("Instance"); err != nil {
@@ -648,7 +636,7 @@ func (x StatusInstance) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x StatusInstallation) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_7); err != nil {
 		return err
 	}
 	if err := enc.NextField("Installation"); err != nil {
@@ -664,7 +652,7 @@ func (x StatusInstallation) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x StatusDevice) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Status)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_7); err != nil {
 		return err
 	}
 	if err := enc.NextField("Device"); err != nil {
@@ -680,11 +668,8 @@ func (x StatusDevice) VDLWrite(enc vdl.Encoder) error {
 }
 
 func VDLReadStatus(dec vdl.Decoder, x *Status) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_union_7); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
-		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
 	}
 	f, err := dec.NextField()
 	if err != nil {
@@ -766,13 +751,13 @@ func (x BlessServerMessageInstancePublicKey) VDLIsZero() bool {
 }
 
 func (x BlessServerMessageInstancePublicKey) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*BlessServerMessage)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_9); err != nil {
 		return err
 	}
 	if err := enc.NextField("InstancePublicKey"); err != nil {
 		return err
 	}
-	if err := enc.StartValue(vdl.TypeOf((*[]byte)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_8); err != nil {
 		return err
 	}
 	if err := enc.EncodeBytes(x.Value); err != nil {
@@ -788,11 +773,8 @@ func (x BlessServerMessageInstancePublicKey) VDLWrite(enc vdl.Encoder) error {
 }
 
 func VDLReadBlessServerMessage(dec vdl.Decoder, x *BlessServerMessage) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_union_9); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
-		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
 	}
 	f, err := dec.NextField()
 	if err != nil {
@@ -801,7 +783,7 @@ func VDLReadBlessServerMessage(dec vdl.Decoder, x *BlessServerMessage) error {
 	switch f {
 	case "InstancePublicKey":
 		var field BlessServerMessageInstancePublicKey
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(__VDLType_list_8); err != nil {
 			return err
 		}
 		if err := dec.DecodeBytes(-1, &field.Value); err != nil {
@@ -867,7 +849,7 @@ func (x BlessClientMessageAppBlessings) VDLIsZero() bool {
 }
 
 func (x BlessClientMessageAppBlessings) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*BlessClientMessage)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_11); err != nil {
 		return err
 	}
 	if err := enc.NextField("AppBlessings"); err != nil {
@@ -887,11 +869,8 @@ func (x BlessClientMessageAppBlessings) VDLWrite(enc vdl.Encoder) error {
 }
 
 func VDLReadBlessClientMessage(dec vdl.Decoder, x *BlessClientMessage) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_union_11); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
-		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
 	}
 	f, err := dec.NextField()
 	if err != nil {
@@ -948,7 +927,7 @@ func (x Description) VDLIsZero() bool {
 }
 
 func (x Description) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Description)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_12); err != nil {
 		return err
 	}
 	if len(x.Profiles) != 0 {
@@ -966,7 +945,7 @@ func (x Description) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[string]struct{}) error {
-	if err := enc.StartValue(vdl.TypeOf((*map[string]struct{})(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_set_13); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -994,11 +973,8 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[string]struct{}) error {
 
 func (x *Description) VDLRead(dec vdl.Decoder) error {
 	*x = Description{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_12); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -1021,11 +997,8 @@ func (x *Description) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[string]struct{}) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_set_13); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible set %T, from %v", *x, dec.Type())
 	}
 	var tmpMap map[string]struct{}
 	if len := dec.LenHint(); len > 0 {
@@ -1041,7 +1014,7 @@ func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[string]struct{}) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -1076,7 +1049,7 @@ func (x Association) VDLIsZero() bool {
 }
 
 func (x Association) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Association)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_14); err != nil {
 		return err
 	}
 	if x.IdentityName != "" {
@@ -1115,11 +1088,8 @@ func (x Association) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Association) VDLRead(dec vdl.Decoder) error {
 	*x = Association{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_14); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -1130,7 +1100,7 @@ func (x *Association) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "IdentityName":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -1141,7 +1111,7 @@ func (x *Association) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "AccountName":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -2874,6 +2844,24 @@ var descDevice = rpc.InterfaceDesc{
 	},
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_map_1     *vdl.Type
+	__VDLType_enum_2    *vdl.Type
+	__VDLType_enum_3    *vdl.Type
+	__VDLType_struct_4  *vdl.Type
+	__VDLType_struct_5  *vdl.Type
+	__VDLType_struct_6  *vdl.Type
+	__VDLType_union_7   *vdl.Type
+	__VDLType_list_8    *vdl.Type
+	__VDLType_union_9   *vdl.Type
+	__VDLType_struct_10 *vdl.Type
+	__VDLType_union_11  *vdl.Type
+	__VDLType_struct_12 *vdl.Type
+	__VDLType_set_13    *vdl.Type
+	__VDLType_struct_14 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -2907,6 +2895,22 @@ func __VDLInit() struct{} {
 	vdl.Register((*BlessClientMessage)(nil))
 	vdl.Register((*Description)(nil))
 	vdl.Register((*Association)(nil))
+
+	// Initialize type definitions.
+	__VDLType_map_1 = vdl.TypeOf((*Config)(nil))
+	__VDLType_enum_2 = vdl.TypeOf((*InstallationState)(nil))
+	__VDLType_enum_3 = vdl.TypeOf((*InstanceState)(nil))
+	__VDLType_struct_4 = vdl.TypeOf((*InstanceStatus)(nil)).Elem()
+	__VDLType_struct_5 = vdl.TypeOf((*InstallationStatus)(nil)).Elem()
+	__VDLType_struct_6 = vdl.TypeOf((*DeviceStatus)(nil)).Elem()
+	__VDLType_union_7 = vdl.TypeOf((*Status)(nil))
+	__VDLType_list_8 = vdl.TypeOf((*[]byte)(nil))
+	__VDLType_union_9 = vdl.TypeOf((*BlessServerMessage)(nil))
+	__VDLType_struct_10 = vdl.TypeOf((*security.WireBlessings)(nil)).Elem()
+	__VDLType_union_11 = vdl.TypeOf((*BlessClientMessage)(nil))
+	__VDLType_struct_12 = vdl.TypeOf((*Description)(nil)).Elem()
+	__VDLType_set_13 = vdl.TypeOf((*map[string]struct{})(nil))
+	__VDLType_struct_14 = vdl.TypeOf((*Association)(nil)).Elem()
 
 	return struct{}{}
 }

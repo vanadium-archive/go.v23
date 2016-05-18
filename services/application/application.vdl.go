@@ -9,7 +9,6 @@
 package application
 
 import (
-	"fmt"
 	"time"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
@@ -46,7 +45,7 @@ func (x SignedFile) VDLIsZero() bool {
 }
 
 func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*SignedFile)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
 	if x.File != "" {
@@ -79,11 +78,8 @@ func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
 
 func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 	*x = SignedFile{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -94,7 +90,7 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "File":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -145,7 +141,7 @@ func (x Packages) VDLIsZero() bool {
 }
 
 func (x Packages) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Packages)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_map_3); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -175,11 +171,8 @@ func (x Packages) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Packages) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_map_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible map %T, from %v", *x, dec.Type())
 	}
 	var tmpMap Packages
 	if len := dec.LenHint(); len > 0 {
@@ -195,7 +188,7 @@ func (x *Packages) VDLRead(dec vdl.Decoder) error {
 		}
 		var key string
 		{
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -292,7 +285,7 @@ func (x Envelope) VDLIsZero() bool {
 }
 
 func (x Envelope) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Envelope)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
 	if x.Title != "" {
@@ -386,7 +379,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]string)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -414,11 +407,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 
 func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 	*x = Envelope{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -429,7 +419,7 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Title":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -464,7 +454,7 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Restarts":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int32Type); err != nil {
 				return err
 			}
 			tmp, err := dec.DecodeInt(32)
@@ -492,11 +482,8 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -512,7 +499,7 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 			return dec.FinishValue()
 		}
 		var elem string
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		var err error
@@ -531,6 +518,17 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 
 // Device manager application envelopes must present this title.
 const DeviceManagerTitle = "device manager"
+
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_struct_1 *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_map_3    *vdl.Type
+	__VDLType_struct_4 *vdl.Type
+	__VDLType_list_5   *vdl.Type
+	__VDLType_struct_6 *vdl.Type
+	__VDLType_struct_7 *vdl.Type
+)
 
 var __VDLInitCalled bool
 
@@ -557,6 +555,15 @@ func __VDLInit() struct{} {
 	vdl.Register((*SignedFile)(nil))
 	vdl.Register((*Packages)(nil))
 	vdl.Register((*Envelope)(nil))
+
+	// Initialize type definitions.
+	__VDLType_struct_1 = vdl.TypeOf((*SignedFile)(nil)).Elem()
+	__VDLType_struct_2 = vdl.TypeOf((*security.Signature)(nil)).Elem()
+	__VDLType_map_3 = vdl.TypeOf((*Packages)(nil))
+	__VDLType_struct_4 = vdl.TypeOf((*Envelope)(nil)).Elem()
+	__VDLType_list_5 = vdl.TypeOf((*[]string)(nil))
+	__VDLType_struct_6 = vdl.TypeOf((*security.WireBlessings)(nil)).Elem()
+	__VDLType_struct_7 = vdl.TypeOf((*vdltime.Duration)(nil)).Elem()
 
 	return struct{}{}
 }

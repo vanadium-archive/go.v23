@@ -93,10 +93,6 @@ func (d *xDecoder) IgnoreNextStartValue() {
 	d.ignoreNextStartValue = true
 }
 
-func (d *xDecoder) StackDepth() int {
-	return len(d.stack)
-}
-
 func (d *xDecoder) decodeWireType(wt *wireType) (TypeId, error) {
 	// TODO(toddw): Flip useOldDecoder=false to enable Decoder.
 	const useOldDecoder = false
@@ -172,8 +168,7 @@ func (d *xDecoder) readRawBytes(raw *RawBytes) error {
 	return d.old.decodeRaw(ttElem, anyLen, raw)
 }
 
-func (d *xDecoder) StartValue() error {
-	//defer func() { fmt.Printf("HACK: StartValue  %+v\n", d.stack) }()
+func (d *xDecoder) StartValue(want *vdl.Type) error {
 	if d.ignoreNextStartValue {
 		d.ignoreNextStartValue = false
 		return nil
@@ -182,10 +177,10 @@ func (d *xDecoder) StartValue() error {
 	if err != nil {
 		return err
 	}
-	return d.setupValue(tt)
+	return d.setupValue(tt, want)
 }
 
-func (d *xDecoder) setupValue(tt *vdl.Type) error {
+func (d *xDecoder) setupValue(tt, want *vdl.Type) error {
 	// Handle any, which may be nil.  We "dereference" non-nil any to the inner
 	// type.  If that happens to be an optional, it's handled below.
 	isAny := false
@@ -217,12 +212,24 @@ func (d *xDecoder) setupValue(tt *vdl.Type) error {
 			tt = tt.Elem() // non-nil optional
 		}
 	}
+	// Check compatibility between the actual type and the want type.  Since
+	// compatibility applies to the entire static type, we only need to perform
+	// this check for top-level decoded values, and subsequently for decoded any
+	// values.  We skip checking non-composite want types, since those will be
+	// naturally caught by the Decode* calls anyways.
+	if len(d.stack) == 0 || isAny {
+		switch want.Kind() {
+		case vdl.Optional, vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.Union:
+			if !vdl.Compatible2(tt, want) {
+				return fmt.Errorf("vom: incompatible decode from %v into %v", tt, want)
+			}
+		}
+	}
 	// Initialize LenHint for composite types.
 	entry := decoderStackEntry{
 		Type:       tt,
 		Index:      -1,
 		LenHint:    -1,
-		NumStarted: 0,
 		IsAny:      isAny,
 		IsOptional: isOptional,
 	}
@@ -251,7 +258,6 @@ func (d *xDecoder) setupValue(tt *vdl.Type) error {
 }
 
 func (d *xDecoder) FinishValue() error {
-	//defer func() { fmt.Printf("HACK: FinishValue %+v\n", d.stack) }()
 	d.ignoreNextStartValue = false
 	stackTop := len(d.stack) - 1
 	if stackTop == -1 {
@@ -313,7 +319,7 @@ func (d *xDecoder) dfsNextType() (*vdl.Type, error) {
 	case vdl.Union, vdl.Struct:
 		return top.Type.Field(top.Index).Type, nil
 	}
-	return nil, fmt.Errorf("vom: invalid DFS walk, scalar type, stack %+v", d.stack)
+	return nil, fmt.Errorf("vom: can't StartValue on %v", top.Type)
 }
 
 func (d *xDecoder) checkInvariants(top *decoderStackEntry) error {
@@ -480,7 +486,7 @@ func (d *xDecoder) DecodeBool() (bool, error) {
 	if tt.Kind() == vdl.Bool {
 		return binaryDecodeBool(d.old.buf)
 	}
-	return false, fmt.Errorf("vom: type mismatch, got %v, want bool", tt)
+	return false, fmt.Errorf("vom: incompatible decode from %v into bool", tt)
 }
 
 func (d *xDecoder) binaryDecodeByte() (byte, error) {
@@ -499,7 +505,7 @@ func (d *xDecoder) binaryDecodeByte() (byte, error) {
 }
 
 func (d *xDecoder) DecodeUint(bitlen int) (uint64, error) {
-	const errFmt = "vom: %v conversion to uint%d loses precision: %v"
+	const errFmt = "vom: conversion from %v into uint%d loses precision: %v"
 	tt, ubitlen := d.Type(), uint(bitlen)
 	if tt == nil {
 		return 0, errEmptyDecoderStack
@@ -541,11 +547,11 @@ func (d *xDecoder) DecodeUint(bitlen int) (uint64, error) {
 		}
 		return ux, nil
 	}
-	return 0, fmt.Errorf("vom: type mismatch, got %v, want uint%d", tt, bitlen)
+	return 0, fmt.Errorf("vom: incompatible decode from %v into uint%d", tt, bitlen)
 }
 
 func (d *xDecoder) DecodeInt(bitlen int) (int64, error) {
-	const errFmt = "vom: %v conversion to int%d loses precision: %v"
+	const errFmt = "vom: conversion from %v into int%d loses precision: %v"
 	tt, ubitlen := d.Type(), uint(bitlen)
 	if tt == nil {
 		return 0, errEmptyDecoderStack
@@ -594,11 +600,11 @@ func (d *xDecoder) DecodeInt(bitlen int) (int64, error) {
 		}
 		return ix, nil
 	}
-	return 0, fmt.Errorf("vom: type mismatch, got %v, want int%d", tt, bitlen)
+	return 0, fmt.Errorf("vom: incompatible decode from %v into int%d", tt, bitlen)
 }
 
 func (d *xDecoder) DecodeFloat(bitlen int) (float64, error) {
-	const errFmt = "vom: %v conversion to float%d loses precision: %v"
+	const errFmt = "vom: conversion from %v into float%d loses precision: %v"
 	tt := d.Type()
 	if tt == nil {
 		return 0, errEmptyDecoderStack
@@ -650,7 +656,7 @@ func (d *xDecoder) DecodeFloat(bitlen int) (float64, error) {
 		}
 		return x, nil
 	}
-	return 0, fmt.Errorf("vom: type mismatch, got %v, want float%d", tt, bitlen)
+	return 0, fmt.Errorf("vom: incompatible decode from %v into float%d", tt, bitlen)
 }
 
 func (d *xDecoder) DecodeBytes(fixedlen int, v *[]byte) error {
@@ -695,7 +701,7 @@ func (d *xDecoder) DecodeString() (string, error) {
 		}
 		return tt.EnumLabel(int(index)), nil
 	}
-	return "", fmt.Errorf("vom: type mismatch, got %v, want string", tt)
+	return "", fmt.Errorf("vom: incompatible decode from %v into string", tt)
 }
 
 func (d *xDecoder) DecodeTypeObject() (*vdl.Type, error) {
@@ -715,11 +721,11 @@ func (d *xDecoder) DecodeTypeObject() (*vdl.Type, error) {
 		}
 		return d.old.typeDec.lookupType(tid)
 	}
-	return nil, fmt.Errorf("vom: type mismatch, got %v, want typeobject", tt)
+	return nil, fmt.Errorf("vom: incompatible decode from %v into typeobject", tt)
 }
 
 func (d *xDecoder) SkipValue() error {
-	if err := d.StartValue(); err != nil {
+	if err := d.StartValue(vdl.AnyType); err != nil {
 		return err
 	}
 	// Nil values have already been read in StartValue, so we only need to

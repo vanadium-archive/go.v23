@@ -83,7 +83,7 @@ func (x WireRetryCode) VDLIsZero() bool {
 }
 
 func (x WireRetryCode) VDLWrite(enc Encoder) error {
-	if err := enc.StartValue(TypeOf((*WireRetryCode)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -93,7 +93,7 @@ func (x WireRetryCode) VDLWrite(enc Encoder) error {
 }
 
 func (x *WireRetryCode) VDLRead(dec Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_1); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -139,7 +139,7 @@ func (x WireError) VDLIsZero() bool {
 }
 
 func (x WireError) VDLWrite(enc Encoder) error {
-	if err := enc.StartValue(TypeOf((*WireError)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
 	if x.Id != "" {
@@ -193,7 +193,7 @@ func (x WireError) VDLWrite(enc Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc Encoder, x []*Value) error {
-	if err := enc.StartValue(TypeOf((*[]*Value)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_3); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -221,11 +221,8 @@ func __VDLWriteAnon_list_1(enc Encoder, x []*Value) error {
 
 func (x *WireError) VDLRead(dec Decoder) error {
 	*x = WireError{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -236,7 +233,7 @@ func (x *WireError) VDLRead(dec Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(StringType); err != nil {
 				return err
 			}
 			var err error
@@ -251,7 +248,7 @@ func (x *WireError) VDLRead(dec Decoder) error {
 				return err
 			}
 		case "Msg":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(StringType); err != nil {
 				return err
 			}
 			var err error
@@ -274,11 +271,8 @@ func (x *WireError) VDLRead(dec Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -304,6 +298,13 @@ func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
 
 // Type-check native conversion functions.
 var ()
+
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_enum_1   *Type
+	__VDLType_struct_2 *Type
+	__VDLType_list_3   *Type
+)
 
 var __VDLInitCalled bool
 
@@ -331,6 +332,11 @@ func __VDLInit() struct{} {
 	// Register types.
 	Register((*WireRetryCode)(nil))
 	Register((*WireError)(nil))
+
+	// Initialize type definitions.
+	__VDLType_enum_1 = TypeOf((*WireRetryCode)(nil))
+	__VDLType_struct_2 = TypeOf((*WireError)(nil)).Elem()
+	__VDLType_list_3 = TypeOf((*[]*Value)(nil))
 
 	return struct{}{}
 }

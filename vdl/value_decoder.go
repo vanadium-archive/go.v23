@@ -35,7 +35,7 @@ type vdStackEntry struct {
 	Keys       []*Value // keys for set/map
 }
 
-func (d *valueDecoder) StartValue() error {
+func (d *valueDecoder) StartValue(want *Type) error {
 	if d.ignoreNext {
 		d.ignoreNext = false
 		return nil
@@ -61,7 +61,7 @@ func (d *valueDecoder) StartValue() error {
 		case Union:
 			_, vv = top.Value.UnionField()
 		default:
-			return fmt.Errorf("unknown composite kind: %v", top.Value.Kind())
+			return fmt.Errorf("vdl: can't StartValue on %v", top.Value.Type())
 		}
 		top.NumStarted++
 	}
@@ -78,6 +78,19 @@ func (d *valueDecoder) StartValue() error {
 			vv = vv.Elem()
 		}
 	}
+	// Check compatibility between the actual type and the want type.  Since
+	// compatibility applies to the entire static type, we only need to perform
+	// this check for top-level decoded values, and subsequently for decoded any
+	// values.  We skip checking non-composite want types, since those will be
+	// naturally caught by the Decode* calls anyways.
+	if len(d.stack) == 0 || isAny {
+		switch want.Kind() {
+		case Optional, Array, List, Set, Map, Struct, Union:
+			if !Compatible2(vv.Type(), want) {
+				return fmt.Errorf("vdl: incompatible decode from %v into %v", vv.Type(), want)
+			}
+		}
+	}
 	entry := vdStackEntry{
 		Value:      vv,
 		IsAny:      isAny,
@@ -89,10 +102,6 @@ func (d *valueDecoder) StartValue() error {
 	}
 	d.stack = append(d.stack, entry)
 	return nil
-}
-
-func (d *valueDecoder) StackDepth() int {
-	return len(d.stack)
 }
 
 func (d *valueDecoder) IgnoreNextStartValue() {
@@ -150,6 +159,13 @@ func (d *valueDecoder) NextField() (string, error) {
 	return top.Value.Type().Field(index).Name, nil
 }
 
+func (d *valueDecoder) topValue() *Value {
+	if top := d.top(); top != nil {
+		return top.Value
+	}
+	return nil
+}
+
 func (d *valueDecoder) Type() *Type {
 	if top := d.top(); top != nil {
 		return top.Value.Type()
@@ -196,91 +212,91 @@ func (d *valueDecoder) LenHint() int {
 }
 
 func (d *valueDecoder) DecodeBool() (bool, error) {
-	top := d.top()
-	if top == nil {
+	topV := d.topValue()
+	if topV == nil {
 		return false, errEmptyDecoderStack
 	}
-	if top.Value.Kind() != Bool {
-		return false, fmt.Errorf("vdl: type mismatch, got %v, want bool", top.Value.Type())
+	if topV.Kind() == Bool {
+		return topV.Bool(), nil
 	}
-	return top.Value.Bool(), nil
+	return false, fmt.Errorf("vdl: incompatible decode from %v into bool", topV.Type())
 }
 
 func (d *valueDecoder) DecodeUint(bitlen int) (uint64, error) {
-	const errFmt = "vdl: %v conversion to uint%d loses precision: %v"
-	top, ubitlen := d.top(), uint(bitlen)
-	if top == nil {
+	const errFmt = "vdl: conversion from %v into uint%d loses precision: %v"
+	topV, ubitlen := d.topValue(), uint(bitlen)
+	if topV == nil {
 		return 0, errEmptyDecoderStack
 	}
-	switch top.Value.Kind() {
+	switch topV.Kind() {
 	case Byte, Uint16, Uint32, Uint64:
-		x := top.Value.Uint()
+		x := topV.Uint()
 		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return x, nil
 	case Int8, Int16, Int32, Int64:
-		x := top.Value.Int()
+		x := topV.Int()
 		ux := uint64(x)
 		if shift := 64 - ubitlen; x < 0 || ux != (ux<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return ux, nil
 	case Float32, Float64:
-		x := top.Value.Float()
+		x := topV.Float()
 		ux := uint64(x)
 		if shift := 64 - ubitlen; x != float64(ux) || ux != (ux<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return ux, nil
 	default:
-		return 0, fmt.Errorf("vdl: type mismatch, got %v, want uint%d", top.Value.Type(), bitlen)
+		return 0, fmt.Errorf("vdl: incompatible decode from %v into uint%d", topV.Type(), bitlen)
 	}
 }
 
 func (d *valueDecoder) DecodeInt(bitlen int) (int64, error) {
-	const errFmt = "vdl: %v conversion to int%d loses precision: %v"
-	top, ubitlen := d.top(), uint(bitlen)
-	if top == nil {
+	const errFmt = "vdl: conversion from %v into int%d loses precision: %v"
+	topV, ubitlen := d.topValue(), uint(bitlen)
+	if topV == nil {
 		return 0, errEmptyDecoderStack
 	}
-	switch top.Value.Kind() {
+	switch topV.Kind() {
 	case Byte, Uint16, Uint32, Uint64:
-		x := top.Value.Uint()
+		x := topV.Uint()
 		ix := int64(x)
 		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
 		// numbers should be shifted by 33 rather than 32.
 		if shift := 65 - ubitlen; ix < 0 || x != (x<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return ix, nil
 	case Int8, Int16, Int32, Int64:
-		x := top.Value.Int()
+		x := topV.Int()
 		if shift := 64 - ubitlen; x != (x<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return x, nil
 	case Float32, Float64:
-		x := top.Value.Float()
+		x := topV.Float()
 		ix := int64(x)
 		if shift := 64 - ubitlen; x != float64(ix) || ix != (ix<<shift)>>shift {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return ix, nil
 	default:
-		return 0, fmt.Errorf("vdl: type mismatch, got %v, want int%d", top.Value.Type(), bitlen)
+		return 0, fmt.Errorf("vdl: incompatible decode from %v into int%d", topV.Type(), bitlen)
 	}
 }
 
 func (d *valueDecoder) DecodeFloat(bitlen int) (float64, error) {
-	const errFmt = "vdl: %v conversion to float%d loses precision: %v"
-	top := d.top()
-	if top == nil {
+	const errFmt = "vdl: conversion from %v into float%d loses precision: %v"
+	topV := d.topValue()
+	if topV == nil {
 		return 0, errEmptyDecoderStack
 	}
-	switch top.Value.Kind() {
+	switch topV.Kind() {
 	case Byte, Uint16, Uint32, Uint64:
-		x := top.Value.Uint()
+		x := topV.Uint()
 		var max uint64
 		if bitlen > 32 {
 			max = float64MaxInt
@@ -288,11 +304,11 @@ func (d *valueDecoder) DecodeFloat(bitlen int) (float64, error) {
 			max = float32MaxInt
 		}
 		if x > max {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return float64(x), nil
 	case Int8, Int16, Int32, Int64:
-		x := top.Value.Int()
+		x := topV.Int()
 		var min, max int64
 		if bitlen > 32 {
 			min, max = float64MinInt, float64MaxInt
@@ -300,64 +316,63 @@ func (d *valueDecoder) DecodeFloat(bitlen int) (float64, error) {
 			min, max = float32MinInt, float32MaxInt
 		}
 		if x < min || x > max {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return float64(x), nil
 	case Float32, Float64:
-		x := top.Value.Float()
+		x := topV.Float()
 		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
-			return 0, fmt.Errorf(errFmt, top.Value, bitlen, x)
+			return 0, fmt.Errorf(errFmt, topV.Type(), bitlen, x)
 		}
 		return x, nil
 	default:
-		return 0, fmt.Errorf("vdl: type mismatch, got %v, want float%d", top.Value.Type(), bitlen)
+		return 0, fmt.Errorf("vdl: incompatible decode from %v into float%d", topV.Type(), bitlen)
 	}
 }
 
 func (d *valueDecoder) DecodeBytes(fixedlen int, v *[]byte) error {
-	top := d.top()
-	if top == nil {
+	topV := d.topValue()
+	if topV == nil {
 		return errEmptyDecoderStack
 	}
-	if !top.Value.Type().IsBytes() {
+	if !topV.Type().IsBytes() {
 		return DecodeConvertedBytes(d, fixedlen, v)
 	}
-	if fixedlen >= 0 && top.Value.Len() != fixedlen {
-		return fmt.Errorf("vdl: %v got %v bytes, want fixed len %v", top.Value.Type(), top.Value.Len(), fixedlen)
+	if fixedlen >= 0 && fixedlen != topV.Len() {
+		return fmt.Errorf("vdl: %v got %d bytes, want fixed len %d", topV.Type(), topV.Len(), fixedlen)
 	}
-	if cap(*v) < top.Value.Len() {
-		*v = make([]byte, top.Value.Len())
+	if cap(*v) >= topV.Len() {
+		*v = (*v)[:topV.Len()]
 	} else {
-		*v = (*v)[:top.Value.Len()]
+		*v = make([]byte, topV.Len())
 	}
-	copy(*v, top.Value.Bytes())
+	copy(*v, topV.Bytes())
 	return nil
 }
 
 func (d *valueDecoder) DecodeString() (string, error) {
-	top := d.top()
-	if top == nil {
+	topV := d.topValue()
+	if topV == nil {
 		return "", errEmptyDecoderStack
 	}
-	switch top.Value.Kind() {
+	switch topV.Kind() {
 	case String:
-		return top.Value.RawString(), nil
+		return topV.RawString(), nil
 	case Enum:
-		return top.Value.EnumLabel(), nil
-	default:
-		return "", fmt.Errorf("vdl: type mismatch, got %v, want string", top.Value.Type())
+		return topV.EnumLabel(), nil
 	}
+	return "", fmt.Errorf("vdl: incompatible decode from %v into string", topV.Type())
 }
 
 func (d *valueDecoder) DecodeTypeObject() (*Type, error) {
-	top := d.top()
-	if top == nil {
+	topV := d.topValue()
+	if topV == nil {
 		return nil, errEmptyDecoderStack
 	}
-	if top.Value.Type() != TypeObjectType {
-		return nil, fmt.Errorf("vdl: type mismatch, got %v, want typeobject", top.Value.Type())
+	if topV.Type() == TypeObjectType {
+		return topV.TypeObject(), nil
 	}
-	return top.Value.TypeObject(), nil
+	return nil, fmt.Errorf("vdl: incompatible decode from %v into typeobject", topV.Type())
 }
 
 func (d *valueDecoder) top() *vdStackEntry {

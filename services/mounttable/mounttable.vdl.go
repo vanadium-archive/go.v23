@@ -44,7 +44,7 @@ func (x Tag) VDLIsZero() bool {
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Tag)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_string_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(string(x)); err != nil {
@@ -54,7 +54,7 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_string_1); err != nil {
 		return err
 	}
 	tmp, err := dec.DecodeString()
@@ -394,6 +394,11 @@ var descMountTable = rpc.InterfaceDesc{
 	},
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_string_1 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -417,6 +422,9 @@ func __VDLInit() struct{} {
 
 	// Register types.
 	vdl.Register((*Tag)(nil))
+
+	// Initialize type definitions.
+	__VDLType_string_1 = vdl.TypeOf((*Tag)(nil))
 
 	return struct{}{}
 }

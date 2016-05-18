@@ -4,11 +4,7 @@
 
 package verror
 
-import (
-	"fmt"
-
-	"v.io/v23/vdl"
-)
+import "v.io/v23/vdl"
 
 func init() {
 	// TODO(bprosnitz) Remove this old-style registration.
@@ -148,13 +144,10 @@ func retryFromAction(action ActionCode) vdl.WireRetryCode {
 // Unlike regular VDLRead implementations, this handles the case where the
 // decoder contains a nil value, to make code generation simpler.
 func VDLRead(dec vdl.Decoder, x *error) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(vdl.ErrorType.Elem()); err != nil {
 		return err
 	}
 	if dec.IsNil() {
-		if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.ErrorType, dec.Type()) {
-			return fmt.Errorf("incompatible error, from %v", dec.Type())
-		}
 		*x = nil
 		return dec.FinishValue()
 	}

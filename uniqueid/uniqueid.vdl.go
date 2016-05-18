@@ -29,7 +29,7 @@ func (x Id) VDLIsZero() bool {
 }
 
 func (x Id) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Id)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_array_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
@@ -39,7 +39,7 @@ func (x Id) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Id) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_array_1); err != nil {
 		return err
 	}
 	bytes := x[:]
@@ -48,6 +48,11 @@ func (x *Id) VDLRead(dec vdl.Decoder) error {
 	}
 	return dec.FinishValue()
 }
+
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_array_1 *vdl.Type
+)
 
 var __VDLInitCalled bool
 
@@ -72,6 +77,9 @@ func __VDLInit() struct{} {
 
 	// Register types.
 	vdl.Register((*Id)(nil))
+
+	// Initialize type definitions.
+	__VDLType_array_1 = vdl.TypeOf((*Id)(nil))
 
 	return struct{}{}
 }

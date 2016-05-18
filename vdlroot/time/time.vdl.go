@@ -14,7 +14,6 @@
 package time
 
 import (
-	"fmt"
 	"time"
 	"v.io/v23/vdl"
 )
@@ -49,7 +48,7 @@ func (x Duration) VDLIsZero() bool {
 }
 
 func (x Duration) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Duration)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
 	if x.Seconds != 0 {
@@ -88,11 +87,8 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Duration) VDLRead(dec vdl.Decoder) error {
 	*x = Duration{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -103,7 +99,7 @@ func (x *Duration) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Seconds":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int64Type); err != nil {
 				return err
 			}
 			var err error
@@ -114,7 +110,7 @@ func (x *Duration) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Nanos":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int32Type); err != nil {
 				return err
 			}
 			tmp, err := dec.DecodeInt(32)
@@ -163,7 +159,7 @@ func (x Time) VDLIsZero() bool {
 }
 
 func (x Time) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Time)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
 	if x.Seconds != 0 {
@@ -202,11 +198,8 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Time) VDLRead(dec vdl.Decoder) error {
 	*x = Time{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -217,7 +210,7 @@ func (x *Time) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Seconds":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int64Type); err != nil {
 				return err
 			}
 			var err error
@@ -228,7 +221,7 @@ func (x *Time) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Nanos":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int32Type); err != nil {
 				return err
 			}
 			tmp, err := dec.DecodeInt(32)
@@ -286,7 +279,7 @@ func (x WireDeadline) VDLIsZero() bool {
 }
 
 func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*WireDeadline)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
 	if x.FromNow != 0 {
@@ -309,11 +302,8 @@ func (x WireDeadline) VDLWrite(enc vdl.Encoder) error {
 
 func (x *WireDeadline) VDLRead(dec vdl.Decoder) error {
 	*x = WireDeadline{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -349,6 +339,13 @@ var (
 	_ func(*WireDeadline, Deadline) error  = WireDeadlineFromNative
 )
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_struct_1 *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_struct_3 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -379,6 +376,11 @@ func __VDLInit() struct{} {
 	vdl.Register((*Duration)(nil))
 	vdl.Register((*Time)(nil))
 	vdl.Register((*WireDeadline)(nil))
+
+	// Initialize type definitions.
+	__VDLType_struct_1 = vdl.TypeOf((*Duration)(nil)).Elem()
+	__VDLType_struct_2 = vdl.TypeOf((*Time)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*WireDeadline)(nil)).Elem()
 
 	return struct{}{}
 }

@@ -16,7 +16,11 @@ func (vv *Value) VDLRead(dec Decoder) error {
 	if vv == nil {
 		return errReadIntoNilValue
 	}
-	if err := dec.StartValue(); err != nil {
+	ttWant := AnyType
+	if vv.IsValid() {
+		ttWant = vv.Type()
+	}
+	if err := dec.StartValue(ttWant); err != nil {
 		return err
 	}
 	if !vv.IsValid() {
@@ -35,10 +39,7 @@ func (vv *Value) VDLRead(dec Decoder) error {
 }
 
 func (vv *Value) read(dec Decoder) error {
-	if err := dec.StartValue(); err != nil {
-		return err
-	}
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
+	if err := dec.StartValue(vv.Type()); err != nil {
 		return err
 	}
 	// Handle nil decoded values first, to simplify the rest of the cases.
@@ -171,9 +172,6 @@ func (vv *Value) readNonNilValue(dec Decoder) error {
 }
 
 func (vv *Value) readArray(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	index := 0
 	for {
 		switch done, err := dec.NextEntry(); {
@@ -192,9 +190,6 @@ func (vv *Value) readArray(dec Decoder) error {
 }
 
 func (vv *Value) readList(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	switch len := dec.LenHint(); {
 	case len >= 0:
 		vv.AssignLen(len)
@@ -233,9 +228,6 @@ func (vv *Value) readList(dec Decoder) error {
 }
 
 func (vv *Value) readSet(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
@@ -252,9 +244,6 @@ func (vv *Value) readSet(dec Decoder) error {
 }
 
 func (vv *Value) readMap(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
@@ -275,9 +264,6 @@ func (vv *Value) readMap(dec Decoder) error {
 }
 
 func (vv *Value) readStruct(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	// Reset to zero struct, since fields may be missing.
 	vv.Assign(nil)
 	for {
@@ -302,9 +288,6 @@ func (vv *Value) readStruct(dec Decoder) error {
 }
 
 func (vv *Value) readUnion(dec Decoder) error {
-	if err := decoderCompatible(dec, vv.Type()); err != nil {
-		return err
-	}
 	name, err := dec.NextField()
 	switch {
 	case err != nil:

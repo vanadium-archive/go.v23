@@ -32,7 +32,7 @@ func (x MountFlag) VDLIsZero() bool {
 }
 
 func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*MountFlag)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_uint32_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeUint(uint64(x)); err != nil {
@@ -42,7 +42,7 @@ func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *MountFlag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_uint32_1); err != nil {
 		return err
 	}
 	tmp, err := dec.DecodeUint(32)
@@ -77,7 +77,7 @@ func (x MountedServer) VDLIsZero() bool {
 }
 
 func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*MountedServer)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
 	if x.Server != "" {
@@ -114,11 +114,8 @@ func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
 
 func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 	*x = MountedServer{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -129,7 +126,7 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Server":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -189,7 +186,7 @@ func (x MountEntry) VDLIsZero() bool {
 }
 
 func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*MountEntry)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
 	if x.Name != "" {
@@ -249,7 +246,7 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc vdl.Encoder, x []MountedServer) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]MountedServer)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -271,11 +268,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []MountedServer) error {
 
 func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 	*x = MountEntry{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -286,7 +280,7 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -301,7 +295,7 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "ServesMountTable":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -312,7 +306,7 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "IsLeaf":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -331,11 +325,8 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]MountedServer) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -377,7 +368,7 @@ func (x GlobError) VDLIsZero() bool {
 }
 
 func (x GlobError) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobError)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_6); err != nil {
 		return err
 	}
 	if x.Name != "" {
@@ -410,11 +401,8 @@ func (x GlobError) VDLWrite(enc vdl.Encoder) error {
 
 func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 	*x = GlobError{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_6); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -425,7 +413,7 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -497,7 +485,7 @@ func (x GlobReplyError) VDLIsZero() bool {
 }
 
 func (x GlobReplyEntry) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobReply)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_7); err != nil {
 		return err
 	}
 	if err := enc.NextField("Entry"); err != nil {
@@ -513,7 +501,7 @@ func (x GlobReplyEntry) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x GlobReplyError) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobReply)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_7); err != nil {
 		return err
 	}
 	if err := enc.NextField("Error"); err != nil {
@@ -529,11 +517,8 @@ func (x GlobReplyError) VDLWrite(enc vdl.Encoder) error {
 }
 
 func VDLReadGlobReply(dec vdl.Decoder, x *GlobReply) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_union_7); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
-		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
 	}
 	f, err := dec.NextField()
 	if err != nil {
@@ -616,7 +601,7 @@ func (x GlobChildrenReplyError) VDLIsZero() bool {
 }
 
 func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobChildrenReply)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_8); err != nil {
 		return err
 	}
 	if err := enc.NextField("Name"); err != nil {
@@ -638,7 +623,7 @@ func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x GlobChildrenReplyError) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobChildrenReply)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_union_8); err != nil {
 		return err
 	}
 	if err := enc.NextField("Error"); err != nil {
@@ -654,11 +639,8 @@ func (x GlobChildrenReplyError) VDLWrite(enc vdl.Encoder) error {
 }
 
 func VDLReadGlobChildrenReply(dec vdl.Decoder, x *GlobChildrenReply) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_union_8); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(x), dec.Type()) {
-		return fmt.Errorf("incompatible union %T, from %v", x, dec.Type())
 	}
 	f, err := dec.NextField()
 	if err != nil {
@@ -667,7 +649,7 @@ func VDLReadGlobChildrenReply(dec vdl.Decoder, x *GlobChildrenReply) error {
 	switch f {
 	case "Name":
 		var field GlobChildrenReplyName
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(vdl.StringType); err != nil {
 			return err
 		}
 		var err error
@@ -705,6 +687,18 @@ const Replace = MountFlag(1) // Replace means the mount should replace what is c
 const MT = MountFlag(2)      // MT means that the target server is a mount table.
 const Leaf = MountFlag(4)    // Leaf means that the target server is a leaf.
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_uint32_1 *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_struct_3 *vdl.Type
+	__VDLType_struct_4 *vdl.Type
+	__VDLType_list_5   *vdl.Type
+	__VDLType_struct_6 *vdl.Type
+	__VDLType_union_7  *vdl.Type
+	__VDLType_union_8  *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -733,6 +727,16 @@ func __VDLInit() struct{} {
 	vdl.Register((*GlobError)(nil))
 	vdl.Register((*GlobReply)(nil))
 	vdl.Register((*GlobChildrenReply)(nil))
+
+	// Initialize type definitions.
+	__VDLType_uint32_1 = vdl.TypeOf((*MountFlag)(nil))
+	__VDLType_struct_2 = vdl.TypeOf((*MountedServer)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*vdltime.WireDeadline)(nil)).Elem()
+	__VDLType_struct_4 = vdl.TypeOf((*MountEntry)(nil)).Elem()
+	__VDLType_list_5 = vdl.TypeOf((*[]MountedServer)(nil))
+	__VDLType_struct_6 = vdl.TypeOf((*GlobError)(nil)).Elem()
+	__VDLType_union_7 = vdl.TypeOf((*GlobReply)(nil))
+	__VDLType_union_8 = vdl.TypeOf((*GlobChildrenReply)(nil))
 
 	return struct{}{}
 }

@@ -14,7 +14,7 @@ import (
 func TestValueDecoderDecodeBool(t *testing.T) {
 	expected := true
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(BoolType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), BoolType; got != want {
@@ -34,7 +34,7 @@ func TestValueDecoderDecodeBool(t *testing.T) {
 func TestValueDecoderDecodeUint(t *testing.T) {
 	expected := uint32(5)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(Uint32Type); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), Uint32Type; got != want {
@@ -54,7 +54,7 @@ func TestValueDecoderDecodeUint(t *testing.T) {
 func TestValueDecoderDecodeInt(t *testing.T) {
 	expected := int64(5)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(Int64Type); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), Int64Type; got != want {
@@ -74,7 +74,7 @@ func TestValueDecoderDecodeInt(t *testing.T) {
 func TestValueDecoderDecodeFloat(t *testing.T) {
 	expected := float32(5)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(Float32Type); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), Float32Type; got != want {
@@ -94,7 +94,7 @@ func TestValueDecoderDecodeFloat(t *testing.T) {
 func TestValueDecoderDecodeString(t *testing.T) {
 	expected := "abc"
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -115,7 +115,7 @@ func TestValueDecoderDecodeEnum(t *testing.T) {
 	expectedType := EnumType("A", "B")
 	expected := ZeroValue(expectedType)
 	vd := expected.Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), expectedType; got != want {
@@ -134,11 +134,12 @@ func TestValueDecoderDecodeEnum(t *testing.T) {
 
 func TestValueDecoderDecodeByteList(t *testing.T) {
 	expected := []byte("abc")
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 	var out []byte
@@ -155,11 +156,12 @@ func TestValueDecoderDecodeByteList(t *testing.T) {
 
 func TestValueDecoderDecodeByteArray(t *testing.T) {
 	expected := [3]byte{byte('a'), byte('b'), byte('c')}
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 	var out []byte
@@ -174,7 +176,7 @@ func TestValueDecoderDecodeByteArray(t *testing.T) {
 	}
 
 	vd = ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if err := vd.DecodeBytes(2, &out); err == nil {
@@ -188,7 +190,7 @@ func TestValueDecoderDecodeByteArray(t *testing.T) {
 func TestValueDecoderDecodeTypeObject(t *testing.T) {
 	expected := TypeOf("abc")
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(TypeObjectType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), TypeObjectType; got != want {
@@ -206,11 +208,12 @@ func TestValueDecoderDecodeTypeObject(t *testing.T) {
 }
 
 func testValueDecoderDecodeSequence(t *testing.T, expected interface{}) {
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
@@ -220,7 +223,7 @@ func testValueDecoderDecodeSequence(t *testing.T, expected interface{}) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -242,7 +245,7 @@ func testValueDecoderDecodeSequence(t *testing.T, expected interface{}) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -284,11 +287,12 @@ func TestValueDecoderDecodeArray(t *testing.T) {
 
 func TestValueDecoderDecodeSet(t *testing.T) {
 	expected := map[string]struct{}{"a": struct{}{}, "b": struct{}{}}
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
@@ -298,7 +302,7 @@ func TestValueDecoderDecodeSet(t *testing.T) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -321,7 +325,7 @@ func TestValueDecoderDecodeSet(t *testing.T) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -356,11 +360,12 @@ func TestValueDecoderDecodeSet(t *testing.T) {
 
 func TestValueDecoderDecodeMap(t *testing.T) {
 	expected := map[string]uint32{"a": 3, "b": 7}
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
@@ -370,7 +375,7 @@ func TestValueDecoderDecodeMap(t *testing.T) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -386,7 +391,7 @@ func TestValueDecoderDecodeMap(t *testing.T) {
 	if err := vd.FinishValue(); err != nil {
 		t.Fatalf("error in FinishValue: %v", err)
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(Uint32Type); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), Uint32Type; got != want {
@@ -408,7 +413,7 @@ func TestValueDecoderDecodeMap(t *testing.T) {
 	case done:
 		t.Fatalf("ended prematurely")
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(StringType); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), StringType; got != want {
@@ -424,7 +429,7 @@ func TestValueDecoderDecodeMap(t *testing.T) {
 	if err := vd.FinishValue(); err != nil {
 		t.Fatalf("error in FinishValue: %v", err)
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(Uint32Type); err != nil {
 		t.Fatalf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), Uint32Type; got != want {
@@ -464,11 +469,12 @@ type decoderTestStruct struct {
 
 func TestValueDecoderDecodeStruct(t *testing.T) {
 	expected := decoderTestStruct{1, []bool{true, false}, "abc"}
+	expectedType := TypeOf(expected)
 	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), TypeOf(expected); got != want {
+	if got, want := vd.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
@@ -481,7 +487,7 @@ loop:
 			t.Fatalf("error in NextField: %v", err)
 		case name == "A":
 			seen = append(seen, name)
-			if err := vd.StartValue(); err != nil {
+			if err := vd.StartValue(Int32Type); err != nil {
 				t.Errorf("error in StartValue: %v", err)
 			}
 			switch val, err := vd.DecodeInt(32); {
@@ -495,7 +501,7 @@ loop:
 			}
 		case name == "B":
 			seen = append(seen, name)
-			if err := vd.StartValue(); err != nil {
+			if err := vd.StartValue(expectedType.Field(1).Type); err != nil {
 				t.Errorf("error in StartValue: %v", err)
 			}
 
@@ -515,7 +521,7 @@ loop:
 			case done:
 				t.Errorf("unexpected end marker")
 			}
-			if err := vd.StartValue(); err != nil {
+			if err := vd.StartValue(BoolType); err != nil {
 				t.Errorf("error in StartValue: %v", err)
 			}
 			switch val, err := vd.DecodeBool(); {
@@ -533,7 +539,7 @@ loop:
 			}
 		case name == "C":
 			seen = append(seen, name)
-			if err := vd.StartValue(); err != nil {
+			if err := vd.StartValue(StringType); err != nil {
 				t.Errorf("error in StartValue: %v", err)
 			}
 			switch val, err := vd.DecodeString(); {
@@ -565,17 +571,10 @@ loop:
 }
 
 func TestValueDecoderDecodeUnion(t *testing.T) {
-	b := TypeBuilder{}
-	union := b.Union()
-	union.AppendField("A", BoolType).AppendField("B", StringType)
-	b.Build()
-	expectedType, err := union.Built()
-	if err != nil {
-		t.Fatalf("error building union type: %v", err)
-	}
+	expectedType := UnionType(Field{"A", BoolType}, Field{"B", StringType})
 	expected := ZeroValue(expectedType)
 	vd := expected.Decoder()
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	if got, want := vd.Type(), expectedType; got != want {
@@ -588,7 +587,7 @@ func TestValueDecoderDecodeUnion(t *testing.T) {
 	case name != "A":
 		t.Errorf("unexpected field name: %v", name)
 	}
-	if err := vd.StartValue(); err != nil {
+	if err := vd.StartValue(BoolType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
 	switch val, err := vd.DecodeBool(); {

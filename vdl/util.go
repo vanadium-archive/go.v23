@@ -103,9 +103,13 @@ func rvFlattenPointers(rv reflect.Value) reflect.Value {
 // zeroDecoder is a decoder that only returns zero values.
 type zeroDecoder struct{ tt *Type }
 
-func (z zeroDecoder) StartValue() error          { return nil }
+func (z zeroDecoder) StartValue(want *Type) error {
+	if !Compatible2(z.tt, want) {
+		return fmt.Errorf("vdl: zero incompatible decode from %v into %v", z.tt, want)
+	}
+	return nil
+}
 func (z zeroDecoder) FinishValue() error         { return nil }
-func (z zeroDecoder) StackDepth() int            { return 0 }
 func (z zeroDecoder) SkipValue() error           { return nil }
 func (z zeroDecoder) IgnoreNextStartValue()      {}
 func (z zeroDecoder) NextEntry() (bool, error)   { return true, nil }
@@ -117,14 +121,14 @@ func (z zeroDecoder) IsNil() bool                { return z.IsAny() || z.IsOptio
 func (z zeroDecoder) Index() int                 { return 0 }
 func (z zeroDecoder) LenHint() int               { return 0 }
 
-func (z zeroDecoder) DecodeBool() (bool, error)               { return false, nil }
-func (z zeroDecoder) DecodeString() (string, error)           { return "", nil }
-func (z zeroDecoder) DecodeTypeObject() (*Type, error)        { return AnyType, nil }
-func (z zeroDecoder) DecodeUint(bitlen int) (uint64, error)   { return 0, nil }
-func (z zeroDecoder) DecodeInt(bitlen int) (int64, error)     { return 0, nil }
-func (z zeroDecoder) DecodeFloat(bitlen int) (float64, error) { return 0, nil }
+func (z zeroDecoder) DecodeBool() (bool, error)        { return false, nil }
+func (z zeroDecoder) DecodeString() (string, error)    { return "", nil }
+func (z zeroDecoder) DecodeTypeObject() (*Type, error) { return AnyType, nil }
+func (z zeroDecoder) DecodeUint(int) (uint64, error)   { return 0, nil }
+func (z zeroDecoder) DecodeInt(int) (int64, error)     { return 0, nil }
+func (z zeroDecoder) DecodeFloat(int) (float64, error) { return 0, nil }
 func (z zeroDecoder) DecodeBytes(fixedlen int, x *[]byte) error {
-	*x = nil
+	*x = (*x)[:0]
 	return nil
 }
 

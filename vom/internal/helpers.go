@@ -12,6 +12,7 @@ import (
 	"encoding/gob"
 	"strings"
 	"testing"
+
 	"v.io/v23/security"
 	"v.io/v23/vom"
 )
@@ -19,6 +20,14 @@ import (
 func benchmarkSingleShotEncode(b *testing.B, value interface{}) {
 	for i := 0; i < b.N; i++ {
 		vom.Encode(value)
+	}
+}
+
+func benchmarkSingleShotDecode(b *testing.B, tofill, value interface{}) {
+	bytes, _ := vom.Encode(value)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		vom.Decode(bytes, tofill)
 	}
 }
 
@@ -32,14 +41,6 @@ func benchmarkRepeatedEncode(b *testing.B, value interface{}) {
 	}
 }
 
-func benchmarkSingleShotDecode(b *testing.B, tofill, value interface{}) {
-	bytes, _ := vom.Encode(value)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		vom.Decode(bytes, tofill)
-	}
-}
-
 func benchmarkRepeatedDecode(b *testing.B, tofill, value interface{}) {
 	var buf bytes.Buffer
 	enc := vom.NewEncoder(&buf)
@@ -47,7 +48,7 @@ func benchmarkRepeatedDecode(b *testing.B, tofill, value interface{}) {
 		enc.Encode(value)
 	}
 	dec := vom.NewDecoder(&buf)
-	dec.Decode(tofill)
+	dec.Decode(tofill) // decode the type
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		dec.Decode(tofill)
@@ -55,19 +56,26 @@ func benchmarkRepeatedDecode(b *testing.B, tofill, value interface{}) {
 }
 
 func benchmarkGobEncode(b *testing.B, value interface{}) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	enc.Encode(value) // encode the type
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		var buf bytes.Buffer
-		gob.NewEncoder(&buf).Encode(value)
+		enc.Encode(value)
 	}
 }
 
 func benchmarkGobDecode(b *testing.B, tofill, value interface{}) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
-	enc.Encode(value)
+	for i := 0; i <= b.N; i++ {
+		enc.Encode(value)
+	}
+	dec := gob.NewDecoder(&buf)
+	dec.Decode(tofill) // decode the type
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		gob.NewDecoder(&buf).Decode(tofill)
+		dec.Decode(tofill)
 	}
 }
 

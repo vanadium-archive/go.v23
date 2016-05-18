@@ -8,7 +8,6 @@
 package rpc
 
 import (
-	"fmt"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
 	vdltime "v.io/v23/vdlroot/time"
@@ -93,7 +92,7 @@ func (x Request) VDLIsZero() bool {
 }
 
 func (x Request) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Request)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
 	if x.Suffix != "" {
@@ -206,11 +205,8 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Request) VDLRead(dec vdl.Decoder) error {
 	*x = Request{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -221,7 +217,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Suffix":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -232,7 +228,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Method":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -243,7 +239,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "NumPosArgs":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Uint64Type); err != nil {
 				return err
 			}
 			var err error
@@ -254,7 +250,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "EndStreamArgs":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -285,7 +281,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Language":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -350,7 +346,7 @@ func (x Response) VDLIsZero() bool {
 }
 
 func (x Response) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Response)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
 	if x.Error != nil {
@@ -419,11 +415,8 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Response) VDLRead(dec vdl.Decoder) error {
 	*x = Response{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -438,7 +431,7 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "EndStreamResults":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -449,7 +442,7 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "NumPosResults":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Uint64Type); err != nil {
 				return err
 			}
 			var err error
@@ -464,7 +457,7 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "AckBlessings":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -490,6 +483,16 @@ const GlobMethod = "__Glob"
 const ReservedSignature = "__Signature"
 const ReservedMethodSignature = "__MethodSignature"
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_struct_1 *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_struct_3 *vdl.Type
+	__VDLType_struct_4 *vdl.Type
+	__VDLType_struct_5 *vdl.Type
+	__VDLType_struct_6 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -514,6 +517,14 @@ func __VDLInit() struct{} {
 	// Register types.
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
+
+	// Initialize type definitions.
+	__VDLType_struct_1 = vdl.TypeOf((*Request)(nil)).Elem()
+	__VDLType_struct_2 = vdl.TypeOf((*vdltime.WireDeadline)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*security.WireBlessings)(nil)).Elem()
+	__VDLType_struct_4 = vdl.TypeOf((*vtrace.Request)(nil)).Elem()
+	__VDLType_struct_5 = vdl.TypeOf((*Response)(nil)).Elem()
+	__VDLType_struct_6 = vdl.TypeOf((*vtrace.Response)(nil)).Elem()
 
 	return struct{}{}
 }

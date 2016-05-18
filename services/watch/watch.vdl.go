@@ -108,7 +108,6 @@
 package watch
 
 import (
-	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -168,7 +167,7 @@ func (x ResumeMarker) VDLIsZero() bool {
 }
 
 func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*ResumeMarker)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeBytes([]byte(x)); err != nil {
@@ -178,7 +177,7 @@ func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_1); err != nil {
 		return err
 	}
 	var bytes []byte
@@ -216,7 +215,7 @@ func (x GlobRequest) VDLIsZero() bool {
 }
 
 func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GlobRequest)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
 	if x.Pattern != "" {
@@ -249,11 +248,8 @@ func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
 
 func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 	*x = GlobRequest{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -264,7 +260,7 @@ func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Pattern":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -332,7 +328,7 @@ func (x Change) VDLIsZero() bool {
 }
 
 func (x Change) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Change)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
 	if x.Name != "" {
@@ -403,11 +399,8 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 	*x = Change{
 		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
 	}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -418,7 +411,7 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -429,7 +422,7 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "State":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int32Type); err != nil {
 				return err
 			}
 			tmp, err := dec.DecodeInt(32)
@@ -450,7 +443,7 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Continued":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.BoolType); err != nil {
 				return err
 			}
 			var err error
@@ -724,6 +717,13 @@ func (s implGlobWatcherWatchGlobServerCallSend) Send(item Change) error {
 	return s.s.Send(item)
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_list_1   *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_struct_3 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -749,6 +749,11 @@ func __VDLInit() struct{} {
 	vdl.Register((*ResumeMarker)(nil))
 	vdl.Register((*GlobRequest)(nil))
 	vdl.Register((*Change)(nil))
+
+	// Initialize type definitions.
+	__VDLType_list_1 = vdl.TypeOf((*ResumeMarker)(nil))
+	__VDLType_struct_2 = vdl.TypeOf((*GlobRequest)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*Change)(nil)).Elem()
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownResumeMarker.ID), "{1:}{2:} unknown resume marker {_}")

@@ -8,7 +8,6 @@
 package vtrace
 
 import (
-	"fmt"
 	"time"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
@@ -46,7 +45,7 @@ func (x Annotation) VDLIsZero() bool {
 }
 
 func (x Annotation) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Annotation)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
 	if !x.When.IsZero() {
@@ -83,11 +82,8 @@ func (x Annotation) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 	*x = Annotation{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -106,7 +102,7 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Message":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -163,7 +159,7 @@ func (x SpanRecord) VDLIsZero() bool {
 }
 
 func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*SpanRecord)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
 	if x.Id != (uniqueid.Id{}) {
@@ -235,7 +231,7 @@ func (x SpanRecord) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_1(enc vdl.Encoder, x []Annotation) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]Annotation)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -257,11 +253,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []Annotation) error {
 
 func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 	*x = SpanRecord{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -280,7 +273,7 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Name":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -319,11 +312,8 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Annotation) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -367,7 +357,7 @@ func (x TraceRecord) VDLIsZero() bool {
 }
 
 func (x TraceRecord) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*TraceRecord)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_6); err != nil {
 		return err
 	}
 	if x.Id != (uniqueid.Id{}) {
@@ -393,7 +383,7 @@ func (x TraceRecord) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_list_2(enc vdl.Encoder, x []SpanRecord) error {
-	if err := enc.StartValue(vdl.TypeOf((*[]SpanRecord)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_list_7); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -415,11 +405,8 @@ func __VDLWriteAnon_list_2(enc vdl.Encoder, x []SpanRecord) error {
 
 func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 	*x = TraceRecord{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_6); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -446,11 +433,8 @@ func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]SpanRecord) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_list_7); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible list %T, from %v", *x, dec.Type())
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
@@ -485,7 +469,7 @@ func (x TraceFlags) VDLIsZero() bool {
 }
 
 func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*TraceFlags)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_int32_8); err != nil {
 		return err
 	}
 	if err := enc.EncodeInt(int64(x)); err != nil {
@@ -495,7 +479,7 @@ func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *TraceFlags) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_int32_8); err != nil {
 		return err
 	}
 	tmp, err := dec.DecodeInt(32)
@@ -524,7 +508,7 @@ func (x Request) VDLIsZero() bool {
 }
 
 func (x Request) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Request)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_9); err != nil {
 		return err
 	}
 	if x.SpanId != (uniqueid.Id{}) {
@@ -573,11 +557,8 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Request) VDLRead(dec vdl.Decoder) error {
 	*x = Request{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_9); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -600,7 +581,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "LogLevel":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.Int32Type); err != nil {
 				return err
 			}
 			tmp, err := dec.DecodeInt(32)
@@ -644,7 +625,7 @@ func (x Response) VDLIsZero() bool {
 }
 
 func (x Response) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Response)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_10); err != nil {
 		return err
 	}
 	if x.Flags != 0 {
@@ -671,11 +652,8 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Response) VDLRead(dec vdl.Decoder) error {
 	*x = Response{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_10); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -707,6 +685,20 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 const Empty = TraceFlags(0)
 const CollectInMemory = TraceFlags(1)
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_struct_1  *vdl.Type
+	__VDLType_struct_2  *vdl.Type
+	__VDLType_struct_3  *vdl.Type
+	__VDLType_array_4   *vdl.Type
+	__VDLType_list_5    *vdl.Type
+	__VDLType_struct_6  *vdl.Type
+	__VDLType_list_7    *vdl.Type
+	__VDLType_int32_8   *vdl.Type
+	__VDLType_struct_9  *vdl.Type
+	__VDLType_struct_10 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -735,6 +727,18 @@ func __VDLInit() struct{} {
 	vdl.Register((*TraceFlags)(nil))
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
+
+	// Initialize type definitions.
+	__VDLType_struct_1 = vdl.TypeOf((*Annotation)(nil)).Elem()
+	__VDLType_struct_2 = vdl.TypeOf((*vdltime.Time)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*SpanRecord)(nil)).Elem()
+	__VDLType_array_4 = vdl.TypeOf((*uniqueid.Id)(nil))
+	__VDLType_list_5 = vdl.TypeOf((*[]Annotation)(nil))
+	__VDLType_struct_6 = vdl.TypeOf((*TraceRecord)(nil)).Elem()
+	__VDLType_list_7 = vdl.TypeOf((*[]SpanRecord)(nil))
+	__VDLType_int32_8 = vdl.TypeOf((*TraceFlags)(nil))
+	__VDLType_struct_9 = vdl.TypeOf((*Request)(nil)).Elem()
+	__VDLType_struct_10 = vdl.TypeOf((*Response)(nil)).Elem()
 
 	return struct{}{}
 }

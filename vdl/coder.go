@@ -57,9 +57,11 @@ type ReadWriter interface {
 //    1.5
 type Decoder interface {
 	// StartValue must be called before decoding each value, for both scalar and
-	// composite values.  Each call pushes the type of the next value on to the
-	// stack.
-	StartValue() error
+	// composite values.  The want type is the type of value being decoded into,
+	// used to check compatibility with the value in the decoder; use AnyType if
+	// you don't know, or want to decode any type of value.  Each call pushes the
+	// type of the next value on to the stack.
+	StartValue(want *Type) error
 	// FinishValue must be called after decoding each value, for both scalar and
 	// composite values.  Each call pops the type of the top value off of the
 	// stack.
@@ -75,10 +77,6 @@ type Decoder interface {
 	// ignore the second StartValue call.
 	IgnoreNextStartValue()
 
-	// StackDepth returns the stack depth of the current value.  Returns 0 if
-	// StartValue hasn't been called for the next top-level value.
-	StackDepth() int
-
 	// NextEntry instructs the Decoder to move to the next element of an Array or
 	// List, the next key of a Set, or the next (key,elem) pair of a Map.  Returns
 	// done=true when there are no remaining entries.
@@ -88,10 +86,9 @@ type Decoder interface {
 	// are no remaining fields.
 	NextField() (name string, _ error)
 
-	// Type returns the type of the top value on the stack, corresponding to the
-	// previous call of StartValue.  Returns nil when the stack depth is 0.  The
-	// returned type is only Any or Optional iff the value is nil; non-nil values
-	// are "auto-dereferenced" to their underlying element value.
+	// Type returns the type of the top value on the stack.  Returns nil when the
+	// stack is empty.  The returned type is only Any or Optional iff the value is
+	// nil; non-nil values are "auto-dereferenced" to their underlying elem value.
 	Type() *Type
 	// IsAny returns true iff the type of the top value on the stack was Any,
 	// despite the "auto-dereference" behavior of non-nil values.
@@ -184,15 +181,6 @@ type Encoder interface {
 	EncodeTypeObject(v *Type) error
 }
 
-func decoderCompatible(dec Decoder, tt *Type) error {
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !Compatible(tt, dec.Type()) {
-		return fmt.Errorf("incompatible %v, from %v", tt, dec.Type())
-	}
-	return nil
-}
-
-var ttByteList = ListType(ByteType)
-
 // DecodeConvertedBytes is a helper function for implementations of
 // Decoder.DecodeBytes, to deal with cases where the decoder value is
 // convertible to []byte.  E.g. if the decoder value is []float64, we need to
@@ -201,9 +189,6 @@ var ttByteList = ListType(ByteType)
 // Since this is meant to be used in the implementation of DecodeBytes, there is
 // no outer call to StartValue/FinishValue.
 func DecodeConvertedBytes(dec Decoder, fixedlen int, buf *[]byte) error {
-	if err := decoderCompatible(dec, ttByteList); err != nil {
-		return err
-	}
 	if len := dec.LenHint(); len >= 0 && cap(*buf) < len {
 		*buf = make([]byte, 0, len)
 	} else {
@@ -219,7 +204,7 @@ func DecodeConvertedBytes(dec Decoder, fixedlen int, buf *[]byte) error {
 		case done:
 			return nil
 		}
-		if err := dec.StartValue(); err != nil {
+		if err := dec.StartValue(ByteType); err != nil {
 			return err
 		}
 		elem, err := dec.DecodeUint(8)

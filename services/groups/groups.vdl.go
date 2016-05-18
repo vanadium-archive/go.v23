@@ -43,7 +43,7 @@ func (x BlessingPatternChunk) VDLIsZero() bool {
 }
 
 func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*BlessingPatternChunk)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_string_1); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(string(x)); err != nil {
@@ -53,7 +53,7 @@ func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_string_1); err != nil {
 		return err
 	}
 	tmp, err := dec.DecodeString()
@@ -77,7 +77,7 @@ func (x GetRequest) VDLIsZero() bool {
 }
 
 func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GetRequest)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -88,11 +88,8 @@ func (x GetRequest) VDLWrite(enc vdl.Encoder) error {
 
 func (x *GetRequest) VDLRead(dec vdl.Decoder) error {
 	*x = GetRequest{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -127,7 +124,7 @@ func (x GetResponse) VDLIsZero() bool {
 }
 
 func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*GetResponse)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
 	if len(x.Entries) != 0 {
@@ -145,7 +142,7 @@ func (x GetResponse) VDLWrite(enc vdl.Encoder) error {
 }
 
 func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[BlessingPatternChunk]struct{}) error {
-	if err := enc.StartValue(vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_set_4); err != nil {
 		return err
 	}
 	if err := enc.SetLenHint(len(x)); err != nil {
@@ -167,11 +164,8 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[BlessingPatternChunk]struct{}) 
 
 func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 	*x = GetResponse{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -194,11 +188,8 @@ func (x *GetResponse) VDLRead(dec vdl.Decoder) error {
 }
 
 func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_set_4); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible set %T, from %v", *x, dec.Type())
 	}
 	var tmpMap map[BlessingPatternChunk]struct{}
 	if len := dec.LenHint(); len > 0 {
@@ -282,7 +273,7 @@ func (x ApproximationType) VDLIsZero() bool {
 }
 
 func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*ApproximationType)(nil))); err != nil {
+	if err := enc.StartValue(__VDLType_enum_5); err != nil {
 		return err
 	}
 	if err := enc.EncodeString(x.String()); err != nil {
@@ -292,7 +283,7 @@ func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_enum_5); err != nil {
 		return err
 	}
 	enum, err := dec.DecodeString()
@@ -322,7 +313,7 @@ func (x Approximation) VDLIsZero() bool {
 }
 
 func (x Approximation) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.TypeOf((*Approximation)(nil)).Elem()); err != nil {
+	if err := enc.StartValue(__VDLType_struct_6); err != nil {
 		return err
 	}
 	if x.Reason != "" {
@@ -361,11 +352,8 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 
 func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 	*x = Approximation{}
-	if err := dec.StartValue(); err != nil {
+	if err := dec.StartValue(__VDLType_struct_6); err != nil {
 		return err
-	}
-	if (dec.StackDepth() == 1 || dec.IsAny()) && !vdl.Compatible(vdl.TypeOf(*x), dec.Type()) {
-		return fmt.Errorf("incompatible struct %T, from %v", *x, dec.Type())
 	}
 	for {
 		f, err := dec.NextField()
@@ -376,7 +364,7 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Reason":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -387,7 +375,7 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Details":
-			if err := dec.StartValue(); err != nil {
+			if err := dec.StartValue(vdl.StringType); err != nil {
 				return err
 			}
 			var err error
@@ -925,6 +913,16 @@ var descGroup = rpc.InterfaceDesc{
 	},
 }
 
+// Hold type definitions in package-level variables, for better performance.
+var (
+	__VDLType_string_1 *vdl.Type
+	__VDLType_struct_2 *vdl.Type
+	__VDLType_struct_3 *vdl.Type
+	__VDLType_set_4    *vdl.Type
+	__VDLType_enum_5   *vdl.Type
+	__VDLType_struct_6 *vdl.Type
+)
+
 var __VDLInitCalled bool
 
 // __VDLInit performs vdl initialization.  It is safe to call multiple times.
@@ -952,6 +950,14 @@ func __VDLInit() struct{} {
 	vdl.Register((*GetResponse)(nil))
 	vdl.Register((*ApproximationType)(nil))
 	vdl.Register((*Approximation)(nil))
+
+	// Initialize type definitions.
+	__VDLType_string_1 = vdl.TypeOf((*BlessingPatternChunk)(nil))
+	__VDLType_struct_2 = vdl.TypeOf((*GetRequest)(nil)).Elem()
+	__VDLType_struct_3 = vdl.TypeOf((*GetResponse)(nil)).Elem()
+	__VDLType_set_4 = vdl.TypeOf((*map[BlessingPatternChunk]struct{})(nil))
+	__VDLType_enum_5 = vdl.TypeOf((*ApproximationType)(nil))
+	__VDLType_struct_6 = vdl.TypeOf((*Approximation)(nil)).Elem()
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group Permissions")
