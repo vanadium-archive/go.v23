@@ -28,26 +28,27 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 
 	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
-	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgId, "c:foo", "", sbBlessings(sbs), nil))
-	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", "s0", sgId))
-	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, 10))
+	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId))
+	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
 
 	// FetchBlob first.
-	ok(t, generateBlob(sbs[0].clientCtx, "s0", "foo", 0, []byte("foobarbaz")))
-	ok(t, fetchBlob(sbs[1].clientCtx, "s1", "foo", 0, 9, false))
-	ok(t, getBlob(sbs[1].clientCtx, "s1", "foo", 0, []byte("foobarbaz"), 0))
+	ok(t, generateBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz")))
+	ok(t, fetchBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, 9, false))
+	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, []byte("foobarbaz"), 0))
 
 	// GetBlob directly.
-	ok(t, generateBlob(sbs[1].clientCtx, "s1", "foo", 0, []byte("abcdefghijklmn")))
+	ok(t, generateBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, []byte("abcdefghijklmn")))
 	// Sleep so that the update to key "foo0" makes it to the other side.
 	time.Sleep(10 * time.Second)
-	ok(t, getBlob(sbs[0].clientCtx, "s0", "foo", 0, []byte("fghijklmn"), 5))
-	ok(t, fetchBlob(sbs[0].clientCtx, "s0", "foo", 0, 14, true))
+	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("fghijklmn"), 5))
+	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, 14, true))
 
 	// Test with a big blob (1 MB).
-	ok(t, generateBigBlob(sbs[0].clientCtx, "s0", "foo", 1))
-	ok(t, getBigBlob(sbs[1].clientCtx, "s1", "foo", 1))
+	ok(t, generateBigBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1))
+	ok(t, getBigBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1))
 }
 
 ////////////////////////////////////

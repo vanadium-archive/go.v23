@@ -37,7 +37,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -48,7 +48,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 
 	// Populate data on creator as well.
 	keypfx := "foo==" + sbs[0].sbName + "=="
-	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, keypfx, 0, 5))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, keypfx, 0, 5))
 
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
@@ -80,7 +80,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	sbName := sbs[N].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "", sbBlessings(sbs), nil))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -91,7 +91,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 
 	// Populate data on creator as well.
 	keypfx := "foo==" + sbs[0].sbName + "=="
-	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, keypfx, 0, 5))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, keypfx, 0, 5))
 
 	// Verify steady state sequentially.
 	for i := 0; i < N; i++ {
@@ -138,7 +138,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	}
 	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c:foo", "/mttable", "root", perms))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable", "", perms, clBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -149,7 +149,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 
 	// Populate data on creator as well.
 	keypfx := "foo==" + sbs[0].sbName + "=="
-	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, keypfx, 0, 5))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, keypfx, 0, 5))
 
 	// Verify steady state sequentially.
 	for _, sb := range sbs {
@@ -178,20 +178,19 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	// stagger the process.
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
-	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, "c:foo", "", sbBlessings(sbs)))
+	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, testCx.Name, "", sbBlessings(sbs), clBlessings(sbs)))
 
-	// Remaining syncbases run the specified workload concurrently.
+	// Remaining syncbases join the syncgroup concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, "c:foo", "", sbBlessings(sbs)))
+			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, testCx.Name, "", sbBlessings(sbs), clBlessings(sbs)))
 		}(i)
 	}
 
-	// Populate and join occur concurrently.
+	// Populate data concurrently.
 	for _, sb := range sbs {
 		go func(sb *testSyncbase) {
-			keypfx := "foo==" + sb.sbName + "=="
-			ok(t, populateData(sb.clientCtx, sb.sbName, keypfx, 0, 5))
+			ok(t, populateDataWithRetry(sb.clientCtx, sb.sbName, "foo"))
 		}(sb)
 	}
 
@@ -220,23 +219,36 @@ func runSyncWorkload(ctx *context.T, syncbaseName, sbName string, sgId wire.Id, 
 	}
 
 	// Populate some data without colliding with data from other Syncbases.
+	return populateDataWithRetry(ctx, syncbaseName, prefix)
+}
+
+func populateDataWithRetry(ctx *context.T, syncbaseName, prefix string) error {
+	var err error
 	keypfx := prefix + "==" + syncbaseName + "=="
-	return populateData(ctx, syncbaseName, keypfx, 0, 5)
+	for i := 0; i < 8; i++ {
+		// Wait for the presence of the collection and its ACL to be
+		// synced.
+		time.Sleep(500 * time.Millisecond)
+		if err = populateData(ctx, syncbaseName, testCx.Name, keypfx, 0, 5); err == nil {
+			break
+		}
+	}
+	return err
 }
 
 func verifySync(ctx *context.T, syncbaseName string, numSyncbases int, prefix string) error {
 	for i := numSyncbases - 1; i >= 0; i-- {
 		keypfx := fmt.Sprintf("%s==s%d==", prefix, i)
-		if err := verifySyncgroupData(ctx, syncbaseName, keypfx, 0, 5); err != nil {
+		if err := verifySyncgroupData(ctx, syncbaseName, testCx.Name, keypfx, "", 0, 5); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgPrefixes, mtName, bps string) error {
+func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgColls, mtName, bps, clbps string) error {
 	if err := joinSyncgroup(ctx, sbNameLocal, sbNameRemote, sgId); err == nil {
 		return nil
 	}
-	return createSyncgroup(ctx, sbNameLocal, sgId, sgPrefixes, mtName, bps, nil)
+	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName, bps, nil, clbps)
 }

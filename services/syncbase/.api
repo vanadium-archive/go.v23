@@ -682,11 +682,11 @@ pkg syncbase, type SyncgroupMemberInfo struct
 pkg syncbase, type SyncgroupMemberInfo struct, BlobDevType byte
 pkg syncbase, type SyncgroupMemberInfo struct, SyncPriority byte
 pkg syncbase, type SyncgroupSpec struct
+pkg syncbase, type SyncgroupSpec struct, Collections []Id
 pkg syncbase, type SyncgroupSpec struct, Description string
 pkg syncbase, type SyncgroupSpec struct, IsPrivate bool
 pkg syncbase, type SyncgroupSpec struct, MountTables []string
 pkg syncbase, type SyncgroupSpec struct, Perms access.Permissions
-pkg syncbase, type SyncgroupSpec struct, Prefixes []CollectionRow
 pkg syncbase, type SyncgroupSpec struct, PublishSyncbaseName string
 pkg syncbase, type Value struct
 pkg syncbase, type Value struct, Bytes *vom.RawBytes

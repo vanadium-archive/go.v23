@@ -59,13 +59,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 			// Syncbase s0 is the creator.
 			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: sbBlessings(sbs)}
 
-			// TODO(alexfandrianto): Was unable to use the empty prefix ("c:").
-			// Observation: w0's watch isn't working with the empty prefix.
-			// Possible explanation: The empty prefix ACL receives an initial value
-			// from the Collection ACL. If this value is synced over from the opposing
-			// peer, conflict resolution can mean that s0 loses the ability to watch.
-			syncString := fmt.Sprintf("%s:p", testCx.Name)
-			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, syncString, "", sbBlessings(sbs), nil))
+			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 
 			// The other syncbases will attempt to join the syncgroup.
 			for i := 1; i < *numSync; i++ {

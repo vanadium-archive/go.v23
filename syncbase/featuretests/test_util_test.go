@@ -37,15 +37,19 @@ var (
 
 func setupHierarchy(ctx *context.T, syncbaseName string) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	if err := d.Create(ctx, nil); err != nil {
-		return err
-	}
-	return d.CollectionForId(testCx).Create(ctx, nil)
+	return d.Create(ctx, nil)
+}
+
+func createCollection(ctx *context.T, syncbaseName, collectionName string) error {
+	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
+	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	return d.CollectionForId(collectionId).Create(ctx, nil)
 }
 
 type testSyncbase struct {
 	sbName    string
 	sbCreds   *v23test.Credentials
+	rootDir   string
 	clientId  string
 	clientCtx *context.T
 	cleanup   func(sig os.Signal)
@@ -59,12 +63,13 @@ func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*t
 		sbs[i] = &testSyncbase{
 			sbName:    sbName,
 			sbCreds:   sh.ForkCredentials(sbName),
+			rootDir:   sh.MakeTempDir(),
 			clientId:  clientId,
 			clientCtx: sh.ForkContext(clientId),
 		}
 		// Give XRWA permissions to this Syncbase's client.
 		acl := fmt.Sprintf(`{"Resolve":{"In":["root:%s"]},"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId, clientId)
-		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, DevMode: devMode}, acl)
+		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, RootDir: sbs[i].rootDir, DevMode: devMode}, acl)
 	}
 	// Call setupHierarchy on each Syncbase.
 	for _, sb := range sbs {
@@ -82,16 +87,26 @@ func sbBlessings(sbs []*testSyncbase) string {
 	return strings.Join(names, ";")
 }
 
+// Returns a ";"-separated list of Syncbase clients blessing names.
+func clBlessings(sbs []*testSyncbase) string {
+	names := make([]string, len(sbs))
+	for i, sb := range sbs {
+		names[i] = "root:" + sb.clientId
+	}
+	return strings.Join(names, ";")
+}
+
 ////////////////////////////////////////////////////////////
 // Helpers for adding or updating data
 
-func populateData(ctx *context.T, syncbaseName, keyPrefix string, start, end int) error {
+func populateData(ctx *context.T, syncbaseName, collectionName, keyPrefix string, start, end int) error {
 	if end <= start {
 		return fmt.Errorf("end (%d) <= start (%d)", end, start)
 	}
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.CollectionForId(testCx)
+	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	c := d.CollectionForId(collectionId)
 
 	for i := start; i < end; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -166,11 +181,10 @@ func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
 ////////////////////////////////////////////////////////////
 // Helpers for verifying data
 
-const skipScan = true
-
-func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, count int) error {
+func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix, valuePrefix string, start, count int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.CollectionForId(testCx)
+	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	c := d.CollectionForId(collectionId)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
@@ -182,6 +196,10 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 		}
 	}
 
+	if valuePrefix == "" {
+		valuePrefix = "testkey"
+	}
+
 	// Verify that all keys and values made it over correctly.
 	for i := start; i < start+count; i++ {
 		key := fmt.Sprintf("%s%d", keyPrefix, i)
@@ -189,31 +207,9 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 		if err := c.Get(ctx, key, &got); err != nil {
 			return fmt.Errorf("c.Get() failed: %v", err)
 		}
-		want := "testkey" + key
+		want := valuePrefix + key
 		if got != want {
 			return fmt.Errorf("unexpected value: got %q, want %q", got, want)
-		}
-	}
-
-	// TODO(sadovsky): Drop this? (Does it buy us much?)
-	if !skipScan {
-		// Re-verify using a scan operation.
-		stream := c.Scan(ctx, syncbase.Prefix(keyPrefix))
-		for i := 0; stream.Advance(); i++ {
-			got, want := stream.Key(), fmt.Sprintf("%s%d", keyPrefix, i)
-			if got != want {
-				return fmt.Errorf("unexpected key in scan: got %q, want %q", got, want)
-			}
-			want = "testkey" + want
-			if err := stream.Value(&got); err != nil {
-				return fmt.Errorf("failed to fetch value in scan: %v", err)
-			}
-			if got != want {
-				return fmt.Errorf("unexpected value in scan: got %q, want %q", got, want)
-			}
-		}
-		if err := stream.Err(); err != nil {
-			return fmt.Errorf("scan stream error: %v", err)
 		}
 	}
 	return nil
@@ -223,7 +219,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, keyPrefix string, start, 
 // Helpers for managing syncgroups
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
-func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgPrefixes, mtName, blessingPatterns string, perms access.Permissions) error {
+func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName, sbBlessings string, perms access.Permissions, clBlessings string) error {
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
 		if len(roots) == 0 {
@@ -235,17 +231,29 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgPrefix
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	if perms == nil {
-		perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
+		perms = tu.DefaultPerms(strings.Split(sbBlessings, ";")...)
 	}
+	clperms := tu.DefaultPerms(strings.Split(clBlessings, ";")...)
 
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
 		Perms:       perms,
-		Prefixes:    parseSgPrefixes(sgPrefixes),
+		Collections: parseSgCollections(sgColls),
 		MountTables: []string{mtName},
 	}
 
+	// Change the collection ACLs to enable syncing.
+	for _, cId := range spec.Collections {
+		c := d.CollectionForId(cId)
+		// Ignore the error since sometimes a collection might already exist.
+		c.Create(ctx, nil)
+		if err := c.SetPermissions(ctx, clperms); err != nil {
+			return fmt.Errorf("{%q, %v} c.SetPermissions failed: %v", syncbaseName, cId, err)
+		}
+	}
+
 	sg := d.SyncgroupForId(sgId)
+
 	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("{%q, %v} sg.Create() failed: %v", syncbaseName, sgId, err)
@@ -296,18 +304,14 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 ////////////////////////////////////////////////////////////
 // Syncbase-specific testing helpers
 
-// parseSgPrefixes converts, for example, "a:b,c:" to
-// [{Collection: {"u", "a"}, Row: "b"}, {Collection: {"u", "c"}, Row: ""}].
+// parseSgCollections converts, for example, "a,c" to
+// [Collection: {"u", "a"}, Collection: {"u", "c"}].
 // TODO(ivanpi): Change format to support user blessings other than "u".
-func parseSgPrefixes(csv string) []wire.CollectionRow {
+func parseSgCollections(csv string) []wire.Id {
 	strs := strings.Split(csv, ",")
-	res := make([]wire.CollectionRow, len(strs))
+	res := make([]wire.Id, len(strs))
 	for i, v := range strs {
-		parts := strings.SplitN(v, ":", 2)
-		if len(parts) != 2 {
-			panic(fmt.Sprintf("invalid prefix string: %q", v))
-		}
-		res[i] = wire.CollectionRow{CollectionId: wire.Id{"u", parts[0]}, Row: parts[1]}
+		res[i] = wire.Id{"u", v}
 	}
 	return res
 }

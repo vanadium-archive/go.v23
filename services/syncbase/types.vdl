@@ -81,8 +81,8 @@ type SyncgroupSpec struct {
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
 
-	// Data (collectionId-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []CollectionRow
+	// Data (set of collectionIds) covered by this syncgroup.
+	Collections []Id
 
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses

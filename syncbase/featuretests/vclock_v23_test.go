@@ -259,14 +259,14 @@ func TestV23VClockSyncBasic(t *testing.T) {
 
 	sbs := setupSyncbases(t, sh, 4, true)
 
-	checkSbTimeNotEq(t, "s0", sbs[0].clientCtx, jan2015)
+	checkSbTimeNotEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015)
 
 	// Do NTP at s0.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015)
 
 	// Set up a chain of syncgroups, then wait for a few seconds to allow the
 	// Syncbases to sync.
@@ -276,9 +276,9 @@ func TestV23VClockSyncBasic(t *testing.T) {
 	time.Sleep(fiveSecs)
 
 	// s1 and s2 should sync s0's clock; s3 should not.
-	checkSbTimeApproxEq(t, "s1", sbs[1].clientCtx, jan2015.Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s2", sbs[2].clientCtx, jan2015.Add(fiveSecs))
-	checkSbTimeNotEq(t, "s3", sbs[3].clientCtx, jan2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[1].sbName, sbs[1].clientCtx, jan2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[2].sbName, sbs[2].clientCtx, jan2015.Add(fiveSecs))
+	checkSbTimeNotEq(t, sbs[3].sbName, sbs[3].clientCtx, jan2015.Add(fiveSecs))
 }
 
 // Tests p2p clock sync where multiple devices are NTP-synced.
@@ -291,17 +291,17 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 3, true)
 
 	// Do NTP at s0 and s2.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015)
 
-	ok(t, sc("s2").DevModeUpdateVClock(sbs[2].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[2].sbName).DevModeUpdateVClock(sbs[2].clientCtx, wire.DevModeUpdateVClockOpts{
 		NtpHost:     startFakeNtpServer(t, sh, feb2015),
 		DoNtpUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s2", sbs[2].clientCtx, feb2015)
+	checkSbTimeApproxEq(t, sbs[2].sbName, sbs[2].clientCtx, feb2015)
 
 	// Set up a chain of syncgroups, then wait for a few seconds to allow the
 	// Syncbases to sync.
@@ -317,21 +317,21 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 	// have NTP'ed at times t0 and t1 respectively. If C transitively hears from A
 	// before talking to D, D will not pick up C's NTP time even though C is just
 	// one hop away. This probably doesn't matter much in practice.
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, feb2015.Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s1", sbs[1].clientCtx, feb2015.Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s2", sbs[2].clientCtx, feb2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, feb2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[1].sbName, sbs[1].clientCtx, feb2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[2].sbName, sbs[2].clientCtx, feb2015.Add(fiveSecs))
 
 	// Do NTP at s0 again; the update should propagate through the existing
 	// syncgroups.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		NtpHost:     startFakeNtpServer(t, sh, mar2015),
 		DoNtpUpdate: true,
 	}))
 
 	time.Sleep(fiveSecs)
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, mar2015.Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s1", sbs[1].clientCtx, mar2015.Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s2", sbs[2].clientCtx, mar2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, mar2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[1].sbName, sbs[1].clientCtx, mar2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[2].sbName, sbs[2].clientCtx, mar2015.Add(fiveSecs))
 }
 
 // Tests p2p clock sync where local is not NTP-synced and is 1 hop away from an
@@ -345,44 +345,44 @@ func TestV23VClockSyncWithReboots(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 2, true)
 
 	// Set s0's local clock.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015.Add(-time.Hour),
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015.Add(-time.Hour))
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015.Add(-time.Hour))
 
 	// Do NTP at s0. As a result, s0 will think it has a one hour NTP skew, i.e.
 	// NTP time minus system clock time equals one hour.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		NtpHost:     startFakeNtpServer(t, sh, jan2015),
 		DoNtpUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015)
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015)
 
 	// Set s1's local clock.
-	ok(t, sc("s1").DevModeUpdateVClock(sbs[1].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[1].sbName).DevModeUpdateVClock(sbs[1].clientCtx, wire.DevModeUpdateVClockOpts{
 		Now:           feb2015,
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s1", sbs[1].clientCtx, feb2015)
+	checkSbTimeApproxEq(t, sbs[1].sbName, sbs[1].clientCtx, feb2015)
 
 	// Move time forward at s0, and reset its elapsed time to 0. Syncbase should
 	// detect a reboot, and should reflect the new time. Note that the time
 	// reported by s0.GetTime should reflect its one hour NTP skew.
-	ok(t, sc("s0").DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
+	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
 		Now:           jan2015.Add(8 * time.Hour),
 		ElapsedTime:   0,
 		DoLocalUpdate: true,
 	}))
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015.Add(9*time.Hour))
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015.Add(9*time.Hour))
 
 	// Since s0 thinks it has rebooted, s1 should not get s0's clock.
 	setupChain(t, sbs)
 	time.Sleep(fiveSecs)
-	checkSbTimeApproxEq(t, "s0", sbs[0].clientCtx, jan2015.Add(9*time.Hour).Add(fiveSecs))
-	checkSbTimeApproxEq(t, "s1", sbs[1].clientCtx, feb2015.Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015.Add(9*time.Hour).Add(fiveSecs))
+	checkSbTimeApproxEq(t, sbs[1].sbName, sbs[1].clientCtx, feb2015.Add(fiveSecs))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -396,9 +396,13 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 			break
 		}
 		a, b := sbs[i], sbs[i+1]
+
 		sgId := wire.Id{Name: fmt.Sprintf("syncgroup%d", i), Blessing: "root"}
-		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgId, testCx.Name+":"+a.sbName+b.sbName, "", "root", nil))
+		collectionName := testCx.Name + "_" + a.sbName + b.sbName
+		ok(t, createCollection(a.clientCtx, a.sbName, collectionName))
+		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgId, collectionName, "", "root", nil, clBlessings(sbs)))
 		ok(t, joinSyncgroup(b.clientCtx, b.sbName, a.sbName, sgId))
+
 		// Wait for a to see b.
 		ok(t, verifySyncgroupMembers(a.clientCtx, a.sbName, sgId, 2))
 	}

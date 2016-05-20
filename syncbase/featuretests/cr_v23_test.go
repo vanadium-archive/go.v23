@@ -84,8 +84,8 @@ func TestV23CRDefault(t *testing.T) {
 
 	// Add new seperate keys to each syncbase so that we can verify if sync
 	// has happened between the two syncbases by waiting on the other's key.
-	ok(t, populateData(client0Ctx, "s0", "foo", 22, 23))
-	ok(t, populateData(client1Ctx, "s1", "foo", 44, 45))
+	ok(t, populateData(client0Ctx, "s0", testCx.Name, "foo", 22, 23))
+	ok(t, populateData(client1Ctx, "s1", testCx.Name, "foo", 44, 45))
 
 	ok(t, resumeSync(client0Ctx, "s0"))
 	ok(t, resumeSync(client1Ctx, "s1"))
@@ -180,9 +180,9 @@ func TestV23CRWithAtomicBatch(t *testing.T) {
 
 	// Make sure that the sync has completed by injecting a row on s0 and
 	// reading it on s1.
-	ok(t, populateData(client0Ctx, "s0", "foo", 200, 201))
+	ok(t, populateData(client0Ctx, "s0", testCx.Name, "foo", 200, 201))
 	ok(t, waitForValue(client1Ctx, "s1", "foo200", "testkey", ""))
-	ok(t, populateData(client1Ctx, "s1", "foo", 400, 401))
+	ok(t, populateData(client1Ctx, "s1", testCx.Name, "foo", 400, 401))
 	ok(t, waitForValue(client0Ctx, "s0", "foo400", "testkey", ""))
 
 	ok(t, verifyConflictResolvedBatch(client0Ctx, "s0", "foo", 0, 100, "concurrentBatchUpdate"))
@@ -325,14 +325,14 @@ func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool)
 	sgId = wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
 
 	// Create syncgroup and populate data on s0.
-	ok(t, createSyncgroup(sbs[0].clientCtx, "s0", sgId, "c:foo", "", sbBlessings(sbs), nil))
-	ok(t, populateData(sbs[0].clientCtx, "s0", "foo", 0, numInitRows))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, numInitRows))
 
 	// Join syncgroup and verify data on s1.
-	ok(t, joinSyncgroup(sbs[1].clientCtx, "s1", "s0", sgId))
-	ok(t, verifySyncgroupData(sbs[1].clientCtx, "s1", "foo", 0, numInitRows))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId))
+	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, numInitRows))
 
-	return sbs[0].clientCtx, sbs[1].clientCtx, "s0", sgId
+	return sbs[0].clientCtx, sbs[1].clientCtx, sbs[0].sbName, sgId
 }
 
 // TODO(sadovsky): This pattern is not ideal in that it makes the test code

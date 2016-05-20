@@ -14,7 +14,7 @@ import (
 	"v.io/x/ref/test/v23test"
 )
 
-func TestV23SyncbasedPutGet(t *testing.T) {
+func TestV23ClientPutGet(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()

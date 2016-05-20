@@ -646,8 +646,8 @@ type SyncgroupSpec struct {
 	PublishSyncbaseName string
 	// Permissions governing access to this syncgroup.
 	Perms access.Permissions
-	// Data (collectionId-rowPrefix pairs) covered by this syncgroup.
-	Prefixes []CollectionRow
+	// Data (set of collectionIds) covered by this syncgroup.
+	Collections []Id
 	// Mount tables at which to advertise this syncgroup, for rendezvous purposes.
 	// (Note that in addition to these mount tables, Syncbase also uses
 	// network-neighborhood-based discovery for rendezvous.)
@@ -678,7 +678,7 @@ func (x SyncgroupSpec) VDLIsZero() bool {
 	if len(x.Perms) != 0 {
 		return false
 	}
-	if len(x.Prefixes) != 0 {
+	if len(x.Collections) != 0 {
 		return false
 	}
 	if len(x.MountTables) != 0 {
@@ -730,11 +730,11 @@ func (x SyncgroupSpec) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if len(x.Prefixes) != 0 {
-		if err := enc.NextField("Prefixes"); err != nil {
+	if len(x.Collections) != 0 {
+		if err := enc.NextField("Collections"); err != nil {
 			return err
 		}
-		if err := __VDLWriteAnon_list_1(enc, x.Prefixes); err != nil {
+		if err := __VDLWriteAnon_list_1(enc, x.Collections); err != nil {
 			return err
 		}
 	}
@@ -766,7 +766,7 @@ func (x SyncgroupSpec) VDLWrite(enc vdl.Encoder) error {
 	return enc.FinishValue()
 }
 
-func __VDLWriteAnon_list_1(enc vdl.Encoder, x []CollectionRow) error {
+func __VDLWriteAnon_list_1(enc vdl.Encoder, x []Id) error {
 	if err := enc.StartValue(__VDLType_list_11); err != nil {
 		return err
 	}
@@ -853,8 +853,8 @@ func (x *SyncgroupSpec) VDLRead(dec vdl.Decoder) error {
 			if err := x.Perms.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Prefixes":
-			if err := __VDLReadAnon_list_1(dec, &x.Prefixes); err != nil {
+		case "Collections":
+			if err := __VDLReadAnon_list_1(dec, &x.Collections); err != nil {
 				return err
 			}
 		case "MountTables":
@@ -880,13 +880,13 @@ func (x *SyncgroupSpec) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
-func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]CollectionRow) error {
+func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Id) error {
 	if err := dec.StartValue(__VDLType_list_11); err != nil {
 		return err
 	}
 	switch len := dec.LenHint(); {
 	case len > 0:
-		*x = make([]CollectionRow, 0, len)
+		*x = make([]Id, 0, len)
 	default:
 		*x = nil
 	}
@@ -897,7 +897,7 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]CollectionRow) error {
 		case done:
 			return dec.FinishValue()
 		}
-		var elem CollectionRow
+		var elem Id
 		if err := elem.VDLRead(dec); err != nil {
 			return err
 		}
@@ -6756,7 +6756,7 @@ func __VDLInit() struct{} {
 	__VDLType_struct_8 = vdl.TypeOf((*CollectionRow)(nil)).Elem()
 	__VDLType_struct_9 = vdl.TypeOf((*SyncgroupSpec)(nil)).Elem()
 	__VDLType_map_10 = vdl.TypeOf((*access.Permissions)(nil))
-	__VDLType_list_11 = vdl.TypeOf((*[]CollectionRow)(nil))
+	__VDLType_list_11 = vdl.TypeOf((*[]Id)(nil))
 	__VDLType_list_12 = vdl.TypeOf((*[]string)(nil))
 	__VDLType_struct_13 = vdl.TypeOf((*SyncgroupMemberInfo)(nil)).Elem()
 	__VDLType_enum_14 = vdl.TypeOf((*ResolverType)(nil))
