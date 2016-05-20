@@ -7,7 +7,6 @@ package query_parser
 import (
 	"fmt"
 	"math/big"
-	"regexp"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -15,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	ds "v.io/v23/query/engine/datasource"
+	"v.io/v23/query/pattern"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
@@ -110,27 +110,26 @@ const (
 	TypParameter
 	TypStr
 	TypTime
-	TypObject // Only as the result of a ResolveOperand.
-	TypUint   // Only as a result of a ResolveOperand
+	TypObject // Only as the result of a ResolveOperand
+	TypUint   // Only as the result of a ResolveOperand
 )
 
 type Operand struct {
-	Type      OperandType
-	BigInt    *big.Int
-	BigRat    *big.Rat
-	Bool      bool
-	Column    *Field
-	Float     float64
-	Function  *Function
-	Int       int64
-	Str       string
-	Time      time.Time
-	Prefix    string // Computed by checker for Like expressions
-	Regex     string // Computed by checker for Like expressions
-	Uint      uint64
-	CompRegex *regexp.Regexp
-	Expr      *Expression
-	Object    *vdl.Value
+	Type     OperandType
+	BigInt   *big.Int
+	BigRat   *big.Rat
+	Bool     bool
+	Column   *Field
+	Float    float64
+	Function *Function
+	Int      int64
+	Str      string
+	Time     time.Time
+	Prefix   string           // Computed by checker for Like expressions
+	Pattern  *pattern.Pattern // Computed by checker for Like expressions
+	Uint     uint64
+	Expr     *Expression
+	Object   *vdl.Value
 	Node
 }
 

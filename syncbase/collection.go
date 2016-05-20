@@ -96,7 +96,7 @@ func (c *collection) Scan(ctx *context.T, r RowRange) ScanStream {
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := c.c.Scan(ctx, c.bh, []byte(r.Start()), []byte(r.Limit()))
 	if err != nil {
-		return &InvalidScanStream{Error: err}
+		return &invalidScanStream{invalidStream{err: err}}
 	}
 	return newScanStream(cancel, call)
 }

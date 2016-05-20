@@ -15,6 +15,7 @@ import (
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_checker"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/pattern"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -94,9 +95,8 @@ type indexRangesTest struct {
 	indexRanges []*ds.IndexRanges
 }
 
-type regularExpressionsTest struct {
+type likePatternsTest struct {
 	query      string
-	regex      string
 	matches    []string
 	nonMatches []string
 }
@@ -440,7 +440,7 @@ func TestKeyRanges(t *testing.T) {
 			},
 		},
 		{
-			// Note: 'like "Foo"' is optimized to '= "Foo"
+			// Note: 'like "Foo"' is optimized to '= "Foo"'
 			"select k, v from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100 offset 200",
 			&ds.IndexRanges{
 				FieldName:  "k",
@@ -679,7 +679,7 @@ func TestKeyRanges(t *testing.T) {
 			},
 		},
 		{
-			// Note: 'like "Foo"' is optimized to '= "Foo"
+			// Note: 'like "Foo"' is optimized to '= "Foo"'
 			"delete from Customer where k = \"Foo.Bar\" or k like \"Foo\" or k like \"abc%\" limit 100",
 			&ds.IndexRanges{
 				FieldName:  "k",
@@ -1072,7 +1072,7 @@ func TestIndexRanges(t *testing.T) {
 			},
 		},
 		{
-			// Note: 'like "Foo"' is optimized to '= "Foo"
+			// Note: 'like "Foo"' is optimized to '= "Foo"'
 			"select k, v from Customer where v.Foo = \"Foo.Bar\" or v.Foo like \"Foo\" or v.Foo like \"abc%\" limit 100 offset 200",
 			[]string{"v.Foo"},
 			[]*ds.IndexRanges{
@@ -1450,7 +1450,7 @@ func TestIndexRanges(t *testing.T) {
 			},
 		},
 		{
-			// Note: 'like "Foo"' is optimized to '= "Foo"
+			// Note: 'like "Foo"' is optimized to '= "Foo"'
 			"delete from Customer where v.Foo = \"Foo.Bar\" or v.Foo like \"Foo\" or v.Foo like \"abc%\" limit 100",
 			[]string{"v.Foo"},
 			[]*ds.IndexRanges{
@@ -1566,103 +1566,87 @@ func TestIndexRanges(t *testing.T) {
 	}
 }
 
-func TestRegularExpressions(t *testing.T) {
-	basic := []regularExpressionsTest{
+func TestLikePatterns(t *testing.T) {
+	basic := []likePatternsTest{
 		// Select
 		{
 			"select v from Customer where v like \"abc%\"",
-			"^abc.*?$",
 			[]string{"abc", "abcd", "abcabc"},
 			[]string{"xabcd"},
 		},
 		{
 			"select v from Customer where v like \"abc_\"",
-			"^abc.$",
 			[]string{"abcd", "abc1"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"select v from Customer where v like \"*%*_%\" escape '*'",
-			"^%_.*?$",
 			[]string{"%_", "%_abc"},
 			[]string{"%a", "abc%_abc"},
 		},
 		{
 			"select v from Customer where v like \"abc^_\" escape '^'",
-			"^abc_$",
 			[]string{"abc_"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"select v from Customer where v like \"abc^%\" escape '^'",
-			"^abc%$",
 			[]string{"abc%"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"select v from Customer where v like \"abc_efg\"",
-			"^abc.efg$",
 			[]string{"abcdefg"},
 			[]string{"abc", "xabcd", "abcde", "abcdefgh"},
 		},
 		{
 			"select v from Customer where v like \"abc%def\"",
-			"^abc.*?def$",
 			[]string{"abcdefdef", "abcdef", "abcdefghidef"},
 			[]string{"abcdefg", "abcdefde"},
 		},
 		{
 			"select v from Customer where v like \"[0-9]*abc%def\"",
-			"^\\[0-9\\]\\*abc.*?def$",
 			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
 			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
 		},
 		// Delete
 		{
 			"delete from Customer where v like \"abc%\"",
-			"^abc.*?$",
 			[]string{"abc", "abcd", "abcabc"},
 			[]string{"xabcd"},
 		},
 		{
 			"delete from Customer where v like \"abc_\"",
-			"^abc.$",
 			[]string{"abcd", "abc1"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"delete from Customer where v like \"*%*_%\" escape '*'",
-			"^%_.*?$",
 			[]string{"%_", "%_abc"},
 			[]string{"%a", "abc%_abc"},
 		},
 		{
 			"delete from Customer where v like \"abc^_\" escape '^'",
-			"^abc_$",
 			[]string{"abc_"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"delete from Customer where v like \"abc^%\" escape '^'",
-			"^abc%$",
 			[]string{"abc%"},
 			[]string{"abc", "xabcd", "abcde"},
 		},
 		{
 			"delete from Customer where v like \"abc_efg\"",
-			"^abc.efg$",
 			[]string{"abcdefg"},
 			[]string{"abc", "xabcd", "abcde", "abcdefgh"},
 		},
 		{
 			"delete from Customer where v like \"abc%def\"",
-			"^abc.*?def$",
 			[]string{"abcdefdef", "abcdef", "abcdefghidef"},
 			[]string{"abcdefg", "abcdefde"},
 		},
 		{
 			"delete from Customer where v like \"[0-9]*abc%def\"",
-			"^\\[0-9\\]\\*abc.*?def$",
 			[]string{"[0-9]*abcdefdef", "[0-9]*abcdef", "[0-9]*abcdefghidef"},
 			[]string{"0abcdefg", "9abcdefde", "[0-9]abcdefg", "[0-9]abcdefg", "[0-9]abcdefg"},
 		},
@@ -1680,39 +1664,33 @@ func TestRegularExpressions(t *testing.T) {
 		switch sel := (*s).(type) {
 		case query_parser.SelectStatement:
 			// We know there is exactly one like expression and operand2 contains
-			// a regex and compiled regex.
-			if sel.Where.Expr.Operand2.Regex != test.regex {
-				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, sel.Where.Expr.Operand2.Regex, test.regex)
-			}
-			regexp := sel.Where.Expr.Operand2.CompRegex
-			// Make sure all matches actually match
+			// a prefix and compiled pattern.
+			p := sel.Where.Expr.Operand2.Pattern
+			// Make sure all matches actually match.
 			for _, m := range test.matches {
-				if !regexp.MatchString(m) {
+				if !p.MatchString(m) {
 					t.Errorf("query: %s;Expected match: %s; \nGOT  false\nWANT true", test.query, m)
 				}
 			}
-			// Make sure all nonMatches actually don't match
+			// Make sure all nonMatches actually don't match.
 			for _, n := range test.nonMatches {
-				if regexp.MatchString(n) {
+				if p.MatchString(n) {
 					t.Errorf("query: %s;Expected nonMatch: %s; \nGOT  true\nWANT false", test.query, n)
 				}
 			}
 		case query_parser.DeleteStatement:
 			// We know there is exactly one like expression and operand2 contains
-			// a regex and compiled regex.
-			if sel.Where.Expr.Operand2.Regex != test.regex {
-				t.Errorf("query: %s;\nGOT  %s\nWANT %s", test.query, sel.Where.Expr.Operand2.Regex, test.regex)
-			}
-			regexp := sel.Where.Expr.Operand2.CompRegex
-			// Make sure all matches actually match
+			// a prefix and compiled pattern.
+			p := sel.Where.Expr.Operand2.Pattern
+			// Make sure all matches actually match.
 			for _, m := range test.matches {
-				if !regexp.MatchString(m) {
+				if !p.MatchString(m) {
 					t.Errorf("query: %s;Expected match: %s; \nGOT  false\nWANT true", test.query, m)
 				}
 			}
-			// Make sure all nonMatches actually don't match
+			// Make sure all nonMatches actually don't match.
 			for _, n := range test.nonMatches {
-				if regexp.MatchString(n) {
+				if p.MatchString(n) {
 					t.Errorf("query: %s;Expected nonMatch: %s; \nGOT  true\nWANT false", test.query, n)
 				}
 			}
@@ -1730,7 +1708,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"select v from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 29)},
 		{"select v from Customer limit 0", syncql.NewErrLimitMustBeGt0(db.GetContext(), 29)},
 		{"select v.z from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 40)},
-		{"select v.z from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidEscapeSequence(db.GetContext(), 38)},
+		{"select v.z from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidLikePattern(db.GetContext(), 38, pattern.NewErrInvalidEscape(nil, "b"))},
 		{"select v from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 33)},
 		{"select v from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 34)},
 		{"select v from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 29, "Foo")},
@@ -1768,7 +1746,7 @@ func TestQueryCheckerErrors(t *testing.T) {
 		{"delete from Customer where a=1", syncql.NewErrBadFieldInWhere(db.GetContext(), 27)},
 		{"delete from Customer limit 0", syncql.NewErrLimitMustBeGt0(db.GetContext(), 27)},
 		{"delete from Customer where v.x like v.y", syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), 36)},
-		{"delete from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidEscapeSequence(db.GetContext(), 34)},
+		{"delete from Customer where k like \"a^bc%\" escape '^'", syncql.NewErrInvalidLikePattern(db.GetContext(), 34, pattern.NewErrInvalidEscape(nil, "b"))},
 		{"delete from Customer where v.A > false", syncql.NewErrBoolInvalidExpression(db.GetContext(), 31)},
 		{"delete from Customer where true <= v.A", syncql.NewErrBoolInvalidExpression(db.GetContext(), 32)},
 		{"delete from Customer where Foo(\"2015/07/22\", true, 3.14157) = true", syncql.NewErrFunctionNotFound(db.GetContext(), 27, "Foo")},

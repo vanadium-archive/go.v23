@@ -35,6 +35,7 @@ import (
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	_ "v.io/x/ref/runtime/factories/roaming"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -186,9 +187,11 @@ func runWatchPutsBenchmark(b *testing.B, value interface{}) {
 	defer cleanup()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w, err := d.Watch(ctx, wire.Id{"u", "c"}, "", watch.ResumeMarker("now"))
-		if err != nil {
-			b.Fatalf("watch error: %v", err)
+		w := d.Watch(ctx, watch.ResumeMarker("now"), []wire.CollectionRowPattern{
+			util.RowPrefixPattern(wire.Id{"u", "c"}, ""),
+		})
+		if w.Err() != nil {
+			b.Fatalf("watch error: %v", w.Err())
 		}
 		done := make(chan struct{})
 		go func() {
@@ -213,11 +216,13 @@ func runWatchOnePutBenchmark(b *testing.B, value interface{}) {
 	b.Skip("Hangs on occasion, for unknown reasons - v.io/i/1134")
 	ctx, d, c, cleanup := prepare(b)
 	defer cleanup()
-	w, err := d.Watch(ctx, wire.Id{"u", "c"}, "", watch.ResumeMarker("now"))
-	row := make(chan struct{})
-	if err != nil {
-		b.Fatalf("watch error: %v", err)
+	w := d.Watch(ctx, watch.ResumeMarker("now"), []wire.CollectionRowPattern{
+		util.RowPrefixPattern(wire.Id{"u", "c"}, ""),
+	})
+	if w.Err() != nil {
+		b.Fatalf("watch error: %v", w.Err())
 	}
+	row := make(chan struct{})
 	go func() {
 		seen := 0
 		for seen < b.N && w.Advance() {

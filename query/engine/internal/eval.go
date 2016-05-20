@@ -288,9 +288,9 @@ func compareStrings(lhsValue, rhsValue *query_parser.Operand, oper *query_parser
 	case query_parser.GreaterThanOrEqual:
 		return lhsValue.Str >= rhsValue.Str
 	case query_parser.Like:
-		return rhsValue.CompRegex.MatchString(lhsValue.Str)
+		return rhsValue.Pattern.MatchString(lhsValue.Str)
 	case query_parser.NotLike:
-		return !rhsValue.CompRegex.MatchString(lhsValue.Str)
+		return !rhsValue.Pattern.MatchString(lhsValue.Str)
 	default:
 		// TODO(jkline): Log this logic error and all other similar cases.
 		return false

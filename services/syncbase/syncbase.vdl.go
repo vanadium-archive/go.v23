@@ -3095,8 +3095,133 @@ func (x *BlobFetchStatus) VDLRead(dec vdl.Decoder) error {
 	}
 }
 
+// CollectionRowPattern contains SQL LIKE-style glob patterns ('%' and '_'
+// wildcards, '\' as escape character) for matching rows and collections by
+// name components.
+// Collection blessing and name patterns are not allowed to be empty, but the
+// row key pattern is (for matching only collections and no rows).
+type CollectionRowPattern struct {
+	CollectionBlessing string
+	CollectionName     string
+	RowKey             string
+}
+
+func (CollectionRowPattern) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.CollectionRowPattern"`
+}) {
+}
+
+func (x CollectionRowPattern) VDLIsZero() bool {
+	return x == CollectionRowPattern{}
+}
+
+func (x CollectionRowPattern) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(__VDLType_struct_36); err != nil {
+		return err
+	}
+	if x.CollectionBlessing != "" {
+		if err := enc.NextField("CollectionBlessing"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.CollectionBlessing); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.CollectionName != "" {
+		if err := enc.NextField("CollectionName"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.CollectionName); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if x.RowKey != "" {
+		if err := enc.NextField("RowKey"); err != nil {
+			return err
+		}
+		if err := enc.StartValue(vdl.StringType); err != nil {
+			return err
+		}
+		if err := enc.EncodeString(x.RowKey); err != nil {
+			return err
+		}
+		if err := enc.FinishValue(); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(""); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *CollectionRowPattern) VDLRead(dec vdl.Decoder) error {
+	*x = CollectionRowPattern{}
+	if err := dec.StartValue(__VDLType_struct_36); err != nil {
+		return err
+	}
+	for {
+		f, err := dec.NextField()
+		if err != nil {
+			return err
+		}
+		switch f {
+		case "":
+			return dec.FinishValue()
+		case "CollectionBlessing":
+			if err := dec.StartValue(vdl.StringType); err != nil {
+				return err
+			}
+			var err error
+			if x.CollectionBlessing, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "CollectionName":
+			if err := dec.StartValue(vdl.StringType); err != nil {
+				return err
+			}
+			var err error
+			if x.CollectionName, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		case "RowKey":
+			if err := dec.StartValue(vdl.StringType); err != nil {
+				return err
+			}
+			var err error
+			if x.RowKey, err = dec.DecodeString(); err != nil {
+				return err
+			}
+			if err := dec.FinishValue(); err != nil {
+				return err
+			}
+		default:
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
 // StoreChange is the new value for a watched entity.
-// TODO(rogulenko): Consider adding the Shell state.
 type StoreChange struct {
 	// Value is the new value for the row if the Change state equals to Exists,
 	// otherwise the Value is nil.
@@ -3123,7 +3248,7 @@ func (x StoreChange) VDLIsZero() bool {
 }
 
 func (x StoreChange) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_struct_36); err != nil {
+	if err := enc.StartValue(__VDLType_struct_37); err != nil {
 		return err
 	}
 	if x.Value != nil && !x.Value.VDLIsZero() {
@@ -3158,7 +3283,7 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 	*x = StoreChange{
 		Value: vom.RawBytesOf(vdl.ZeroValue(vdl.AnyType)),
 	}
-	if err := dec.StartValue(__VDLType_struct_36); err != nil {
+	if err := dec.StartValue(__VDLType_struct_37); err != nil {
 		return err
 	}
 	for {
@@ -3512,16 +3637,15 @@ var descService = rpc.InterfaceDesc{
 //
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-// behavior.
-// TODO(rogulenko): Currently the only supported watch patterns are
-// "<collectionId>/<rowPrefix>*". Consider changing that.
+// without re-ordering. Only rows matching at least one of the patterns are
+// returned. Rows in collections with no Read access are also filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
 // batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker.
+// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+// detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
 // (until the call fails or is canceled). Each Change contains the Name field in
@@ -3540,6 +3664,9 @@ type DatabaseWatcherClientMethods interface {
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
 	GetResumeMarker(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (watch.ResumeMarker, error)
+	// WatchPatterns returns a stream of changes that match any of the specified
+	// patterns. At least one pattern must be specified.
+	WatchPatterns(_ *context.T, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern, _ ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 }
 
 // DatabaseWatcherClientStub adds universal methods to DatabaseWatcherClientMethods.
@@ -3564,21 +3691,98 @@ func (c implDatabaseWatcherClientStub) GetResumeMarker(ctx *context.T, i0 BatchH
 	return
 }
 
+func (c implDatabaseWatcherClientStub) WatchPatterns(ctx *context.T, i0 watch.ResumeMarker, i1 []CollectionRowPattern, opts ...rpc.CallOpt) (ocall DatabaseWatcherWatchPatternsClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "WatchPatterns", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	ocall = &implDatabaseWatcherWatchPatternsClientCall{ClientCall: call}
+	return
+}
+
+// DatabaseWatcherWatchPatternsClientStream is the client stream for DatabaseWatcher.WatchPatterns.
+type DatabaseWatcherWatchPatternsClientStream interface {
+	// RecvStream returns the receiver side of the DatabaseWatcher.WatchPatterns client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() watch.Change
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+}
+
+// DatabaseWatcherWatchPatternsClientCall represents the call returned from DatabaseWatcher.WatchPatterns.
+type DatabaseWatcherWatchPatternsClientCall interface {
+	DatabaseWatcherWatchPatternsClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implDatabaseWatcherWatchPatternsClientCall struct {
+	rpc.ClientCall
+	valRecv watch.Change
+	errRecv error
+}
+
+func (c *implDatabaseWatcherWatchPatternsClientCall) RecvStream() interface {
+	Advance() bool
+	Value() watch.Change
+	Err() error
+} {
+	return implDatabaseWatcherWatchPatternsClientCallRecv{c}
+}
+
+type implDatabaseWatcherWatchPatternsClientCallRecv struct {
+	c *implDatabaseWatcherWatchPatternsClientCall
+}
+
+func (c implDatabaseWatcherWatchPatternsClientCallRecv) Advance() bool {
+	c.c.valRecv = watch.Change{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implDatabaseWatcherWatchPatternsClientCallRecv) Value() watch.Change {
+	return c.c.valRecv
+}
+func (c implDatabaseWatcherWatchPatternsClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implDatabaseWatcherWatchPatternsClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
+	return
+}
+
 // DatabaseWatcherServerMethods is the interface a server writer
 // implements for DatabaseWatcher.
 //
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-// behavior.
-// TODO(rogulenko): Currently the only supported watch patterns are
-// "<collectionId>/<rowPrefix>*". Consider changing that.
+// without re-ordering. Only rows matching at least one of the patterns are
+// returned. Rows in collections with no Read access are also filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
 // batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker.
+// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+// detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
 // (until the call fails or is canceled). Each Change contains the Name field in
@@ -3597,6 +3801,9 @@ type DatabaseWatcherServerMethods interface {
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
 	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
+	// WatchPatterns returns a stream of changes that match any of the specified
+	// patterns. At least one pattern must be specified.
+	WatchPatterns(_ *context.T, _ DatabaseWatcherWatchPatternsServerCall, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) error
 }
 
 // DatabaseWatcherServerStubMethods is the server interface containing
@@ -3610,6 +3817,9 @@ type DatabaseWatcherServerStubMethods interface {
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
 	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
+	// WatchPatterns returns a stream of changes that match any of the specified
+	// patterns. At least one pattern must be specified.
+	WatchPatterns(_ *context.T, _ *DatabaseWatcherWatchPatternsServerCallStub, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) error
 }
 
 // DatabaseWatcherServerStub adds universal methods to DatabaseWatcherServerStubMethods.
@@ -3647,6 +3857,10 @@ func (s implDatabaseWatcherServerStub) GetResumeMarker(ctx *context.T, call rpc.
 	return s.impl.GetResumeMarker(ctx, call, i0)
 }
 
+func (s implDatabaseWatcherServerStub) WatchPatterns(ctx *context.T, call *DatabaseWatcherWatchPatternsServerCallStub, i0 watch.ResumeMarker, i1 []CollectionRowPattern) error {
+	return s.impl.WatchPatterns(ctx, call, i0, i1)
+}
+
 func (s implDatabaseWatcherServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -3662,7 +3876,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionId>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows matching at least one of the patterns are\n// returned. Rows in collections with no Read access are also filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker. See watch.GlobWatcher for a\n// detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -3678,7 +3892,59 @@ var descDatabaseWatcher = rpc.InterfaceDesc{
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
+		{
+			Name: "WatchPatterns",
+			Doc:  "// WatchPatterns returns a stream of changes that match any of the specified\n// patterns. At least one pattern must be specified.",
+			InArgs: []rpc.ArgDesc{
+				{"resumeMarker", ``}, // watch.ResumeMarker
+				{"patterns", ``},     // []CollectionRowPattern
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+		},
 	},
+}
+
+// DatabaseWatcherWatchPatternsServerStream is the server stream for DatabaseWatcher.WatchPatterns.
+type DatabaseWatcherWatchPatternsServerStream interface {
+	// SendStream returns the send side of the DatabaseWatcher.WatchPatterns server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item watch.Change) error
+	}
+}
+
+// DatabaseWatcherWatchPatternsServerCall represents the context passed to DatabaseWatcher.WatchPatterns.
+type DatabaseWatcherWatchPatternsServerCall interface {
+	rpc.ServerCall
+	DatabaseWatcherWatchPatternsServerStream
+}
+
+// DatabaseWatcherWatchPatternsServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements DatabaseWatcherWatchPatternsServerCall.
+type DatabaseWatcherWatchPatternsServerCallStub struct {
+	rpc.StreamServerCall
+}
+
+// Init initializes DatabaseWatcherWatchPatternsServerCallStub from rpc.StreamServerCall.
+func (s *DatabaseWatcherWatchPatternsServerCallStub) Init(call rpc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// SendStream returns the send side of the DatabaseWatcher.WatchPatterns server stream.
+func (s *DatabaseWatcherWatchPatternsServerCallStub) SendStream() interface {
+	Send(item watch.Change) error
+} {
+	return implDatabaseWatcherWatchPatternsServerCallSend{s}
+}
+
+type implDatabaseWatcherWatchPatternsServerCallSend struct {
+	s *DatabaseWatcherWatchPatternsServerCallStub
+}
+
+func (s implDatabaseWatcherWatchPatternsServerCallSend) Send(item watch.Change) error {
+	return s.s.Send(item)
 }
 
 // SyncgroupManagerClientMethods is the client interface
@@ -5295,16 +5561,15 @@ type DatabaseClientMethods interface {
 	permissions.ObjectClientMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-	// behavior.
-	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionId>/<rowPrefix>*". Consider changing that.
+	// without re-ordering. Only rows matching at least one of the patterns are
+	// returned. Rows in collections with no Read access are also filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
 	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker.
+	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+	// detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
@@ -5589,16 +5854,15 @@ type DatabaseServerMethods interface {
 	permissions.ObjectServerMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-	// behavior.
-	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionId>/<rowPrefix>*". Consider changing that.
+	// without re-ordering. Only rows matching at least one of the patterns are
+	// returned. Rows in collections with no Read access are also filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
 	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker.
+	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+	// detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
@@ -5737,16 +6001,15 @@ type DatabaseServerStubMethods interface {
 	permissions.ObjectServerStubMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-	// behavior.
-	// TODO(rogulenko): Currently the only supported watch patterns are
-	// "<collectionId>/<rowPrefix>*". Consider changing that.
+	// without re-ordering. Only rows matching at least one of the patterns are
+	// returned. Rows in collections with no Read access are also filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
 	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker.
+	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+	// detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
 	// (until the call fails or is canceled). Each Change contains the Name field in
@@ -5932,7 +6195,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. See watch.GlobWatcher for a detailed explanation of the\n// behavior.\n// TODO(rogulenko): Currently the only supported watch patterns are\n// \"<collectionId>/<rowPrefix>*\". Consider changing that.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows matching at least one of the patterns are\n// returned. Rows in collections with no Read access are also filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker. See watch.GlobWatcher for a\n// detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
@@ -6692,6 +6955,7 @@ var (
 	__VDLType_enum_34     *vdl.Type
 	__VDLType_struct_35   *vdl.Type
 	__VDLType_struct_36   *vdl.Type
+	__VDLType_struct_37   *vdl.Type
 )
 
 var __VDLInitCalled bool
@@ -6743,6 +7007,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*BlobRef)(nil))
 	vdl.Register((*BlobFetchState)(nil))
 	vdl.Register((*BlobFetchStatus)(nil))
+	vdl.Register((*CollectionRowPattern)(nil))
 	vdl.Register((*StoreChange)(nil))
 
 	// Initialize type definitions.
@@ -6781,7 +7046,8 @@ func __VDLInit() struct{} {
 	__VDLType_string_33 = vdl.TypeOf((*BlobRef)(nil))
 	__VDLType_enum_34 = vdl.TypeOf((*BlobFetchState)(nil))
 	__VDLType_struct_35 = vdl.TypeOf((*BlobFetchStatus)(nil)).Elem()
-	__VDLType_struct_36 = vdl.TypeOf((*StoreChange)(nil)).Elem()
+	__VDLType_struct_36 = vdl.TypeOf((*CollectionRowPattern)(nil)).Elem()
+	__VDLType_struct_37 = vdl.TypeOf((*StoreChange)(nil)).Elem()
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")

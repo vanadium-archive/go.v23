@@ -20,8 +20,8 @@ func ConvertValueToString(o *query_parser.Operand) (*query_parser.Operand, error
 	switch o.Type {
 	case query_parser.TypStr:
 		c.Str = o.Str
-		c.Regex = o.Regex         // non-empty for rhs of like expressions
-		c.CompRegex = o.CompRegex // non-nil for rhs of like expressions
+		c.Prefix = o.Prefix   // non-nil for rhs of like expressions
+		c.Pattern = o.Pattern // non-nil for rhs of like expressions
 	default:
 		return nil, errors.New("Cannot convert operand to string.")
 	}

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	"v.io/v23/query/pattern"
 	"v.io/v23/query/syncql"
 	"v.io/v23/syncbase"
 	"v.io/v23/syncbase/testdata"
@@ -2451,11 +2452,11 @@ func TestQueryErrors(t *testing.T) {
 		},
 		{
 			"select k from Customer where v.Name like \"a^b%\" escape '^'",
-			syncql.NewErrInvalidEscapeSequence(ctx, 41),
+			syncql.NewErrInvalidLikePattern(ctx, 41, pattern.NewErrInvalidEscape(nil, "b")),
 		},
 		{
 			"select k from Customer where v.Name like \"John^Smith\" escape '^'",
-			syncql.NewErrInvalidEscapeSequence(ctx, 41),
+			syncql.NewErrInvalidLikePattern(ctx, 41, pattern.NewErrInvalidEscape(nil, "S")),
 		},
 		{
 			"select a from Customer",
@@ -2502,7 +2503,7 @@ func TestQueryErrors(t *testing.T) {
 		},
 		{
 			"select k from Customer escape ' '",
-			syncql.NewErrInvalidEscapeChar(ctx, 30),
+			syncql.NewErrInvalidEscapeChar(ctx, 30, " "),
 		},
 		{
 			"select K from Customer",

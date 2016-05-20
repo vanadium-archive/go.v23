@@ -70,6 +70,7 @@ pkg syncbase, method (*BlobManagerPutBlobServerCallStub) Init(rpc.StreamServerCa
 pkg syncbase, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
 pkg syncbase, method (*BlobRef) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*CollectionRow) VDLRead(vdl.Decoder) error
+pkg syncbase, method (*CollectionRowPattern) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*CollectionScanServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*CollectionScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
 pkg syncbase, method (*ConflictInfo) VDLRead(vdl.Decoder) error
@@ -80,6 +81,8 @@ pkg syncbase, method (*CrPolicy) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*CrRule) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*DatabaseExecServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*DatabaseExecServerCallStub) SendStream() interface {  Send(item []*vom.RawBytes) error;}
+pkg syncbase, method (*DatabaseWatcherWatchPatternsServerCallStub) Init(rpc.StreamServerCall)
+pkg syncbase, method (*DatabaseWatcherWatchPatternsServerCallStub) SendStream() interface {  Send(item watch.Change) error;}
 pkg syncbase, method (*DevModeUpdateVClockOpts) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*Id) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*KeyValue) VDLRead(vdl.Decoder) error
@@ -116,6 +119,8 @@ pkg syncbase, method (BlobRef) VDLIsZero() bool
 pkg syncbase, method (BlobRef) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (CollectionRow) VDLIsZero() bool
 pkg syncbase, method (CollectionRow) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (CollectionRowPattern) VDLIsZero() bool
+pkg syncbase, method (CollectionRowPattern) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ConflictDataBatch) Index() int
 pkg syncbase, method (ConflictDataBatch) Interface() interface{}
 pkg syncbase, method (ConflictDataBatch) Name() string
@@ -303,6 +308,10 @@ pkg syncbase, type CollectionClientStub interface, unexported methods
 pkg syncbase, type CollectionRow struct
 pkg syncbase, type CollectionRow struct, CollectionId Id
 pkg syncbase, type CollectionRow struct, Row string
+pkg syncbase, type CollectionRowPattern struct
+pkg syncbase, type CollectionRowPattern struct, CollectionBlessing string
+pkg syncbase, type CollectionRowPattern struct, CollectionName string
+pkg syncbase, type CollectionRowPattern struct, RowKey string
 pkg syncbase, type CollectionScanClientCall interface { Finish, RecvStream }
 pkg syncbase, type CollectionScanClientCall interface, Finish() error
 pkg syncbase, type CollectionScanClientCall interface, RecvStream() interface {  Advance() bool;; Value() KeyValue;; Err() error;}
@@ -418,6 +427,7 @@ pkg syncbase, type DatabaseClientMethods interface, SetSchemaMetadata(*context.T
 pkg syncbase, type DatabaseClientMethods interface, SetSyncgroupSpec(*context.T, Id, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientMethods interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg syncbase, type DatabaseClientMethods interface, WatchPatterns(*context.T, watch.ResumeMarker, []CollectionRowPattern, ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 pkg syncbase, type DatabaseClientMethods interface, unexported methods
 pkg syncbase, type DatabaseClientStub interface, Abort(*context.T, BatchHandle, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, BeginBatch(*context.T, BatchOptions, ...rpc.CallOpt) (BatchHandle, error)
@@ -452,6 +462,7 @@ pkg syncbase, type DatabaseClientStub interface, SetSchemaMetadata(*context.T, S
 pkg syncbase, type DatabaseClientStub interface, SetSyncgroupSpec(*context.T, Id, SyncgroupSpec, string, ...rpc.CallOpt) error
 pkg syncbase, type DatabaseClientStub interface, StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, UnpinBlob(*context.T, BlobRef, ...rpc.CallOpt) error
+pkg syncbase, type DatabaseClientStub interface, WatchPatterns(*context.T, watch.ResumeMarker, []CollectionRowPattern, ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 pkg syncbase, type DatabaseClientStub interface, unexported methods
 pkg syncbase, type DatabaseExecClientCall interface { Finish, RecvStream }
 pkg syncbase, type DatabaseExecClientCall interface, Finish() error
@@ -497,6 +508,7 @@ pkg syncbase, type DatabaseServerMethods interface, SetSchemaMetadata(*context.T
 pkg syncbase, type DatabaseServerMethods interface, SetSyncgroupSpec(*context.T, rpc.ServerCall, Id, SyncgroupSpec, string) error
 pkg syncbase, type DatabaseServerMethods interface, StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
 pkg syncbase, type DatabaseServerMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg syncbase, type DatabaseServerMethods interface, WatchPatterns(*context.T, DatabaseWatcherWatchPatternsServerCall, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseServerMethods interface, unexported methods
 pkg syncbase, type DatabaseServerStub interface, Abort(*context.T, rpc.ServerCall, BatchHandle) error
 pkg syncbase, type DatabaseServerStub interface, BeginBatch(*context.T, rpc.ServerCall, BatchOptions) (BatchHandle, error)
@@ -521,6 +533,7 @@ pkg syncbase, type DatabaseServerStub interface, PutBlob(*context.T, *BlobManage
 pkg syncbase, type DatabaseServerStub interface, ResumeSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStub interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
 pkg syncbase, type DatabaseServerStub interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg syncbase, type DatabaseServerStub interface, WatchPatterns(*context.T, *DatabaseWatcherWatchPatternsServerCallStub, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseServerStub interface, unexported methods
 pkg syncbase, type DatabaseServerStubMethods interface, Abort(*context.T, rpc.ServerCall, BatchHandle) error
 pkg syncbase, type DatabaseServerStubMethods interface, BeginBatch(*context.T, rpc.ServerCall, BatchOptions) (BatchHandle, error)
@@ -544,18 +557,35 @@ pkg syncbase, type DatabaseServerStubMethods interface, PutBlob(*context.T, *Blo
 pkg syncbase, type DatabaseServerStubMethods interface, ResumeSync(*context.T, rpc.ServerCall) error
 pkg syncbase, type DatabaseServerStubMethods interface, StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
 pkg syncbase, type DatabaseServerStubMethods interface, UnpinBlob(*context.T, rpc.ServerCall, BlobRef) error
+pkg syncbase, type DatabaseServerStubMethods interface, WatchPatterns(*context.T, *DatabaseWatcherWatchPatternsServerCallStub, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseServerStubMethods interface, unexported methods
 pkg syncbase, type DatabaseWatcherClientMethods interface, GetResumeMarker(*context.T, BatchHandle, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseWatcherClientMethods interface, WatchPatterns(*context.T, watch.ResumeMarker, []CollectionRowPattern, ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 pkg syncbase, type DatabaseWatcherClientMethods interface, unexported methods
 pkg syncbase, type DatabaseWatcherClientStub interface, GetResumeMarker(*context.T, BatchHandle, ...rpc.CallOpt) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseWatcherClientStub interface, WatchPatterns(*context.T, watch.ResumeMarker, []CollectionRowPattern, ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 pkg syncbase, type DatabaseWatcherClientStub interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerMethods interface, GetResumeMarker(*context.T, rpc.ServerCall, BatchHandle) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseWatcherServerMethods interface, WatchPatterns(*context.T, DatabaseWatcherWatchPatternsServerCall, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseWatcherServerMethods interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerStub interface, Describe__() []rpc.InterfaceDesc
 pkg syncbase, type DatabaseWatcherServerStub interface, GetResumeMarker(*context.T, rpc.ServerCall, BatchHandle) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseWatcherServerStub interface, WatchPatterns(*context.T, *DatabaseWatcherWatchPatternsServerCallStub, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseWatcherServerStub interface, unexported methods
 pkg syncbase, type DatabaseWatcherServerStubMethods interface, GetResumeMarker(*context.T, rpc.ServerCall, BatchHandle) (watch.ResumeMarker, error)
+pkg syncbase, type DatabaseWatcherServerStubMethods interface, WatchPatterns(*context.T, *DatabaseWatcherWatchPatternsServerCallStub, watch.ResumeMarker, []CollectionRowPattern) error
 pkg syncbase, type DatabaseWatcherServerStubMethods interface, unexported methods
+pkg syncbase, type DatabaseWatcherWatchPatternsClientCall interface { Finish, RecvStream }
+pkg syncbase, type DatabaseWatcherWatchPatternsClientCall interface, Finish() error
+pkg syncbase, type DatabaseWatcherWatchPatternsClientCall interface, RecvStream() interface {  Advance() bool;; Value() watch.Change;; Err() error;}
+pkg syncbase, type DatabaseWatcherWatchPatternsClientStream interface { RecvStream }
+pkg syncbase, type DatabaseWatcherWatchPatternsClientStream interface, RecvStream() interface {  Advance() bool;; Value() watch.Change;; Err() error;}
+pkg syncbase, type DatabaseWatcherWatchPatternsServerCall interface, SendStream() interface {  Send(item watch.Change) error;}
+pkg syncbase, type DatabaseWatcherWatchPatternsServerCall interface, unexported methods
+pkg syncbase, type DatabaseWatcherWatchPatternsServerCallStub struct
+pkg syncbase, type DatabaseWatcherWatchPatternsServerCallStub struct, embedded rpc.StreamServerCall
+pkg syncbase, type DatabaseWatcherWatchPatternsServerStream interface { SendStream }
+pkg syncbase, type DatabaseWatcherWatchPatternsServerStream interface, SendStream() interface {  Send(item watch.Change) error;}
 pkg syncbase, type DevModeUpdateVClockOpts struct
 pkg syncbase, type DevModeUpdateVClockOpts struct, DoLocalUpdate bool
 pkg syncbase, type DevModeUpdateVClockOpts struct, DoNtpUpdate bool

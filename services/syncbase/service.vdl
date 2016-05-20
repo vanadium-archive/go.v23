@@ -350,16 +350,15 @@ type BlobManager interface {
 
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. See watch.GlobWatcher for a detailed explanation of the
-// behavior.
-// TODO(rogulenko): Currently the only supported watch patterns are
-// "<collectionId>/<rowPrefix>*". Consider changing that.
+// without re-ordering. Only rows matching at least one of the patterns are
+// returned. Rows in collections with no Read access are also filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
 // batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker.
+// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
+// detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
 // (until the call fails or is canceled). Each Change contains the Name field in
@@ -372,11 +371,15 @@ type BlobManager interface {
 // resolution. However, changes from a single original batch will always appear
 // in the same Change batch.
 type DatabaseWatcher interface {
-	watch.GlobWatcher
-
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
 	GetResumeMarker(bh BatchHandle) (watch.ResumeMarker | error) {access.Read}
+
+	// WatchPatterns returns a stream of changes that match any of the specified
+	// patterns. At least one pattern must be specified.
+	WatchPatterns(resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) stream<_, watch.Change> error {access.Resolve}
+
+	watch.GlobWatcher
 }
 
 error (

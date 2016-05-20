@@ -12,11 +12,6 @@ pkg syncbase, method (*Conflict) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRowSet) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictScanSet) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*InvalidScanStream) Advance() bool
-pkg syncbase, method (*InvalidScanStream) Cancel()
-pkg syncbase, method (*InvalidScanStream) Err() error
-pkg syncbase, method (*InvalidScanStream) Key() string
-pkg syncbase, method (*InvalidScanStream) Value(interface{}) error
 pkg syncbase, method (*Resolution) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ResolvedRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*Value) Get(interface{}) error
@@ -123,7 +118,7 @@ pkg syncbase, type Database interface, PauseSync(*context.T) error
 pkg syncbase, type Database interface, ResumeSync(*context.T) error
 pkg syncbase, type Database interface, Syncgroup(*context.T, string) Syncgroup
 pkg syncbase, type Database interface, SyncgroupForId(wire.Id) Syncgroup
-pkg syncbase, type Database interface, Watch(*context.T, wire.Id, string, watch.ResumeMarker) (WatchStream, error)
+pkg syncbase, type Database interface, Watch(*context.T, watch.ResumeMarker, []wire.CollectionRowPattern) WatchStream
 pkg syncbase, type Database interface, unexported methods
 pkg syncbase, type DatabaseHandle interface { Collection, CollectionForId, Exec, FullName, GetResumeMarker, Id, ListCollections }
 pkg syncbase, type DatabaseHandle interface, Collection(*context.T, string) Collection
@@ -133,8 +128,6 @@ pkg syncbase, type DatabaseHandle interface, FullName() string
 pkg syncbase, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseHandle interface, Id() wire.Id
 pkg syncbase, type DatabaseHandle interface, ListCollections(*context.T) ([]wire.Id, error)
-pkg syncbase, type InvalidScanStream struct
-pkg syncbase, type InvalidScanStream struct, Error error
 pkg syncbase, type PrefixRange interface { Limit, Prefix, Start }
 pkg syncbase, type PrefixRange interface, Limit() string
 pkg syncbase, type PrefixRange interface, Prefix() string

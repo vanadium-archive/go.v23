@@ -142,18 +142,17 @@ type Database interface {
 	// interface.
 	util.AccessController
 
-	// Watch allows a client to watch for updates to the database. For each watch
-	// request, the client will receive a reliable stream of watch events without
-	// reordering. See watch.GlobWatcher for a detailed explanation of the
-	// behavior.
+	// Watch allows a client to watch for updates to the database. At least one
+	// pattern must be specified. For each watch request, the client will receive
+	// a reliable stream of watch events without reordering. Only rows matching at
+	// least one of the patterns are returned. Rows in collections with no Read
+	// access are also filtered out.
 	//
 	// If a nil ResumeMarker is provided, the WatchStream will begin with a Change
 	// batch containing the initial state. Otherwise, the WatchStream will contain
 	// only changes since the provided ResumeMarker.
-	//
-	// TODO(sadovsky): Watch should return just a WatchStream, similar to how Scan
-	// returns just a ScanStream.
-	Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error)
+	// See watch.GlobWatcher for a detailed explanation of the behavior.
+	Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patterns []wire.CollectionRowPattern) WatchStream
 
 	// SyncgroupForId returns a handle to the syncgroup with the given Id.
 	SyncgroupForId(id wire.Id) Syncgroup

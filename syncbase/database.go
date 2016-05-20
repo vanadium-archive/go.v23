@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/naming"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
@@ -105,19 +104,13 @@ func (d *database) GetPermissions(ctx *context.T) (perms access.Permissions, ver
 }
 
 // Watch implements Database.Watch.
-func (d *database) Watch(ctx *context.T, collection wire.Id, prefix string, resumeMarker watch.ResumeMarker) (WatchStream, error) {
-	if err := util.ValidateId(collection); err != nil {
-		return nil, verror.New(wire.ErrInvalidName, ctx, collection, err)
-	}
+func (d *database) Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patterns []wire.CollectionRowPattern) WatchStream {
 	ctx, cancel := context.WithCancel(ctx)
-	call, err := d.c.WatchGlob(ctx, watch.GlobRequest{
-		Pattern:      naming.Join(util.EncodeId(collection), prefix+"*"),
-		ResumeMarker: resumeMarker,
-	})
+	call, err := d.c.WatchPatterns(ctx, resumeMarker, patterns)
 	if err != nil {
-		return nil, err
+		return &invalidWatchStream{invalidStream{err: err}}
 	}
-	return newWatchStream(cancel, call), nil
+	return newWatchStream(cancel, call)
 }
 
 // SyncgroupForId implements Database.SyncgroupForId.

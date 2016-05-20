@@ -3349,7 +3349,7 @@ func TestExecErrors(t *testing.T) {
 		},
 		{
 			"select v from Customer where k like \"abc %\" escape ' '",
-			syncql.NewErrInvalidEscapeChar(db.GetContext(), 51),
+			syncql.NewErrInvalidEscapeChar(db.GetContext(), 51, string(' ')),
 		},
 	}
 

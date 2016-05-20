@@ -14,6 +14,7 @@ import (
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/x/ref/test/v23test"
 )
 
@@ -78,10 +79,14 @@ func BenchmarkPingPongPair(b *testing.B) {
 
 		// Set up the watch streams (watching the other syncbase's prefix).
 		prefix0, prefix1 := "prefix0", "prefix1"
-		w0, err := db0.Watch(sbs[0].clientCtx, testCx, prefix1, watch.ResumeMarker("now"))
-		ok(b, err)
-		w1, err := db1.Watch(sbs[1].clientCtx, testCx, prefix0, watch.ResumeMarker("now"))
-		ok(b, err)
+		w0 := db0.Watch(sbs[0].clientCtx, watch.ResumeMarker("now"), []wire.CollectionRowPattern{
+			util.RowPrefixPattern(testCx, prefix1),
+		})
+		ok(b, w0.Err())
+		w1 := db1.Watch(sbs[1].clientCtx, watch.ResumeMarker("now"), []wire.CollectionRowPattern{
+			util.RowPrefixPattern(testCx, prefix0),
+		})
+		ok(b, w0.Err())
 
 		// The join has succeeded, so make sure sync is initialized.
 		// The strategy is: s0 sends to s1, and then s1 responds.

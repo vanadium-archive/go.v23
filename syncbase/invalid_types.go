@@ -4,39 +4,52 @@
 
 package syncbase
 
-// InvalidScanStream is a ScanStream for which all methods return errors.
-// TODO(sadovsky): Make InvalidScanStream private.
-type InvalidScanStream struct {
-	Error error // returned by all methods
+// invalidStream is a Stream for which all methods return errors.
+type invalidStream struct {
+	err error // returned by all methods
 }
 
-var (
-	_ ScanStream = (*InvalidScanStream)(nil)
-)
-
-////////////////////////////////////////////////////////////
-// InvalidScanStream
+var _ Stream = (*invalidStream)(nil)
 
 // Advance implements the Stream interface.
-func (s *InvalidScanStream) Advance() bool {
+func (_ *invalidStream) Advance() bool {
 	return false
 }
 
 // Err implements the Stream interface.
-func (s *InvalidScanStream) Err() error {
-	return s.Error
+func (s *invalidStream) Err() error {
+	return s.err
 }
 
 // Cancel implements the Stream interface.
-func (s *InvalidScanStream) Cancel() {
+func (_ *invalidStream) Cancel() {
 }
 
+// invalidScanStream is a ScanStream for which all methods return errors.
+type invalidScanStream struct {
+	invalidStream
+}
+
+var _ ScanStream = (*invalidScanStream)(nil)
+
 // Key implements the ScanStream interface.
-func (s *InvalidScanStream) Key() string {
-	panic(s.Error)
+func (s *invalidScanStream) Key() string {
+	panic(s.err)
 }
 
 // Value implements the ScanStream interface.
-func (s *InvalidScanStream) Value(value interface{}) error {
-	panic(s.Error)
+func (s *invalidScanStream) Value(value interface{}) error {
+	panic(s.err)
+}
+
+// invalidWatchStream is a WatchStream for which all methods return errors.
+type invalidWatchStream struct {
+	invalidStream
+}
+
+var _ WatchStream = (*invalidWatchStream)(nil)
+
+// Change implements the WatchStream interface.
+func (s *invalidWatchStream) Change() WatchChange {
+	panic(s.err)
 }

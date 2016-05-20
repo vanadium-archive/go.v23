@@ -17,6 +17,7 @@ import (
 	"v.io/v23/context"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	tu "v.io/x/ref/services/syncbase/testutil"
@@ -314,10 +315,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 
 	// Watch for the row change.
 	timeout, _ := context.WithTimeout(clientCtx, time.Second)
-	stream, err := d.Watch(timeout, testCx, "r", marker)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stream := d.Watch(timeout, marker, []wire.CollectionRowPattern{util.RowPrefixPattern(testCx, "r")})
 	if !stream.Advance() {
 		cleanup(os.Interrupt)
 		t.Fatalf("expected to be able to Advance: %v", stream.Err())
@@ -348,10 +346,7 @@ func TestV23RestartabilityWatch(t *testing.T) {
 
 	// Resume the watch from after the first Put.  We should see only the second
 	// Put.
-	stream, err = d.Watch(clientCtx, testCx, "", marker)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stream = d.Watch(clientCtx, marker, []wire.CollectionRowPattern{util.RowPrefixPattern(testCx, "")})
 	if !stream.Advance() {
 		t.Fatalf("expected to be able to Advance: %v", stream.Err())
 	}

@@ -5,14 +5,12 @@
 package query_checker
 
 import (
-	"bytes"
-	"regexp"
 	"sort"
-	"strings"
 
 	ds "v.io/v23/query/engine/datasource"
 	"v.io/v23/query/engine/internal/query_functions"
 	"v.io/v23/query/engine/internal/query_parser"
+	"v.io/v23/query/pattern"
 	"v.io/v23/query/syncql"
 	"v.io/v23/vdl"
 )
@@ -136,19 +134,15 @@ func checkExpression(db ds.Database, e *query_parser.Expression, ec *query_parse
 		if e.Operand2.Type != query_parser.TypStr {
 			return syncql.NewErrLikeExpressionsRequireRhsString(db.GetContext(), e.Operand2.Off)
 		}
-		prefix, err := computePrefix(db, e.Operand2.Off, e.Operand2.Str, ec)
+		// Compile the like pattern now to to check for errors.
+		p, err := parseLikePattern(db, e.Operand2.Off, e.Operand2.Str, ec)
 		if err != nil {
 			return err
 		}
-		e.Operand2.Prefix = prefix
-		// Compute the regular expression now to to check for errors.
-		// Save the regex (testing) and the compiled regex (for later use in evaluation).
-		regex, compRegex, foundWildcard, err := computeRegex(db, e.Operand2.Off, e.Operand2.Str, ec)
-		if err != nil {
-			return err
-		}
+		fixedPrefix, noWildcards := p.FixedPrefix()
+		e.Operand2.Prefix = fixedPrefix
 		// Optimization: If like/not like argument contains no wildcards, convert the expression to equals/not equals.
-		if !foundWildcard {
+		if noWildcards {
 			if e.Operator.Type == query_parser.Like {
 				e.Operator.Type = query_parser.Equal
 			} else { // not like
@@ -156,10 +150,10 @@ func checkExpression(db ds.Database, e *query_parser.Expression, ec *query_parse
 			}
 			// Since this is no longer a like expression, we need to unescape
 			// any escaped chars.
-			e.Operand2.Str = unescapeLikeExpression(e.Operand2.Str, ec)
+			e.Operand2.Str = fixedPrefix
 		}
-		e.Operand2.Regex = regex
-		e.Operand2.CompRegex = compRegex
+		// Save the compiled pattern for later use in evaluation.
+		e.Operand2.Pattern = p
 	}
 
 	// Is/IsNot expressions require operand1 to be a (value or function) and operand2 to be nil.
@@ -239,137 +233,16 @@ func checkOperand(db ds.Database, o *query_parser.Operand, ec *query_parser.Esca
 	return nil
 }
 
-// Only include up to (but not including) a wildcard character ('%', '_').
-func computePrefix(db ds.Database, off int64, s string, ec *query_parser.EscapeClause) (string, error) {
-	if strings.Index(s, "%") == -1 && strings.Index(s, "_") == -1 && (ec == nil || strings.IndexRune(s, ec.EscapeChar.Value) == -1) {
-		return s, nil
-	}
-	var s2 string
-	escapedChar := false
-	for _, c := range s {
-		if escapedChar {
-			switch c {
-			case '%':
-				s2 += string(c)
-			case '_':
-				s2 += string(c)
-			default:
-				return "", syncql.NewErrInvalidEscapeSequence(db.GetContext(), off)
-			}
-			escapedChar = false
-		} else {
-			// Hit an unescaped wildcard, we are done
-			if c == '%' || c == '_' {
-				return s2, nil
-			} else if ec != nil && c == ec.EscapeChar.Value {
-				escapedChar = true
-			} else {
-				s2 += string(c)
-			}
-		}
-	}
-	if escapedChar {
-		return "", syncql.NewErrInvalidEscapeSequence(db.GetContext(), off)
-	}
-	return s2, nil
-}
-
-// Convert Like expression to a regex.  That is, convert:
-// % to .*?
-// _ to .
-// Escape everything that would be incorrectly interpreted as a regex.
-//
-// The approach this function takes is to collect characters to be escaped
-// into toBeEscapedBuf.  When a wildcard is encountered, first toBeEscapedBuf
-// is escaped and written to the regex buffer, next the wildcard is translated
-// to regex (either ".*?" or ".") and written to the regex buffer.
-// At the end, any remaining chars in toBeEscapedBuf are written.
-//
-// Return values are:
-// 1. string: uncompiled regular expression
-// 2. *Regexp: compiled regular expression
-// 3. bool: true if wildcards were found (if false, like is converted to equal)
-// 4. error: non-nil if error encountered
-func computeRegex(db ds.Database, off int64, s string, ec *query_parser.EscapeClause) (string, *regexp.Regexp, bool, error) {
-	var buf bytes.Buffer            // buffer for return regex
-	var toBeEscapedBuf bytes.Buffer // buffer to hold characters waiting to be escaped
-
-	buf.WriteString("^") // '^<regex_str>$'
-	escapedMode := false
-	foundWildcard := false
-
-	escChar := ' ' // blank will be ignored as an escape char
+func parseLikePattern(db ds.Database, off int64, s string, ec *query_parser.EscapeClause) (*pattern.Pattern, error) {
+	escChar := '\x00' // nul is ignored as an escape char
 	if ec != nil {
 		escChar = ec.EscapeChar.Value
 	}
-
-	for _, c := range s {
-		switch c {
-		case '%', '_':
-			if escapedMode {
-				toBeEscapedBuf.WriteString(string(c))
-			} else {
-				// Write out any chars waiting to be escaped, then
-				// write ".*?' or '.'.
-				buf.WriteString(regexp.QuoteMeta(toBeEscapedBuf.String()))
-				toBeEscapedBuf.Reset()
-				if c == '%' {
-					buf.WriteString(".*?")
-				} else {
-					buf.WriteString(".")
-				}
-				foundWildcard = true
-			}
-			escapedMode = false
-		case escChar:
-			if escChar != ' ' {
-				if escapedMode {
-					toBeEscapedBuf.WriteString(string(c))
-				}
-				escapedMode = !escapedMode
-			} else {
-				// not an escape char, treat same as default
-				toBeEscapedBuf.WriteString(string(c))
-			}
-		default:
-			toBeEscapedBuf.WriteString(string(c))
-		}
-	}
-	// Write any remaining chars in toBeEscapedBuf.
-	buf.WriteString(regexp.QuoteMeta(toBeEscapedBuf.String()))
-	buf.WriteString("$") // '^<regex_str>$'
-	regex := buf.String()
-	compRegex, err := regexp.Compile(regex)
+	p, err := pattern.ParseWithEscapeChar(s, escChar)
 	if err != nil {
-		return "", nil, false, syncql.NewErrErrorCompilingRegularExpression(db.GetContext(), off, regex, err)
+		return nil, syncql.NewErrInvalidLikePattern(db.GetContext(), off, err)
 	}
-	return regex, compRegex, foundWildcard, nil
-}
-
-// Unescape any escaped % and _ chars as this is being converted to an equals expression.
-func unescapeLikeExpression(s string, ec *query_parser.EscapeClause) string {
-	var buf bytes.Buffer // buffer for returned unescaped string
-
-	if ec == nil {
-		// there is nothing to unescape
-		return s
-	}
-
-	escapedMode := false
-
-	for _, c := range s {
-		switch c {
-		case ec.EscapeChar.Value:
-			if escapedMode {
-				buf.WriteString(string(c))
-			}
-			escapedMode = !escapedMode
-		default:
-			buf.WriteString(string(c))
-			escapedMode = false
-		}
-	}
-	return buf.String()
+	return p, nil
 }
 
 func IsLogicalOperator(o *query_parser.BinaryOperator) bool {
@@ -748,15 +621,15 @@ func addStringFieldRange(fieldRange ds.StringFieldRange, fieldRanges *ds.StringF
 	sort.Sort(*fieldRanges)
 }
 
-// Check escape clause.  Escape char cannot be '\'.
+// Check escape clause. Escape char cannot be '\', ' ', or a wildcard.
 // Return bool (true if escape char defined), escape char, error.
 func checkEscapeClause(db ds.Database, e *query_parser.EscapeClause) error {
 	if e == nil {
 		return nil
 	}
-	switch e.EscapeChar.Value {
-	case ' ', '\\':
-		return syncql.NewErrInvalidEscapeChar(db.GetContext(), e.EscapeChar.Off)
+	switch ec := e.EscapeChar.Value; ec {
+	case '\x00', '_', '%', ' ', '\\':
+		return syncql.NewErrInvalidEscapeChar(db.GetContext(), e.EscapeChar.Off, string(ec))
 	default:
 		return nil
 	}

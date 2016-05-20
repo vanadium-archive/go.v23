@@ -20,6 +20,7 @@ import (
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
 	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/services/syncbase/syncbaselib"
@@ -555,17 +556,16 @@ func verifySyncgroupDataWithWatch(ctx *context.T, syncbaseName, collectionName, 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	stream, err := d.Watch(ctxWithTimeout, collectionId, keyPrefix, beforeSyncMarker)
-	if err != nil {
-		return fmt.Errorf("watch error: %v\n", err)
-	}
+	stream := d.Watch(ctxWithTimeout, beforeSyncMarker, []wire.CollectionRowPattern{
+		util.RowPrefixPattern(collectionId, keyPrefix),
+	})
 
 	var changes []syncbase.WatchChange
-	for i := 0; stream.Advance() && i < count; i++ {
-		if err := stream.Err(); err != nil {
-			return fmt.Errorf("watch stream error: %v\n", err)
-		}
+	for i := 0; i < count && stream.Advance(); i++ {
 		changes = append(changes, stream.Change())
+	}
+	if err := stream.Err(); err != nil {
+		return fmt.Errorf("watch stream error: %v\n", err)
 	}
 
 	sort.Sort(ByRow(changes))

@@ -388,8 +388,18 @@ type BlobFetchStatus struct {
 	Total    int64 // Blob size.
 }
 
+// CollectionRowPattern contains SQL LIKE-style glob patterns ('%' and '_'
+// wildcards, '\' as escape character) for matching rows and collections by
+// name components.
+// Collection blessing and name patterns are not allowed to be empty, but the
+// row key pattern is (for matching only collections and no rows).
+type CollectionRowPattern struct {
+	CollectionBlessing string
+	CollectionName     string
+	RowKey             string
+}
+
 // StoreChange is the new value for a watched entity.
-// TODO(rogulenko): Consider adding the Shell state.
 type StoreChange struct {
 	// Value is the new value for the row if the Change state equals to Exists,
 	// otherwise the Value is nil.

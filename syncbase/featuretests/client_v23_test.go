@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"v.io/v23/context"
+	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/x/ref/services/syncbase/syncbaselib"
 	"v.io/x/ref/test/v23test"
 )
@@ -58,10 +60,7 @@ func TestV23ClientPutGet(t *testing.T) {
 	// Do a watch from the resume marker before the put operation.
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	stream, err := d.Watch(ctxWithTimeout, testCx, "", marker)
-	if err != nil {
-		t.Fatalf("unable to start a watch %v", err)
-	}
+	stream := d.Watch(ctxWithTimeout, marker, []wire.CollectionRowPattern{util.RowPrefixPattern(testCx, "")})
 	if !stream.Advance() {
 		t.Fatalf("watch stream unexpectedly reached the end: %v", stream.Err())
 	}

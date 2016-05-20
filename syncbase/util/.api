@@ -8,6 +8,7 @@ pkg util, func ListChildIds(*context.T, string) ([]wire.Id, error)
 pkg util, func ParseCollectionRowPair(*context.T, string) (wire.Id, string, error)
 pkg util, func PrefixRangeLimit(string) string
 pkg util, func PrefixRangeStart(string) string
+pkg util, func RowPrefixPattern(wire.Id, string) wire.CollectionRowPattern
 pkg util, func SortIds([]wire.Id)
 pkg util, func UserBlessingFromContext(*context.T) (string, error)
 pkg util, func ValidateId(wire.Id) error

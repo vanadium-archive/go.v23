@@ -20,9 +20,6 @@ error (
 	DotNotationDisallowedForKey(off int64) {
 		"en": "[{off}]Dot notation may not be used on a key field.",
 	}
-	ErrorCompilingRegularExpression(off int64, regex string, err error) {
-		"en": "[{off}]The following error encountered compiling regex '{regex}': {err}",
-	}
 	ExecOfUnknownStatementType(off int64, statementType string) {
 		"en": "[{off}]Cannot execute unknown statement type: {statementType}.",
 	}
@@ -98,8 +95,8 @@ error (
 	IsIsNotRequireRhsNil(off int64) {
 		"en": "[{off}]'Is/is not' expressions require right operand to be nil.",
 	}
-	InvalidEscapeSequence(off int64) {
-		"en": "[{off}Expected percent, or underscore after escape character.]",
+	InvalidLikePattern(off int64, err error) {
+		"en": "[{off}]Invalid like pattern: {err}.",
 	}
 	InvalidSelectField(off int64) {
 		"en": "[{off}]Select field must be 'k' or 'v[{.<ident>}...]'.",
@@ -140,8 +137,8 @@ error (
 	UnknownIdentifier(off int64, found string) {
 		"en": "[{off}]Unknown identifier: {found}.",
 	}
-	InvalidEscapeChar(off int64) {
-		"en": "[{off}]Invalid escape character cannot be space or backslash.",
+	InvalidEscapeChar(off int64, escChar string) {
+		"en": "[{off}]'{escChar}' is not a valid escape character.",
 	}
 	DidYouMeanLowercaseK(off int64) {
 		"en": "[{off}]Did you mean: 'k'?",

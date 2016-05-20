@@ -11,6 +11,7 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/query/pattern"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
@@ -140,6 +141,16 @@ func ParseCollectionRowPair(ctx *context.T, pattern string) (wire.Id, string, er
 		}
 	}
 	return collection, row, nil
+}
+
+// RowPrefixPattern returns a CollectionRowPattern matching a single key prefix
+// in a single collection.
+func RowPrefixPattern(cxId wire.Id, keyPrefix string) wire.CollectionRowPattern {
+	return wire.CollectionRowPattern{
+		CollectionBlessing: pattern.Escape(cxId.Blessing),
+		CollectionName:     pattern.Escape(cxId.Name),
+		RowKey:             pattern.Escape(keyPrefix) + "%",
+	}
 }
 
 // PrefixRangeStart returns the start of the row range for the given prefix.
