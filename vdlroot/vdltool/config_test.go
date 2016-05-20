@@ -59,12 +59,8 @@ func TestLoadingVdlConfig(t *testing.T) {
 	configVdlValue := vdl.ValueOf(config)
 
 	var finalConfig Config
-	target, err := vdl.ReflectTarget(reflect.ValueOf(&finalConfig))
-	if err != nil {
-		t.Fatalf("Error creating reflect target: %v", err)
-	}
-	if err := vdl.FromValue(target, configVdlValue); err != nil {
-		t.Fatalf("error while using ConfigTarget: %v", err)
+	if err := vdl.Convert(&finalConfig, configVdlValue); err != nil {
+		t.Fatalf("error in Convert: %v", err)
 	}
 
 	if got, want := finalConfig, config; !reflect.DeepEqual(got, want) {

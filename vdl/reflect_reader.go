@@ -318,6 +318,12 @@ func readFromNilNative(dec Decoder, rv reflect.Value, tt *Type) (bool, error) {
 	return false, nil
 }
 
+// settable exists to avoid a call to reflect.Call() to invoke Set()
+// which results in an allocation
+type settable interface {
+	Set(string) error
+}
+
 func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {
 	// Handle named and unnamed []byte and [N]byte, where the element type is the
 	// unnamed byte type.  Cases like []MyByte fall through and are handled as

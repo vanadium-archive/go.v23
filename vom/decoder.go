@@ -14,7 +14,6 @@ import (
 )
 
 var (
-	errDecodeNil                = verror.Register(pkgPath+".errDecodeNil", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil interface{}{:_}")
 	errDecodeZeroTypeID         = verror.Register(pkgPath+".errDecodeZeroTypeID", verror.NoRetry, "{1:}{2:} vom: zero type id{:_}")
 	errIndexOutOfRange          = verror.Register(pkgPath+".errIndexOutOfRange", verror.NoRetry, "{1:}{2:} vom: index out of range{:_}")
 	errLeftOverBytes            = verror.Register(pkgPath+".errLeftOverBytes", verror.NoRetry, "{1:}{2:} vom: {3} leftover bytes{:_}")
@@ -23,6 +22,11 @@ var (
 	errIgnoreValueUnhandledType = verror.Register(pkgPath+".errIgnoreValueUnhandledType", verror.NoRetry, "{1:}{2:} vom: ignoreValue unhandled type {3}{:_}")
 	errInvalidTypeIdIndex       = verror.Register(pkgPath+".errInvalidTypeIdIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into type id table {:_}")
 	errInvalidAnyIndex          = verror.Register(pkgPath+".errInvalidAnyIndex", verror.NoRetry, "{1:}{2:} vom: value referenced invalid index into anyLen table {:_}")
+)
+
+var (
+	rtRawBytes      = reflect.TypeOf(RawBytes{})
+	rtPtrToRawBytes = reflect.TypeOf((*RawBytes)(nil))
 )
 
 // ZDecoder manages the receipt and unmarshalling of typed values from the other
@@ -74,32 +78,6 @@ func NewZDecoderWithTypeDecoder(r io.Reader, typeDec *TypeDecoder) *ZDecoder {
 	}
 }
 
-// Decode reads the next value from the reader(s) and stores it in value v.
-// The type of v need not exactly match the type of the originally encoded
-// value; decoding succeeds as long as the values are compatible.
-//
-//   Types that are special-cased, only for v:
-//     *RawBytes  - Store raw (uninterpreted) bytes in v.
-//
-//   Types that are special-cased, recursively throughout v:
-//     *vdl.Value    - Decode into v.
-//     reflect.Value - Decode into v, which must be settable.
-//
-// Decoding into a RawBytes captures the value in a raw form, which may be
-// subsequently passed to an Encoder for transcoding.
-//
-// Decode(nil) always returns an error.  Use Ignore() to ignore the next value.
-func (d *ZDecoder) Decode(v interface{}) error {
-	if v == nil {
-		return verror.New(errDecodeNil, nil)
-	}
-	target, err := vdl.ReflectTarget(reflect.ValueOf(v))
-	if err != nil {
-		return err
-	}
-	return d.decodeToTarget(target)
-}
-
 func (d *ZDecoder) decodeTypeDefs() error {
 	if !d.hasSeparateTypeDec {
 		for {
@@ -116,36 +94,6 @@ func (d *ZDecoder) decodeTypeDefs() error {
 		}
 	}
 	return nil
-}
-
-func (d *ZDecoder) decodeToTarget(target vdl.Target) error {
-	if err := d.decodeTypeDefs(); err != nil {
-		return err
-	}
-	tid, err := d.nextMessage()
-	if err != nil {
-		return err
-	}
-	valType, err := d.typeDec.lookupType(tid)
-	if err != nil {
-		return err
-	}
-	if hax, ok := target.(hasRvHack); ok {
-		rv := hax.HackGetRv()
-		valLen, err := d.peekValueByteLen(valType)
-		if err != nil {
-			return err
-		}
-		if isRawBytes, err := d.tryDecodeRaw(valType, valLen, rv); err != nil {
-			return err
-		} else if isRawBytes {
-			return d.endMessage()
-		}
-	}
-	if err := d.decodeValue(valType, target); err != nil {
-		return err
-	}
-	return d.endMessage()
 }
 
 // Ignore ignores the next value from the reader.
@@ -170,24 +118,6 @@ func (d *ZDecoder) Ignore() error {
 		return err
 	}
 	return d.endMessage()
-}
-
-// decodeWireType decodes the next type definition message and returns its
-// type id.
-func (d *ZDecoder) decodeWireType(wt *wireType) (TypeId, error) {
-	tid, err := d.nextMessage()
-	if err != nil {
-		return 0, err
-	}
-	// Decode the wire type like a regular value.
-	target, err := vdl.ReflectTarget(reflect.ValueOf(wt))
-	if err != nil {
-		return 0, err
-	}
-	if err := d.decodeValue(wireTypeType, target); err != nil {
-		return 0, err
-	}
-	return tid, d.endMessage()
 }
 
 // peekValueByteLen returns the byte length of the next value.
@@ -271,281 +201,6 @@ func (d *ZDecoder) tryDecodeRaw(tt *vdl.Type, valLen int, rv reflect.Value) (isR
 		return true, nil
 	}
 	return false, nil
-}
-
-// decodeValue decodes the rest of the message assuming type tt.
-func (d *ZDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
-	ttFrom := tt
-	if tt.Kind() == vdl.Optional {
-		// If the type is optional, we expect to see either WireCtrlNil or the actual
-		// value, but not both.  And thus, we can just peek for the WireCtrlNil here.
-		switch ctrl, err := binaryPeekControl(d.buf); {
-		case err != nil:
-			return err
-		case ctrl == WireCtrlNil:
-			d.buf.Skip(1)
-			return target.FromNil(ttFrom)
-		}
-		tt = tt.Elem()
-	}
-	if tt.IsBytes() {
-		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
-		if err != nil {
-			return err
-		}
-		// TODO(toddw): remove allocation
-		buf := make([]byte, len)
-		if err := d.buf.ReadIntoBuf(buf); err != nil {
-			return err
-		}
-		return target.FromBytes(buf, ttFrom)
-	}
-	switch kind := tt.Kind(); kind {
-	case vdl.Bool:
-		v, err := binaryDecodeBool(d.buf)
-		if err != nil {
-			return err
-		}
-		return target.FromBool(v, ttFrom)
-	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
-		var v uint64
-		if tt.Kind() == vdl.Byte && d.buf.version == Version80 {
-			b, err := d.buf.ReadByte()
-			if err != nil {
-				return err
-			}
-			v = uint64(b)
-		} else {
-			var err error
-			v, err = binaryDecodeUint(d.buf)
-			if err != nil {
-				return err
-			}
-		}
-		return target.FromUint(v, ttFrom)
-	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
-		if d.buf.version == Version80 && tt.Kind() == vdl.Int8 {
-			return verror.New(errUnsupportedInVOMVersion, nil, "int8", d.buf.version)
-		}
-		v, err := binaryDecodeInt(d.buf)
-		if err != nil {
-			return err
-		}
-		return target.FromInt(v, ttFrom)
-	case vdl.Float32, vdl.Float64:
-		v, err := binaryDecodeFloat(d.buf)
-		if err != nil {
-			return err
-		}
-		return target.FromFloat(v, ttFrom)
-	case vdl.String:
-		v, err := binaryDecodeString(d.buf)
-		if err != nil {
-			return err
-		}
-		return target.FromString(v, ttFrom)
-	case vdl.Enum:
-		index, err := binaryDecodeUint(d.buf)
-		switch {
-		case err != nil:
-			return err
-		case index >= uint64(tt.NumEnumLabel()):
-			return verror.New(errIndexOutOfRange, nil)
-		}
-		return target.FromEnumLabel(tt.EnumLabel(int(index)), ttFrom)
-	case vdl.TypeObject:
-		x, err := binaryDecodeUint(d.buf)
-		if err != nil {
-			return err
-		}
-		var tid TypeId
-		if d.buf.version == Version80 {
-			tid = TypeId(x)
-		} else {
-			tid, err = d.refTypes.ReferencedTypeId(x)
-			if err != nil {
-				return err
-			}
-		}
-		typeobject, err := d.typeDec.lookupType(tid)
-		if err != nil {
-			return err
-		}
-		return target.FromTypeObject(typeobject)
-	case vdl.Array, vdl.List:
-		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
-		if err != nil {
-			return err
-		}
-		listTarget, err := target.StartList(ttFrom, len)
-		if err != nil {
-			return err
-		}
-		for ix := 0; ix < len; ix++ {
-			elem, err := listTarget.StartElem(ix)
-			if err != nil {
-				return err
-			}
-			if err := d.decodeValue(tt.Elem(), elem); err != nil {
-				return err
-			}
-			if err := listTarget.FinishElem(elem); err != nil {
-				return err
-			}
-		}
-		return target.FinishList(listTarget)
-	case vdl.Set:
-		len, err := binaryDecodeLen(d.buf)
-		if err != nil {
-			return err
-		}
-		setTarget, err := target.StartSet(ttFrom, len)
-		if err != nil {
-			return err
-		}
-		for ix := 0; ix < len; ix++ {
-			key, err := setTarget.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := d.decodeValue(tt.Key(), key); err != nil {
-				return err
-			}
-			switch err := setTarget.FinishKey(key); {
-			case err == vdl.ErrFieldNoExist:
-				continue
-			case err != nil:
-				return err
-			}
-		}
-		return target.FinishSet(setTarget)
-	case vdl.Map:
-		len, err := binaryDecodeLen(d.buf)
-		if err != nil {
-			return err
-		}
-		mapTarget, err := target.StartMap(ttFrom, len)
-		if err != nil {
-			return err
-		}
-		for ix := 0; ix < len; ix++ {
-			key, err := mapTarget.StartKey()
-			if err != nil {
-				return err
-			}
-			if err := d.decodeValue(tt.Key(), key); err != nil {
-				return err
-			}
-			switch field, err := mapTarget.FinishKeyStartField(key); {
-			case err == vdl.ErrFieldNoExist:
-				if err := d.ignoreValue(tt.Elem()); err != nil {
-					return err
-				}
-			case err != nil:
-				return err
-			default:
-				if err := d.decodeValue(tt.Elem(), field); err != nil {
-					return err
-				}
-				if err := mapTarget.FinishField(key, field); err != nil {
-					return err
-				}
-			}
-		}
-		return target.FinishMap(mapTarget)
-	case vdl.Struct:
-		fieldsTarget, err := target.StartFields(ttFrom)
-		if err != nil {
-			return err
-		}
-		// Loop through decoding the 0-based field index and corresponding field.
-		decodedFields := make([]bool, tt.NumField())
-		for {
-			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
-			switch {
-			case err != nil:
-				return err
-			case ctrl == WireCtrlEnd:
-				// Fill not-yet-decoded fields with their zero values.
-				for index, decoded := range decodedFields {
-					if decoded {
-						continue
-					}
-					ttfield := tt.Field(index)
-					switch err := fieldsTarget.ZeroField(ttfield.Name); {
-					case err == vdl.ErrFieldNoExist:
-						// Ignore it.
-					case err != nil:
-						return err
-
-					}
-				}
-				return target.FinishFields(fieldsTarget)
-			case ctrl != 0:
-				return verror.New(errUnexpectedControlByte, nil, ctrl)
-			case index >= uint64(tt.NumField()):
-				return verror.New(errIndexOutOfRange, nil)
-			}
-			ttfield := tt.Field(int(index))
-			switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
-			case err == vdl.ErrFieldNoExist:
-				if err := d.ignoreValue(ttfield.Type); err != nil {
-					return err
-				}
-			case err != nil:
-				return err
-			default:
-				if err := d.decodeValue(ttfield.Type, field); err != nil {
-					return err
-				}
-				if err := fieldsTarget.FinishField(key, field); err != nil {
-					return err
-				}
-			}
-			decodedFields[index] = true
-		}
-	case vdl.Union:
-		fieldsTarget, err := target.StartFields(ttFrom)
-		if err != nil {
-			return err
-		}
-		index, err := binaryDecodeUint(d.buf)
-		switch {
-		case err != nil:
-			return err
-		case index >= uint64(tt.NumField()):
-			return verror.New(errIndexOutOfRange, nil)
-		}
-		ttfield := tt.Field(int(index))
-		key, field, err := fieldsTarget.StartField(ttfield.Name)
-		if err != nil {
-			return err
-		}
-		if err := d.decodeValue(ttfield.Type, field); err != nil {
-			return err
-		}
-		if err := fieldsTarget.FinishField(key, field); err != nil {
-			return err
-		}
-		return target.FinishFields(fieldsTarget)
-	case vdl.Any:
-		elemType, valLen, err := d.readAnyHeader()
-		if err != nil {
-			return err
-		}
-		if elemType == nil {
-			return target.FromNil(tt)
-		}
-		if hax, ok := target.(hasRvHack); ok {
-			rv := hax.HackGetRv()
-			if isRawBytes, err := d.tryDecodeRaw(elemType, valLen, rv); isRawBytes {
-				return err
-			}
-		}
-		return d.decodeValue(elemType, target)
-	default:
-		panic(verror.New(errDecodeValueUnhandledType, nil, tt))
-	}
 }
 
 func (d *ZDecoder) readAnyHeader() (*vdl.Type, int, error) {

@@ -182,13 +182,6 @@ type reflectInfo struct {
 	// UnionFields holds the fields of a union; it is non-empty iff the Type
 	// represents a vdl union.
 	UnionFields []reflectField
-
-	// UnionFactoryTarget holds a factory that can construct targets that
-	// write to unions of this type.
-	// This is needed in addition to MakeVdlTarget because unions are
-	// based on interfaces, which can't directly have method bodies defined
-	// on them.
-	UnionTargetFactory unionTargetFactory
 }
 
 // reflectField describes the reflection info for a Union field.
@@ -200,10 +193,6 @@ type reflectField struct {
 	Name    string       // Field name, e.g. "A", "B"
 	Type    reflect.Type // Field type, e.g. bool, string
 	RepType reflect.Type // Concrete type representing the field, e.g. FooA, FooB
-}
-
-type unionTargetFactory interface {
-	VDLMakeUnionTarget(union interface{}) (Target, error)
 }
 
 // deriveReflectInfo returns the reflectInfo corresponding to rt.
@@ -258,11 +247,6 @@ func deriveReflectInfo(rt reflect.Type) (*reflectInfo, bool, error) {
 		if field, ok := rtReflect.FieldByName("Union"); ok {
 			if err := describeUnion(field.Type, rt, ri); err != nil {
 				return nil, false, err
-			}
-		}
-		if field, ok := rtReflect.FieldByName("UnionTargetFactory"); ok {
-			if factory, ok := reflect.Zero(field.Type).Interface().(unionTargetFactory); ok {
-				ri.UnionTargetFactory = factory
 			}
 		}
 		if len(ri.EnumLabels) > 0 && len(ri.UnionFields) > 0 {

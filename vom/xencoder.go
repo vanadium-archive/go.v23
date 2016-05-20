@@ -13,9 +13,25 @@ import (
 	"v.io/v23/verror"
 )
 
+func (v Version) String() string {
+	return fmt.Sprintf("Version%x", byte(v))
+}
+
 var (
-	errEmptyEncoderStack = errors.New("vom: empty encoder stack")
+	errEmptyEncoderStack       = errors.New("vom: empty encoder stack")
+	errLabelNotInType          = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
+	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
+	errUnusedTypeIds           = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
+	errUnusedAnys              = verror.Register(pkgPath+".errUnusedAnys", verror.NoRetry, "{1:}{2:} vom: some anys unused during encode {:_}")
 )
+
+const (
+	typeIDListInitialSize = 16
+	anyLenListInitialSize = 16
+)
+
+// paddingLen must be large enough to hold the header in writeMsg.
+const paddingLen = maxEncodedUintBytes * 2
 
 // Encoder manages the transmission and marshaling of typed values to the other
 // side of a connection.
@@ -58,9 +74,6 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 	}}
 }
 
-// TODO(toddw): Flip useOldEncoderForTypes=false to enable Encoder for types.
-const useOldEncoderForTypes = false
-
 func newEncoderForTypes(version Version, w io.Writer) *xEncoder {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
@@ -72,16 +85,6 @@ func newEncoderForTypes(version Version, w io.Writer) *xEncoder {
 		sentVersionByte: true,
 		version:         version,
 		mode:            encoderForTypes,
-	}
-	if useOldEncoderForTypes {
-		// TEMPORARY HACK: Create the old encoder if we're using it for types.
-		e.old = &encoder{
-			writer:          w,
-			buf:             buf,
-			typeStack:       make([]typeStackEntry, 0, 10),
-			sentVersionByte: true,
-			version:         version,
-		}
 	}
 	return e
 }
@@ -152,12 +155,6 @@ type xEncoder struct {
 	msgType *vdl.Type
 
 	mode encoderMode
-
-	// As a temporary hack, before we've switched to the XEncoder for everything,
-	// we still need to support the old encoder.
-	//
-	// TODO(toddw): Remove this when the switch to XEncoder is complete.
-	old *encoder
 }
 
 type encoderStackEntry struct {
@@ -200,9 +197,6 @@ func (e *xEncoder) top() *encoderStackEntry {
 }
 
 func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
-	if useOldEncoderForTypes {
-		return e.old.encodeWireType(tid, wt, typeIncomplete)
-	}
 	// RawBytes doesn't need type messages to be encoded, since it holds the types
 	// in-memory.
 	if e.mode == encoderForRawBytes {
@@ -582,4 +576,91 @@ func (e *xEncoder) writeRawBytes(rb *RawBytes) error {
 	}
 	e.buf.Write(rb.Data)
 	return e.FinishValue()
+}
+
+func newTypeIDList() *typeIDList {
+	return &typeIDList{
+		tids: make([]TypeId, 0, typeIDListInitialSize),
+	}
+}
+
+type typeIDList struct {
+	tids      []TypeId
+	totalSent int
+}
+
+func (l *typeIDList) ReferenceTypeID(tid TypeId) uint64 {
+	for index, existingTid := range l.tids {
+		if existingTid == tid {
+			return uint64(index)
+		}
+	}
+
+	l.tids = append(l.tids, tid)
+	return uint64(len(l.tids) - 1)
+}
+
+func (l *typeIDList) Reset() error {
+	if l.totalSent != len(l.tids) {
+		return verror.New(errUnusedTypeIds, nil)
+	}
+	l.tids = l.tids[:0]
+	l.totalSent = 0
+	return nil
+}
+
+func (l *typeIDList) NewIDs() []TypeId {
+	var newIDs []TypeId
+	if l.totalSent < len(l.tids) {
+		newIDs = l.tids[l.totalSent:]
+	}
+	l.totalSent = len(l.tids)
+	return newIDs
+}
+
+func newAnyLenList() *anyLenList {
+	return &anyLenList{
+		lens: make([]int, 0, anyLenListInitialSize),
+	}
+}
+
+type anyStartRef struct {
+	index  int // index into the anyLen list
+	marker int // position marker for the start of the any
+}
+
+type anyLenList struct {
+	lens      []int
+	totalSent int
+}
+
+func (l *anyLenList) StartAny(startMarker int) anyStartRef {
+	l.lens = append(l.lens, 0)
+	index := len(l.lens) - 1
+	return anyStartRef{
+		index:  index,
+		marker: startMarker + lenUint(uint64(index)),
+	}
+}
+
+func (l *anyLenList) FinishAny(start anyStartRef, endMarker int) {
+	l.lens[start.index] = endMarker - start.marker
+}
+
+func (l *anyLenList) Reset() error {
+	if l.totalSent != len(l.lens) {
+		return verror.New(errUnusedAnys, nil)
+	}
+	l.lens = l.lens[:0]
+	l.totalSent = 0
+	return nil
+}
+
+func (l *anyLenList) NewAnyLens() []int {
+	var newAnyLens []int
+	if l.totalSent < len(l.lens) {
+		newAnyLens = l.lens[l.totalSent:]
+	}
+	l.totalSent = len(l.lens)
+	return newAnyLens
 }

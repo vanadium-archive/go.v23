@@ -55,12 +55,8 @@ pkg vom, func NewTypeEncoder(io.Writer) *TypeEncoder
 pkg vom, func NewVersionedEncoder(Version, io.Writer) *Encoder
 pkg vom, func NewVersionedEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *Encoder
 pkg vom, func NewVersionedTypeEncoder(Version, io.Writer) *TypeEncoder
-pkg vom, func NewVersionedZEncoder(Version, io.Writer) *ZEncoder
-pkg vom, func NewVersionedZEncoderWithTypeEncoder(Version, io.Writer, *TypeEncoder) *ZEncoder
 pkg vom, func NewZDecoder(io.Reader) *ZDecoder
 pkg vom, func NewZDecoderWithTypeDecoder(io.Reader, *TypeDecoder) *ZDecoder
-pkg vom, func NewZEncoder(io.Writer) *ZEncoder
-pkg vom, func NewZEncoderWithTypeEncoder(io.Writer, *TypeEncoder) *ZEncoder
 pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VDLReadPrimitive(vdl.Decoder, *Primitive) error
@@ -81,9 +77,7 @@ pkg vom, method (*Dumper) Write([]byte) (int, error)
 pkg vom, method (*Encoder) Encode(interface{}) error
 pkg vom, method (*Encoder) Encoder() vdl.Encoder
 pkg vom, method (*RawBytes) Decoder() vdl.Decoder
-pkg vom, method (*RawBytes) FillVDLTarget(vdl.Target, *vdl.Type) error
 pkg vom, method (*RawBytes) IsNil() bool
-pkg vom, method (*RawBytes) MakeVDLTarget() vdl.Target
 pkg vom, method (*RawBytes) String() string
 pkg vom, method (*RawBytes) ToValue(interface{}) error
 pkg vom, method (*RawBytes) VDLEqual(interface{}) bool
@@ -94,9 +88,7 @@ pkg vom, method (*TypeDecoder) Start()
 pkg vom, method (*TypeDecoder) Stop()
 pkg vom, method (*TypeId) VDLRead(vdl.Decoder) error
 pkg vom, method (*Version) VDLRead(vdl.Decoder) error
-pkg vom, method (*ZDecoder) Decode(interface{}) error
 pkg vom, method (*ZDecoder) Ignore() error
-pkg vom, method (*ZEncoder) Encode(interface{}) error
 pkg vom, method (ControlKind) String() string
 pkg vom, method (ControlKind) VDLIsZero() bool
 pkg vom, method (ControlKind) VDLWrite(vdl.Encoder) error
@@ -201,6 +193,5 @@ pkg vom, type TypeEncoder struct
 pkg vom, type TypeId uint64
 pkg vom, type Version byte
 pkg vom, type ZDecoder struct
-pkg vom, type ZEncoder struct
 pkg vom, var ControlKindAll [...]ControlKind
 pkg vom, var DumpKindAll [...]DumpKind

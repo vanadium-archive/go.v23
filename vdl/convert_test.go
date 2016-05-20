@@ -1187,42 +1187,18 @@ func TestConverterError(t *testing.T) {
 		{ttIntegers, rtIntegers, vvFloat(1.5), rvFloat(1.5)},
 	}
 	for _, test := range tests {
-		for _, ttDst := range test.ttDst {
-			tname := fmt.Sprintf("ValueTarget(%v)", ttDst)
-			vvDst := vdl.ZeroValue(ttDst)
-			target, err := vdl.ValueTarget(vvDst)
-			if !vdl.ExpectErr(t, err, "", tname) {
-				continue
-			}
-			for _, vvSrc := range test.vvSrc {
-				if err := vdl.FromValue(target, vvSrc); err == nil {
-					t.Errorf("%s FromValue(%v) got %v, want error", tname, vvSrc.Type(), vvDst)
-				}
-			}
-			for _, src := range test.rvSrc {
-				rvSrc := reflect.ValueOf(src)
-				if err := vdl.FromReflect(target, rvSrc); err == nil {
-					t.Errorf("%s FromReflect(%v) got %v, want error", tname, rvSrc.Type(), vvDst)
-				}
-			}
-		}
 		for _, rtDst := range test.rtDst {
-			tname := fmt.Sprintf("ReflectTarget(%v)", rtDst)
 			rvDst := reflect.New(rtDst)
-			target, err := vdl.ReflectTarget(rvDst)
-			if !vdl.ExpectErr(t, err, "", tname) {
-				continue
-			}
 			got := rvDst.Elem().Interface()
 			for _, vvSrc := range test.vvSrc {
-				if err := vdl.FromValue(target, vvSrc); err == nil {
-					t.Errorf("%s FromValue(%v) got %v, want error", tname, vvSrc.Type(), got)
+				if err := vdl.ConvertReflect(rvDst, reflect.ValueOf(vvSrc)); err == nil {
+					t.Errorf("%s ConvertReflect(%v, %v), want error", rvDst.Type(), vvSrc.Type(), got)
 				}
 			}
 			for _, src := range test.rvSrc {
 				rvSrc := reflect.ValueOf(src)
-				if err := vdl.FromReflect(target, rvSrc); err == nil {
-					t.Errorf("%s FromReflect(%v) got %v, want error", tname, rvSrc.Type(), got)
+				if err := vdl.ConvertReflect(rvDst, rvSrc); err == nil {
+					t.Errorf("%s FromReflect(%v, %v), want error", rvDst.Type(), rvSrc.Type(), got)
 				}
 			}
 		}

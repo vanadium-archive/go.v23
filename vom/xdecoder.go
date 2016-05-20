@@ -94,11 +94,6 @@ func (d *xDecoder) IgnoreNextStartValue() {
 }
 
 func (d *xDecoder) decodeWireType(wt *wireType) (TypeId, error) {
-	// TODO(toddw): Flip useOldDecoder=false to enable Decoder.
-	const useOldDecoder = false
-	if useOldDecoder {
-		return d.old.decodeWireType(wt)
-	}
 	// Type messages are just a regularly encoded wireType, which is a union.  To
 	// decode we pre-populate the stack with an entry for the wire type, and run
 	// the code-generated __VDLRead_wireType method.

@@ -16,6 +16,7 @@ var (
 	errEmptyPipeStack        = errors.New("vdl: empty pipe stack")
 	errEncCallDuringDecPhase = errors.New("vdl: pipe encoder method called during decode phase")
 	errInvalidPipeState      = errors.New("vdl: invalid pipe state")
+	errIncompatibleTypes     = errors.New("vdl: incompatible types")
 )
 
 func convertPipe(dst, src interface{}) error {
@@ -314,14 +315,10 @@ func (d *pipeDecoder) StartValue(want *Type) error {
 	// Check compatibility between the actual type and the want type.  Since
 	// compatibility applies to the entire static type, we only need to perform
 	// this check for top-level decoded values, and subsequently for decoded any
-	// values.  We skip checking non-composite want types, since those will be
-	// naturally caught by the Decode* calls anyways.
+	// values.
 	if len(d.Enc.Stack) == 1 || d.IsAny() {
-		switch want.Kind() {
-		case Optional, Array, List, Set, Map, Struct, Union:
-			if !Compatible2(d.Type(), want) {
-				return d.Enc.closeLocked(fmt.Errorf("vdl: pipe incompatible decode from %v into %v", d.Type(), want))
-			}
+		if !Compatible2(d.Type(), want) {
+			return d.Enc.closeLocked(fmt.Errorf("vdl: pipe incompatible decode from %v into %v", d.Type(), want))
 		}
 	}
 	if got, want := top.NextOp, pipeStartDec; got != want {
