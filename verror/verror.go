@@ -298,26 +298,17 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			if id, err := dec.DecodeString(); err != nil {
-				return err
-			} else {
-				x.ID = ID(id)
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		case "RetryCode":
-			if err := dec.StartValue(ttWireRetryCode); err != nil {
-				return err
-			}
-			label, err := dec.DecodeString()
+			id, err := dec.ReadValueString()
 			if err != nil {
 				return err
 			}
-			switch label {
+			x.ID = ID(id)
+		case "RetryCode":
+			code, err := dec.ReadValueString()
+			if err != nil {
+				return err
+			}
+			switch code {
 			case "NoRetry":
 				x.Action = NoRetry
 			case "RetryConnection":
@@ -327,22 +318,14 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 			case "RetryBackoff":
 				x.Action = RetryBackoff
 			default:
-				return fmt.Errorf("label %s not in enum WireRetryCode", label)
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+				return fmt.Errorf("label %s not in enum WireRetryCode", code)
 			}
 		case "Msg":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			msg, err := dec.ReadValueString()
+			if err != nil {
 				return err
 			}
-			var err error
-			if x.Msg, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
+			x.Msg = msg
 		case "ParamList":
 			if err := dec.StartValue(ttListAny); err != nil {
 				return err

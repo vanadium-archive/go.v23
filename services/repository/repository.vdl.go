@@ -94,26 +94,18 @@ func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Type":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Type, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Type = value
 			}
 		case "Encoding":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Encoding, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Encoding = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

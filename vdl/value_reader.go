@@ -90,11 +90,12 @@ func (vv *Value) readFromNil(dec Decoder) error {
 
 func (vv *Value) readNonNilValue(dec Decoder) error {
 	if vv.Type().IsBytes() {
+		var val []byte
 		fixedLen := -1
 		if vv.Kind() == Array {
 			fixedLen = vv.Type().Len()
+			val = make([]byte, fixedLen)
 		}
-		var val []byte
 		if err := dec.DecodeBytes(fixedLen, &val); err != nil {
 			return err
 		}

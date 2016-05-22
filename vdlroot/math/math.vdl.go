@@ -83,28 +83,18 @@ func (x *Complex64) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Real":
-			if err := dec.StartValue(vdl.Float32Type); err != nil {
+			switch value, err := dec.ReadValueFloat(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeFloat(32)
-			if err != nil {
-				return err
-			}
-			x.Real = float32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Real = float32(value)
 			}
 		case "Imag":
-			if err := dec.StartValue(vdl.Float32Type); err != nil {
+			switch value, err := dec.ReadValueFloat(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeFloat(32)
-			if err != nil {
-				return err
-			}
-			x.Imag = float32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Imag = float32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -181,26 +171,18 @@ func (x *Complex128) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Real":
-			if err := dec.StartValue(vdl.Float64Type); err != nil {
+			switch value, err := dec.ReadValueFloat(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Real, err = dec.DecodeFloat(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Real = value
 			}
 		case "Imag":
-			if err := dec.StartValue(vdl.Float64Type); err != nil {
+			switch value, err := dec.ReadValueFloat(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Imag, err = dec.DecodeFloat(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Imag = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

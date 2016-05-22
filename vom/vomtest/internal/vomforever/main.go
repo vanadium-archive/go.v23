@@ -16,11 +16,11 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"v.io/x/lib/textutil"
 
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/vdltest"
 	"v.io/v23/vom"
+	"v.io/x/lib/textutil"
 	"v.io/x/ref/lib/vdl/codegen/vdlgen"
 )
 
@@ -98,9 +98,9 @@ func run(entry entry, mode mode) {
 	fmt.Printf("Testing %v\n", entry.Value)
 	switch mode {
 	case reflect:
-		buildAndRunFromVdlFile(entry.Value, entry.Types, []string{"-skip-gen-old-target", "-skip-gen-write-read"})
+		buildAndRunFromVdlFile(entry.Value, entry.Types, []string{"-skip-go-methods"})
 	case generated:
-		buildAndRunFromVdlFile(entry.Value, entry.Types, []string{"-skip-gen-old-target"})
+		buildAndRunFromVdlFile(entry.Value, entry.Types, nil)
 	case vdlValue:
 		runVdlValue(entry.Value)
 	}

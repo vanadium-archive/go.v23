@@ -93,17 +93,15 @@ func (x WireRetryCode) VDLWrite(enc Encoder) error {
 }
 
 func (x *WireRetryCode) VDLRead(dec Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // WireError is the wire representation for the built-in error type.  Errors and
@@ -233,30 +231,27 @@ func (x *WireError) VDLRead(dec Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := dec.StartValue(StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Id, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Id = value
 			}
 		case "RetryCode":
-			if err := x.RetryCode.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.RetryCode.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Msg":
-			if err := dec.StartValue(StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Msg, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Msg = value
 			}
 		case "ParamList":
 			if err := __VDLReadAnon_list_1(dec, &x.ParamList); err != nil {
@@ -274,10 +269,9 @@ func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
 	if err := dec.StartValue(__VDLType_list_3); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]*Value, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -286,13 +280,14 @@ func __VDLReadAnon_list_1(dec Decoder, x *[]*Value) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem *Value
+			elem = new(Value)
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem *Value
-		elem = new(Value)
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 

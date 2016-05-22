@@ -91,26 +91,18 @@ func (x *LogEntry) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Position":
-			if err := dec.StartValue(vdl.Int64Type); err != nil {
+			switch value, err := dec.ReadValueInt(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Position, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Position = value
 			}
 		case "Line":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Line, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Line = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

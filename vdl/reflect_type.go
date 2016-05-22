@@ -421,6 +421,8 @@ func makeUnnamedFromReflectLocked(ri *reflectInfo, builder *TypeBuilder, pending
 var (
 	errTypeFromReflectValue = errors.New("invalid vdl.TypeOf(reflect.Value{})")
 
+	ttByteList = ListType(ByteType)
+
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtBool               = reflect.TypeOf(false)
 	rtByte               = reflect.TypeOf(byte(0))

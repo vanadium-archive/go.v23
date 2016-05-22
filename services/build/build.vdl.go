@@ -92,17 +92,15 @@ func (x Architecture) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Architecture) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // Format specifies the file format of a host.
@@ -174,17 +172,15 @@ func (x Format) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Format) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_2); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // OperatingSystem specifies the operating system of a host.
@@ -262,17 +258,15 @@ func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *OperatingSystem) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_3); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // File records the name and contents of a file.
@@ -348,24 +342,14 @@ func (x *File) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Contents":
-			if err := dec.StartValue(__VDLType_list_5); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &x.Contents); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
+			if err := dec.ReadValueBytes(-1, &x.Contents); err != nil {
 				return err
 			}
 		default:

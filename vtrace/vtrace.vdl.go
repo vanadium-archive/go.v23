@@ -102,15 +102,11 @@ func (x *Annotation) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Message":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Message, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Message = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -265,23 +261,21 @@ func (x *SpanRecord) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := x.Id.VDLRead(dec); err != nil {
+			bytes := x.Id[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "Parent":
-			if err := x.Parent.VDLRead(dec); err != nil {
+			bytes := x.Parent[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Start":
 			var wire vdltime.Time
@@ -315,10 +309,9 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Annotation) error {
 	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]Annotation, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -327,12 +320,13 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Annotation) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem Annotation
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem Annotation
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -417,7 +411,8 @@ func (x *TraceRecord) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := x.Id.VDLRead(dec); err != nil {
+			bytes := x.Id[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "Spans":
@@ -436,10 +431,9 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]SpanRecord) error {
 	if err := dec.StartValue(__VDLType_list_7); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]SpanRecord, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -448,12 +442,13 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]SpanRecord) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem SpanRecord
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem SpanRecord
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -479,15 +474,13 @@ func (x TraceFlags) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *TraceFlags) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_int32_8); err != nil {
+	switch value, err := dec.ReadValueInt(32); {
+	case err != nil:
 		return err
+	default:
+		*x = TraceFlags(value)
 	}
-	tmp, err := dec.DecodeInt(32)
-	if err != nil {
-		return err
-	}
-	*x = TraceFlags(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 // Request is the object that carries trace informtion between processes.
@@ -569,28 +562,28 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "SpanId":
-			if err := x.SpanId.VDLRead(dec); err != nil {
+			bytes := x.SpanId[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "TraceId":
-			if err := x.TraceId.VDLRead(dec); err != nil {
+			bytes := x.TraceId[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "Flags":
-			if err := x.Flags.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
+			default:
+				x.Flags = TraceFlags(value)
 			}
 		case "LogLevel":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.LogLevel = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.LogLevel = int32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -664,8 +657,11 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Flags":
-			if err := x.Flags.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
+			default:
+				x.Flags = TraceFlags(value)
 			}
 		case "Trace":
 			if err := x.Trace.VDLRead(dec); err != nil {

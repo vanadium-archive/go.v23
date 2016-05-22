@@ -99,27 +99,18 @@ func (x *Duration) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Seconds":
-			if err := dec.StartValue(vdl.Int64Type); err != nil {
+			switch value, err := dec.ReadValueInt(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Seconds, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Seconds = value
 			}
 		case "Nanos":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Nanos = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Nanos = int32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -210,27 +201,18 @@ func (x *Time) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Seconds":
-			if err := dec.StartValue(vdl.Int64Type); err != nil {
+			switch value, err := dec.ReadValueInt(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Seconds, err = dec.DecodeInt(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Seconds = value
 			}
 		case "Nanos":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Nanos = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Nanos = int32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

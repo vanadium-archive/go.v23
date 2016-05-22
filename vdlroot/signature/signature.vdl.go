@@ -99,37 +99,25 @@ func (x *Embed) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "PkgPath":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.PkgPath, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.PkgPath = value
 			}
 		case "Doc":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Doc, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Doc = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -226,37 +214,25 @@ func (x *Arg) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Doc":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Doc, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Doc = value
 			}
 		case "Type":
-			if err := dec.StartValue(vdl.TypeObjectType); err != nil {
+			switch value, err := dec.ReadValueTypeObject(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Type, err = dec.DecodeTypeObject(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Type = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -453,26 +429,18 @@ func (x *Method) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Doc":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Doc, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Doc = value
 			}
 		case "InArgs":
 			if err := __VDLReadAnon_list_1(dec, &x.InArgs); err != nil {
@@ -530,10 +498,9 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Arg) error {
 	if err := dec.StartValue(__VDLType_list_4); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]Arg, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -542,12 +509,13 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]Arg) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem Arg
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem Arg
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -555,10 +523,9 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]*vdl.Value) error {
 	if err := dec.StartValue(__VDLType_list_6); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]*vdl.Value, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -567,13 +534,14 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]*vdl.Value) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem *vdl.Value
+			elem = new(vdl.Value)
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem *vdl.Value
-		elem = new(vdl.Value)
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -734,37 +702,25 @@ func (x *Interface) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "PkgPath":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.PkgPath, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.PkgPath = value
 			}
 		case "Doc":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Doc, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Doc = value
 			}
 		case "Embeds":
 			if err := __VDLReadAnon_list_3(dec, &x.Embeds); err != nil {
@@ -786,10 +742,9 @@ func __VDLReadAnon_list_3(dec vdl.Decoder, x *[]Embed) error {
 	if err := dec.StartValue(__VDLType_list_8); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]Embed, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -798,12 +753,13 @@ func __VDLReadAnon_list_3(dec vdl.Decoder, x *[]Embed) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem Embed
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem Embed
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -811,10 +767,9 @@ func __VDLReadAnon_list_4(dec vdl.Decoder, x *[]Method) error {
 	if err := dec.StartValue(__VDLType_list_9); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]Method, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -823,12 +778,13 @@ func __VDLReadAnon_list_4(dec vdl.Decoder, x *[]Method) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem Method
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem Method
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 

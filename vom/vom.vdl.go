@@ -86,17 +86,15 @@ func (x ControlKind) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *ControlKind) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 type (
@@ -368,87 +366,67 @@ func VDLReadPrimitive(dec vdl.Decoder, x *Primitive) error {
 	switch f {
 	case "PBool":
 		var field PrimitivePBool
-		if err := dec.StartValue(vdl.BoolType); err != nil {
+		switch value, err := dec.ReadValueBool(); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeBool(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "PByte":
 		var field PrimitivePByte
-		if err := dec.StartValue(vdl.ByteType); err != nil {
+		switch value, err := dec.ReadValueUint(8); {
+		case err != nil:
 			return err
-		}
-		tmp, err := dec.DecodeUint(8)
-		if err != nil {
-			return err
-		}
-		field.Value = byte(tmp)
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = byte(value)
 		}
 		*x = field
 	case "PUint":
 		var field PrimitivePUint
-		if err := dec.StartValue(vdl.Uint64Type); err != nil {
+		switch value, err := dec.ReadValueUint(64); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeUint(64); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "PInt":
 		var field PrimitivePInt
-		if err := dec.StartValue(vdl.Int64Type); err != nil {
+		switch value, err := dec.ReadValueInt(64); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeInt(64); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "PFloat":
 		var field PrimitivePFloat
-		if err := dec.StartValue(vdl.Float64Type); err != nil {
+		switch value, err := dec.ReadValueFloat(64); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeFloat(64); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "PString":
 		var field PrimitivePString
-		if err := dec.StartValue(vdl.StringType); err != nil {
+		switch value, err := dec.ReadValueString(); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "PControl":
 		var field PrimitivePControl
-		if err := field.Value.VDLRead(dec); err != nil {
+		switch value, err := dec.ReadValueString(); {
+		case err != nil:
 			return err
+		default:
+			if err := field.Value.Set(value); err != nil {
+				return err
+			}
 		}
 		*x = field
 	case "":
@@ -606,17 +584,15 @@ func (x DumpKind) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *DumpKind) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_3); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // DumpAtom describes a single indivisible piece of the vom encoding.  The vom
@@ -719,17 +695,16 @@ func (x *DumpAtom) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Kind":
-			if err := x.Kind.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.Kind.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Bytes":
-			if err := dec.StartValue(__VDLType_list_5); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &x.Bytes); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
+			if err := dec.ReadValueBytes(-1, &x.Bytes); err != nil {
 				return err
 			}
 		case "Data":
@@ -737,15 +712,11 @@ func (x *DumpAtom) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Debug":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Debug, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Debug = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -778,15 +749,13 @@ func (x Version) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Version) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_byte_6); err != nil {
+	switch value, err := dec.ReadValueUint(8); {
+	case err != nil:
 		return err
+	default:
+		*x = Version(value)
 	}
-	tmp, err := dec.DecodeUint(8)
-	if err != nil {
-		return err
-	}
-	*x = Version(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 // TypeId uniquely identifies a type definition within a vom stream.
@@ -812,15 +781,13 @@ func (x TypeId) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *TypeId) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_uint64_7); err != nil {
+	switch value, err := dec.ReadValueUint(64); {
+	case err != nil:
 		return err
+	default:
+		*x = TypeId(value)
 	}
-	tmp, err := dec.DecodeUint(64)
-	if err != nil {
-		return err
-	}
-	*x = TypeId(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 // wireNamed represents a type definition for named primitives.
@@ -884,19 +851,18 @@ func (x *wireNamed) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Base":
-			if err := x.Base.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Base = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1000,15 +966,11 @@ func (x *wireEnum) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Labels":
 			if err := __VDLReadAnon_list_1(dec, &x.Labels); err != nil {
@@ -1026,31 +988,20 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 	if err := dec.StartValue(__VDLType_list_10); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]string, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, elem)
 		}
-		var elem string
-		if err := dec.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		var err error
-		if elem, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -1130,30 +1081,25 @@ func (x *wireArray) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Elem":
-			if err := x.Elem.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Elem = TypeId(value)
 			}
 		case "Len":
-			if err := dec.StartValue(vdl.Uint64Type); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Len, err = dec.DecodeUint(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Len = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1224,19 +1170,18 @@ func (x *wireList) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Elem":
-			if err := x.Elem.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Elem = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1307,19 +1252,18 @@ func (x *wireSet) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Key":
-			if err := x.Key.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Key = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1399,23 +1343,25 @@ func (x *wireMap) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Key":
-			if err := x.Key.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Key = TypeId(value)
 			}
 		case "Elem":
-			if err := x.Elem.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Elem = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1486,19 +1432,18 @@ func (x *wireField) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Type":
-			if err := x.Type.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Type = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1596,15 +1541,11 @@ func (x *wireStruct) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Fields":
 			if err := __VDLReadAnon_list_2(dec, &x.Fields); err != nil {
@@ -1622,10 +1563,9 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]wireField) error {
 	if err := dec.StartValue(__VDLType_list_17); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]wireField, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -1634,12 +1574,13 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]wireField) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem wireField
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem wireField
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -1710,15 +1651,11 @@ func (x *wireUnion) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Fields":
 			if err := __VDLReadAnon_list_2(dec, &x.Fields); err != nil {
@@ -1793,19 +1730,18 @@ func (x *wireOptional) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Elem":
-			if err := x.Elem.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
+			default:
+				x.Elem = TypeId(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

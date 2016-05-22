@@ -262,24 +262,20 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]security.BlessingPattern) error 
 	if err := dec.StartValue(__VDLType_list_2); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]security.BlessingPattern, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, security.BlessingPattern(elem))
 		}
-		var elem security.BlessingPattern
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -287,31 +283,20 @@ func __VDLReadAnon_list_2(dec vdl.Decoder, x *[]string) error {
 	if err := dec.StartValue(__VDLType_list_3); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]string, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, elem)
 		}
-		var elem string
-		if err := dec.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		var err error
-		if elem, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -372,36 +357,22 @@ func (x *Permissions) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(Permissions, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem AccessList
-		{
+		default:
+			var elem AccessList
 			if err := elem.VDLRead(dec); err != nil {
 				return err
 			}
+			if tmpMap == nil {
+				tmpMap = make(Permissions)
+			}
+			tmpMap[key] = elem
 		}
-		if tmpMap == nil {
-			tmpMap = make(Permissions)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -432,15 +403,13 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_string_6); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		*x = Tag(value)
 	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = Tag(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 //////////////////////////////////////////////////

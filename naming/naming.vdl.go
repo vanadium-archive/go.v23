@@ -42,15 +42,13 @@ func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *MountFlag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_uint32_1); err != nil {
+	switch value, err := dec.ReadValueUint(32); {
+	case err != nil:
 		return err
+	default:
+		*x = MountFlag(value)
 	}
-	tmp, err := dec.DecodeUint(32)
-	if err != nil {
-		return err
-	}
-	*x = MountFlag(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 // MountedServer represents a server mounted on a specific name.
@@ -126,15 +124,11 @@ func (x *MountedServer) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Server":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Server, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Server = value
 			}
 		case "Deadline":
 			var wire vdltime.WireDeadline
@@ -280,41 +274,29 @@ func (x *MountEntry) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Servers":
 			if err := __VDLReadAnon_list_1(dec, &x.Servers); err != nil {
 				return err
 			}
 		case "ServesMountTable":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.ServesMountTable, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.ServesMountTable = value
 			}
 		case "IsLeaf":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.IsLeaf, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.IsLeaf = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -328,10 +310,9 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]MountedServer) error {
 	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]MountedServer, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -340,12 +321,13 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]MountedServer) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem MountedServer
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem MountedServer
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -413,15 +395,11 @@ func (x *GlobError) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "Error":
 			if err := verror.VDLRead(dec, &x.Error); err != nil {
@@ -649,15 +627,11 @@ func VDLReadGlobChildrenReply(dec vdl.Decoder, x *GlobChildrenReply) error {
 	switch f {
 	case "Name":
 		var field GlobChildrenReplyName
-		if err := dec.StartValue(vdl.StringType); err != nil {
+		switch value, err := dec.ReadValueString(); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "Error":

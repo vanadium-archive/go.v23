@@ -217,48 +217,32 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Suffix":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Suffix, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Suffix = value
 			}
 		case "Method":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Method, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Method = value
 			}
 		case "NumPosArgs":
-			if err := dec.StartValue(vdl.Uint64Type); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.NumPosArgs, err = dec.DecodeUint(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.NumPosArgs = value
 			}
 		case "EndStreamArgs":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.EndStreamArgs, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.EndStreamArgs = value
 			}
 		case "Deadline":
 			var wire vdltime.WireDeadline
@@ -281,15 +265,11 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Language":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Language, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Language = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -431,41 +411,29 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "EndStreamResults":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.EndStreamResults, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.EndStreamResults = value
 			}
 		case "NumPosResults":
-			if err := dec.StartValue(vdl.Uint64Type); err != nil {
+			switch value, err := dec.ReadValueUint(64); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.NumPosResults, err = dec.DecodeUint(64); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.NumPosResults = value
 			}
 		case "TraceResponse":
 			if err := x.TraceResponse.VDLRead(dec); err != nil {
 				return err
 			}
 		case "AckBlessings":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.AckBlessings, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.AckBlessings = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

@@ -88,43 +88,25 @@ func (x *Config) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(Config, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
+		default:
+			var elem string
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
+				return err
+			default:
+				elem = value
+			}
+			if tmpMap == nil {
+				tmpMap = make(Config)
+			}
+			tmpMap[key] = elem
 		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if elem, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(Config)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -192,17 +174,15 @@ func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *InstallationState) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_2); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // InstanceState describes the states that an instance can be in at any
@@ -293,17 +273,15 @@ func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *InstanceState) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_3); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // InstanceStatus specifies the Status returned by the Application Status method
@@ -368,19 +346,20 @@ func (x *InstanceStatus) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "State":
-			if err := x.State.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.State.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Version":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Version, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Version = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -452,19 +431,20 @@ func (x *InstallationStatus) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "State":
-			if err := x.State.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.State.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Version":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Version, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Version = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -536,19 +516,20 @@ func (x *DeviceStatus) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "State":
-			if err := x.State.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.State.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Version":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Version, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Version = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -783,13 +764,7 @@ func VDLReadBlessServerMessage(dec vdl.Decoder, x *BlessServerMessage) error {
 	switch f {
 	case "InstancePublicKey":
 		var field BlessServerMessageInstancePublicKey
-		if err := dec.StartValue(__VDLType_list_8); err != nil {
-			return err
-		}
-		if err := dec.DecodeBytes(-1, &field.Value); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
+		if err := dec.ReadValueBytes(-1, &field.Value); err != nil {
 			return err
 		}
 		*x = field
@@ -1005,30 +980,18 @@ func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[string]struct{}) error {
 		tmpMap = make(map[string]struct{}, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
+		default:
+			if tmpMap == nil {
+				tmpMap = make(map[string]struct{})
 			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
+			tmpMap[key] = struct{}{}
 		}
-		if tmpMap == nil {
-			tmpMap = make(map[string]struct{})
-		}
-		tmpMap[key] = struct{}{}
 	}
 }
 
@@ -1100,26 +1063,18 @@ func (x *Association) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "IdentityName":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.IdentityName, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.IdentityName = value
 			}
 		case "AccountName":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.AccountName, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.AccountName = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

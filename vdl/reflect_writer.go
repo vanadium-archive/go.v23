@@ -40,8 +40,6 @@ func Write(enc Encoder, v interface{}) error {
 	return writeReflect(enc, rv, tt)
 }
 
-var ttBytes = ListType(ByteType)
-
 func writeNonReflect(enc Encoder, v interface{}) error {
 	switch x := v.(type) {
 	case Writer:
@@ -52,7 +50,7 @@ func writeNonReflect(enc Encoder, v interface{}) error {
 		// Cases after this point are purely performance optimizations.
 		// TODO(toddw): Handle other common cases.
 	case []byte:
-		if err := enc.StartValue(ttBytes); err != nil {
+		if err := enc.StartValue(ttByteList); err != nil {
 			return err
 		}
 		if err := enc.EncodeBytes(x); err != nil {

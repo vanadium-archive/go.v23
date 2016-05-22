@@ -39,14 +39,11 @@ func (x AdId) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *AdId) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_array_1); err != nil {
-		return err
-	}
 	bytes := x[:]
-	if err := dec.DecodeBytes(16, &bytes); err != nil {
+	if err := dec.ReadValueBytes(16, &bytes); err != nil {
 		return err
 	}
-	return dec.FinishValue()
+	return nil
 }
 
 // Attributes represents service attributes as a key/value pair.
@@ -106,43 +103,25 @@ func (x *Attributes) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(Attributes, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
+		default:
+			var elem string
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
+				return err
+			default:
+				elem = value
+			}
+			if tmpMap == nil {
+				tmpMap = make(Attributes)
+			}
+			tmpMap[key] = elem
 		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if elem, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(Attributes)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -203,42 +182,22 @@ func (x *Attachments) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(Attachments, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
+		default:
+			var elem []byte
+			if err := dec.ReadValueBytes(-1, &elem); err != nil {
+				return err
+			}
+			if tmpMap == nil {
+				tmpMap = make(Attachments)
+			}
+			tmpMap[key] = elem
 		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem []byte
-		{
-			if err := dec.StartValue(__VDLType_list_4); err != nil {
-				return err
-			}
-			if err := dec.DecodeBytes(-1, &elem); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(Attachments)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -400,19 +359,16 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Id":
-			if err := x.Id.VDLRead(dec); err != nil {
+			bytes := x.Id[:]
+			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
 		case "InterfaceName":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.InterfaceName, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.InterfaceName = value
 			}
 		case "Addresses":
 			if err := __VDLReadAnon_list_1(dec, &x.Addresses); err != nil {
@@ -438,31 +394,20 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 	if err := dec.StartValue(__VDLType_list_6); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]string, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, elem)
 		}
-		var elem string
-		if err := dec.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		var err error
-		if elem, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 

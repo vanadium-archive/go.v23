@@ -40,15 +40,13 @@ func (x VNumber) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *VNumber) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_int32_1); err != nil {
+	switch value, err := dec.ReadValueInt(32); {
+	case err != nil:
 		return err
+	default:
+		*x = VNumber(value)
 	}
-	tmp, err := dec.DecodeInt(32)
-	if err != nil {
-		return err
-	}
-	*x = VNumber(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 type VString string
@@ -73,15 +71,13 @@ func (x VString) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *VString) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_string_2); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		*x = VString(value)
 	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = VString(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 type VEnum int
@@ -152,17 +148,15 @@ func (x VEnum) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *VEnum) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_3); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 type VByteList []byte
@@ -187,15 +181,12 @@ func (x VByteList) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *VByteList) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_list_4); err != nil {
-		return err
-	}
 	var bytes []byte
-	if err := dec.DecodeBytes(-1, &bytes); err != nil {
+	if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 		return err
 	}
 	*x = bytes
-	return dec.FinishValue()
+	return nil
 }
 
 type VByteArray [3]byte
@@ -220,14 +211,11 @@ func (x VByteArray) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *VByteArray) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_array_5); err != nil {
-		return err
-	}
 	bytes := x[:]
-	if err := dec.DecodeBytes(3, &bytes); err != nil {
+	if err := dec.ReadValueBytes(3, &bytes); err != nil {
 		return err
 	}
-	return dec.FinishValue()
+	return nil
 }
 
 type VArray [3]int32
@@ -269,29 +257,23 @@ func (x *VArray) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_array_6); err != nil {
 		return err
 	}
-	index := 0
-	for {
-		switch done, err := dec.NextEntry(); {
+	for index := 0; index < 3; index++ {
+		switch done, elem, err := dec.NextEntryValueInt(32); {
 		case err != nil:
 			return err
-		case done != (index >= len(*x)):
-			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %T)", done, index, len(*x), *x)
 		case done:
-			return dec.FinishValue()
+			return fmt.Errorf("short array, got len %d < 3 %T)", index, *x)
+		default:
+			x[index] = int32(elem)
 		}
-		if err := dec.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		tmp, err := dec.DecodeInt(32)
-		if err != nil {
-			return err
-		}
-		x[index] = int32(tmp)
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		index++
 	}
+	switch done, err := dec.NextEntry(); {
+	case err != nil:
+		return err
+	case !done:
+		return fmt.Errorf("long array, got len > 3 %T", *x)
+	}
+	return dec.FinishValue()
 }
 
 type VList []int32
@@ -336,32 +318,20 @@ func (x *VList) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_list_7); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make(VList, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueInt(32); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, int32(elem))
 		}
-		var elem int32
-		if err := dec.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		tmp, err := dec.DecodeInt(32)
-		if err != nil {
-			return err
-		}
-		elem = int32(tmp)
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -407,10 +377,9 @@ func (x *VListAny) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_list_8); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make(VListAny, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -419,13 +388,14 @@ func (x *VListAny) VDLRead(dec vdl.Decoder) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem *vom.RawBytes
+			elem = new(vom.RawBytes)
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem *vom.RawBytes
-		elem = new(vom.RawBytes)
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -476,30 +446,18 @@ func (x *VSet) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(VSet, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
+		default:
+			if tmpMap == nil {
+				tmpMap = make(VSet)
 			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
+			tmpMap[key] = struct{}{}
 		}
-		if tmpMap == nil {
-			tmpMap = make(VSet)
-		}
-		tmpMap[key] = struct{}{}
 	}
 }
 
@@ -559,43 +517,25 @@ func (x *VMap) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(VMap, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
+		default:
+			var elem bool
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
+				return err
+			default:
+				elem = value
+			}
+			if tmpMap == nil {
+				tmpMap = make(VMap)
+			}
+			tmpMap[key] = elem
 		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem bool
-		{
-			if err := dec.StartValue(vdl.BoolType); err != nil {
-				return err
-			}
-			var err error
-			if elem, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(VMap)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -680,38 +620,25 @@ func (x *VSmallStruct) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "A":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.A = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.A = int32(value)
 			}
 		case "B":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.B, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.B = value
 			}
 		case "C":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.C, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.C = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -1507,604 +1434,354 @@ func (x *VLargeStruct) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "F1":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F1 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F1 = int32(value)
 			}
 		case "F2":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F2 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F2 = int32(value)
 			}
 		case "F3":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F3 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F3 = int32(value)
 			}
 		case "F4":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F4 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F4 = int32(value)
 			}
 		case "F5":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F5 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F5 = int32(value)
 			}
 		case "F6":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F6 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F6 = int32(value)
 			}
 		case "F7":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F7 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F7 = int32(value)
 			}
 		case "F8":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F8 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F8 = int32(value)
 			}
 		case "F9":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F9 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F9 = int32(value)
 			}
 		case "F10":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F10 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F10 = int32(value)
 			}
 		case "F11":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F11 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F11 = int32(value)
 			}
 		case "F12":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F12 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F12 = int32(value)
 			}
 		case "F13":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F13 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F13 = int32(value)
 			}
 		case "F14":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F14 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F14 = int32(value)
 			}
 		case "F15":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F15 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F15 = int32(value)
 			}
 		case "F16":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F16 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F16 = int32(value)
 			}
 		case "F17":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F17 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F17 = int32(value)
 			}
 		case "F18":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F18 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F18 = int32(value)
 			}
 		case "F19":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F19 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F19 = int32(value)
 			}
 		case "F20":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F20 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F20 = int32(value)
 			}
 		case "F21":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F21 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F21 = int32(value)
 			}
 		case "F22":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F22 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F22 = int32(value)
 			}
 		case "F23":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F23 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F23 = int32(value)
 			}
 		case "F24":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F24 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F24 = int32(value)
 			}
 		case "F25":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F25 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F25 = int32(value)
 			}
 		case "F26":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F26 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F26 = int32(value)
 			}
 		case "F27":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F27 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F27 = int32(value)
 			}
 		case "F28":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F28 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F28 = int32(value)
 			}
 		case "F29":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F29 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F29 = int32(value)
 			}
 		case "F30":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F30 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F30 = int32(value)
 			}
 		case "F31":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F31 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F31 = int32(value)
 			}
 		case "F32":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F32 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F32 = int32(value)
 			}
 		case "F33":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F33 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F33 = int32(value)
 			}
 		case "F34":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F34 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F34 = int32(value)
 			}
 		case "F35":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F35 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F35 = int32(value)
 			}
 		case "F36":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F36 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F36 = int32(value)
 			}
 		case "F37":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F37 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F37 = int32(value)
 			}
 		case "F38":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F38 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F38 = int32(value)
 			}
 		case "F39":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F39 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F39 = int32(value)
 			}
 		case "F40":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F40 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F40 = int32(value)
 			}
 		case "F41":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F41 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F41 = int32(value)
 			}
 		case "F42":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F42 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F42 = int32(value)
 			}
 		case "F43":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F43 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F43 = int32(value)
 			}
 		case "F44":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F44 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F44 = int32(value)
 			}
 		case "F45":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F45 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F45 = int32(value)
 			}
 		case "F46":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F46 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F46 = int32(value)
 			}
 		case "F47":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F47 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F47 = int32(value)
 			}
 		case "F48":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F48 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F48 = int32(value)
 			}
 		case "F49":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F49 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F49 = int32(value)
 			}
 		case "F50":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.F50 = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.F50 = int32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -2250,42 +1927,29 @@ func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 	switch f {
 	case "A":
 		var field VSmallUnionA
-		if err := dec.StartValue(vdl.Int32Type); err != nil {
+		switch value, err := dec.ReadValueInt(32); {
+		case err != nil:
 			return err
-		}
-		tmp, err := dec.DecodeInt(32)
-		if err != nil {
-			return err
-		}
-		field.Value = int32(tmp)
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = int32(value)
 		}
 		*x = field
 	case "B":
 		var field VSmallUnionB
-		if err := dec.StartValue(vdl.StringType); err != nil {
+		switch value, err := dec.ReadValueString(); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "C":
 		var field VSmallUnionC
-		if err := dec.StartValue(vdl.BoolType); err != nil {
+		switch value, err := dec.ReadValueBool(); {
+		case err != nil:
 			return err
-		}
-		var err error
-		if field.Value, err = dec.DecodeBool(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
+		default:
+			field.Value = value
 		}
 		*x = field
 	case "":

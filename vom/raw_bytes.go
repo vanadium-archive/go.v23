@@ -129,9 +129,16 @@ func (rb *RawBytes) Decoder() vdl.Decoder {
 		dec.refAnyLens.lens[i] = anyLen
 	}
 	xd := &xDecoder{old: dec}
-	if err := xd.setupValue(rb.Type, rb.Type); err != nil {
-		panic(err)
+	tt, lenHint, flag, err := xd.setupType(rb.Type, nil)
+	if err != nil {
+		panic(err) // TODO(toddw): Change this to not panic.
 	}
+	xd.stack = append(xd.stack, decoderStackEntry{
+		Type:    tt,
+		Index:   -1,
+		LenHint: lenHint,
+		Flag:    flag,
+	})
 	xd.ignoreNextStartValue = true
 	return xd
 }

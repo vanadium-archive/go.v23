@@ -168,7 +168,7 @@ pkg vdl, method (WireError) VDLWrite(Encoder) error
 pkg vdl, method (WireRetryCode) String() string
 pkg vdl, method (WireRetryCode) VDLIsZero() bool
 pkg vdl, method (WireRetryCode) VDLWrite(Encoder) error
-pkg vdl, type Decoder interface { DecodeBool, DecodeBytes, DecodeFloat, DecodeInt, DecodeString, DecodeTypeObject, DecodeUint, FinishValue, IgnoreNextStartValue, Index, IsAny, IsNil, IsOptional, LenHint, NextEntry, NextField, SkipValue, StartValue, Type }
+pkg vdl, type Decoder interface { DecodeBool, DecodeBytes, DecodeFloat, DecodeInt, DecodeString, DecodeTypeObject, DecodeUint, FinishValue, IgnoreNextStartValue, Index, IsAny, IsNil, IsOptional, LenHint, NextEntry, NextEntryValueBool, NextEntryValueFloat, NextEntryValueInt, NextEntryValueString, NextEntryValueTypeObject, NextEntryValueUint, NextField, ReadValueBool, ReadValueBytes, ReadValueFloat, ReadValueInt, ReadValueString, ReadValueTypeObject, ReadValueUint, SkipValue, StartValue, Type }
 pkg vdl, type Decoder interface, DecodeBool() (bool, error)
 pkg vdl, type Decoder interface, DecodeBytes(int, *[]byte) error
 pkg vdl, type Decoder interface, DecodeFloat(int) (float64, error)
@@ -184,7 +184,20 @@ pkg vdl, type Decoder interface, IsNil() bool
 pkg vdl, type Decoder interface, IsOptional() bool
 pkg vdl, type Decoder interface, LenHint() int
 pkg vdl, type Decoder interface, NextEntry() (bool, error)
+pkg vdl, type Decoder interface, NextEntryValueBool() (bool, bool, error)
+pkg vdl, type Decoder interface, NextEntryValueFloat(int) (bool, float64, error)
+pkg vdl, type Decoder interface, NextEntryValueInt(int) (bool, int64, error)
+pkg vdl, type Decoder interface, NextEntryValueString() (bool, string, error)
+pkg vdl, type Decoder interface, NextEntryValueTypeObject() (bool, *Type, error)
+pkg vdl, type Decoder interface, NextEntryValueUint(int) (bool, uint64, error)
 pkg vdl, type Decoder interface, NextField() (string, error)
+pkg vdl, type Decoder interface, ReadValueBool() (bool, error)
+pkg vdl, type Decoder interface, ReadValueBytes(int, *[]byte) error
+pkg vdl, type Decoder interface, ReadValueFloat(int) (float64, error)
+pkg vdl, type Decoder interface, ReadValueInt(int) (int64, error)
+pkg vdl, type Decoder interface, ReadValueString() (string, error)
+pkg vdl, type Decoder interface, ReadValueTypeObject() (*Type, error)
+pkg vdl, type Decoder interface, ReadValueUint(int) (uint64, error)
 pkg vdl, type Decoder interface, SkipValue() error
 pkg vdl, type Decoder interface, StartValue(*Type) error
 pkg vdl, type Decoder interface, Type() *Type

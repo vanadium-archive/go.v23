@@ -137,26 +137,18 @@ func (x *vdlEntry) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Label":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Label, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Label = value
 			}
 		case "ValueLabel":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.ValueLabel, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.ValueLabel = value
 			}
 		case "Value":
 			var readAny interface{}
@@ -165,30 +157,25 @@ func (x *vdlEntry) VDLRead(dec vdl.Decoder) error {
 			}
 			x.Value = readAny
 		case "Version":
-			if err := x.Version.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueUint(8); {
+			case err != nil:
 				return err
+			default:
+				x.Version = vom.Version(value)
 			}
 		case "HexType":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.HexType, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.HexType = value
 			}
 		case "HexValue":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.HexValue, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.HexValue = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

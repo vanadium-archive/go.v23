@@ -123,14 +123,37 @@ func (z zeroDecoder) LenHint() int               { return 0 }
 
 func (z zeroDecoder) DecodeBool() (bool, error)        { return false, nil }
 func (z zeroDecoder) DecodeString() (string, error)    { return "", nil }
-func (z zeroDecoder) DecodeTypeObject() (*Type, error) { return AnyType, nil }
 func (z zeroDecoder) DecodeUint(int) (uint64, error)   { return 0, nil }
 func (z zeroDecoder) DecodeInt(int) (int64, error)     { return 0, nil }
 func (z zeroDecoder) DecodeFloat(int) (float64, error) { return 0, nil }
-func (z zeroDecoder) DecodeBytes(fixedlen int, x *[]byte) error {
-	*x = (*x)[:0]
+func (z zeroDecoder) DecodeTypeObject() (*Type, error) { return AnyType, nil }
+func (z zeroDecoder) DecodeBytes(fixedLen int, x *[]byte) error {
+	if fixedLen >= 0 {
+		for i := 0; i < fixedLen; i++ {
+			(*x)[i] = 0
+		}
+	} else {
+		*x = nil
+	}
 	return nil
 }
+
+func (z zeroDecoder) ReadValueBool() (bool, error)               { return false, nil }
+func (z zeroDecoder) ReadValueString() (string, error)           { return "", nil }
+func (z zeroDecoder) ReadValueUint(bitlen int) (uint64, error)   { return 0, nil }
+func (z zeroDecoder) ReadValueInt(bitlen int) (int64, error)     { return 0, nil }
+func (z zeroDecoder) ReadValueFloat(bitlen int) (float64, error) { return 0, nil }
+func (z zeroDecoder) ReadValueTypeObject() (*Type, error)        { return AnyType, nil }
+func (z zeroDecoder) ReadValueBytes(fixedLen int, x *[]byte) error {
+	return z.DecodeBytes(fixedLen, x)
+}
+
+func (z zeroDecoder) NextEntryValueBool() (bool, bool, error)               { return true, false, nil }
+func (z zeroDecoder) NextEntryValueString() (bool, string, error)           { return true, "", nil }
+func (z zeroDecoder) NextEntryValueUint(bitlen int) (bool, uint64, error)   { return true, 0, nil }
+func (z zeroDecoder) NextEntryValueInt(bitlen int) (bool, int64, error)     { return true, 0, nil }
+func (z zeroDecoder) NextEntryValueFloat(bitlen int) (bool, float64, error) { return true, 0, nil }
+func (z zeroDecoder) NextEntryValueTypeObject() (bool, *Type, error)        { return true, nil, nil }
 
 var (
 	rvAnyType               = reflect.ValueOf(AnyType)

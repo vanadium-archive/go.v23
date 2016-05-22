@@ -54,15 +54,13 @@ func (x Tag) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_string_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		*x = Tag(value)
 	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = Tag(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 //////////////////////////////////////////////////

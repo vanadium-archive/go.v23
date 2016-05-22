@@ -381,3 +381,129 @@ func (d *valueDecoder) top() *vdStackEntry {
 	}
 	return nil
 }
+
+// The ReadValue* and NextEntryValue* methods just call methods in sequence.
+
+func (d *valueDecoder) ReadValueBool() (bool, error) {
+	if err := d.StartValue(BoolType); err != nil {
+		return false, err
+	}
+	value, err := d.DecodeBool()
+	if err != nil {
+		return false, err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueString() (string, error) {
+	if err := d.StartValue(StringType); err != nil {
+		return "", err
+	}
+	value, err := d.DecodeString()
+	if err != nil {
+		return "", err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueUint(bitlen int) (uint64, error) {
+	if err := d.StartValue(Uint64Type); err != nil {
+		return 0, err
+	}
+	value, err := d.DecodeUint(bitlen)
+	if err != nil {
+		return 0, err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueInt(bitlen int) (int64, error) {
+	if err := d.StartValue(Int64Type); err != nil {
+		return 0, err
+	}
+	value, err := d.DecodeInt(bitlen)
+	if err != nil {
+		return 0, err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueFloat(bitlen int) (float64, error) {
+	if err := d.StartValue(Float64Type); err != nil {
+		return 0, err
+	}
+	value, err := d.DecodeFloat(bitlen)
+	if err != nil {
+		return 0, err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueTypeObject() (*Type, error) {
+	if err := d.StartValue(TypeObjectType); err != nil {
+		return nil, err
+	}
+	value, err := d.DecodeTypeObject()
+	if err != nil {
+		return nil, err
+	}
+	return value, d.FinishValue()
+}
+
+func (d *valueDecoder) ReadValueBytes(fixedLen int, x *[]byte) error {
+	if err := d.StartValue(ttByteList); err != nil {
+		return err
+	}
+	if err := d.DecodeBytes(fixedLen, x); err != nil {
+		return err
+	}
+	return d.FinishValue()
+}
+
+func (d *valueDecoder) NextEntryValueBool() (done bool, _ bool, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, false, err
+	}
+	value, err := d.ReadValueBool()
+	return false, value, err
+}
+
+func (d *valueDecoder) NextEntryValueString() (done bool, _ string, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, "", err
+	}
+	value, err := d.ReadValueString()
+	return false, value, err
+}
+
+func (d *valueDecoder) NextEntryValueUint(bitlen int) (done bool, _ uint64, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, 0, err
+	}
+	value, err := d.ReadValueUint(bitlen)
+	return false, value, err
+}
+
+func (d *valueDecoder) NextEntryValueInt(bitlen int) (done bool, _ int64, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, 0, err
+	}
+	value, err := d.ReadValueInt(bitlen)
+	return false, value, err
+}
+
+func (d *valueDecoder) NextEntryValueFloat(bitlen int) (done bool, _ float64, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, 0, err
+	}
+	value, err := d.ReadValueFloat(bitlen)
+	return false, value, err
+}
+
+func (d *valueDecoder) NextEntryValueTypeObject() (done bool, _ *Type, _ error) {
+	if done, err := d.NextEntry(); done || err != nil {
+		return done, nil, err
+	}
+	value, err := d.ReadValueTypeObject()
+	return false, value, err
+}

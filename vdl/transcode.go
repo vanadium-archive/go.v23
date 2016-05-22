@@ -36,6 +36,7 @@ func transcodeNonNilValue(e Encoder, d Decoder) error {
 		fixedLen := -1
 		if d.Type().Kind() == Array {
 			fixedLen = d.Type().Len()
+			b = make([]byte, fixedLen)
 		}
 		if err := d.DecodeBytes(fixedLen, &b); err != nil {
 			return err

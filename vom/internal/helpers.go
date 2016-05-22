@@ -24,7 +24,9 @@ func vomEncode(b *testing.B, value interface{}) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vom.Encode(value)
+		if _, err := vom.Encode(value); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -39,7 +41,9 @@ func vomDecode(b *testing.B, tofill, value interface{}) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		vom.Decode(data, tofill)
+		if err := vom.Decode(data, tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -53,7 +57,9 @@ func vomEncodeMany(b *testing.B, value interface{}) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		enc.Encode(value)
+		if err := enc.Encode(value); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -69,16 +75,22 @@ func vomDecodeMany(b *testing.B, tofill, value interface{}) {
 	if err := enc.Encode(value); err != nil {
 		b.Fatal(err)
 	}
-	// Decode the type and value once first.
+	// Decode twice to read the type and two values.  We must read both values to
+	// ensure the decoder doesn't have any additional buffered data.
 	reader := bytes.NewReader(buf.Bytes())
 	dec := vom.NewDecoder(reader)
-	if err := dec.Decode(tofill); err != nil {
-		b.Fatal(err)
+	for i := 0; i < 2; i++ {
+		if err := dec.Decode(tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(valueOffset, 0)
-		dec.Decode(tofill)
+		// TODO(toddw): Change benchmark to create a new value each time.
+		if err := dec.Decode(tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -91,7 +103,9 @@ func gobEncode(b *testing.B, value interface{}) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		gob.NewEncoder(&buf).Encode(value)
+		if err := gob.NewEncoder(&buf).Encode(value); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -108,7 +122,9 @@ func gobDecode(b *testing.B, tofill, value interface{}) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(0, 0)
-		gob.NewDecoder(reader).Decode(tofill)
+		if err := gob.NewDecoder(reader).Decode(tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -123,7 +139,9 @@ func gobEncodeMany(b *testing.B, value interface{}) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
-		enc.Encode(value)
+		if err := enc.Encode(value); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -139,16 +157,21 @@ func gobDecodeMany(b *testing.B, tofill, value interface{}) {
 	if err := enc.Encode(value); err != nil {
 		b.Fatal(err)
 	}
-	// Decode the type and value once first.
+	// Decode twice to read the type and two values.  We must read both values to
+	// ensure the decoder doesn't have any additional buffered data.
 	reader := bytes.NewReader(buf.Bytes())
 	dec := gob.NewDecoder(reader)
-	if err := dec.Decode(tofill); err != nil {
-		b.Fatal(err)
+	for i := 0; i < 2; i++ {
+		if err := dec.Decode(tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(valueOffset, 0)
-		dec.Decode(tofill)
+		if err := dec.Decode(tofill); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 

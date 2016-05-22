@@ -97,28 +97,18 @@ func (x *Task) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Progress":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Progress = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Progress = int32(value)
 			}
 		case "Goal":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Goal = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Goal = int32(value)
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

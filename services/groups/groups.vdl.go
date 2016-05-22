@@ -53,15 +53,13 @@ func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_string_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		*x = BlessingPatternChunk(value)
 	}
-	tmp, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	*x = BlessingPatternChunk(tmp)
-	return dec.FinishValue()
+	return nil
 }
 
 type GetRequest struct {
@@ -196,23 +194,18 @@ func __VDLReadAnon_set_1(dec vdl.Decoder, x *map[BlessingPatternChunk]struct{}) 
 		tmpMap = make(map[BlessingPatternChunk]struct{}, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key BlessingPatternChunk
-		{
-			if err := key.VDLRead(dec); err != nil {
-				return err
+		default:
+			if tmpMap == nil {
+				tmpMap = make(map[BlessingPatternChunk]struct{})
 			}
+			tmpMap[BlessingPatternChunk(key)] = struct{}{}
 		}
-		if tmpMap == nil {
-			tmpMap = make(map[BlessingPatternChunk]struct{})
-		}
-		tmpMap[key] = struct{}{}
 	}
 }
 
@@ -283,17 +276,15 @@ func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_5); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // Approximation contains information about membership approximations made
@@ -364,26 +355,18 @@ func (x *Approximation) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Reason":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Reason, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Reason = value
 			}
 		case "Details":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Details, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Details = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

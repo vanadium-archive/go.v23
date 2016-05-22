@@ -90,15 +90,11 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "File":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.File, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.File = value
 			}
 		case "Signature":
 			if err := x.Signature.VDLRead(dec); err != nil {
@@ -179,36 +175,22 @@ func (x *Packages) VDLRead(dec vdl.Decoder) error {
 		tmpMap = make(Packages, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem SignedFile
-		{
+		default:
+			var elem SignedFile
 			if err := elem.VDLRead(dec); err != nil {
 				return err
 			}
+			if tmpMap == nil {
+				tmpMap = make(Packages)
+			}
+			tmpMap[key] = elem
 		}
-		if tmpMap == nil {
-			tmpMap = make(Packages)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -419,15 +401,11 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Title":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Title, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Title = value
 			}
 		case "Args":
 			if err := __VDLReadAnon_list_1(dec, &x.Args); err != nil {
@@ -454,16 +432,11 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "Restarts":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.Restarts = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Restarts = int32(value)
 			}
 		case "RestartTimeWindow":
 			var wire vdltime.Duration
@@ -485,31 +458,20 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]string) error {
 	if err := dec.StartValue(__VDLType_list_5); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]string, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			*x = append(*x, elem)
 		}
-		var elem string
-		if err := dec.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		var err error
-		if elem, err = dec.DecodeString(); err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 

@@ -177,15 +177,12 @@ func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_list_1); err != nil {
-		return err
-	}
 	var bytes []byte
-	if err := dec.DecodeBytes(-1, &bytes); err != nil {
+	if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 		return err
 	}
 	*x = bytes
-	return dec.FinishValue()
+	return nil
 }
 
 // GlobRequest specifies which entities should be watched and, optionally,
@@ -260,20 +257,18 @@ func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Pattern":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Pattern, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Pattern = value
 			}
 		case "ResumeMarker":
-			if err := x.ResumeMarker.VDLRead(dec); err != nil {
+			var bytes []byte
+			if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 				return err
 			}
+			x.ResumeMarker = bytes
 		default:
 			if err := dec.SkipValue(); err != nil {
 				return err
@@ -411,27 +406,18 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		case "State":
-			if err := dec.StartValue(vdl.Int32Type); err != nil {
+			switch value, err := dec.ReadValueInt(32); {
+			case err != nil:
 				return err
-			}
-			tmp, err := dec.DecodeInt(32)
-			if err != nil {
-				return err
-			}
-			x.State = int32(tmp)
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.State = int32(value)
 			}
 		case "Value":
 			x.Value = new(vom.RawBytes)
@@ -439,19 +425,17 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 				return err
 			}
 		case "ResumeMarker":
-			if err := x.ResumeMarker.VDLRead(dec); err != nil {
+			var bytes []byte
+			if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 				return err
 			}
+			x.ResumeMarker = bytes
 		case "Continued":
-			if err := dec.StartValue(vdl.BoolType); err != nil {
+			switch value, err := dec.ReadValueBool(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Continued, err = dec.DecodeBool(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Continued = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {

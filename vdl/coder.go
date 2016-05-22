@@ -121,13 +121,55 @@ type Decoder interface {
 	// DecodeFloat returns the top value on the stack as a float, where the result
 	// has bitlen bits.  Errors are returned on loss of precision.
 	DecodeFloat(bitlen int) (float64, error)
-	// DecodeBytes decodes the top value on the stack as bytes, into x.  If
-	// fixedlen >= 0 the decoded bytes must be exactly that length, otherwise
-	// there is no restriction on the number of decoded bytes.  If cap(*x) is not
-	// large enough to fit the decoded bytes, a new byte slice is assigned to *x.
-	DecodeBytes(fixedlen int, x *[]byte) error
 	// DecodeTypeObject returns the top value on the stack as a type.
 	DecodeTypeObject() (*Type, error)
+	// DecodeBytes decodes the top value on the stack as bytes, into x.  If
+	// fixedLen >= 0 the decoded bytes must be exactly that length, otherwise
+	// there is no restriction on the number of decoded bytes.  If cap(*x) is not
+	// large enough to fit the decoded bytes, a new byte slice is assigned to *x.
+	DecodeBytes(fixedLen int, x *[]byte) error
+
+	// ReadValueBool behaves as if StartValue, DecodeBool, FinishValue were
+	// called in sequence.  Some decoders optimize this codepath.
+	ReadValueBool() (bool, error)
+	// ReadValueString behaves as if StartValue, DecodeString, FinishValue were
+	// called in sequence.  Some decoders optimize this codepath.
+	ReadValueString() (string, error)
+	// ReadValueUint behaves as if StartValue, DecodeUint, FinishValue were called
+	// in sequence.  Some decoders optimize this codepath.
+	ReadValueUint(bitlen int) (uint64, error)
+	// ReadValueInt behaves as if StartValue, DecodeInt, FinishValue were called
+	// in sequence.  Some decoders optimize this codepath.
+	ReadValueInt(bitlen int) (int64, error)
+	// ReadValueFloat behaves as if StartValue, DecodeFloat, FinishValue were
+	// called in sequence.  Some decoders optimize this codepath.
+	ReadValueFloat(bitlen int) (float64, error)
+	// ReadValueTypeObject behaves as if StartValue, DecodeTypeObject, FinishValue
+	// were called in sequence.  Some decoders optimize this codepath.
+	ReadValueTypeObject() (*Type, error)
+	// ReadValueBytes behaves as if StartValue, DecodeBytes, FinishValue were
+	// called in sequence.  Some decoders optimize this codepath.
+	ReadValueBytes(fixedLen int, x *[]byte) error
+
+	// NextEntryValueBool behaves as if NextEntry, StartValue, DecodeBool,
+	// FinishValue were called in sequence.  Some decoders optimize this codepath.
+	NextEntryValueBool() (done bool, _ bool, _ error)
+	// NextEntryValueString behaves as if NextEntry, StartValue, DecodeString,
+	// FinishValue were called in sequence.  Some decoders optimize this codepath.
+	NextEntryValueString() (done bool, _ string, _ error)
+	// NextEntryValueUint behaves as if NextEntry, StartValue, DecodeUint,
+	// FinishValue were called in sequence.  Some decoders optimize this codepath.
+	NextEntryValueUint(bitlen int) (done bool, _ uint64, _ error)
+	// NextEntryValueInt behaves as if NextEntry, StartValue, DecodeInt,
+	// FinishValue were called in sequence.  Some decoders optimize this codepath.
+	NextEntryValueInt(bitlen int) (done bool, _ int64, _ error)
+	// NextEntryValueFloat behaves as if NextEntry, StartValue, DecodeFloat,
+	// FinishValue were called in sequence.  Some decoders optimize this codepath.
+	NextEntryValueFloat(bitlen int) (done bool, _ float64, _ error)
+	// NextEntryValueTypeObject behaves as if NextEntry, StartValue,
+	// DecodeTypeObject, FinishValue were called in sequence.  Some decoders
+	// optimize this codepath.
+	NextEntryValueTypeObject() (done bool, _ *Type, _ error)
 }
 
 // Encoder defines the interface for an encoder of vdl values.  The Encoder is
@@ -188,33 +230,30 @@ type Encoder interface {
 //
 // Since this is meant to be used in the implementation of DecodeBytes, there is
 // no outer call to StartValue/FinishValue.
-func DecodeConvertedBytes(dec Decoder, fixedlen int, buf *[]byte) error {
-	if len := dec.LenHint(); len >= 0 && cap(*buf) < len {
-		*buf = make([]byte, 0, len)
-	} else {
+func DecodeConvertedBytes(dec Decoder, fixedLen int, buf *[]byte) error {
+	// Only re-use the existing buffer if we're filling in an array.  This
+	// sacrifices some performance, but also avoids bugs when repeatedly decoding
+	// into the same value.
+	switch len := dec.LenHint(); {
+	case fixedLen >= 0:
 		*buf = (*buf)[:0]
+	case len > 0:
+		*buf = make([]byte, 0, len)
+	default:
+		*buf = nil
 	}
 	index := 0
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, elem, err := dec.NextEntryValueUint(8); {
 		case err != nil:
 			return err
-		case fixedlen >= 0 && done != (index >= fixedlen):
-			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d", done, index, fixedlen)
+		case fixedLen >= 0 && done != (index >= fixedLen):
+			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d", done, index, fixedLen)
 		case done:
 			return nil
+		default:
+			*buf = append(*buf, byte(elem))
 		}
-		if err := dec.StartValue(ByteType); err != nil {
-			return err
-		}
-		elem, err := dec.DecodeUint(8)
-		if err != nil {
-			return err
-		}
-		if err := dec.FinishValue(); err != nil {
-			return err
-		}
-		*buf = append(*buf, byte(elem))
 		index++
 	}
 }

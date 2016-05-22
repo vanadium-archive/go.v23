@@ -39,14 +39,11 @@ func (x Id) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *Id) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_array_1); err != nil {
-		return err
-	}
 	bytes := x[:]
-	if err := dec.DecodeBytes(16, &bytes); err != nil {
+	if err := dec.ReadValueBytes(16, &bytes); err != nil {
 		return err
 	}
-	return dec.FinishValue()
+	return nil
 }
 
 // Hold type definitions in package-level variables, for better performance.

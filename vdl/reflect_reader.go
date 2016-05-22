@@ -52,34 +52,17 @@ func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 	case **Type:
 		// Special-case type decoding, since we must assign the hash-consed pointer
 		// for correctness, rather than filling in a newly-created Type.
-		if !calledStart {
-			if err := dec.StartValue(TypeObjectType); err != nil {
-				return err
-			}
+		if calledStart {
+			dec.IgnoreNextStartValue()
 		}
 		var err error
-		if *x, err = dec.DecodeTypeObject(); err != nil {
-			return err
-		}
-		return dec.FinishValue()
+		*x, err = dec.ReadValueTypeObject()
+		return err
 
-		// Cases after this point are purely performance optimizations.
-		// TODO(toddw): Handle other common cases.
-	case *[]byte:
-		if !calledStart {
-			if err := dec.StartValue(ttByteList); err != nil {
-				return err
-			}
-		}
-		if err := dec.DecodeBytes(-1, x); err != nil {
-			return err
-		}
-		return dec.FinishValue()
+		// TODO(toddw): Consider adding common-cases as performance optimizations.
 	}
 	return errReadMustReflect
 }
-
-var ttByteList = ListType(ByteType)
 
 // ReadReflect is like Read, but takes a reflect.Value argument.
 func ReadReflect(dec Decoder, rv reflect.Value) error {
@@ -111,21 +94,25 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	if tt == AnyType {
 		return readIntoAny(dec, calledStart, rv)
 	}
-	// Now start the decoder value, if we haven't already.
-	if !calledStart {
-		if err := dec.StartValue(tt); err != nil {
-			return err
+	// Handle optional types, which need StartValue to be called first to
+	// determine whether the decoded value is nil.
+	if tt.Kind() == Optional {
+		if !calledStart {
+			calledStart = true
+			if err := dec.StartValue(tt); err != nil {
+				return err
+			}
+		}
+		// Handle nil decoded values next, to simplify the rest of the cases.  This
+		// handles cases where the dec value is either any(nil) or optional(nil).
+		if dec.IsNil() {
+			return readFromNil(dec, rv, tt)
 		}
 	}
-	// Handle nil decoded values next, to simplify the rest of the cases.  This
-	// handles cases where the dec value is either any(nil) or optional(nil).
-	if dec.IsNil() {
-		return readFromNil(dec, rv, tt)
-	}
-	// Now we know that the decoded value isn't nil.  Flatten pointers and check
-	// for fast non-reflect support.
+	// Now we know that rv isn't optional.  Flatten pointers and check for fast
+	// non-reflect support.
 	rv = rvFlattenPointers(rv)
-	if err := readNonReflect(dec, true, rv.Addr().Interface()); err != errReadMustReflect {
+	if err := readNonReflect(dec, calledStart, rv.Addr().Interface()); err != errReadMustReflect {
 		return err
 	}
 	// Handle native types, which need the ToNative conversion.  Notice that rv is
@@ -136,17 +123,62 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	// TODO(toddw): Investigate support for native pointer types.
 	if ni := nativeInfoFromNative(rv.Type()); ni != nil {
 		rvWire := reflect.New(ni.WireType).Elem()
-		if err := readReflect(dec, true, rvWire, tt); err != nil {
+		if err := readReflect(dec, calledStart, rvWire, tt); err != nil {
 			return err
 		}
 		return ni.ToNative(rvWire, rv.Addr())
 		// NOTE: readReflect guarantees that FinishValue has already been called.
 	}
-	// Handle non-nil wire values.
-	if err := readNonNilValue(dec, rv, tt.NonOptional()); err != nil {
+	tt = tt.NonOptional()
+	// Handle scalar wire values.
+	if ttIsScalar(tt) {
+		if calledStart {
+			dec.IgnoreNextStartValue()
+		}
+		return readValueScalar(dec, rv, tt)
+	}
+	// Handle bytes wire values.
+	if tt.IsBytes() {
+		if calledStart {
+			dec.IgnoreNextStartValue()
+		}
+		return readValueBytes(dec, rv, tt)
+	}
+	// Handle composite wire values.
+	if !calledStart {
+		if err := dec.StartValue(tt); err != nil {
+			return err
+		}
+	}
+	var err error
+	switch tt.Kind() {
+	case Array:
+		err = readFixedLenList(dec, "array", rv.Len(), rv, tt)
+	case List:
+		err = readList(dec, rv, tt)
+	case Set:
+		err = readSet(dec, rv, tt)
+	case Map:
+		err = readMap(dec, rv, tt)
+	case Struct:
+		err = readStruct(dec, rv, tt)
+	case Union:
+		err = readUnion(dec, rv, tt)
+	default:
+		// Note that both Any and Optional were handled in readIntAny, and
+		// TypeObject was handled via the readNonReflect special-case.
+		return fmt.Errorf("vdl: Read unhandled type %v %v", rv.Type(), tt)
+	}
+	if err != nil {
 		return err
 	}
 	return dec.FinishValue()
+}
+
+// settable exists to avoid a call to reflect.Call() to invoke Set()
+// which results in an allocation
+type settable interface {
+	Set(string) error
 }
 
 // readIntoAny uses dec to decode a value into rv, which has VDL type any.
@@ -318,117 +350,213 @@ func readFromNilNative(dec Decoder, rv reflect.Value, tt *Type) (bool, error) {
 	return false, nil
 }
 
-// settable exists to avoid a call to reflect.Call() to invoke Set()
-// which results in an allocation
-type settable interface {
-	Set(string) error
+func ttIsScalar(tt *Type) bool {
+	switch tt.Kind() {
+	case Bool, String, Enum, Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
+		return true
+	}
+	return false
 }
 
-func readNonNilValue(dec Decoder, rv reflect.Value, tt *Type) error {
-	// Handle named and unnamed []byte and [N]byte, where the element type is the
-	// unnamed byte type.  Cases like []MyByte fall through and are handled as
-	// regular lists, since we can't easily convert []MyByte to []byte.
-	switch {
-	case tt.Kind() == Array && tt.Elem() == ByteType:
-		bytes := rv.Slice(0, tt.Len()).Interface().([]byte)
-		return dec.DecodeBytes(tt.Len(), &bytes)
-	case tt.Kind() == List && tt.Elem() == ByteType:
-		var bytes []byte
-		if err := dec.DecodeBytes(-1, &bytes); err != nil {
-			return err
-		}
-		rv.Set(reflect.ValueOf(bytes))
-		return nil
-	}
-	// Handle regular non-nil values.
+func readValueScalar(dec Decoder, rv reflect.Value, tt *Type) error {
 	switch kind := tt.Kind(); kind {
 	case Bool:
-		val, err := dec.DecodeBool()
+		value, err := dec.ReadValueBool()
 		if err != nil {
 			return err
 		}
-		rv.SetBool(val)
+		rv.SetBool(value)
 		return nil
 	case String:
-		val, err := dec.DecodeString()
+		value, err := dec.ReadValueString()
 		if err != nil {
 			return err
 		}
-		rv.SetString(val)
+		rv.SetString(value)
 		return nil
 	case Enum:
-		val, err := dec.DecodeString()
+		value, err := dec.ReadValueString()
 		if err != nil {
 			return err
 		}
-		return rv.Addr().Interface().(settable).Set(val)
+		return rv.Addr().Interface().(settable).Set(value)
 	case Byte, Uint16, Uint32, Uint64:
-		val, err := dec.DecodeUint(kind.BitLen())
+		value, err := dec.ReadValueUint(kind.BitLen())
 		if err != nil {
 			return err
 		}
-		rv.SetUint(val)
+		rv.SetUint(value)
 		return nil
 	case Int8, Int16, Int32, Int64:
-		val, err := dec.DecodeInt(kind.BitLen())
+		value, err := dec.ReadValueInt(kind.BitLen())
 		if err != nil {
 			return err
 		}
-		rv.SetInt(val)
+		rv.SetInt(value)
 		return nil
 	case Float32, Float64:
-		val, err := dec.DecodeFloat(kind.BitLen())
+		value, err := dec.ReadValueFloat(kind.BitLen())
 		if err != nil {
 			return err
 		}
-		rv.SetFloat(val)
+		rv.SetFloat(value)
 		return nil
-	case Array:
-		return readArray(dec, rv, tt)
-	case List:
-		return readList(dec, rv, tt)
-	case Set:
-		return readSet(dec, rv, tt)
-	case Map:
-		return readMap(dec, rv, tt)
-	case Struct:
-		return readStruct(dec, rv, tt)
-	case Union:
-		return readUnion(dec, rv, tt)
 	}
-	// Note that Any was already handled via readAny, Optional was handled via
-	// readFromNil (or stripped off for non-nil values), and TypeObject was
-	// handled via the readNonReflect special-case.
-	return fmt.Errorf("vdl: Read unhandled type %v %v", rv.Type(), tt)
+	return fmt.Errorf("vdl: readValueScalar called on non-scalar %v, %v", tt, rv.Type())
 }
 
-func readArray(dec Decoder, rv reflect.Value, tt *Type) error {
-	rt := rv.Type()
-	index := 0
-	for {
-		switch done, err := dec.NextEntry(); {
+func readNextEntryScalar(dec Decoder, rv reflect.Value, tt *Type) (bool, error) {
+	switch kind := tt.Kind(); kind {
+	case Bool:
+		switch done, value, err := dec.NextEntryValueBool(); {
 		case err != nil:
-			return err
-		case done != (index >= rv.Len()):
-			return fmt.Errorf("array len mismatch, done:%v index:%d len:%d %v", done, index, rt.Len(), rt)
+			return false, err
 		case done:
-			return nil
+			return true, nil
+		default:
+			rv.SetBool(value)
+			return false, nil
 		}
-		if err := readReflect(dec, false, rv.Index(index), tt.Elem()); err != nil {
-			return err
+	case String:
+		switch done, value, err := dec.NextEntryValueString(); {
+		case err != nil:
+			return false, err
+		case done:
+			return true, nil
+		default:
+			rv.SetString(value)
+			return false, nil
 		}
-		index++
+	case Enum:
+		switch done, value, err := dec.NextEntryValueString(); {
+		case err != nil:
+			return false, err
+		case done:
+			return true, nil
+		default:
+			return false, rv.Addr().Interface().(settable).Set(value)
+		}
+	case Byte, Uint16, Uint32, Uint64:
+		switch done, value, err := dec.NextEntryValueUint(kind.BitLen()); {
+		case err != nil:
+			return false, err
+		case done:
+			return true, nil
+		default:
+			rv.SetUint(value)
+			return false, nil
+		}
+	case Int8, Int16, Int32, Int64:
+		switch done, value, err := dec.NextEntryValueInt(kind.BitLen()); {
+		case err != nil:
+			return false, err
+		case done:
+			return true, nil
+		default:
+			rv.SetInt(value)
+			return false, nil
+		}
+	case Float32, Float64:
+		switch done, value, err := dec.NextEntryValueFloat(kind.BitLen()); {
+		case err != nil:
+			return false, err
+		case done:
+			return true, nil
+		default:
+			rv.SetFloat(value)
+			return false, nil
+		}
 	}
+	return false, fmt.Errorf("vdl: readNextEntryScalar called on non-scalar %v, %v", tt, rv.Type())
+}
+
+func readValueBytes(dec Decoder, rv reflect.Value, tt *Type) error {
+	kind := tt.Kind()
+	// Go doesn't allow type conversions from []MyByte to []byte, but the reflect
+	// package does let us perform this conversion.  We slice arrays so that we
+	// can fill them in directly.
+	fixedLen, needAssign := -1, false
+	var fillPtr *[]byte
+	switch {
+	case kind == Array:
+		fixedLen = tt.Len()
+		tmp := rv.Slice(0, fixedLen).Bytes()
+		fillPtr = &tmp
+	case tt.Name() != "" || tt.Elem() != ByteType:
+		fillPtr = new([]byte)
+		needAssign = true
+	default: // rv has type []byte
+		fillPtr = rv.Addr().Interface().(*[]byte)
+	}
+	if err := dec.ReadValueBytes(fixedLen, fillPtr); err != nil {
+		return err
+	}
+	if needAssign {
+		rv.SetBytes(*fillPtr)
+	}
+	return nil
+}
+
+func readFixedLenList(dec Decoder, name string, len int, rv reflect.Value, tt *Type) error {
+	ttElem := tt.Elem()
+	if ttIsScalar(ttElem) {
+		// Handle scalar element fastpath.
+		for index := 0; index < len; index++ {
+			switch done, err := readNextEntryScalar(dec, rv.Index(index), ttElem); {
+			case err != nil:
+				return err
+			case done:
+				return fmt.Errorf("vdl: short %s, got len %d < %d %v", name, index, len, rv.Type())
+			}
+		}
+	} else {
+		// Handle non-scalar elements.
+		for index := 0; index < len; index++ {
+			switch done, err := dec.NextEntry(); {
+			case err != nil:
+				return err
+			case done:
+				return fmt.Errorf("vdl: short %s, got len %d < %d %v", name, index, len, rv.Type())
+			}
+			if err := readReflect(dec, false, rv.Index(index), ttElem); err != nil {
+				return err
+			}
+		}
+	}
+	switch done, err := dec.NextEntry(); {
+	case err != nil:
+		return err
+	case !done:
+		return fmt.Errorf("vdl: long %s, got len > %d %v", name, len, rv.Type())
+	}
+	return nil
 }
 
 func readList(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
-	switch len := dec.LenHint(); {
-	case len > 0:
-		rv.Set(reflect.MakeSlice(rt, 0, len))
-	default:
-		rv.Set(reflect.Zero(rt))
+	rtElem, ttElem := rt.Elem(), tt.Elem()
+	if len := dec.LenHint(); len > 0 {
+		// Handle fixed-length fastpath.
+		rv.Set(reflect.MakeSlice(rt, len, len))
+		return readFixedLenList(dec, "list", len, rv, tt)
 	}
+	// TODO(toddw): Make progressively larger slices, rather than creating each
+	// element one at a time.
+	rv.Set(reflect.Zero(rt))
+	if ttIsScalar(ttElem) {
+		// Handle scalar element fastpath.
+		for {
+			rvElem := reflect.New(rtElem).Elem()
+			switch done, err := readNextEntryScalar(dec, rvElem, ttElem); {
+			case err != nil:
+				return err
+			case done:
+				return nil
+			}
+			rv.Set(reflect.Append(rv, rvElem))
+		}
+	}
+	// Handle non-scalar elements.
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
@@ -436,11 +564,11 @@ func readList(dec Decoder, rv reflect.Value, tt *Type) error {
 		case done:
 			return nil
 		}
-		elem := reflect.New(rt.Elem()).Elem()
-		if err := readReflect(dec, false, elem, tt.Elem()); err != nil {
+		rvElem := reflect.New(rtElem).Elem()
+		if err := readReflect(dec, false, rvElem, ttElem); err != nil {
 			return err
 		}
-		rv.Set(reflect.Append(rv, elem))
+		rv.Set(reflect.Append(rv, rvElem))
 	}
 }
 
@@ -448,7 +576,26 @@ var rvEmptyStruct = reflect.ValueOf(struct{}{})
 
 func readSet(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
+	rtKey, ttKey := rt.Key(), tt.Key()
 	tmpSet, isNil := reflect.Zero(rt), true
+	if ttIsScalar(tt.Key()) {
+		// Handle scalar key fastpath.
+		for {
+			rvKey := reflect.New(rtKey).Elem()
+			switch done, err := readNextEntryScalar(dec, rvKey, ttKey); {
+			case err != nil:
+				return err
+			case done:
+				rv.Set(tmpSet)
+				return nil
+			}
+			if isNil {
+				tmpSet, isNil = reflect.MakeMap(rt), false
+			}
+			tmpSet.SetMapIndex(rvKey, rvEmptyStruct)
+		}
+	}
+	// Handle non-scalar elements.
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
@@ -457,20 +604,44 @@ func readSet(dec Decoder, rv reflect.Value, tt *Type) error {
 			rv.Set(tmpSet)
 			return nil
 		}
-		key := reflect.New(rt.Key()).Elem()
-		if err := readReflect(dec, false, key, tt.Key()); err != nil {
+		rvKey := reflect.New(rtKey).Elem()
+		if err := readReflect(dec, false, rvKey, ttKey); err != nil {
 			return err
 		}
 		if isNil {
 			tmpSet, isNil = reflect.MakeMap(rt), false
 		}
-		tmpSet.SetMapIndex(key, rvEmptyStruct)
+		tmpSet.SetMapIndex(rvKey, rvEmptyStruct)
 	}
 }
 
 func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
+	rtKey, ttKey := rt.Key(), tt.Key()
+	rtElem, ttElem := rt.Elem(), tt.Elem()
 	tmpMap, isNil := reflect.Zero(rt), true
+	if ttIsScalar(ttKey) {
+		// Handle scalar key fastpath.
+		for {
+			rvKey := reflect.New(rtKey).Elem()
+			switch done, err := readNextEntryScalar(dec, rvKey, ttKey); {
+			case err != nil:
+				return err
+			case done:
+				rv.Set(tmpMap)
+				return nil
+			}
+			rvElem := reflect.New(rtElem).Elem()
+			if err := readReflect(dec, false, rvElem, ttElem); err != nil {
+				return err
+			}
+			if isNil {
+				tmpMap, isNil = reflect.MakeMap(rt), false
+			}
+			tmpMap.SetMapIndex(rvKey, rvElem)
+		}
+	}
+	// Handle non-scalar keys.
 	for {
 		switch done, err := dec.NextEntry(); {
 		case err != nil:
@@ -479,18 +650,18 @@ func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 			rv.Set(tmpMap)
 			return nil
 		}
-		key := reflect.New(rt.Key()).Elem()
-		if err := readReflect(dec, false, key, tt.Key()); err != nil {
+		rvKey := reflect.New(rtKey).Elem()
+		if err := readReflect(dec, false, rvKey, ttKey); err != nil {
 			return err
 		}
-		elem := reflect.New(rt.Elem()).Elem()
-		if err := readReflect(dec, false, elem, tt.Elem()); err != nil {
+		rvElem := reflect.New(rtElem).Elem()
+		if err := readReflect(dec, false, rvElem, ttElem); err != nil {
 			return err
 		}
 		if isNil {
 			tmpMap, isNil = reflect.MakeMap(rt), false
 		}
-		tmpMap.SetMapIndex(key, elem)
+		tmpMap.SetMapIndex(rvKey, rvElem)
 	}
 }
 

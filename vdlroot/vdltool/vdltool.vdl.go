@@ -94,17 +94,15 @@ func (x GenLanguage) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *GenLanguage) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_1); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // GoKind describes the kind of Go type.
@@ -212,17 +210,15 @@ func (x GoKind) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *GoKind) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_2); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // GoZeroMode describes the relationship between the Go zero value of the native
@@ -295,17 +291,15 @@ func (x GoZeroMode) VDLWrite(enc vdl.Encoder) error {
 }
 
 func (x *GoZeroMode) VDLRead(dec vdl.Decoder) error {
-	if err := dec.StartValue(__VDLType_enum_3); err != nil {
+	switch value, err := dec.ReadValueString(); {
+	case err != nil:
 		return err
+	default:
+		if err := x.Set(value); err != nil {
+			return err
+		}
 	}
-	enum, err := dec.DecodeString()
-	if err != nil {
-		return err
-	}
-	if err := x.Set(enum); err != nil {
-		return err
-	}
-	return dec.FinishValue()
+	return nil
 }
 
 // GoZero describes Go zero value behavior.
@@ -384,19 +378,20 @@ func (x *GoZero) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Mode":
-			if err := x.Mode.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.Mode.Set(value); err != nil {
+					return err
+				}
 			}
 		case "IsZero":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.IsZero, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.IsZero = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -477,26 +472,18 @@ func (x *GoImport) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Path":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Path, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Path = value
 			}
 		case "Name":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Name, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Name = value
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -671,45 +658,38 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 		case "":
 			return dec.FinishValue()
 		case "Kind":
-			if err := x.Kind.VDLRead(dec); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
+			default:
+				if err := x.Kind.Set(value); err != nil {
+					return err
+				}
 			}
 		case "Type":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.Type, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.Type = value
 			}
 		case "Zero":
 			if err := x.Zero.VDLRead(dec); err != nil {
 				return err
 			}
 		case "ToNative":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.ToNative, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.ToNative = value
 			}
 		case "FromNative":
-			if err := dec.StartValue(vdl.StringType); err != nil {
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
 				return err
-			}
-			var err error
-			if x.FromNative, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
+			default:
+				x.FromNative = value
 			}
 		case "Imports":
 			if err := __VDLReadAnon_list_1(dec, &x.Imports); err != nil {
@@ -727,10 +707,9 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]GoImport) error {
 	if err := dec.StartValue(__VDLType_list_7); err != nil {
 		return err
 	}
-	switch len := dec.LenHint(); {
-	case len > 0:
+	if len := dec.LenHint(); len > 0 {
 		*x = make([]GoImport, 0, len)
-	default:
+	} else {
 		*x = nil
 	}
 	for {
@@ -739,12 +718,13 @@ func __VDLReadAnon_list_1(dec vdl.Decoder, x *[]GoImport) error {
 			return err
 		case done:
 			return dec.FinishValue()
+		default:
+			var elem GoImport
+			if err := elem.VDLRead(dec); err != nil {
+				return err
+			}
+			*x = append(*x, elem)
 		}
-		var elem GoImport
-		if err := elem.VDLRead(dec); err != nil {
-			return err
-		}
-		*x = append(*x, elem)
 	}
 }
 
@@ -868,36 +848,22 @@ func __VDLReadAnon_map_2(dec vdl.Decoder, x *map[string]GoType) error {
 		tmpMap = make(map[string]GoType, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem GoType
-		{
+		default:
+			var elem GoType
 			if err := elem.VDLRead(dec); err != nil {
 				return err
 			}
+			if tmpMap == nil {
+				tmpMap = make(map[string]GoType)
+			}
+			tmpMap[key] = elem
 		}
-		if tmpMap == nil {
-			tmpMap = make(map[string]GoType)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -1052,43 +1018,25 @@ func __VDLReadAnon_map_3(dec vdl.Decoder, x *map[string]string) error {
 		tmpMap = make(map[string]string, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
+		default:
+			var elem string
+			switch value, err := dec.ReadValueString(); {
+			case err != nil:
+				return err
+			default:
+				elem = value
+			}
+			if tmpMap == nil {
+				tmpMap = make(map[string]string)
+			}
+			tmpMap[key] = elem
 		}
-		var key string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if key, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		var elem string
-		{
-			if err := dec.StartValue(vdl.StringType); err != nil {
-				return err
-			}
-			var err error
-			if elem, err = dec.DecodeString(); err != nil {
-				return err
-			}
-			if err := dec.FinishValue(); err != nil {
-				return err
-			}
-		}
-		if tmpMap == nil {
-			tmpMap = make(map[string]string)
-		}
-		tmpMap[key] = elem
 	}
 }
 
@@ -1392,23 +1340,22 @@ func __VDLReadAnon_set_4(dec vdl.Decoder, x *map[GenLanguage]struct{}) error {
 		tmpMap = make(map[GenLanguage]struct{}, len)
 	}
 	for {
-		switch done, err := dec.NextEntry(); {
+		switch done, key, err := dec.NextEntryValueString(); {
 		case err != nil:
 			return err
 		case done:
 			*x = tmpMap
 			return dec.FinishValue()
-		}
-		var key GenLanguage
-		{
-			if err := key.VDLRead(dec); err != nil {
+		default:
+			var keyEnum GenLanguage
+			if err := keyEnum.Set(key); err != nil {
 				return err
 			}
+			if tmpMap == nil {
+				tmpMap = make(map[GenLanguage]struct{})
+			}
+			tmpMap[keyEnum] = struct{}{}
 		}
-		if tmpMap == nil {
-			tmpMap = make(map[GenLanguage]struct{})
-		}
-		tmpMap[key] = struct{}{}
 	}
 }
 
