@@ -63,12 +63,6 @@ type KeyValue struct {
 	Value any
 }
 
-// CollectionRow encapsulates a collection id and row key or row prefix.
-type CollectionRow struct {
-	CollectionId Id
-	Row          string
-}
-
 // SyncgroupSpec contains the specification for a syncgroup.
 type SyncgroupSpec struct {
 	// Human-readable description of this syncgroup.

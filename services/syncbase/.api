@@ -69,7 +69,6 @@ pkg syncbase, method (*BlobManagerGetBlobServerCallStub) SendStream() interface 
 pkg syncbase, method (*BlobManagerPutBlobServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*BlobManagerPutBlobServerCallStub) RecvStream() interface {  Advance() bool; Value() []byte; Err() error;}
 pkg syncbase, method (*BlobRef) VDLRead(vdl.Decoder) error
-pkg syncbase, method (*CollectionRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*CollectionRowPattern) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*CollectionScanServerCallStub) Init(rpc.StreamServerCall)
 pkg syncbase, method (*CollectionScanServerCallStub) SendStream() interface {  Send(item KeyValue) error;}
@@ -117,8 +116,6 @@ pkg syncbase, method (BlobFetchStatus) VDLIsZero() bool
 pkg syncbase, method (BlobFetchStatus) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (BlobRef) VDLIsZero() bool
 pkg syncbase, method (BlobRef) VDLWrite(vdl.Encoder) error
-pkg syncbase, method (CollectionRow) VDLIsZero() bool
-pkg syncbase, method (CollectionRow) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (CollectionRowPattern) VDLIsZero() bool
 pkg syncbase, method (CollectionRowPattern) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (ConflictDataBatch) Index() int
@@ -305,9 +302,6 @@ pkg syncbase, type CollectionClientStub interface, GetPermissions(*context.T, Ba
 pkg syncbase, type CollectionClientStub interface, Scan(*context.T, BatchHandle, []byte, []byte, ...rpc.CallOpt) (CollectionScanClientCall, error)
 pkg syncbase, type CollectionClientStub interface, SetPermissions(*context.T, BatchHandle, access.Permissions, ...rpc.CallOpt) error
 pkg syncbase, type CollectionClientStub interface, unexported methods
-pkg syncbase, type CollectionRow struct
-pkg syncbase, type CollectionRow struct, CollectionId Id
-pkg syncbase, type CollectionRow struct, Row string
 pkg syncbase, type CollectionRowPattern struct
 pkg syncbase, type CollectionRowPattern struct, CollectionBlessing string
 pkg syncbase, type CollectionRowPattern struct, CollectionName string
