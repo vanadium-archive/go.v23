@@ -158,6 +158,8 @@ type Collection interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
+	// Note, we use []byte rather than string for start and limit because they
+	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
 	Scan(bh BatchHandle, start, limit []byte) stream<_, KeyValue> error {access.Read}
 }
 

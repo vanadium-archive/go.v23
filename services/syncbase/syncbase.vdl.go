@@ -6138,6 +6138,8 @@ type CollectionClientMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
+	// Note, we use []byte rather than string for start and limit because they
+	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
 	Scan(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
 }
 
@@ -6291,6 +6293,8 @@ type CollectionServerMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
+	// Note, we use []byte rather than string for start and limit because they
+	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
 	Scan(_ *context.T, _ CollectionScanServerCall, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -6320,6 +6324,8 @@ type CollectionServerStubMethods interface {
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
+	// Note, we use []byte rather than string for start and limit because they
+	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
 	Scan(_ *context.T, _ *CollectionScanServerCallStub, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -6457,7 +6463,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included.\n// Concurrency semantics are documented in model.go.",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included.\n// Concurrency semantics are documented in model.go.\n// Note, we use []byte rather than string for start and limit because they\n// need not be valid UTF-8; VDL expects strings to be valid UTF-8.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte
