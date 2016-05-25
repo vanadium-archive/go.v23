@@ -32,13 +32,10 @@ func (x MountFlag) VDLIsZero() bool {
 }
 
 func (x MountFlag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_uint32_1); err != nil {
+	if err := enc.WriteValueUint(__VDLType_uint32_1, uint64(x)); err != nil {
 		return err
 	}
-	if err := enc.EncodeUint(uint64(x)); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *MountFlag) VDLRead(dec vdl.Decoder) error {
@@ -79,16 +76,7 @@ func (x MountedServer) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Server != "" {
-		if err := enc.NextField("Server"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Server); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Server", vdl.StringType, x.Server); err != nil {
 			return err
 		}
 	}
@@ -184,16 +172,7 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
@@ -206,30 +185,12 @@ func (x MountEntry) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.ServesMountTable {
-		if err := enc.NextField("ServesMountTable"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.ServesMountTable); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("ServesMountTable", vdl.BoolType, x.ServesMountTable); err != nil {
 			return err
 		}
 	}
 	if x.IsLeaf {
-		if err := enc.NextField("IsLeaf"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.IsLeaf); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("IsLeaf", vdl.BoolType, x.IsLeaf); err != nil {
 			return err
 		}
 	}
@@ -246,11 +207,11 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []MountedServer) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
+	for _, elem := range x {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
+		if err := elem.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -354,16 +315,7 @@ func (x GlobError) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
@@ -582,16 +534,7 @@ func (x GlobChildrenReplyName) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_8); err != nil {
 		return err
 	}
-	if err := enc.NextField("Name"); err != nil {
-		return err
-	}
-	if err := enc.StartValue(vdl.StringType); err != nil {
-		return err
-	}
-	if err := enc.EncodeString(x.Value); err != nil {
-		return err
-	}
-	if err := enc.FinishValue(); err != nil {
+	if err := enc.NextFieldValueString("Name", vdl.StringType, x.Value); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {

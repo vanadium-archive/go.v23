@@ -188,11 +188,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []security.BlessingPattern) error 
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := x[i].VDLWrite(enc); err != nil {
+	for _, elem := range x {
+		if err := enc.NextEntryValueString(__VDLType_string_4, string(elem)); err != nil {
 			return err
 		}
 	}
@@ -209,17 +206,8 @@ func __VDLWriteAnon_list_2(enc vdl.Encoder, x []string) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x[i]); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+	for _, elem := range x {
+		if err := enc.NextEntryValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -326,16 +314,7 @@ func (x Permissions) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
 		if err := elem.VDLWrite(enc); err != nil {
@@ -393,13 +372,10 @@ func (x Tag) VDLIsZero() bool {
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_string_6); err != nil {
+	if err := enc.WriteValueString(__VDLType_string_6, string(x)); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(string(x)); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {

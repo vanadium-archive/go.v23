@@ -52,30 +52,12 @@ func (x Duration) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Seconds != 0 {
-		if err := enc.NextField("Seconds"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Seconds); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Seconds", vdl.Int64Type, x.Seconds); err != nil {
 			return err
 		}
 	}
 	if x.Nanos != 0 {
-		if err := enc.NextField("Nanos"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Nanos", vdl.Int32Type, int64(x.Nanos)); err != nil {
 			return err
 		}
 	}
@@ -154,30 +136,12 @@ func (x Time) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Seconds != 0 {
-		if err := enc.NextField("Seconds"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Seconds); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Seconds", vdl.Int64Type, x.Seconds); err != nil {
 			return err
 		}
 	}
 	if x.Nanos != 0 {
-		if err := enc.NextField("Nanos"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Nanos)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Nanos", vdl.Int32Type, int64(x.Nanos)); err != nil {
 			return err
 		}
 	}

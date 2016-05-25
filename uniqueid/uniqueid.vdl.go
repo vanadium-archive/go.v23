@@ -29,13 +29,10 @@ func (x Id) VDLIsZero() bool {
 }
 
 func (x Id) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_array_1); err != nil {
+	if err := enc.WriteValueBytes(__VDLType_array_1, x[:]); err != nil {
 		return err
 	}
-	if err := enc.EncodeBytes([]byte(x[:])); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Id) VDLRead(dec vdl.Decoder) error {

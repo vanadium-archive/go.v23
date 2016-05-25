@@ -44,30 +44,12 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Position != 0 {
-		if err := enc.NextField("Position"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Position); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Position", vdl.Int64Type, x.Position); err != nil {
 			return err
 		}
 	}
 	if x.Line != "" {
-		if err := enc.NextField("Line"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Line); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Line", vdl.StringType, x.Line); err != nil {
 			return err
 		}
 	}

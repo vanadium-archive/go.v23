@@ -64,7 +64,7 @@ func testEncode(t *testing.T, version Version, name string, value interface{}, h
 			t.Error(err)
 		}
 		if !match {
-			t.Errorf("%s: Encode(%#v)\n GOT %s\nWANT %s", name, value, got, want)
+			t.Errorf("%s: Encode(%#v)\nGOT  %s\nWANT %s", name, value, got, want)
 		}
 	}
 }
@@ -83,7 +83,7 @@ func testEncodeWithTypeEncoder(t *testing.T, version Version, name string, value
 		t.Error(err)
 	}
 	if !match && len(hextype) > 0 {
-		t.Errorf("%s: EncodeType(%#v)\nGOT %s\nWANT %s", name, value, got, want)
+		t.Errorf("%s: EncodeType(%#v)\nGOT  %s\nWANT %s", name, value, got, want)
 	}
 	got, want = fmt.Sprintf("%x", buf.Bytes()), hexversion+hexvalue
 	match, err = matchHexPat(got, want)
@@ -91,6 +91,6 @@ func testEncodeWithTypeEncoder(t *testing.T, version Version, name string, value
 		t.Error(err)
 	}
 	if !match {
-		t.Errorf("%s: Encode(%#v)\nGOT %s\nWANT %s", name, value, got, want)
+		t.Errorf("%s: Encode(%#v)\nGOT  %s\nWANT %s", name, value, got, want)
 	}
 }

@@ -208,19 +208,87 @@ type Encoder interface {
 	SetLenHint(lenHint int) error
 
 	// EncodeBool encodes a bool value.
-	EncodeBool(v bool) error
+	EncodeBool(value bool) error
 	// EncodeString encodes a string value.
-	EncodeString(v string) error
+	EncodeString(value string) error
 	// EncodeUint encodes a uint value.
-	EncodeUint(v uint64) error
+	EncodeUint(value uint64) error
 	// EncodeInt encodes an int value.
-	EncodeInt(v int64) error
+	EncodeInt(value int64) error
 	// EncodeFloat encodes a float value.
-	EncodeFloat(v float64) error
-	// EncodeBytes encodes a bytes value; either an array or list of bytes.
-	EncodeBytes(v []byte) error
+	EncodeFloat(value float64) error
 	// EncodeTypeObject encodes a type.
-	EncodeTypeObject(v *Type) error
+	EncodeTypeObject(value *Type) error
+	// EncodeBytes encodes a bytes value; either an array or list of bytes.
+	EncodeBytes(value []byte) error
+
+	// WriteValueBool behaves as if StartValue, EncodeBool, FinishValue were
+	// called in sequence.  Some encoders optimize this codepath.
+	WriteValueBool(tt *Type, value bool) error
+	// WriteValueString behaves as if StartValue, EncodeString, FinishValue were
+	// called in sequence.  Some encoders optimize this codepath.
+	WriteValueString(tt *Type, value string) error
+	// WriteValueUint behaves as if StartValue, EncodeUint, FinishValue were
+	// called in sequence.  Some encoders optimize this codepath.
+	WriteValueUint(tt *Type, value uint64) error
+	// WriteValueInt behaves as if StartValue, EncodeInt, FinishValue were called
+	// in sequence.  Some encoders optimize this codepath.
+	WriteValueInt(tt *Type, value int64) error
+	// WriteValueFloat behaves as if StartValue, EncodeFloat, FinishValue were
+	// called in sequence.  Some encoders optimize this codepath.
+	WriteValueFloat(tt *Type, value float64) error
+	// WriteValueTypeObject behaves as if StartValue, EncodeTypeObject,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	WriteValueTypeObject(value *Type) error
+	// WriteValueBytes behaves as if StartValue, EncodeBytes, FinishValue were
+	// called in sequence.  Some encoders optimize this codepath.
+	WriteValueBytes(tt *Type, value []byte) error
+
+	// NextEntryValueBool behaves as if NextEntry, StartValue, EncodeBool,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueBool(tt *Type, value bool) error
+	// NextEntryValueString behaves as if NextEntry, StartValue, EncodeString,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueString(tt *Type, value string) error
+	// NextEntryValueUint behaves as if NextEntry, StartValue, EncodeUint,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueUint(tt *Type, value uint64) error
+	// NextEntryValueInt behaves as if NextEntry, StartValue, EncodeInt,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueInt(tt *Type, value int64) error
+	// NextEntryValueFloat behaves as if NextEntry, StartValue, EncodeFloat,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueFloat(tt *Type, value float64) error
+	// NextEntryValueTypeObject behaves as if NextEntry, StartValue,
+	// EncodeTypeObject, FinishValue were called in sequence.  Some encoders
+	// optimize this codepath.
+	NextEntryValueTypeObject(value *Type) error
+	// NextEntryValueBytes behaves as if NextEntry, StartValue, EncodeBytes,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextEntryValueBytes(tt *Type, value []byte) error
+
+	// NextFieldValueBool behaves as if NextEntry, StartValue, EncodeBool,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueBool(name string, tt *Type, value bool) error
+	// NextFieldValueString behaves as if NextEntry, StartValue, EncodeString,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueString(name string, tt *Type, value string) error
+	// NextFieldValueUint behaves as if NextEntry, StartValue, EncodeUint,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueUint(name string, tt *Type, value uint64) error
+	// NextFieldValueInt behaves as if NextEntry, StartValue, EncodeInt,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueInt(name string, tt *Type, value int64) error
+	// NextFieldValueFloat behaves as if NextEntry, StartValue, EncodeFloat,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueFloat(name string, tt *Type, value float64) error
+	// NextFieldValueTypeObject behaves as if NextEntry, StartValue,
+	// EncodeTypeObject, FinishValue were called in sequence.  Some encoders
+	// optimize this codepath.
+	NextFieldValueTypeObject(name string, value *Type) error
+	// NextFieldValueBytes behaves as if NextEntry, StartValue, EncodeBytes,
+	// FinishValue were called in sequence.  Some encoders optimize this codepath.
+	NextFieldValueBytes(name string, tt *Type, value []byte) error
 }
 
 // DecodeConvertedBytes is a helper function for implementations of

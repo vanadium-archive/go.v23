@@ -36,30 +36,12 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Real != 0 {
-		if err := enc.NextField("Real"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(x.Real)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("Real", vdl.Float32Type, float64(x.Real)); err != nil {
 			return err
 		}
 	}
 	if x.Imag != 0 {
-		if err := enc.NextField("Imag"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(x.Imag)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("Imag", vdl.Float32Type, float64(x.Imag)); err != nil {
 			return err
 		}
 	}
@@ -124,30 +106,12 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Real != 0 {
-		if err := enc.NextField("Real"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(x.Real); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("Real", vdl.Float64Type, x.Real); err != nil {
 			return err
 		}
 	}
 	if x.Imag != 0 {
-		if err := enc.NextField("Imag"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(x.Imag); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("Imag", vdl.Float64Type, x.Imag); err != nil {
 			return err
 		}
 	}

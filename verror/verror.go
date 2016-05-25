@@ -194,16 +194,7 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.ID != "" {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(string(x.ID)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Id", vdl.StringType, string(x.ID)); err != nil {
 			return err
 		}
 	}
@@ -217,32 +208,14 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 		case RetryBackoff:
 			actionStr = "RetryBackoff"
 		default:
-			return fmt.Errorf("%d does not correspond to a label in enum WireRetryCode", x.Action)
+			return fmt.Errorf("action %d not in enum WireRetryCode", x.Action)
 		}
-		if err := enc.NextField("RetryCode"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(ttWireRetryCode); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(actionStr); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("RetryCode", ttWireRetryCode, actionStr); err != nil {
 			return err
 		}
 	}
 	if x.Msg != "" {
-		if err := enc.NextField("Msg"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Msg); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Msg", vdl.StringType, x.Msg); err != nil {
 			return err
 		}
 	}

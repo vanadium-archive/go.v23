@@ -16,7 +16,6 @@ var (
 	errEmptyPipeStack        = errors.New("vdl: empty pipe stack")
 	errEncCallDuringDecPhase = errors.New("vdl: pipe encoder method called during decode phase")
 	errInvalidPipeState      = errors.New("vdl: invalid pipe state")
-	errIncompatibleTypes     = errors.New("vdl: incompatible types")
 )
 
 func convertPipe(dst, src interface{}) error {
@@ -35,6 +34,78 @@ func convertPipeReflect(dst, src reflect.Value) error {
 	return dec.Close(ReadReflect(dec, dst))
 }
 
+// newPipe returns a pipeEncoder and pipeDecoder connected via the same "pipe".
+// Conceptually this is similar to an os.Pipe between a io.Writer and io.Reader.
+// It is used to pair together vdl.Write and vdl.Read calls during conversion.
+//
+// Note that vdl.Write calls a sequence of pipeEncoder methods, while vdl.Read
+// calls a sequence of pipeDecoder methods.  The concept behind the pipe is that
+// we match each {Start,Finish}Value on the pipeEncoder with a corresponding
+// call on the pipeDecoder.  Only one call is allowed to be in-flight at a time.
+//
+// We bootstrap with the first enc.StartValue call.  After this first call,
+// every subsequent call to enc.{Start,Finish}Value blocks, waiting for the
+// previous call to be matched by a call on the decoder.  Similarly every call
+// to dec.{Start,Finish}Value blocks, waiting to match the encoder call.
+// Control alternates between the Encoder and Decoder until completion.
+//
+// The Close method shuts the pipe down, causing everything to unblock.
+func newPipe() (*pipeEncoder, *pipeDecoder) {
+	d := &pipeDecoder{Enc: pipeEncoder{}}
+	d.Enc.Cond.L = &d.Enc.Mutex
+	return &d.Enc, d
+}
+
+type pipeEncoder struct {
+	sync.Mutex
+	Cond sync.Cond
+
+	Stack                    []pipeStackEntry
+	NextEntryDone            bool
+	NextFieldName            string
+	NextStartValueIsOptional bool       // The StartValue refers to an optional type.
+	NumberType               numberType // The number type X in EncodeX.
+
+	// EncIsBytes, DecBytesAsEntries and DecByteStartValue deal with a subtlety
+	// when handling bytes.  Normally the {Start,Finish}Value calls on the Encoder
+	// are perfectly matched by the same calls on the Decoder; the pipe's blocking
+	// mechanism depends on this.  But since we allow value conversions, it's
+	// valid for the following mismatched sequences to occur:
+	//    # Encode bytes, decode as an array or list
+	//    Encoder: StartValue,EncodeBytes,                           FinishValue
+	//    Decoder: StartValue,(NextEntry,StartValue,FinishValue,...),FinishValue
+	//
+	//    # Encode array or list, decode as bytes
+	//    Encoder: StartValue,(NextEntry,StartValue,FinishValue,...),FinishValue
+	//    Decoder: StartValue,DecodeBytes,                           FinishValue
+	//
+	// EncIsBytes is set in enc.EncodeBytes, and cleared in enc.FinishValue.
+	// DecBytesAsEntries is set in dec.NextEntry, and cleared in dec.FinishValue.
+	// DecByteStartValue is set in dec.StartValue, and cleared in dec.FinishValue.
+	// The concept is EncIsBytes tracks the encoder bytes state.  If it is set,
+	// and dec.NextEntry is called, it means the caller is decoding the bytes as a
+	// sequence of entries.  Thereafter pairs of dec.{Start,FinishValue} calls are
+	// allowed to proceed without blocking.  The final dec.FinishValue resumes the
+	// regular pattern of blocking on matching calls.
+	EncIsBytes        bool
+	DecBytesAsEntries bool
+	DecByteStartValue bool
+
+	DecStarted bool // Decoding has started
+	Err        error
+
+	State pipeState
+
+	// Arguments from Encode* to be passed to Decode*:
+	ArgBool   bool
+	ArgUint   uint64
+	ArgInt    int64
+	ArgFloat  float64
+	ArgString string
+	ArgBytes  []byte
+	ArgType   *Type
+}
+
 type pipeStackEntry struct {
 	Type       *Type
 	NextOp     pipeOp
@@ -45,9 +116,14 @@ type pipeStackEntry struct {
 	IsNil      bool
 }
 
-// pipeState represents the current state of the pipe controller
-// pipeState is used to control our blocking, which ping-pongs between the encoder and decoder.
-// Once the closed state is reached, everything unblocks.
+type pipeDecoder struct {
+	Enc                  pipeEncoder
+	ignoreNextStartValue bool
+}
+
+// pipeState represents the blocking state of the pipe.  Control is transferred
+// alternately between the encoder and decoder; while one side is running, the
+// other side blocks.  Once the closed state is entered, everything unblocks.
 type pipeState int
 
 const (
@@ -65,13 +141,12 @@ func (x pipeState) String() string {
 	case pipeStateClosed:
 		return "Closed"
 	default:
-		panic("bad controller state")
+		panic(fmt.Errorf("vdl: unknown pipeState %d", x))
 	}
 }
 
-type pipeOp int
-
 // pipeOp is used to check our invariants for state transitions.
+type pipeOp int
 
 const (
 	pipeStartEnc pipeOp = iota
@@ -107,9 +182,6 @@ func (op pipeOp) Next() pipeOp {
 // We can only determine whether the next value is AnyType
 // by checking the next type of the entry.
 func (entry *pipeStackEntry) nextValueIsAny() bool {
-	if entry == nil {
-		return false
-	}
 	switch entry.Type.Kind() {
 	case List, Array:
 		return entry.Type.Elem() == AnyType
@@ -136,38 +208,6 @@ const (
 	numberFloat
 )
 
-type pipeEncoder struct {
-	Stack                    []pipeStackEntry
-	NextEntryDone            bool
-	NextFieldName            string
-	NextStartValueIsOptional bool       // The StartValue refers to an optional type.
-	NumberType               numberType // The number type X in EncodeX.
-	IsBytes                  bool       // Is the current list from EncodeBytes().
-	DecHandlingBytes         bool       // When decoding from []byte received from EncodeBytes, skip
-	// the calls to the Decoder's StartValue/FinishValue
-	// because the encoder will not receive matching calls.
-	DecStarted bool // Decoding has started
-	Err        error
-
-	Mu    sync.Mutex
-	Cond  sync.Cond
-	State pipeState
-
-	// Arguments from Encode* to be passed to Decode*:
-	ArgBool   bool
-	ArgUint   uint64
-	ArgInt    int64
-	ArgFloat  float64
-	ArgString string
-	ArgBytes  []byte
-	ArgType   *Type
-}
-
-type pipeDecoder struct {
-	Enc                    pipeEncoder
-	IgnoringNextStartValue bool
-}
-
 func (e *pipeEncoder) top() *pipeStackEntry {
 	if len(e.Stack) == 0 {
 		return nil
@@ -182,11 +222,8 @@ func (d *pipeDecoder) top() *pipeStackEntry {
 	return &d.Enc.Stack[len(d.Enc.Stack)-1]
 }
 
-func newPipe() (*pipeEncoder, *pipeDecoder) {
-	dec := &pipeDecoder{Enc: pipeEncoder{}}
-	dec.Enc.Cond.L = &dec.Enc.Mu
-	return &dec.Enc, dec
-}
+func (d *pipeDecoder) Lock()   { d.Enc.Mutex.Lock() }
+func (d *pipeDecoder) Unlock() { d.Enc.Mutex.Unlock() }
 
 func (e *pipeEncoder) closeLocked(err error) error {
 	if err != nil && e.Err == nil {
@@ -198,8 +235,8 @@ func (e *pipeEncoder) closeLocked(err error) error {
 }
 
 func (e *pipeEncoder) Close(err error) error {
-	e.Mu.Lock()
-	defer e.Mu.Unlock()
+	e.Lock()
+	defer e.Unlock()
 	return e.closeLocked(err)
 }
 
@@ -224,19 +261,19 @@ func (e *pipeEncoder) NilValue(tt *Type) error {
 	}
 	top := e.top()
 	if top == nil {
-		return e.closeLocked(errEmptyPipeStack)
+		return e.Close(errEmptyPipeStack)
 	}
 	top.IsNil = true
 	return e.FinishValue()
 }
 
 func (e *pipeEncoder) StartValue(tt *Type) error {
-	e.Mu.Lock()
-	defer e.Mu.Unlock()
+	e.Lock()
+	defer e.Unlock()
 	if e.State != pipeStateEncoder {
 		return e.closeLocked(errInvalidPipeState)
 	}
-	if err := e.waitLocked(); err != nil {
+	if err := e.wait(); err != nil {
 		return err
 	}
 	top := e.top()
@@ -246,21 +283,21 @@ func (e *pipeEncoder) StartValue(tt *Type) error {
 	e.Stack = append(e.Stack, pipeStackEntry{
 		Type:       tt,
 		NextOp:     pipeStartDec,
+		Index:      -1,
 		LenHint:    -1,
 		IsOptional: e.NextStartValueIsOptional,
-		Index:      -1,
 	})
 	e.NextStartValueIsOptional = false
 	return e.Err
 }
 
 func (e *pipeEncoder) FinishValue() error {
-	e.Mu.Lock()
-	defer e.Mu.Unlock()
+	e.Lock()
+	defer e.Unlock()
 	if e.State != pipeStateEncoder {
 		return e.closeLocked(errInvalidPipeState)
 	}
-	if err := e.waitLocked(); err != nil {
+	if err := e.wait(); err != nil {
 		return err
 	}
 	top := e.top()
@@ -271,10 +308,13 @@ func (e *pipeEncoder) FinishValue() error {
 		return e.closeLocked(fmt.Errorf("vdl: pipe got state %v, want %v", got, want))
 	}
 	top.NextOp = top.NextOp.Next()
+	// We're finished with the enc.EncodeBytes special case once we've unblocked,
+	// regardless of what sequence of Decoder calls were made.
+	e.EncIsBytes = false
 	return e.Err
 }
 
-func (e *pipeEncoder) waitLocked() error {
+func (e *pipeEncoder) wait() error {
 	top := e.top()
 	if e.State == pipeStateClosed {
 		return e.Err
@@ -293,19 +333,25 @@ func (e *pipeEncoder) waitLocked() error {
 }
 
 func (d *pipeDecoder) StartValue(want *Type) error {
-	d.Enc.Mu.Lock()
-	defer d.Enc.Mu.Unlock()
+	d.Lock()
+	defer d.Unlock()
 	if d.Enc.DecStarted && d.Enc.State != pipeStateDecoder {
 		return d.Enc.closeLocked(errInvalidPipeState)
 	}
-	if d.IgnoringNextStartValue {
-		d.IgnoringNextStartValue = false
+	if d.ignoreNextStartValue {
+		d.ignoreNextStartValue = false
 		return d.Enc.Err
 	}
-	if d.Enc.DecHandlingBytes {
+	// Don't block if enc.EncodeBytes was called, but the caller is decoding as a
+	// sequence of entries.  See the matching logic in dec.FinishValue.
+	if d.Enc.DecBytesAsEntries {
+		if d.Enc.DecByteStartValue {
+			return d.Enc.closeLocked(fmt.Errorf("vdl: can't StartValue on byte"))
+		}
+		d.Enc.DecByteStartValue = true
 		return d.Enc.Err
 	}
-	if err := d.waitLocked(false); err != nil {
+	if err := d.wait(false); err != nil {
 		return err
 	}
 	top := d.top()
@@ -317,8 +363,8 @@ func (d *pipeDecoder) StartValue(want *Type) error {
 	// this check for top-level decoded values, and subsequently for decoded any
 	// values.
 	if len(d.Enc.Stack) == 1 || d.IsAny() {
-		if !Compatible2(d.Type(), want) {
-			return d.Enc.closeLocked(fmt.Errorf("vdl: pipe incompatible decode from %v into %v", d.Type(), want))
+		if tt := d.Type(); !Compatible2(tt, want) {
+			return d.Enc.closeLocked(fmt.Errorf("vdl: pipe incompatible decode from %v into %v", tt, want))
 		}
 	}
 	if got, want := top.NextOp, pipeStartDec; got != want {
@@ -329,18 +375,25 @@ func (d *pipeDecoder) StartValue(want *Type) error {
 }
 
 func (d *pipeDecoder) FinishValue() error {
-	d.Enc.Mu.Lock()
-	defer d.Enc.Mu.Unlock()
+	d.Lock()
+	defer d.Unlock()
 	switch {
 	case d.Enc.State == pipeStateEncoder:
 		return d.Enc.closeLocked(errInvalidPipeState)
 	case d.Enc.State == pipeStateClosed:
 		return d.Enc.Err
 	}
-	if d.Enc.DecHandlingBytes {
-		return d.Enc.Err
+	// Don't block if enc.EncodeBytes was called, but the caller is decoding as a
+	// sequence of entries.  See the matching logic in dec.StartValue.
+	if d.Enc.DecBytesAsEntries {
+		if d.Enc.DecByteStartValue {
+			d.Enc.DecByteStartValue = false
+			return d.Enc.Err
+		}
+		//
+		d.Enc.DecBytesAsEntries = false
 	}
-	if err := d.waitLocked(true); err != nil {
+	if err := d.wait(true); err != nil {
 		return err
 	}
 	top := d.top()
@@ -354,7 +407,7 @@ func (d *pipeDecoder) FinishValue() error {
 	return d.Enc.Err
 }
 
-func (d *pipeDecoder) waitLocked(isFinish bool) error {
+func (d *pipeDecoder) wait(isFinish bool) error {
 	if d.Enc.State == pipeStateClosed {
 		return d.Enc.Err
 	}
@@ -380,13 +433,13 @@ func (d *pipeDecoder) SkipValue() error {
 }
 
 func (d *pipeDecoder) IgnoreNextStartValue() {
-	d.IgnoringNextStartValue = true
+	d.ignoreNextStartValue = true
 }
 
 func (e *pipeEncoder) SetLenHint(lenHint int) error {
 	top := e.top()
 	if top == nil {
-		return e.closeLocked(errEmptyPipeStack)
+		return e.Close(errEmptyPipeStack)
 	}
 	top.LenHint = lenHint
 	return e.Err
@@ -394,15 +447,14 @@ func (e *pipeEncoder) SetLenHint(lenHint int) error {
 
 func (e *pipeEncoder) NextEntry(done bool) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.NextEntryDone = done
-	e.IsBytes = false
 	return e.Err
 }
 func (e *pipeEncoder) NextField(name string) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.NextFieldName = name
 	return e.Err
@@ -411,24 +463,24 @@ func (e *pipeEncoder) NextField(name string) error {
 func (d *pipeDecoder) NextEntry() (bool, error) {
 	top := d.top()
 	if top == nil {
-		return false, d.Enc.closeLocked(errEmptyPipeStack)
+		return false, d.Close(errEmptyPipeStack)
 	}
 	top.Index++
 	var done bool
-	if d.Enc.IsBytes {
+	if d.Enc.EncIsBytes {
+		d.Enc.DecBytesAsEntries = true
 		done = top.Index >= len(d.Enc.ArgBytes)
-		// End handling bytes mode once done.
-		d.Enc.DecHandlingBytes = !done
 	} else {
 		done = d.Enc.NextEntryDone
 	}
 	d.Enc.NextEntryDone = false
 	return done, d.Enc.Err
 }
+
 func (d *pipeDecoder) NextField() (string, error) {
 	top := d.top()
 	if top == nil {
-		return "", d.Enc.closeLocked(errEmptyPipeStack)
+		return "", d.Close(errEmptyPipeStack)
 	}
 	top.Index++
 	name := d.Enc.NextFieldName
@@ -441,8 +493,8 @@ func (d *pipeDecoder) Type() *Type {
 	if top == nil {
 		return nil
 	}
-	if d.Enc.IsBytes && d.Enc.DecHandlingBytes {
-		return ByteType
+	if d.Enc.DecBytesAsEntries {
+		return top.Type.Elem()
 	}
 	return top.Type
 }
@@ -484,7 +536,7 @@ func (d *pipeDecoder) LenHint() int {
 
 func (e *pipeEncoder) EncodeBool(v bool) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgBool = v
 	return e.Err
@@ -496,7 +548,7 @@ func (d *pipeDecoder) DecodeBool() (bool, error) {
 
 func (e *pipeEncoder) EncodeString(v string) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgString = v
 	return e.Err
@@ -508,7 +560,7 @@ func (d *pipeDecoder) DecodeString() (string, error) {
 
 func (e *pipeEncoder) EncodeTypeObject(v *Type) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgType = v
 	return e.Err
@@ -520,7 +572,7 @@ func (d *pipeDecoder) DecodeTypeObject() (*Type, error) {
 
 func (e *pipeEncoder) EncodeUint(v uint64) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgUint = v
 	e.NumberType = numberUint
@@ -531,39 +583,39 @@ func (d *pipeDecoder) DecodeUint(bitlen int) (uint64, error) {
 	const errFmt = "vdl: conversion from %v into uint%d loses precision: %v"
 	top, tt := d.top(), d.Type()
 	if top == nil {
-		return 0, d.Enc.closeLocked(errEmptyPipeStack)
+		return 0, d.Close(errEmptyPipeStack)
 	}
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
-		if d.Enc.IsBytes {
+		if d.Enc.DecBytesAsEntries {
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
 		if shift := 64 - uint(bitlen); x != (x<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return x, d.Enc.Err
 	case numberInt:
 		x := d.Enc.ArgInt
 		ux := uint64(x)
 		if shift := 64 - uint(bitlen); x < 0 || ux != (ux<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return ux, d.Enc.Err
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		ux := uint64(x)
 		if shift := 64 - uint(bitlen); x != float64(ux) || ux != (ux<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return ux, d.Enc.Err
 	}
-	return 0, d.Enc.closeLocked(fmt.Errorf("vdl: incompatible decode from %v into uint%d", tt, bitlen))
+	return 0, d.Close(fmt.Errorf("vdl: incompatible decode from %v into uint%d", tt, bitlen))
 }
 
 func (e *pipeEncoder) EncodeInt(v int64) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgInt = v
 	e.NumberType = numberInt
@@ -574,41 +626,41 @@ func (d *pipeDecoder) DecodeInt(bitlen int) (int64, error) {
 	const errFmt = "vdl: conversion from %v into int%d loses precision: %v"
 	top, tt := d.top(), d.Type()
 	if top == nil {
-		return 0, d.Enc.closeLocked(errEmptyPipeStack)
+		return 0, d.Close(errEmptyPipeStack)
 	}
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
-		if d.Enc.IsBytes {
+		if d.Enc.DecBytesAsEntries {
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
 		ix := int64(x)
 		// The shift uses 65 since the topmost bit is the sign bit.  I.e. 32 bit
 		// numbers should be shifted by 33 rather than 32.
 		if shift := 65 - uint(bitlen); ix < 0 || x != (x<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return ix, d.Enc.Err
 	case numberInt:
 		x := d.Enc.ArgInt
 		if shift := 64 - uint(bitlen); x != (x<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return x, d.Enc.Err
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		ix := int64(x)
 		if shift := 64 - uint(bitlen); x != float64(ix) || ix != (ix<<shift)>>shift {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return ix, d.Enc.Err
 	}
-	return 0, d.Enc.closeLocked(fmt.Errorf("vdl: incompatible decode from %v into int%d", tt, bitlen))
+	return 0, d.Close(fmt.Errorf("vdl: incompatible decode from %v into int%d", tt, bitlen))
 }
 
 func (e *pipeEncoder) EncodeFloat(v float64) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
 	e.ArgFloat = v
 	e.NumberType = numberFloat
@@ -619,12 +671,12 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 	const errFmt = "vdl: conversion from %v into float%d loses precision: %v"
 	top, tt := d.top(), d.Type()
 	if top == nil {
-		return 0, d.Enc.closeLocked(errEmptyPipeStack)
+		return 0, d.Close(errEmptyPipeStack)
 	}
 	switch d.Enc.NumberType {
 	case numberUint:
 		x := d.Enc.ArgUint
-		if d.Enc.IsBytes {
+		if d.Enc.DecBytesAsEntries {
 			x = uint64(d.Enc.ArgBytes[top.Index])
 		}
 		var max uint64
@@ -634,7 +686,7 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 			max = float32MaxInt
 		}
 		if x > max {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return float64(x), d.Enc.Err
 	case numberInt:
@@ -646,175 +698,55 @@ func (d *pipeDecoder) DecodeFloat(bitlen int) (float64, error) {
 			min, max = float32MinInt, float32MaxInt
 		}
 		if x < min || x > max {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return float64(x), d.Enc.Err
 	case numberFloat:
 		x := d.Enc.ArgFloat
 		if bitlen <= 32 && (x < -math.MaxFloat32 || x > math.MaxFloat32) {
-			return 0, d.Enc.closeLocked(fmt.Errorf(errFmt, tt, bitlen, x))
+			return 0, d.Close(fmt.Errorf(errFmt, tt, bitlen, x))
 		}
 		return x, d.Enc.Err
 	}
-	return 0, d.Enc.closeLocked(fmt.Errorf("vdl: incompatible decode from %v into float%d", tt, bitlen))
+	return 0, d.Close(fmt.Errorf("vdl: incompatible decode from %v into float%d", tt, bitlen))
 }
 
 func (e *pipeEncoder) EncodeBytes(v []byte) error {
 	if e.State == pipeStateDecoder {
-		return e.closeLocked(errEncCallDuringDecPhase)
+		return e.Close(errEncCallDuringDecPhase)
 	}
-	e.IsBytes = true
-	e.NumberType = numberUint
+	e.EncIsBytes = true
 	e.ArgBytes = v
+	e.NumberType = numberUint
 	return e.Err
 }
 
-func (d *pipeDecoder) DecodeBytes(fixedLen int, b *[]byte) error {
+func (d *pipeDecoder) DecodeBytes(fixedLen int, value *[]byte) error {
 	top := d.top()
 	if top == nil {
-		return d.Enc.closeLocked(errEmptyPipeStack)
+		return d.Close(errEmptyPipeStack)
 	}
-	if !d.Enc.IsBytes {
-		if err := DecodeConvertedBytes(d, fixedLen, b); err != nil {
-			return d.Enc.closeLocked(err)
+	if !d.Enc.EncIsBytes {
+		if err := DecodeConvertedBytes(d, fixedLen, value); err != nil {
+			return d.Close(err)
 		}
 		return nil
 	}
 	len := len(d.Enc.ArgBytes)
-	if fixedLen >= 0 && fixedLen != len {
-		return d.Enc.closeLocked(fmt.Errorf("vdl: %v got %d bytes, want fixed len %d", d.Type(), len, fixedLen))
+	switch {
+	case fixedLen >= 0 && fixedLen != len:
+		return d.Close(fmt.Errorf("vdl: got %d bytes, want fixed len %d, %v", len, fixedLen, d.Type()))
+	case len == 0:
+		*value = nil
+		return nil
+	case fixedLen >= 0:
+		// Only re-use the existing buffer if we're filling in an array.  This
+		// sacrifices some performance, but also avoids bugs when repeatedly
+		// decoding into the same value.
+		*value = (*value)[:len]
+	default:
+		*value = make([]byte, len)
 	}
-	if cap(*b) >= len {
-		*b = (*b)[:len]
-	} else {
-		*b = make([]byte, len)
-	}
-	copy(*b, d.Enc.ArgBytes)
+	copy(*value, d.Enc.ArgBytes)
 	return d.Enc.Err
-}
-
-// The ReadValue* and NextEntryValue* methods just call methods in sequence.
-
-func (d *pipeDecoder) ReadValueBool() (bool, error) {
-	if err := d.StartValue(BoolType); err != nil {
-		return false, err
-	}
-	value, err := d.DecodeBool()
-	if err != nil {
-		return false, err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueString() (string, error) {
-	if err := d.StartValue(StringType); err != nil {
-		return "", err
-	}
-	value, err := d.DecodeString()
-	if err != nil {
-		return "", err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueUint(bitlen int) (uint64, error) {
-	if err := d.StartValue(Uint64Type); err != nil {
-		return 0, err
-	}
-	value, err := d.DecodeUint(bitlen)
-	if err != nil {
-		return 0, err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueInt(bitlen int) (int64, error) {
-	if err := d.StartValue(Int64Type); err != nil {
-		return 0, err
-	}
-	value, err := d.DecodeInt(bitlen)
-	if err != nil {
-		return 0, err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueFloat(bitlen int) (float64, error) {
-	if err := d.StartValue(Float64Type); err != nil {
-		return 0, err
-	}
-	value, err := d.DecodeFloat(bitlen)
-	if err != nil {
-		return 0, err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueTypeObject() (*Type, error) {
-	if err := d.StartValue(TypeObjectType); err != nil {
-		return nil, err
-	}
-	value, err := d.DecodeTypeObject()
-	if err != nil {
-		return nil, err
-	}
-	return value, d.FinishValue()
-}
-
-func (d *pipeDecoder) ReadValueBytes(fixedLen int, x *[]byte) error {
-	if err := d.StartValue(ttByteList); err != nil {
-		return err
-	}
-	if err := d.DecodeBytes(fixedLen, x); err != nil {
-		return err
-	}
-	return d.FinishValue()
-}
-
-func (d *pipeDecoder) NextEntryValueBool() (done bool, _ bool, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, false, err
-	}
-	value, err := d.ReadValueBool()
-	return false, value, err
-}
-
-func (d *pipeDecoder) NextEntryValueString() (done bool, _ string, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, "", err
-	}
-	value, err := d.ReadValueString()
-	return false, value, err
-}
-
-func (d *pipeDecoder) NextEntryValueUint(bitlen int) (done bool, _ uint64, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, 0, err
-	}
-	value, err := d.ReadValueUint(bitlen)
-	return false, value, err
-}
-
-func (d *pipeDecoder) NextEntryValueInt(bitlen int) (done bool, _ int64, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, 0, err
-	}
-	value, err := d.ReadValueInt(bitlen)
-	return false, value, err
-}
-
-func (d *pipeDecoder) NextEntryValueFloat(bitlen int) (done bool, _ float64, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, 0, err
-	}
-	value, err := d.ReadValueFloat(bitlen)
-	return false, value, err
-}
-
-func (d *pipeDecoder) NextEntryValueTypeObject() (done bool, _ *Type, _ error) {
-	if done, err := d.NextEntry(); done || err != nil {
-		return done, nil, err
-	}
-	value, err := d.ReadValueTypeObject()
-	return false, value, err
 }

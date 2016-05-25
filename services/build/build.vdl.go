@@ -82,13 +82,10 @@ func (x Architecture) VDLIsZero() bool {
 }
 
 func (x Architecture) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_1); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_1, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Architecture) VDLRead(dec vdl.Decoder) error {
@@ -162,13 +159,10 @@ func (x Format) VDLIsZero() bool {
 }
 
 func (x Format) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_2); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_2, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Format) VDLRead(dec vdl.Decoder) error {
@@ -248,13 +242,10 @@ func (x OperatingSystem) VDLIsZero() bool {
 }
 
 func (x OperatingSystem) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_3); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_3, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *OperatingSystem) VDLRead(dec vdl.Decoder) error {
@@ -295,30 +286,12 @@ func (x File) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
 	if len(x.Contents) != 0 {
-		if err := enc.NextField("Contents"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(__VDLType_list_5); err != nil {
-			return err
-		}
-		if err := enc.EncodeBytes(x.Contents); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBytes("Contents", __VDLType_list_5, x.Contents); err != nil {
 			return err
 		}
 	}

@@ -83,13 +83,10 @@ func (x WireRetryCode) VDLIsZero() bool {
 }
 
 func (x WireRetryCode) VDLWrite(enc Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_1); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_1, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *WireRetryCode) VDLRead(dec Decoder) error {
@@ -141,38 +138,17 @@ func (x WireError) VDLWrite(enc Encoder) error {
 		return err
 	}
 	if x.Id != "" {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Id); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Id", StringType, x.Id); err != nil {
 			return err
 		}
 	}
 	if x.RetryCode != WireRetryCodeNoRetry {
-		if err := enc.NextField("RetryCode"); err != nil {
-			return err
-		}
-		if err := x.RetryCode.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("RetryCode", __VDLType_enum_1, x.RetryCode.String()); err != nil {
 			return err
 		}
 	}
 	if x.Msg != "" {
-		if err := enc.NextField("Msg"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Msg); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Msg", StringType, x.Msg); err != nil {
 			return err
 		}
 	}
@@ -197,16 +173,16 @@ func __VDLWriteAnon_list_1(enc Encoder, x []*Value) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
+	for _, elem := range x {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if x[i] == nil {
+		if elem == nil {
 			if err := enc.NilValue(AnyType); err != nil {
 				return err
 			}
 		} else {
-			if err := x[i].VDLWrite(enc); err != nil {
+			if err := elem.VDLWrite(enc); err != nil {
 				return err
 			}
 		}

@@ -367,13 +367,7 @@ func (t *Type) VDLWrite(enc Encoder) error {
 	if t == nil {
 		t = AnyType
 	}
-	if err := enc.StartValue(TypeObjectType); err != nil {
-		return err
-	}
-	if err := enc.EncodeTypeObject(t); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return enc.WriteValueTypeObject(t)
 }
 
 // ptype implements the TypeOrPending interface.

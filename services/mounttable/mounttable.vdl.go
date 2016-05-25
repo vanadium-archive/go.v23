@@ -44,13 +44,10 @@ func (x Tag) VDLIsZero() bool {
 }
 
 func (x Tag) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_string_1); err != nil {
+	if err := enc.WriteValueString(__VDLType_string_1, string(x)); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(string(x)); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Tag) VDLRead(dec vdl.Decoder) error {

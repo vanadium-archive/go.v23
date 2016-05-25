@@ -46,30 +46,12 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Label != "" {
-		if err := enc.NextField("Label"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Label); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Label", vdl.StringType, x.Label); err != nil {
 			return err
 		}
 	}
 	if x.ValueLabel != "" {
-		if err := enc.NextField("ValueLabel"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.ValueLabel); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("ValueLabel", vdl.StringType, x.ValueLabel); err != nil {
 			return err
 		}
 	}
@@ -82,38 +64,17 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Version != 0 {
-		if err := enc.NextField("Version"); err != nil {
-			return err
-		}
-		if err := x.Version.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueUint("Version", __VDLType_byte_2, uint64(x.Version)); err != nil {
 			return err
 		}
 	}
 	if x.HexType != "" {
-		if err := enc.NextField("HexType"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.HexType); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("HexType", vdl.StringType, x.HexType); err != nil {
 			return err
 		}
 	}
 	if x.HexValue != "" {
-		if err := enc.NextField("HexValue"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.HexValue); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("HexValue", vdl.StringType, x.HexValue); err != nil {
 			return err
 		}
 	}

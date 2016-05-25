@@ -43,20 +43,14 @@ func Write(enc Encoder, v interface{}) error {
 func writeNonReflect(enc Encoder, v interface{}) error {
 	switch x := v.(type) {
 	case Writer:
-		// Writer handles the case where x has a code-generated decoder, and
-		// special-cases such as vdl.Value and vom.RawBytes.
+		// Writer handles code-generated VDLWrite methods, and special-cases such as
+		// vdl.Value and vom.RawBytes.
 		return x.VDLWrite(enc)
 
 		// Cases after this point are purely performance optimizations.
 		// TODO(toddw): Handle other common cases.
 	case []byte:
-		if err := enc.StartValue(ttByteList); err != nil {
-			return err
-		}
-		if err := enc.EncodeBytes(x); err != nil {
-			return err
-		}
-		return enc.FinishValue()
+		return enc.WriteValueBytes(ttByteList, x)
 	}
 	return errWriteMustReflect
 }
@@ -160,12 +154,32 @@ func writeReflect(enc Encoder, rv reflect.Value, tt *Type) error {
 			return writeNonNilError(enc, rv.Addr())
 		}
 	}
-	// Handle regular non-nil values.
 	tt = tt.NonOptional()
+	// Handle fastpath values.
+	if ttWriteHasFastpath(tt) {
+		return writeValueFastpath(enc, rv, tt)
+	}
+	// Handle composite wire values.
 	if err := enc.StartValue(tt); err != nil {
 		return err
 	}
-	if err := writeNonNilValue(enc, rv, tt); err != nil {
+	var err error
+	switch tt.Kind() {
+	case Array, List:
+		err = writeArrayOrList(enc, rv, tt)
+	case Set, Map:
+		err = writeSetOrMap(enc, rv, tt)
+	case Struct:
+		err = writeStruct(enc, rv, tt)
+	case Union:
+		err = writeUnion(enc, rv, tt)
+	default:
+		// Special representations like vdl.Type, vdl.Value and vom.RawBytes
+		// implement VDLWrite, and were handled by writeNonReflect.  Nil optional
+		// and any were handled by the pointer-flattening loop.
+		return fmt.Errorf("vdl: Write unhandled type %v %v", rv.Type(), tt)
+	}
+	if err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -185,55 +199,103 @@ func writeNonNilError(enc Encoder, rvNative reflect.Value) error {
 	return writeReflect(enc, rvWirePtr.Elem(), ErrorType)
 }
 
-func writeNonNilValue(enc Encoder, rv reflect.Value, tt *Type) error {
-	// Handle named and unnamed []byte and [N]byte, where the element type is the
-	// unnamed byte type.  Cases like []MyByte fall through and are handled as
-	// regular lists, since we can't easily convert []MyByte to []byte.
-	switch {
-	case tt.Kind() == Array && tt.Elem() == ByteType:
-		var bytes []byte
-		if rv.CanAddr() {
-			bytes = rv.Slice(0, tt.Len()).Interface().([]byte)
-		} else {
-			bytes = make([]byte, tt.Len())
-			reflect.Copy(reflect.ValueOf(bytes), rv)
-		}
-		return enc.EncodeBytes(bytes)
-	case tt.Kind() == List && tt.Elem() == ByteType:
-		bytes := rv.Convert(rtByteList).Interface().([]byte)
-		return enc.EncodeBytes(bytes)
+func extractBytes(rv reflect.Value, tt *Type) []byte {
+	// Go doesn't allow type conversions from []MyByte to []byte, but the reflect
+	// package does let us perform this conversion.
+	if tt.Kind() == List {
+		return rv.Bytes()
 	}
-	// Handle regular non-nil values.
+	switch {
+	case rv.CanAddr():
+		return rv.Slice(0, tt.Len()).Bytes()
+	case tt.Elem() == ByteType:
+		// Unaddressable arrays can't be sliced, so we must copy the bytes.
+		// TODO(toddw): Find a better way to do this.
+		bytes := make([]byte, tt.Len())
+		reflect.Copy(reflect.ValueOf(bytes), rv)
+		return bytes
+	default:
+		// Unaddressable arrays can't be sliced, so we must copy the bytes.
+		// TODO(toddw): Find a better way to do this.
+		rt, len := rv.Type(), tt.Len()
+		rvSlice := reflect.MakeSlice(reflect.SliceOf(rt.Elem()), len, len)
+		reflect.Copy(rvSlice, rv)
+		return rvSlice.Bytes()
+	}
+}
+
+func ttWriteHasFastpath(tt *Type) bool {
+	switch tt.Kind() {
+	case Bool, String, Enum, Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
+		return true
+	}
+	return tt.IsBytes()
+}
+
+func writeValueFastpath(enc Encoder, rv reflect.Value, tt *Type) error {
 	switch tt.Kind() {
 	case Bool:
-		return enc.EncodeBool(rv.Bool())
+		return enc.WriteValueBool(tt, rv.Bool())
 	case String:
-		return enc.EncodeString(rv.String())
+		return enc.WriteValueString(tt, rv.String())
 	case Enum:
 		// TypeFromReflect already validated String(); call without error checking.
-		label := rv.Interface().(stringer).String()
-		return enc.EncodeString(label)
+		return enc.WriteValueString(tt, rv.Interface().(stringer).String())
 	case Byte, Uint16, Uint32, Uint64:
-		return enc.EncodeUint(rv.Uint())
+		return enc.WriteValueUint(tt, rv.Uint())
 	case Int8, Int16, Int32, Int64:
-		return enc.EncodeInt(rv.Int())
+		return enc.WriteValueInt(tt, rv.Int())
 	case Float32, Float64:
-		return enc.EncodeFloat(rv.Float())
-	case Array, List:
-		return writeArrayOrList(enc, rv, tt)
-	case Set, Map:
-		return writeSetOrMap(enc, rv, tt)
-	case Struct:
-		return writeStruct(enc, rv, tt)
-	case Union:
-		return writeUnion(enc, rv, tt)
+		return enc.WriteValueFloat(tt, rv.Float())
 	}
-	// Special representations like vdl.Type, vdl.Value and vom.RawBytes all
-	// implement VDLWrite, and should have been handled by writeNonReflect.  Nil
-	// optional and any should have been handled by the pointer-flattening loop in
-	// writeReflect.  Non-nil optional should have been flattened after the loop,
-	// while non-nil any should have flattened itself down to a non-any type.
-	return fmt.Errorf("vdl: Write unhandled type %v %v", rv.Type(), tt)
+	if !tt.IsBytes() {
+		return fmt.Errorf("vdl: writeValueFastpath called on non-fastpath type %v, %v", tt, rv.Type())
+	}
+	return enc.WriteValueBytes(tt, extractBytes(rv, tt))
+}
+
+func writeNextEntryFastpath(enc Encoder, rv reflect.Value, tt *Type) error {
+	switch tt.Kind() {
+	case Bool:
+		return enc.NextEntryValueBool(tt, rv.Bool())
+	case String:
+		return enc.NextEntryValueString(tt, rv.String())
+	case Enum:
+		// TypeFromReflect already validated String(); call without error checking.
+		return enc.NextEntryValueString(tt, rv.Interface().(stringer).String())
+	case Byte, Uint16, Uint32, Uint64:
+		return enc.NextEntryValueUint(tt, rv.Uint())
+	case Int8, Int16, Int32, Int64:
+		return enc.NextEntryValueInt(tt, rv.Int())
+	case Float32, Float64:
+		return enc.NextEntryValueFloat(tt, rv.Float())
+	}
+	if !tt.IsBytes() {
+		return fmt.Errorf("vdl: writeNextEntryFastpath called on non-fastpath type %v, %v", tt, rv.Type())
+	}
+	return enc.NextEntryValueBytes(tt, extractBytes(rv, tt))
+}
+
+func writeNextFieldFastpath(enc Encoder, rv reflect.Value, tt *Type, name string) error {
+	switch tt.Kind() {
+	case Bool:
+		return enc.NextFieldValueBool(name, tt, rv.Bool())
+	case String:
+		return enc.NextFieldValueString(name, tt, rv.String())
+	case Enum:
+		// TypeFromReflect already validated String(); call without error checking.
+		return enc.NextFieldValueString(name, tt, rv.Interface().(stringer).String())
+	case Byte, Uint16, Uint32, Uint64:
+		return enc.NextFieldValueUint(name, tt, rv.Uint())
+	case Int8, Int16, Int32, Int64:
+		return enc.NextFieldValueInt(name, tt, rv.Int())
+	case Float32, Float64:
+		return enc.NextFieldValueFloat(name, tt, rv.Float())
+	}
+	if !tt.IsBytes() {
+		return fmt.Errorf("vdl: writeNextFieldFastpath called on non-fastpath type %v, %v", tt, rv.Type())
+	}
+	return enc.NextFieldValueBytes(name, tt, extractBytes(rv, tt))
 }
 
 func writeArrayOrList(enc Encoder, rv reflect.Value, tt *Type) error {
@@ -242,12 +304,20 @@ func writeArrayOrList(enc Encoder, rv reflect.Value, tt *Type) error {
 			return err
 		}
 	}
+	ttElem := tt.Elem()
 	for ix := 0; ix < rv.Len(); ix++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := writeReflect(enc, rv.Index(ix), tt.Elem()); err != nil {
-			return err
+		rvElem := rv.Index(ix)
+		if ttWriteHasFastpath(ttElem) {
+			if err := writeNextEntryFastpath(enc, rvElem, ttElem); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.NextEntry(false); err != nil {
+				return err
+			}
+			if err := writeReflect(enc, rvElem, ttElem); err != nil {
+				return err
+			}
 		}
 	}
 	return enc.NextEntry(true)
@@ -257,14 +327,21 @@ func writeSetOrMap(enc Encoder, rv reflect.Value, tt *Type) error {
 	if err := enc.SetLenHint(rv.Len()); err != nil {
 		return err
 	}
+	kind, ttKey := tt.Kind(), tt.Key()
 	for _, rvKey := range rv.MapKeys() {
-		if err := enc.NextEntry(false); err != nil {
-			return err
+		if ttWriteHasFastpath(ttKey) {
+			if err := writeNextEntryFastpath(enc, rvKey, ttKey); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.NextEntry(false); err != nil {
+				return err
+			}
+			if err := writeReflect(enc, rvKey, ttKey); err != nil {
+				return err
+			}
 		}
-		if err := writeReflect(enc, rvKey, tt.Key()); err != nil {
-			return err
-		}
-		if tt.Kind() == Map {
+		if kind == Map {
 			if err := writeReflect(enc, rv.MapIndex(rvKey), tt.Elem()); err != nil {
 				return err
 			}
@@ -288,11 +365,17 @@ func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
 		case isZero:
 			continue // skip zero-valued fields
 		}
-		if err := enc.NextField(field.Name); err != nil {
-			return err
-		}
-		if err := writeReflect(enc, rvField, field.Type); err != nil {
-			return err
+		if ttWriteHasFastpath(field.Type) {
+			if err := writeNextFieldFastpath(enc, rvField, field.Type, field.Name); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.NextField(field.Name); err != nil {
+				return err
+			}
+			if err := writeReflect(enc, rvField, field.Type); err != nil {
+				return err
+			}
 		}
 	}
 	return enc.NextField("")
@@ -302,14 +385,21 @@ func writeUnion(enc Encoder, rv reflect.Value, tt *Type) error {
 	// TypeFromReflect already validated Name() and Index().
 	iface := rv.Interface()
 	name, index := iface.(namer).Name(), iface.(indexer).Index()
-	if err := enc.NextField(name); err != nil {
-		return err
-	}
+	ttField := tt.Field(index).Type
 	// Since this is a non-nil union, we're guaranteed rv is the concrete field
 	// struct, so we can just grab the "Value" field.
 	rvField := rv.Field(0)
-	if err := writeReflect(enc, rvField, tt.Field(index).Type); err != nil {
-		return err
+	if ttWriteHasFastpath(ttField) {
+		if err := writeNextFieldFastpath(enc, rvField, ttField, name); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.NextField(name); err != nil {
+			return err
+		}
+		if err := writeReflect(enc, rvField, ttField); err != nil {
+			return err
+		}
 	}
 	return enc.NextField("")
 }

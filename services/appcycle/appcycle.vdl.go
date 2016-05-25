@@ -50,30 +50,12 @@ func (x Task) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Progress != 0 {
-		if err := enc.NextField("Progress"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Progress)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Progress", vdl.Int32Type, int64(x.Progress)); err != nil {
 			return err
 		}
 	}
 	if x.Goal != 0 {
-		if err := enc.NextField("Goal"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Goal)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Goal", vdl.Int32Type, int64(x.Goal)); err != nil {
 			return err
 		}
 	}

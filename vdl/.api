@@ -201,7 +201,7 @@ pkg vdl, type Decoder interface, ReadValueUint(int) (uint64, error)
 pkg vdl, type Decoder interface, SkipValue() error
 pkg vdl, type Decoder interface, StartValue(*Type) error
 pkg vdl, type Decoder interface, Type() *Type
-pkg vdl, type Encoder interface { EncodeBool, EncodeBytes, EncodeFloat, EncodeInt, EncodeString, EncodeTypeObject, EncodeUint, FinishValue, NextEntry, NextField, NilValue, SetLenHint, SetNextStartValueIsOptional, StartValue }
+pkg vdl, type Encoder interface { EncodeBool, EncodeBytes, EncodeFloat, EncodeInt, EncodeString, EncodeTypeObject, EncodeUint, FinishValue, NextEntry, NextEntryValueBool, NextEntryValueBytes, NextEntryValueFloat, NextEntryValueInt, NextEntryValueString, NextEntryValueTypeObject, NextEntryValueUint, NextField, NextFieldValueBool, NextFieldValueBytes, NextFieldValueFloat, NextFieldValueInt, NextFieldValueString, NextFieldValueTypeObject, NextFieldValueUint, NilValue, SetLenHint, SetNextStartValueIsOptional, StartValue, WriteValueBool, WriteValueBytes, WriteValueFloat, WriteValueInt, WriteValueString, WriteValueTypeObject, WriteValueUint }
 pkg vdl, type Encoder interface, EncodeBool(bool) error
 pkg vdl, type Encoder interface, EncodeBytes([]byte) error
 pkg vdl, type Encoder interface, EncodeFloat(float64) error
@@ -211,11 +211,32 @@ pkg vdl, type Encoder interface, EncodeTypeObject(*Type) error
 pkg vdl, type Encoder interface, EncodeUint(uint64) error
 pkg vdl, type Encoder interface, FinishValue() error
 pkg vdl, type Encoder interface, NextEntry(bool) error
+pkg vdl, type Encoder interface, NextEntryValueBool(*Type, bool) error
+pkg vdl, type Encoder interface, NextEntryValueBytes(*Type, []byte) error
+pkg vdl, type Encoder interface, NextEntryValueFloat(*Type, float64) error
+pkg vdl, type Encoder interface, NextEntryValueInt(*Type, int64) error
+pkg vdl, type Encoder interface, NextEntryValueString(*Type, string) error
+pkg vdl, type Encoder interface, NextEntryValueTypeObject(*Type) error
+pkg vdl, type Encoder interface, NextEntryValueUint(*Type, uint64) error
 pkg vdl, type Encoder interface, NextField(string) error
+pkg vdl, type Encoder interface, NextFieldValueBool(string, *Type, bool) error
+pkg vdl, type Encoder interface, NextFieldValueBytes(string, *Type, []byte) error
+pkg vdl, type Encoder interface, NextFieldValueFloat(string, *Type, float64) error
+pkg vdl, type Encoder interface, NextFieldValueInt(string, *Type, int64) error
+pkg vdl, type Encoder interface, NextFieldValueString(string, *Type, string) error
+pkg vdl, type Encoder interface, NextFieldValueTypeObject(string, *Type) error
+pkg vdl, type Encoder interface, NextFieldValueUint(string, *Type, uint64) error
 pkg vdl, type Encoder interface, NilValue(*Type) error
 pkg vdl, type Encoder interface, SetLenHint(int) error
 pkg vdl, type Encoder interface, SetNextStartValueIsOptional()
 pkg vdl, type Encoder interface, StartValue(*Type) error
+pkg vdl, type Encoder interface, WriteValueBool(*Type, bool) error
+pkg vdl, type Encoder interface, WriteValueBytes(*Type, []byte) error
+pkg vdl, type Encoder interface, WriteValueFloat(*Type, float64) error
+pkg vdl, type Encoder interface, WriteValueInt(*Type, int64) error
+pkg vdl, type Encoder interface, WriteValueString(*Type, string) error
+pkg vdl, type Encoder interface, WriteValueTypeObject(*Type) error
+pkg vdl, type Encoder interface, WriteValueUint(*Type, uint64) error
 pkg vdl, type Equaler interface { VDLEqual }
 pkg vdl, type Equaler interface, VDLEqual(interface{}) bool
 pkg vdl, type Field struct

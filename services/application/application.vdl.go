@@ -49,16 +49,7 @@ func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.File != "" {
-		if err := enc.NextField("File"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.File); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("File", vdl.StringType, x.File); err != nil {
 			return err
 		}
 	}
@@ -144,16 +135,7 @@ func (x Packages) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
 		if err := elem.VDLWrite(enc); err != nil {
@@ -271,16 +253,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Title != "" {
-		if err := enc.NextField("Title"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Title); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Title", vdl.StringType, x.Title); err != nil {
 			return err
 		}
 	}
@@ -329,16 +302,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Restarts != 0 {
-		if err := enc.NextField("Restarts"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Restarts)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Restarts", vdl.Int32Type, int64(x.Restarts)); err != nil {
 			return err
 		}
 	}
@@ -367,17 +331,8 @@ func __VDLWriteAnon_list_1(enc vdl.Encoder, x []string) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x[i]); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+	for _, elem := range x {
+		if err := enc.NextEntryValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}

@@ -19,6 +19,7 @@ func (v Version) String() string {
 
 var (
 	errEmptyEncoderStack       = errors.New("vom: empty encoder stack")
+	errEntriesMustSetLenHint   = errors.New("vom: entries must set LenHint")
 	errLabelNotInType          = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
 	errUnsupportedInVOMVersion = verror.Register(pkgPath+".errUnsupportedInVOMVersion", verror.NoRetry, "{1:}{2:} {3} unsupported in vom version {4}{:_}")
 	errUnusedTypeIds           = verror.Register(pkgPath+".errUnusedTypeIds", verror.NoRetry, "{1:}{2:} vom: some type ids unused during encode {:_}")
@@ -144,11 +145,12 @@ type xEncoder struct {
 	tids    *typeIDList
 	anyLens *anyLenList
 
-	// TODO(bprosnitz) get rid of these fields
+	mid                           int64
 	hasLen, hasAny, hasTypeObject bool
 	typeIncomplete                bool
-	mid                           int64
-	nextStartValueOptional        bool
+
+	isParentBytes            bool // parent type is []byte or [N]byte
+	nextStartValueIsOptional bool // next StartValue is an optional type
 
 	// msgType captures the type of the top-level value.  Unlike stack[0].Type, it
 	// also captures optionality for non-nil types.
@@ -168,23 +170,20 @@ type encoderStackEntry struct {
 // We can only determine whether the next value is AnyType
 // by checking the next type of the entry.
 func (entry *encoderStackEntry) nextValueIsAny() bool {
-	if entry == nil {
-		return false
-	}
-	switch entry.Type.Kind() {
+	switch tt := entry.Type; tt.Kind() {
 	case vdl.List, vdl.Array:
-		return entry.Type.Elem() == vdl.AnyType
+		return tt.Elem() == vdl.AnyType
 	case vdl.Set:
-		return entry.Type.Key() == vdl.AnyType
+		return tt.Key() == vdl.AnyType
 	case vdl.Map:
 		// NumStarted is already incremented by the time we check it.
 		if entry.NumStarted%2 == 1 {
-			return entry.Type.Key() == vdl.AnyType
+			return tt.Key() == vdl.AnyType
 		} else {
-			return entry.Type.Elem() == vdl.AnyType
+			return tt.Elem() == vdl.AnyType
 		}
 	case vdl.Struct, vdl.Union:
-		return entry.Type.Field(entry.Index).Type == vdl.AnyType
+		return tt.Field(entry.Index).Type == vdl.AnyType
 	}
 	return false
 }
@@ -215,7 +214,7 @@ func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) 
 }
 
 func (e *xEncoder) SetNextStartValueIsOptional() {
-	e.nextStartValueOptional = true
+	e.nextStartValueIsOptional = true
 }
 
 func (e *xEncoder) NilValue(tt *vdl.Type) error {
@@ -224,16 +223,17 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 	default:
 		return fmt.Errorf("concrete types disallowed for NilValue (type was %v)", tt)
 	}
-
-	if len(e.stack) == 0 {
+	// Handle StartValue logic.
+	top, isOptionalInsideAny := e.top(), false
+	if top == nil {
 		if err := e.startMessage(tt); err != nil {
 			return err
 		}
+	} else {
+		isOptionalInsideAny = top.nextValueIsAny() && tt.Kind() == vdl.Optional
 	}
-
-	nextValueIsAny := e.top().nextValueIsAny()
 	var anyRef anyStartRef
-	if nextValueIsAny && tt.Kind() == vdl.Optional {
+	if isOptionalInsideAny {
 		tid, err := e.typeEnc.encode(tt)
 		if err != nil {
 			return err
@@ -242,17 +242,18 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 		anyRef = e.anyLens.StartAny(e.buf.Len())
 		binaryEncodeUint(e.buf, uint64(anyRef.index))
 	}
+	// Encode the nil control byte.
 	binaryEncodeControl(e.buf, WireCtrlNil)
-	if nextValueIsAny && tt.Kind() == vdl.Optional {
+	// Handle FinishValue logic.
+	if isOptionalInsideAny {
 		e.anyLens.FinishAny(anyRef, e.buf.Len())
 	}
-
-	if len(e.stack) == 0 {
+	if top == nil {
 		if err := e.finishMessage(); err != nil {
 			return err
 		}
 	}
-	e.nextStartValueOptional = false
+	e.nextStartValueIsOptional = false
 	return nil
 }
 
@@ -261,44 +262,43 @@ func (e *xEncoder) StartValue(tt *vdl.Type) error {
 	case vdl.Any, vdl.Optional:
 		return fmt.Errorf("only concrete types allowed for StartValue (type was %v)", tt)
 	}
-
-	if len(e.stack) == 0 {
+	var anyRef anyStartRef
+	top := e.top()
+	if top == nil {
+		e.isParentBytes = false
 		msgType := tt
-		if e.nextStartValueOptional {
+		if e.nextStartValueIsOptional {
 			msgType = vdl.OptionalType(tt)
 		}
 		if err := e.startMessage(msgType); err != nil {
 			return err
 		}
-	}
-
-	top := e.top()
-	if top != nil {
+	} else {
+		e.isParentBytes = top.Type.IsBytes()
 		top.NumStarted++
-	}
-
-	var anyRef anyStartRef
-	if top.nextValueIsAny() {
-		anyType := tt
-		if e.nextStartValueOptional {
-			anyType = vdl.OptionalType(tt)
+		// Handle Any types, which need the Any header to be written.
+		if top.nextValueIsAny() {
+			anyType := tt
+			if e.nextStartValueIsOptional {
+				anyType = vdl.OptionalType(tt)
+			}
+			tid, err := e.typeEnc.encode(anyType)
+			if err != nil {
+				return err
+			}
+			binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
+			anyRef = e.anyLens.StartAny(e.buf.Len())
+			binaryEncodeUint(e.buf, uint64(anyRef.index))
 		}
-		tid, err := e.typeEnc.encode(anyType)
-		if err != nil {
-			return err
-		}
-		binaryEncodeUint(e.buf, e.tids.ReferenceTypeID(tid))
-		anyRef = e.anyLens.StartAny(e.buf.Len())
-		binaryEncodeUint(e.buf, uint64(anyRef.index))
 	}
-
+	// Add entry to the stack.
 	e.stack = append(e.stack, encoderStackEntry{
 		Type:    tt,
-		AnyRef:  anyRef,
 		Index:   -1,
 		LenHint: -1,
+		AnyRef:  anyRef,
 	})
-	e.nextStartValueOptional = false
+	e.nextStartValueIsOptional = false
 	return nil
 }
 
@@ -339,18 +339,18 @@ func (e *xEncoder) startMessage(tt *vdl.Type) error {
 }
 
 func (e *xEncoder) FinishValue() error {
-	top := e.top()
-	if top == nil {
+	e.isParentBytes = false
+	oldStackTop := len(e.stack) - 1
+	if oldStackTop == -1 {
 		return errEmptyDecoderStack
 	}
-	e.stack = e.stack[:len(e.stack)-1]
-	if e.top().nextValueIsAny() {
-		e.anyLens.FinishAny(top.AnyRef, e.buf.Len())
+	anyRef := e.stack[oldStackTop].AnyRef
+	e.stack = e.stack[:oldStackTop]
+	if oldStackTop == 0 {
+		return e.finishMessage()
 	}
-	if len(e.stack) == 0 {
-		if err := e.finishMessage(); err != nil {
-			return err
-		}
+	if newTop := e.stack[oldStackTop-1]; newTop.nextValueIsAny() {
+		e.anyLens.FinishAny(anyRef, e.buf.Len())
 	}
 	return nil
 }
@@ -424,10 +424,10 @@ func (e *xEncoder) NextEntry(done bool) error {
 			binaryEncodeUint(e.buf, uint64(top.LenHint))
 		}
 	}
-	if done && top.Type.Kind() != vdl.Array && top.LenHint < 0 {
-		// emit collection terminator
+	if done && top.Type.Kind() != vdl.Array && top.LenHint == -1 {
+		// TODO(toddw): Emit collection terminator.
 		// binaryEncodeControl(e.buf, WireCtrlCollectionTerminator)
-		panic("null terminator case not yet supported")
+		return errEntriesMustSetLenHint
 	}
 	return nil
 }
@@ -443,12 +443,10 @@ func (e *xEncoder) NextField(name string) error {
 		}
 		return nil
 	}
-	_, index := top.Type.FieldByName(name)
-	if index < 0 {
-		return fmt.Errorf("vom: encoder: invalid field %q", name)
+	if _, top.Index = top.Type.FieldByName(name); top.Index == -1 {
+		return fmt.Errorf("vom: NextField called with invalid field %q", name)
 	}
-	binaryEncodeUint(e.buf, uint64(index))
-	top.Index = index
+	binaryEncodeUint(e.buf, uint64(top.Index))
 	return nil
 }
 
@@ -466,76 +464,68 @@ func (e *xEncoder) SetLenHint(lenHint int) error {
 	return nil
 }
 
-func (e *xEncoder) EncodeBool(v bool) error {
-	binaryEncodeBool(e.buf, v)
+func (e *xEncoder) EncodeBool(value bool) error {
+	binaryEncodeBool(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeUint(v uint64) error {
+func (e *xEncoder) EncodeUint(value uint64) error {
 	// Handle a special-case where normally single bytes are written out as
 	// variable sized numbers, which use 2 bytes to encode bytes > 127.  But each
 	// byte contained in a list or array is written out as one byte.  E.g.
 	//   byte(0x81)         -> 0xFF81   : single byte with variable-size
 	//   []byte("\x81\x82") -> 0x028182 : each elem byte encoded as one byte
-	if stackTop2 := len(e.stack) - 2; stackTop2 >= 0 {
-		if top2 := e.stack[stackTop2]; top2.Type.IsBytes() {
-			e.buf.WriteOneByte(byte(v))
-			return nil
-		}
+	if e.isParentBytes {
+		e.buf.WriteOneByte(byte(value))
+	} else {
+		binaryEncodeUint(e.buf, value)
 	}
-	binaryEncodeUint(e.buf, v)
 	return nil
 }
 
-func (e *xEncoder) EncodeInt(v int64) error {
-	binaryEncodeInt(e.buf, v)
+func (e *xEncoder) EncodeInt(value int64) error {
+	binaryEncodeInt(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeFloat(v float64) error {
-	binaryEncodeFloat(e.buf, v)
+func (e *xEncoder) EncodeFloat(value float64) error {
+	binaryEncodeFloat(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeBytes(v []byte) error {
+func (e *xEncoder) EncodeBytes(value []byte) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
 	}
-	switch top.Type.Kind() {
-	case vdl.List:
-		binaryEncodeUint(e.buf, uint64(len(v)))
-	case vdl.Array:
+	if top.Type.Kind() == vdl.Array {
 		binaryEncodeUint(e.buf, 0)
-	default:
-		return fmt.Errorf("invalid kind: %v", top.Type.Kind())
+	} else {
+		binaryEncodeUint(e.buf, uint64(len(value)))
 	}
-	e.buf.Write(v)
+	e.buf.Write(value)
 	return nil
 }
 
-func (e *xEncoder) EncodeString(v string) error {
+func (e *xEncoder) EncodeString(value string) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
 	}
-	switch top.Type.Kind() {
-	case vdl.String:
-		binaryEncodeString(e.buf, v)
-	case vdl.Enum:
-		index := top.Type.EnumIndex(v)
+	if tt := top.Type; tt.Kind() == vdl.Enum {
+		index := tt.EnumIndex(value)
 		if index < 0 {
-			return verror.New(errLabelNotInType, nil, v, top.Type)
+			return verror.New(errLabelNotInType, nil, value, tt)
 		}
 		binaryEncodeUint(e.buf, uint64(index))
-	default:
-		return fmt.Errorf("invalid kind: %v", top.Type.Kind())
+	} else {
+		binaryEncodeString(e.buf, value)
 	}
 	return nil
 }
 
-func (e *xEncoder) EncodeTypeObject(v *vdl.Type) error {
-	tid, err := e.typeEnc.encode(v)
+func (e *xEncoder) EncodeTypeObject(value *vdl.Type) error {
+	tid, err := e.typeEnc.encode(value)
 	if err != nil {
 		return err
 	}

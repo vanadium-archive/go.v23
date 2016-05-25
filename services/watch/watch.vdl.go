@@ -167,13 +167,10 @@ func (x ResumeMarker) VDLIsZero() bool {
 }
 
 func (x ResumeMarker) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_list_1); err != nil {
+	if err := enc.WriteValueBytes(__VDLType_list_1, []byte(x)); err != nil {
 		return err
 	}
-	if err := enc.EncodeBytes([]byte(x)); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *ResumeMarker) VDLRead(dec vdl.Decoder) error {
@@ -216,24 +213,12 @@ func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Pattern != "" {
-		if err := enc.NextField("Pattern"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Pattern); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Pattern", vdl.StringType, x.Pattern); err != nil {
 			return err
 		}
 	}
 	if len(x.ResumeMarker) != 0 {
-		if err := enc.NextField("ResumeMarker"); err != nil {
-			return err
-		}
-		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueBytes("ResumeMarker", __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
 			return err
 		}
 	}
@@ -327,30 +312,12 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
 	if x.State != 0 {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.State)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("State", vdl.Int32Type, int64(x.State)); err != nil {
 			return err
 		}
 	}
@@ -363,24 +330,12 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.ResumeMarker) != 0 {
-		if err := enc.NextField("ResumeMarker"); err != nil {
-			return err
-		}
-		if err := x.ResumeMarker.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueBytes("ResumeMarker", __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
 			return err
 		}
 	}
 	if x.Continued {
-		if err := enc.NextField("Continued"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.Continued); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("Continued", vdl.BoolType, x.Continued); err != nil {
 			return err
 		}
 	}

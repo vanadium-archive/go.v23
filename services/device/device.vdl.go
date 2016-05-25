@@ -51,25 +51,10 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -164,13 +149,10 @@ func (x InstallationState) VDLIsZero() bool {
 }
 
 func (x InstallationState) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_2); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_2, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *InstallationState) VDLRead(dec vdl.Decoder) error {
@@ -263,13 +245,10 @@ func (x InstanceState) VDLIsZero() bool {
 }
 
 func (x InstanceState) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_3); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_3, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *InstanceState) VDLRead(dec vdl.Decoder) error {
@@ -305,24 +284,12 @@ func (x InstanceStatus) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.State != InstanceStateLaunching {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := x.State.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("State", __VDLType_enum_3, x.State.String()); err != nil {
 			return err
 		}
 	}
 	if x.Version != "" {
-		if err := enc.NextField("Version"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Version); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Version", vdl.StringType, x.Version); err != nil {
 			return err
 		}
 	}
@@ -390,24 +357,12 @@ func (x InstallationStatus) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.State != InstallationStateActive {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := x.State.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("State", __VDLType_enum_2, x.State.String()); err != nil {
 			return err
 		}
 	}
 	if x.Version != "" {
-		if err := enc.NextField("Version"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Version); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Version", vdl.StringType, x.Version); err != nil {
 			return err
 		}
 	}
@@ -475,24 +430,12 @@ func (x DeviceStatus) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.State != InstanceStateLaunching {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := x.State.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("State", __VDLType_enum_3, x.State.String()); err != nil {
 			return err
 		}
 	}
 	if x.Version != "" {
-		if err := enc.NextField("Version"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Version); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Version", vdl.StringType, x.Version); err != nil {
 			return err
 		}
 	}
@@ -735,16 +678,7 @@ func (x BlessServerMessageInstancePublicKey) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_9); err != nil {
 		return err
 	}
-	if err := enc.NextField("InstancePublicKey"); err != nil {
-		return err
-	}
-	if err := enc.StartValue(__VDLType_list_8); err != nil {
-		return err
-	}
-	if err := enc.EncodeBytes(x.Value); err != nil {
-		return err
-	}
-	if err := enc.FinishValue(); err != nil {
+	if err := enc.NextFieldValueBytes("InstancePublicKey", __VDLType_list_8, x.Value); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -927,16 +861,7 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[string]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
 	}
@@ -1016,30 +941,12 @@ func (x Association) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.IdentityName != "" {
-		if err := enc.NextField("IdentityName"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.IdentityName); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("IdentityName", vdl.StringType, x.IdentityName); err != nil {
 			return err
 		}
 	}
 	if x.AccountName != "" {
-		if err := enc.NextField("AccountName"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.AccountName); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("AccountName", vdl.StringType, x.AccountName); err != nil {
 			return err
 		}
 	}

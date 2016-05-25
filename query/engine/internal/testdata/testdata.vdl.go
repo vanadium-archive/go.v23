@@ -40,58 +40,22 @@ func (x AddressInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Street != "" {
-		if err := enc.NextField("Street"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Street); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Street", vdl.StringType, x.Street); err != nil {
 			return err
 		}
 	}
 	if x.City != "" {
-		if err := enc.NextField("City"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.City); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("City", vdl.StringType, x.City); err != nil {
 			return err
 		}
 	}
 	if x.State != "" {
-		if err := enc.NextField("State"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.State); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("State", vdl.StringType, x.State); err != nil {
 			return err
 		}
 	}
 	if x.Zip != "" {
-		if err := enc.NextField("Zip"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Zip); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Zip", vdl.StringType, x.Zip); err != nil {
 			return err
 		}
 	}
@@ -208,13 +172,10 @@ func (x CreditAgency) VDLIsZero() bool {
 }
 
 func (x CreditAgency) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_2); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_2, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *CreditAgency) VDLRead(dec vdl.Decoder) error {
@@ -281,13 +242,10 @@ func (x ExperianRating) VDLIsZero() bool {
 }
 
 func (x ExperianRating) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_3); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_3, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *ExperianRating) VDLRead(dec vdl.Decoder) error {
@@ -317,17 +275,8 @@ func (x RatingsArray) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_array_4); err != nil {
 		return err
 	}
-	for i := 0; i < 4; i++ {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x[i])); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+	for _, elem := range x {
+		if err := enc.NextEntryValueInt(vdl.Int16Type, int64(elem)); err != nil {
 			return err
 		}
 	}
@@ -379,16 +328,7 @@ func (x EquifaxCreditReport) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Rating != 0 {
-		if err := enc.NextField("Rating"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(x.Rating)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("Rating", vdl.ByteType, uint64(x.Rating)); err != nil {
 			return err
 		}
 	}
@@ -496,13 +436,10 @@ func (x Tdh) VDLIsZero() bool {
 }
 
 func (x Tdh) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_6); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_6, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *Tdh) VDLRead(dec vdl.Decoder) error {
@@ -546,10 +483,7 @@ func (x ExperianCreditReport) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Rating != ExperianRatingGood {
-		if err := enc.NextField("Rating"); err != nil {
-			return err
-		}
-		if err := x.Rating.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("Rating", __VDLType_enum_3, x.Rating.String()); err != nil {
 			return err
 		}
 	}
@@ -562,10 +496,7 @@ func (x ExperianCreditReport) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Auditor != TdhTom {
-		if err := enc.NextField("Auditor"); err != nil {
-			return err
-		}
-		if err := x.Auditor.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("Auditor", __VDLType_enum_6, x.Auditor.String()); err != nil {
 			return err
 		}
 	}
@@ -583,10 +514,7 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[Tdh]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := key.VDLWrite(enc); err != nil {
+		if err := enc.NextEntryValueString(__VDLType_enum_6, key.String()); err != nil {
 			return err
 		}
 	}
@@ -692,16 +620,7 @@ func (x TransUnionCreditReport) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Rating != 0 {
-		if err := enc.NextField("Rating"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.Rating)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Rating", vdl.Int16Type, int64(x.Rating)); err != nil {
 			return err
 		}
 	}
@@ -727,25 +646,10 @@ func __VDLWriteAnon_map_2(enc vdl.Encoder, x map[string]int16) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(elem)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueInt(vdl.Int16Type, int64(elem)); err != nil {
 			return err
 		}
 	}
@@ -991,10 +895,7 @@ func (x CreditReport) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Agency != CreditAgencyEquifax {
-		if err := enc.NextField("Agency"); err != nil {
-			return err
-		}
-		if err := x.Agency.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueString("Agency", __VDLType_enum_2, x.Agency.String()); err != nil {
 			return err
 		}
 	}
@@ -1089,44 +990,17 @@ func (x Customer) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
 	if x.Id != 0 {
-		if err := enc.NextField("Id"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Id); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Id", vdl.Int64Type, x.Id); err != nil {
 			return err
 		}
 	}
 	if x.Active {
-		if err := enc.NextField("Active"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.Active); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("Active", vdl.BoolType, x.Active); err != nil {
 			return err
 		}
 	}
@@ -1167,11 +1041,11 @@ func __VDLWriteAnon_list_3(enc vdl.Encoder, x []AddressInfo) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
+	for _, elem := range x {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := x[i].VDLWrite(enc); err != nil {
+		if err := elem.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
@@ -1301,30 +1175,12 @@ func (x Invoice) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.CustId != 0 {
-		if err := enc.NextField("CustId"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.CustId); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("CustId", vdl.Int64Type, x.CustId); err != nil {
 			return err
 		}
 	}
 	if x.InvoiceNum != 0 {
-		if err := enc.NextField("InvoiceNum"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.InvoiceNum); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("InvoiceNum", vdl.Int64Type, x.InvoiceNum); err != nil {
 			return err
 		}
 	}
@@ -1341,16 +1197,7 @@ func (x Invoice) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Amount != 0 {
-		if err := enc.NextField("Amount"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.Amount); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("Amount", vdl.Int64Type, x.Amount); err != nil {
 			return err
 		}
 	}
@@ -1448,128 +1295,47 @@ func (x Numbers) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.B != 0 {
-		if err := enc.NextField("B"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(x.B)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("B", vdl.ByteType, uint64(x.B)); err != nil {
 			return err
 		}
 	}
 	if x.Ui16 != 0 {
-		if err := enc.NextField("Ui16"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(x.Ui16)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("Ui16", vdl.Uint16Type, uint64(x.Ui16)); err != nil {
 			return err
 		}
 	}
 	if x.Ui32 != 0 {
-		if err := enc.NextField("Ui32"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(x.Ui32)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("Ui32", vdl.Uint32Type, uint64(x.Ui32)); err != nil {
 			return err
 		}
 	}
 	if x.Ui64 != 0 {
-		if err := enc.NextField("Ui64"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(x.Ui64); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("Ui64", vdl.Uint64Type, x.Ui64); err != nil {
 			return err
 		}
 	}
 	if x.I16 != 0 {
-		if err := enc.NextField("I16"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.I16)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("I16", vdl.Int16Type, int64(x.I16)); err != nil {
 			return err
 		}
 	}
 	if x.I32 != 0 {
-		if err := enc.NextField("I32"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(x.I32)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("I32", vdl.Int32Type, int64(x.I32)); err != nil {
 			return err
 		}
 	}
 	if x.I64 != 0 {
-		if err := enc.NextField("I64"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(x.I64); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueInt("I64", vdl.Int64Type, x.I64); err != nil {
 			return err
 		}
 	}
 	if x.F32 != 0 {
-		if err := enc.NextField("F32"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(x.F32)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("F32", vdl.Float32Type, float64(x.F32)); err != nil {
 			return err
 		}
 	}
 	if x.F64 != 0 {
-		if err := enc.NextField("F64"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(x.F64); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("F64", vdl.Float64Type, x.F64); err != nil {
 			return err
 		}
 	}
@@ -1714,16 +1480,7 @@ func (x TitleOrValueTypeTitle) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_18); err != nil {
 		return err
 	}
-	if err := enc.NextField("Title"); err != nil {
-		return err
-	}
-	if err := enc.StartValue(vdl.StringType); err != nil {
-		return err
-	}
-	if err := enc.EncodeString(x.Value); err != nil {
-		return err
-	}
-	if err := enc.FinishValue(); err != nil {
+	if err := enc.NextFieldValueString("Title", vdl.StringType, x.Value); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -1736,16 +1493,7 @@ func (x TitleOrValueTypeValue) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_18); err != nil {
 		return err
 	}
-	if err := enc.NextField("Value"); err != nil {
-		return err
-	}
-	if err := enc.StartValue(vdl.Int64Type); err != nil {
-		return err
-	}
-	if err := enc.EncodeInt(x.Value); err != nil {
-		return err
-	}
-	if err := enc.FinishValue(); err != nil {
+	if err := enc.NextFieldValueInt("Value", vdl.Int64Type, x.Value); err != nil {
 		return err
 	}
 	if err := enc.NextField(""); err != nil {
@@ -1820,16 +1568,7 @@ func (x BazType) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextField("Name"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Name); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
@@ -2028,30 +1767,12 @@ func (x K) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.A != 0 {
-		if err := enc.NextField("A"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(x.A)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("A", vdl.ByteType, uint64(x.A)); err != nil {
 			return err
 		}
 	}
 	if x.B != "" {
-		if err := enc.NextField("B"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.B); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("B", vdl.StringType, x.B); err != nil {
 			return err
 		}
 	}
@@ -2115,30 +1836,12 @@ func (x V) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.A != "" {
-		if err := enc.NextField("A"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.A); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("A", vdl.StringType, x.A); err != nil {
 			return err
 		}
 	}
 	if x.B != 0 {
-		if err := enc.NextField("B"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(x.B)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueFloat("B", vdl.Float32Type, float64(x.B)); err != nil {
 			return err
 		}
 	}
@@ -2273,16 +1976,7 @@ func __VDLWriteAnon_map_5(enc vdl.Encoder, x map[int16][]map[string]struct{}) er
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int16Type, int64(key)); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_6(enc, elem); err != nil {
@@ -2302,11 +1996,11 @@ func __VDLWriteAnon_list_6(enc vdl.Encoder, x []map[string]struct{}) error {
 	if err := enc.SetLenHint(len(x)); err != nil {
 		return err
 	}
-	for i := 0; i < len(x); i++ {
+	for _, elem := range x {
 		if err := enc.NextEntry(false); err != nil {
 			return err
 		}
-		if err := __VDLWriteAnon_set_7(enc, x[i]); err != nil {
+		if err := __VDLWriteAnon_set_7(enc, elem); err != nil {
 			return err
 		}
 	}
@@ -2324,16 +2018,7 @@ func __VDLWriteAnon_set_7(enc vdl.Encoder, x map[string]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
 	}
@@ -2510,18 +2195,12 @@ func (x FunWithTypes) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.T1 != nil && x.T1 != vdl.AnyType {
-		if err := enc.NextField("T1"); err != nil {
-			return err
-		}
-		if err := x.T1.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueTypeObject("T1", x.T1); err != nil {
 			return err
 		}
 	}
 	if x.T2 != nil && x.T2 != vdl.AnyType {
-		if err := enc.NextField("T2"); err != nil {
-			return err
-		}
-		if err := x.T2.VDLWrite(enc); err != nil {
+		if err := enc.NextFieldValueTypeObject("T2", x.T2); err != nil {
 			return err
 		}
 	}
@@ -2755,25 +2434,10 @@ func __VDLWriteAnon_map_8(enc vdl.Encoder, x map[bool]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueBool(vdl.BoolType, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2791,25 +2455,10 @@ func __VDLWriteAnon_map_9(enc vdl.Encoder, x map[byte]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueUint(vdl.ByteType, uint64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2827,25 +2476,10 @@ func __VDLWriteAnon_map_10(enc vdl.Encoder, x map[uint16]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint16Type, uint64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Uint16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2863,25 +2497,10 @@ func __VDLWriteAnon_map_11(enc vdl.Encoder, x map[uint32]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint32Type, uint64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Uint32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2899,25 +2518,10 @@ func __VDLWriteAnon_map_12(enc vdl.Encoder, x map[uint64]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint64Type, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Uint64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2935,25 +2539,10 @@ func __VDLWriteAnon_map_13(enc vdl.Encoder, x map[int16]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int16Type, int64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -2971,25 +2560,10 @@ func __VDLWriteAnon_map_14(enc vdl.Encoder, x map[int32]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int32Type, int64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3007,25 +2581,10 @@ func __VDLWriteAnon_map_15(enc vdl.Encoder, x map[int64]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int64Type, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3043,25 +2602,10 @@ func __VDLWriteAnon_map_16(enc vdl.Encoder, x map[float32]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueFloat(vdl.Float32Type, float64(key)); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3079,25 +2623,10 @@ func __VDLWriteAnon_map_17(enc vdl.Encoder, x map[float64]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueFloat(vdl.Float64Type, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.Float64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3115,25 +2644,10 @@ func __VDLWriteAnon_map_18(enc vdl.Encoder, x map[string]string) error {
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3151,16 +2665,7 @@ func __VDLWriteAnon_map_19(enc vdl.Encoder, x map[string]map[string]string) erro
 		return err
 	}
 	for key, elem := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueString(vdl.StringType, key); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_18(enc, elem); err != nil {
@@ -3191,13 +2696,7 @@ func __VDLWriteAnon_map_20(enc vdl.Encoder, x map[time.Time]string) error {
 		if err := wire.VDLWrite(enc); err != nil {
 			return err
 		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(elem); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.WriteValueString(vdl.StringType, elem); err != nil {
 			return err
 		}
 	}
@@ -3862,16 +3361,7 @@ func __VDLWriteAnon_set_21(enc vdl.Encoder, x map[bool]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueBool(vdl.BoolType, key); err != nil {
 			return err
 		}
 	}
@@ -3889,16 +3379,7 @@ func __VDLWriteAnon_set_22(enc vdl.Encoder, x map[byte]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.ByteType); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueUint(vdl.ByteType, uint64(key)); err != nil {
 			return err
 		}
 	}
@@ -3916,16 +3397,7 @@ func __VDLWriteAnon_set_23(enc vdl.Encoder, x map[uint16]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint16Type, uint64(key)); err != nil {
 			return err
 		}
 	}
@@ -3943,16 +3415,7 @@ func __VDLWriteAnon_set_24(enc vdl.Encoder, x map[uint32]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(uint64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint32Type, uint64(key)); err != nil {
 			return err
 		}
 	}
@@ -3970,16 +3433,7 @@ func __VDLWriteAnon_set_25(enc vdl.Encoder, x map[uint64]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueUint(vdl.Uint64Type, key); err != nil {
 			return err
 		}
 	}
@@ -3997,16 +3451,7 @@ func __VDLWriteAnon_set_26(enc vdl.Encoder, x map[int16]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int16Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int16Type, int64(key)); err != nil {
 			return err
 		}
 	}
@@ -4024,16 +3469,7 @@ func __VDLWriteAnon_set_27(enc vdl.Encoder, x map[int32]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(int64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int32Type, int64(key)); err != nil {
 			return err
 		}
 	}
@@ -4051,16 +3487,7 @@ func __VDLWriteAnon_set_28(enc vdl.Encoder, x map[int64]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Int64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeInt(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueInt(vdl.Int64Type, key); err != nil {
 			return err
 		}
 	}
@@ -4078,16 +3505,7 @@ func __VDLWriteAnon_set_29(enc vdl.Encoder, x map[float32]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float32Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(float64(key)); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueFloat(vdl.Float32Type, float64(key)); err != nil {
 			return err
 		}
 	}
@@ -4105,16 +3523,7 @@ func __VDLWriteAnon_set_30(enc vdl.Encoder, x map[float64]struct{}) error {
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Float64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeFloat(key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextEntryValueFloat(vdl.Float64Type, key); err != nil {
 			return err
 		}
 	}
@@ -4508,16 +3917,7 @@ func (x BigData) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Key != "" {
-		if err := enc.NextField("Key"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Key); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Key", vdl.StringType, x.Key); err != nil {
 			return err
 		}
 	}

@@ -47,30 +47,12 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Type != "" {
-		if err := enc.NextField("Type"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Type); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Type", vdl.StringType, x.Type); err != nil {
 			return err
 		}
 	}
 	if x.Encoding != "" {
-		if err := enc.NextField("Encoding"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Encoding); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Encoding", vdl.StringType, x.Encoding); err != nil {
 			return err
 		}
 	}

@@ -43,8 +43,8 @@ func Read(dec Decoder, v interface{}) error {
 func readNonReflect(dec Decoder, calledStart bool, v interface{}) error {
 	switch x := v.(type) {
 	case Reader:
-		// Reader handles the case where x has a code-generated decoder, and
-		// special-cases such as vdl.Value and vom.RawBytes.
+		// Reader handles code-generated VDLRead methods, and special-cases such as
+		// vdl.Value and vom.RawBytes.
 		if calledStart {
 			dec.IgnoreNextStartValue()
 		}
@@ -131,7 +131,7 @@ func readReflect(dec Decoder, calledStart bool, rv reflect.Value, tt *Type) erro
 	}
 	tt = tt.NonOptional()
 	// Handle scalar wire values.
-	if ttIsScalar(tt) {
+	if ttReadIntoScalar(tt) {
 		if calledStart {
 			dec.IgnoreNextStartValue()
 		}
@@ -350,7 +350,7 @@ func readFromNilNative(dec Decoder, rv reflect.Value, tt *Type) (bool, error) {
 	return false, nil
 }
 
-func ttIsScalar(tt *Type) bool {
+func ttReadIntoScalar(tt *Type) bool {
 	switch tt.Kind() {
 	case Bool, String, Enum, Byte, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64:
 		return true
@@ -499,7 +499,7 @@ func readValueBytes(dec Decoder, rv reflect.Value, tt *Type) error {
 
 func readFixedLenList(dec Decoder, name string, len int, rv reflect.Value, tt *Type) error {
 	ttElem := tt.Elem()
-	if ttIsScalar(ttElem) {
+	if ttReadIntoScalar(ttElem) {
 		// Handle scalar element fastpath.
 		for index := 0; index < len; index++ {
 			switch done, err := readNextEntryScalar(dec, rv.Index(index), ttElem); {
@@ -543,7 +543,7 @@ func readList(dec Decoder, rv reflect.Value, tt *Type) error {
 	// TODO(toddw): Make progressively larger slices, rather than creating each
 	// element one at a time.
 	rv.Set(reflect.Zero(rt))
-	if ttIsScalar(ttElem) {
+	if ttReadIntoScalar(ttElem) {
 		// Handle scalar element fastpath.
 		for {
 			rvElem := reflect.New(rtElem).Elem()
@@ -578,7 +578,7 @@ func readSet(dec Decoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
 	rtKey, ttKey := rt.Key(), tt.Key()
 	tmpSet, isNil := reflect.Zero(rt), true
-	if ttIsScalar(tt.Key()) {
+	if ttReadIntoScalar(ttKey) {
 		// Handle scalar key fastpath.
 		for {
 			rvKey := reflect.New(rtKey).Elem()
@@ -620,7 +620,7 @@ func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 	rtKey, ttKey := rt.Key(), tt.Key()
 	rtElem, ttElem := rt.Elem(), tt.Elem()
 	tmpMap, isNil := reflect.Zero(rt), true
-	if ttIsScalar(ttKey) {
+	if ttReadIntoScalar(ttKey) {
 		// Handle scalar key fastpath.
 		for {
 			rvKey := reflect.New(rtKey).Elem()

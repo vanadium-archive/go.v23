@@ -10,6 +10,8 @@ import (
 	"v.io/v23/vdl"
 )
 
+// TODO(toddw): Use the same technique as xencoder_fast.go to remove boilerplate
+
 // This file contains the NextEntryValue* methods.  The semantics of these
 // methods is the same as if NextEntry, StartValue, Decode*, FinishValue were
 // called in sequence.  The implementation is faster than actually calling that

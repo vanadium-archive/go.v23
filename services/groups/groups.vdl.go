@@ -43,13 +43,10 @@ func (x BlessingPatternChunk) VDLIsZero() bool {
 }
 
 func (x BlessingPatternChunk) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_string_1); err != nil {
+	if err := enc.WriteValueString(__VDLType_string_1, string(x)); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(string(x)); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *BlessingPatternChunk) VDLRead(dec vdl.Decoder) error {
@@ -147,10 +144,7 @@ func __VDLWriteAnon_set_1(enc vdl.Encoder, x map[BlessingPatternChunk]struct{}) 
 		return err
 	}
 	for key := range x {
-		if err := enc.NextEntry(false); err != nil {
-			return err
-		}
-		if err := key.VDLWrite(enc); err != nil {
+		if err := enc.NextEntryValueString(__VDLType_string_1, string(key)); err != nil {
 			return err
 		}
 	}
@@ -266,13 +260,10 @@ func (x ApproximationType) VDLIsZero() bool {
 }
 
 func (x ApproximationType) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(__VDLType_enum_5); err != nil {
+	if err := enc.WriteValueString(__VDLType_enum_5, x.String()); err != nil {
 		return err
 	}
-	if err := enc.EncodeString(x.String()); err != nil {
-		return err
-	}
-	return enc.FinishValue()
+	return nil
 }
 
 func (x *ApproximationType) VDLRead(dec vdl.Decoder) error {
@@ -308,30 +299,12 @@ func (x Approximation) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Reason != "" {
-		if err := enc.NextField("Reason"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Reason); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Reason", vdl.StringType, x.Reason); err != nil {
 			return err
 		}
 	}
 	if x.Details != "" {
-		if err := enc.NextField("Details"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Details); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Details", vdl.StringType, x.Details); err != nil {
 			return err
 		}
 	}

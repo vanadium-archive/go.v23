@@ -96,58 +96,22 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Suffix != "" {
-		if err := enc.NextField("Suffix"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Suffix); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Suffix", vdl.StringType, x.Suffix); err != nil {
 			return err
 		}
 	}
 	if x.Method != "" {
-		if err := enc.NextField("Method"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Method); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Method", vdl.StringType, x.Method); err != nil {
 			return err
 		}
 	}
 	if x.NumPosArgs != 0 {
-		if err := enc.NextField("NumPosArgs"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(x.NumPosArgs); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("NumPosArgs", vdl.Uint64Type, x.NumPosArgs); err != nil {
 			return err
 		}
 	}
 	if x.EndStreamArgs {
-		if err := enc.NextField("EndStreamArgs"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.EndStreamArgs); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("EndStreamArgs", vdl.BoolType, x.EndStreamArgs); err != nil {
 			return err
 		}
 	}
@@ -184,16 +148,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Language != "" {
-		if err := enc.NextField("Language"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.StringType); err != nil {
-			return err
-		}
-		if err := enc.EncodeString(x.Language); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueString("Language", vdl.StringType, x.Language); err != nil {
 			return err
 		}
 	}
@@ -338,30 +293,12 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.EndStreamResults {
-		if err := enc.NextField("EndStreamResults"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.EndStreamResults); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("EndStreamResults", vdl.BoolType, x.EndStreamResults); err != nil {
 			return err
 		}
 	}
 	if x.NumPosResults != 0 {
-		if err := enc.NextField("NumPosResults"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.Uint64Type); err != nil {
-			return err
-		}
-		if err := enc.EncodeUint(x.NumPosResults); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueUint("NumPosResults", vdl.Uint64Type, x.NumPosResults); err != nil {
 			return err
 		}
 	}
@@ -374,16 +311,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.AckBlessings {
-		if err := enc.NextField("AckBlessings"); err != nil {
-			return err
-		}
-		if err := enc.StartValue(vdl.BoolType); err != nil {
-			return err
-		}
-		if err := enc.EncodeBool(x.AckBlessings); err != nil {
-			return err
-		}
-		if err := enc.FinishValue(); err != nil {
+		if err := enc.NextFieldValueBool("AckBlessings", vdl.BoolType, x.AckBlessings); err != nil {
 			return err
 		}
 	}
