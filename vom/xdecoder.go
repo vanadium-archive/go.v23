@@ -346,22 +346,23 @@ func (d *decoder81) dfsNextType() (*vdl.Type, error) {
 		return d.typeDec.lookupType(tid)
 	}
 	// Return the next type from our composite types.
-	switch top.Type.Kind() {
+	tt := top.Type
+	switch tt.Kind() {
 	case vdl.Array, vdl.List:
-		return top.Type.Elem(), nil
+		return tt.Elem(), nil
 	case vdl.Set:
-		return top.Type.Key(), nil
+		return tt.Key(), nil
 	case vdl.Map:
 		top.Flag = top.Flag.FlipIsMapKey()
 		if top.Flag.IsMapKey() {
-			return top.Type.Key(), nil
+			return tt.Key(), nil
 		} else {
-			return top.Type.Elem(), nil
+			return tt.Elem(), nil
 		}
 	case vdl.Union, vdl.Struct:
-		return top.Type.Field(top.Index).Type, nil
+		return tt.Field(top.Index).Type, nil
 	}
-	return nil, fmt.Errorf("vom: can't StartValue on %v", top.Type)
+	return nil, fmt.Errorf("vom: can't StartValue on %v", tt)
 }
 
 func (d *decoder81) NextEntry() (bool, error) {

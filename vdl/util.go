@@ -7,6 +7,7 @@ package vdl
 import (
 	"fmt"
 	"reflect"
+	"sync"
 	"unsafe"
 )
 
@@ -262,7 +263,7 @@ func rvZeroValue(rt reflect.Type, tt *Type) (reflect.Value, error) {
 	case tt.Kind() == Struct && rt.Kind() == reflect.Struct:
 		for ix := 0; ix < tt.NumField(); ix++ {
 			field := tt.Field(ix)
-			rvField := rv.FieldByName(field.Name)
+			rvField := rv.Field(rtFieldIndexByName(rt, field.Name))
 			switch zero, err := rvZeroValue(rvField.Type(), field.Type); {
 			case err != nil:
 				return reflect.Value{}, err
@@ -367,8 +368,9 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		switch tt.Kind() {
 		case Struct:
 			for ix := 0; ix < tt.NumField(); ix++ {
-				field := tt.Field(ix)
-				if z, err := rvIsZeroValue(rv.FieldByName(field.Name), field.Type); err != nil || !z {
+				ttField := tt.Field(ix)
+				rvField := rv.Field(rtFieldIndexByName(rt, ttField.Name))
+				if z, err := rvIsZeroValue(rvField, ttField.Type); err != nil || !z {
 					return false, err
 				}
 			}
@@ -386,4 +388,47 @@ func rvIsZeroValue(rv reflect.Value, tt *Type) (bool, error) {
 		}
 	}
 	return false, fmt.Errorf("vdl: rvIsZeroValue unhandled rt: %v tt: %v", rt, tt)
+}
+
+// rtFieldIndexByName returns the index of the struct field in rt with the given
+// name.  Returns -1 if the field doesn't exist.
+//
+// This function is purely a performance optimization; the current
+// implementation of reflect.Type.Field(index) causes an allocation, which is
+// avoided in the common case by caching the result.
+//
+// REQUIRES: rt.Kind() == reflect.Struct
+func rtFieldIndexByName(rt reflect.Type, name string) int {
+	rtFieldCache.RLock()
+	m, ok := rtFieldCache.Map[rt]
+	rtFieldCache.RUnlock()
+	// Fastpath cache hit.
+	if ok {
+		return m[name] - 1
+	}
+	// Slowpath cache miss, populate the cache.
+	rtFieldCache.Lock()
+	defer rtFieldCache.Unlock()
+	// Handle benign race, where the cache was filled in while we upgraded from a
+	// reader lock to an exclusive lock.
+	if m, ok := rtFieldCache.Map[rt]; ok {
+		return m[name] - 1
+	}
+	if numField := rt.NumField(); numField > 0 {
+		m = make(map[string]int, numField)
+		for i := 0; i < numField; i++ {
+			m[rt.Field(i).Name] = i + 1
+		}
+	}
+	rtFieldCache.Map[rt] = m
+	return m[name] - 1
+}
+
+var rtFieldCache = &rtFieldCacheType{
+	Map: make(map[reflect.Type]map[string]int),
+}
+
+type rtFieldCacheType struct {
+	sync.RWMutex
+	Map map[reflect.Type]map[string]int
 }

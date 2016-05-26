@@ -685,9 +685,15 @@ func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
 		}
 		switch ttField, index := tt.FieldByName(name); {
 		case index != -1:
-			rvField := rv.FieldByName(name)
-			if err := readReflect(dec, false, rvField, ttField.Type); err != nil {
-				return err
+			rvField := rv.Field(rtFieldIndexByName(rt, name))
+			if ttReadIntoScalar(ttField.Type) {
+				if err := readValueScalar(dec, rvField, ttField.Type); err != nil {
+					return err
+				}
+			} else {
+				if err := readReflect(dec, false, rvField, ttField.Type); err != nil {
+					return err
+				}
 			}
 		default:
 			if err := dec.SkipValue(); err != nil {
@@ -717,8 +723,14 @@ func readUnion(dec Decoder, rv reflect.Value, tt *Type) error {
 		return err
 	}
 	rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
-	if err := readReflect(dec, false, rvField.Field(0), ttField.Type); err != nil {
-		return err
+	if ttReadIntoScalar(ttField.Type) {
+		if err := readValueScalar(dec, rvField.Field(0), ttField.Type); err != nil {
+			return err
+		}
+	} else {
+		if err := readReflect(dec, false, rvField.Field(0), ttField.Type); err != nil {
+			return err
+		}
 	}
 	rv.Set(rvField)
 	switch name, err := dec.NextField(); {

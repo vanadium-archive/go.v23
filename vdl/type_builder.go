@@ -650,9 +650,14 @@ func typeConsLocked(t *Type) *Type {
 	if t.key != nil {
 		t.containsKind |= t.key.containsKind
 	}
-	for index := range t.fields {
-		t.fields[index].Type = typeConsLocked(t.fields[index].Type)
-		t.containsKind |= t.fields[index].Type.containsKind
+	if len := len(t.fields); len > 0 {
+		t.fieldIndices = make(map[string]int, len)
+		for index, field := range t.fields {
+			field.Type = typeConsLocked(field.Type)
+			t.fieldIndices[field.Name] = index
+			t.containsKind |= field.Type.containsKind
+			t.fields[index] = field
+		}
 	}
 	return t
 }

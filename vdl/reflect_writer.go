@@ -351,14 +351,12 @@ func writeSetOrMap(enc Encoder, rv reflect.Value, tt *Type) error {
 }
 
 func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
+	rt := rv.Type()
 	// Loop through tt fields rather than rt fields, since the VDL type tt might
 	// have ignored some of the fields in rt, e.g. unexported fields.
 	for ix := 0; ix < tt.NumField(); ix++ {
 		field := tt.Field(ix)
-		rvField := rv.FieldByName(field.Name)
-		if !rvField.IsValid() {
-			panic(fmt.Errorf("vdl: reflect type %v doesn't have field %q, vdl field %d of type %v", rv.Type(), field.Name, ix, tt))
-		}
+		rvField := rv.Field(rtFieldIndexByName(rt, field.Name))
 		switch isZero, err := rvIsZeroValue(rvField, field.Type); {
 		case err != nil:
 			return err

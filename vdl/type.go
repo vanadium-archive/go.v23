@@ -155,15 +155,16 @@ func SplitIdent(ident string) (pkgpath, name string) {
 //     Children []Node
 //   }
 type Type struct {
-	kind         Kind        // used by all kinds
-	name         string      // used by all kinds
-	labels       []string    // used by Enum
-	len          int         // used by Array
-	elem         *Type       // used by Optional, Array, List, Map
-	key          *Type       // used by Set, Map
-	fields       []Field     // used by Struct, Union
-	unique       string      // used by all kinds, filled in by typeCons
-	containsKind kindBitMask // used to determine if this type recursively contains a kind
+	kind         Kind           // used by all kinds
+	name         string         // used by all kinds
+	labels       []string       // used by Enum
+	len          int            // used by Array
+	elem         *Type          // used by Optional, Array, List, Map
+	key          *Type          // used by Set, Map
+	fields       []Field        // used by Struct, Union
+	fieldIndices map[string]int // used by Struct, Union
+	unique       string         // used by all kinds, filled in by typeCons
+	containsKind kindBitMask    // does this type recursively contain a given kind
 }
 
 // Field describes a single field in a Struct or Union.
@@ -325,11 +326,8 @@ var fieldByNameAllowed = []Kind{Struct, Union}
 // name, and its integer field index.  Returns -1 if the name doesn't exist.
 func (t *Type) FieldByName(name string) (Field, int) {
 	t.checkKind("FieldByName", fieldByNameAllowed...)
-	// We typically have a small number of fields, so linear search is fine.
-	for index, f := range t.fields {
-		if f.Name == name {
-			return f, index
-		}
+	if index, ok := t.fieldIndices[name]; ok {
+		return t.fields[index], index
 	}
 	return Field{}, -1
 }
