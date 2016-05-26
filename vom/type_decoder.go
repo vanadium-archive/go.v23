@@ -35,7 +35,7 @@ type TypeDecoder struct {
 	buildCond *sync.Cond
 	err       error               // GUARDED_BY(buildMu)
 	idToWire  map[TypeId]wireType // GUARDED_BY(buildMu)
-	dec       *xDecoder           // GUARDED_BY(buildMu)
+	dec       *decoder81          // GUARDED_BY(buildMu)
 
 	processingControlMu sync.Mutex
 	goroutineRunning    bool // GUARDED_BY(processingControlMu)
@@ -52,7 +52,7 @@ func newTypeDecoderInternal(buf *decbuf) *TypeDecoder {
 	td := &TypeDecoder{
 		idToType: make(map[TypeId]*vdl.Type),
 		idToWire: make(map[TypeId]wireType),
-		dec:      &xDecoder{old: &ZDecoder{buf: buf}},
+		dec:      &decoder81{buf: buf},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td
@@ -62,7 +62,7 @@ func newDerivedTypeDecoderInternal(buf *decbuf, orig *TypeDecoder) *TypeDecoder 
 	td := &TypeDecoder{
 		idToType: orig.idToType,
 		idToWire: orig.idToWire,
-		dec:      &xDecoder{old: &ZDecoder{buf: buf}},
+		dec:      &decoder81{buf: buf},
 	}
 	td.buildCond = sync.NewCond(&td.buildMu)
 	return td
@@ -118,18 +118,15 @@ func (d *TypeDecoder) readSingleType() error {
 	if err != nil {
 		return err
 	}
-
 	// Add the wire type.
 	if err := d.addWireType(curTypeID, wt); err != nil {
 		return err
 	}
-
-	if !d.dec.old.typeIncomplete {
-		if err := d.buildType(curTypeID); d.dec.old.buf.version >= Version81 && err != nil {
+	if !d.dec.flag.TypeIncomplete() {
+		if err := d.buildType(curTypeID); d.dec.buf.version >= Version81 && err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -148,22 +145,18 @@ func (d *TypeDecoder) lookupType(tid TypeId) (*vdl.Type, error) {
 			// may still be possible to lookup a type.
 			return nil, d.err
 		}
-
 		if tt := d.lookupKnownType(tid); tt != nil {
 			return tt, nil
 		}
-
 		if d.err != nil {
 			return nil, d.err
 		}
-
 		d.processingControlMu.Lock()
 		running := d.goroutineRunning
 		d.processingControlMu.Unlock()
 		if !running {
 			return nil, verror.New(errStartNotCalled, nil)
 		}
-
 		d.buildCond.Wait()
 	}
 }

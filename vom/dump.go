@@ -165,7 +165,7 @@ type dumpWorker struct {
 
 	recReader     *recordingReader
 	recDataReader *recordedDataReader
-	redDataDec    *xDecoder
+	redDataDec    *decoder81
 
 	// Each Write call on the Dumper is passed to us on the cmdChan.  When we get
 	// around to processing the Write data, we buffer any extra data, and hold on

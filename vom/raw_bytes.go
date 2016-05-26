@@ -116,7 +116,8 @@ func (rb *RawBytes) IsNil() bool {
 }
 
 func (rb *RawBytes) Decoder() vdl.Decoder {
-	dec := NewZDecoder(bytes.NewReader(rb.Data))
+	decoder := NewDecoder(bytes.NewReader(rb.Data))
+	dec := &decoder.dec
 	dec.buf.version = rb.Version
 	dec.refTypes.tids = make([]TypeId, len(rb.RefTypes))
 	for i, refType := range rb.RefTypes {
@@ -128,19 +129,18 @@ func (rb *RawBytes) Decoder() vdl.Decoder {
 	for i, anyLen := range rb.AnyLengths {
 		dec.refAnyLens.lens[i] = anyLen
 	}
-	xd := &xDecoder{old: dec}
-	tt, lenHint, flag, err := xd.setupType(rb.Type, nil)
+	tt, lenHint, flag, err := dec.setupType(rb.Type, nil)
 	if err != nil {
 		panic(err) // TODO(toddw): Change this to not panic.
 	}
-	xd.stack = append(xd.stack, decoderStackEntry{
+	dec.stack = append(dec.stack, decStackEntry{
 		Type:    tt,
 		Index:   -1,
 		LenHint: lenHint,
 		Flag:    flag,
 	})
-	xd.ignoreNextStartValue = true
-	return xd
+	dec.flag = dec.flag.Set(decFlagIgnoreNextStartValue)
+	return dec
 }
 
 func (rb *RawBytes) VDLIsZero() bool {
@@ -157,9 +157,9 @@ func (rb *RawBytes) VDLEqual(x interface{}) bool {
 }
 
 func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
-	// Fastpath: the bytes are already available in the xDecoder.  Note that this
+	// Fastpath: the bytes are already available in the decoder81.  Note that this
 	// also handles the case where dec is RawBytes.Decoder().
-	if d, ok := dec.(*xDecoder); ok {
+	if d, ok := dec.(*decoder81); ok {
 		return d.readRawBytes(rb)
 	}
 	// Slowpath: the bytes are not available, we must encode new bytes.
@@ -196,13 +196,13 @@ func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 }
 
 func (rb *RawBytes) VDLWrite(enc vdl.Encoder) error {
-	// Fastpath: we're trying to encode into an xEncoder.  We can only write
+	// Fastpath: we're trying to encode into an encoder81.  We can only write
 	// directly if the versions are the same and if the encoder hasn't written any
 	// other values yet, since otherwise rb.Data needs to be re-written to account
 	// for the differences.
 	//
 	// TODO(toddw): Code a variant that performs the re-writing.
-	if e, ok := enc.(*xEncoder); ok && e.version == rb.Version && len(e.stack) == 0 {
+	if e, ok := enc.(*encoder81); ok && e.version == rb.Version && len(e.stack) == 0 {
 		return e.writeRawBytes(rb)
 	}
 	// Slowpath: decodes bytes from rb and fill in enc.

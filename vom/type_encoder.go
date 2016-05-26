@@ -26,8 +26,8 @@ type TypeEncoder struct {
 	nextId   TypeId               // GUARDED_BY(typeMu)
 
 	encMu           sync.Mutex
-	enc             *xEncoder // GUARDED_BY(encMu)
-	sentVersionByte bool      // GUARDED_BY(encMu)
+	enc             *encoder81 // GUARDED_BY(encMu)
+	sentVersionByte bool       // GUARDED_BY(encMu)
 }
 
 // NewTypeEncoder returns a new TypeEncoder that writes types to the given
@@ -47,7 +47,7 @@ func NewVersionedTypeEncoder(version Version, w io.Writer) *TypeEncoder {
 	}
 }
 
-func newTypeEncoderInternal(version Version, enc *xEncoder) *TypeEncoder {
+func newTypeEncoderInternal(version Version, enc *encoder81) *TypeEncoder {
 	return &TypeEncoder{
 		typeToId:        make(map[*vdl.Type]TypeId),
 		nextId:          WireIdFirstUserType,

@@ -62,15 +62,11 @@ func Decode(data []byte, v interface{}) error {
 		typeDec = newDerivedTypeDecoderInternal(buf, typeDec)
 	}
 	// Decode the value message.
-	decoder := &Decoder{
-		xDecoder{
-			old: &ZDecoder{
-				buf:     buf,
-				typeDec: typeDec,
-			},
-		},
-	}
-	if err := decoder.Decode(v); err != nil {
+	dec := &Decoder{decoder81{
+		buf:     buf,
+		typeDec: typeDec,
+	}}
+	if err := dec.Decode(v); err != nil {
 		return err
 	}
 	// Populate the typeDecoder cache for future re-use.

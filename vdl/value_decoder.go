@@ -86,7 +86,7 @@ func (d *valueDecoder) StartValue(want *Type) error {
 	if len(d.stack) == 0 || isAny {
 		switch want.Kind() {
 		case Optional, Array, List, Set, Map, Struct, Union:
-			if !Compatible2(vv.Type(), want) {
+			if !Compatible(vv.Type(), want) {
 				return fmt.Errorf("vdl: incompatible decode from %v into %v", vv.Type(), want)
 			}
 		}

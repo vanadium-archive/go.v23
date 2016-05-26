@@ -89,7 +89,7 @@ func mimicNilValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 	case base.Type() == vdl.AnyType:
 		// Can't convert from optional(nil) to any(nil).
 		return nil
-	case !vdl.Compatible2(tt, base.Type()):
+	case !vdl.Compatible(tt, base.Type()):
 		// Can't convert incompatible optional types.
 		return nil
 	}
@@ -101,7 +101,7 @@ func mimicNilValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
 //
 // REQUIRES: tt and base cannot be Optional or Any.
 func mimicNonNilValue(tt *vdl.Type, base *vdl.Value) *vdl.Value {
-	if !vdl.Compatible2(tt, base.Type()) {
+	if !vdl.Compatible(tt, base.Type()) {
 		return nil
 	}
 	switch tt.Kind() {

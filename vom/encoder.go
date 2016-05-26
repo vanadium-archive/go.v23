@@ -37,7 +37,7 @@ const paddingLen = maxEncodedUintBytes * 2
 // Encoder manages the transmission and marshaling of typed values to the other
 // side of a connection.
 type Encoder struct {
-	enc xEncoder
+	enc encoder81
 }
 
 // NewEncoder returns a new Encoder that writes to the given writer in the VOM
@@ -66,7 +66,7 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
 	}
-	return &Encoder{xEncoder{
+	return &Encoder{encoder81{
 		writer:          w,
 		buf:             newEncbuf(),
 		typeEnc:         typeEnc,
@@ -75,12 +75,12 @@ func NewVersionedEncoderWithTypeEncoder(version Version, w io.Writer, typeEnc *T
 	}}
 }
 
-func newEncoderForTypes(version Version, w io.Writer) *xEncoder {
+func newEncoderForTypes(version Version, w io.Writer) *encoder81 {
 	if !isAllowedVersion(version) {
 		panic(fmt.Sprintf("unsupported VOM version: %x", version))
 	}
 	buf := newEncbuf()
-	e := &xEncoder{
+	e := &encoder81{
 		writer:          w,
 		buf:             buf,
 		sentVersionByte: true,
@@ -90,16 +90,16 @@ func newEncoderForTypes(version Version, w io.Writer) *xEncoder {
 	return e
 }
 
-func newXEncoderForRawBytes(w io.Writer) *xEncoder {
+func newXEncoderForRawBytes(w io.Writer) *encoder81 {
 	// RawBytes doesn't need the types to be encoded, since it holds the in-memory
 	// representation.  We still need a type encoder to collect the unique types,
 	// but we give it a dummy encoder that doesn't have any state set up.
-	typeEnc := newTypeEncoderInternal(DefaultVersion, &xEncoder{
+	typeEnc := newTypeEncoderInternal(DefaultVersion, &encoder81{
 		sentVersionByte: true,
 		version:         DefaultVersion,
 		mode:            encoderForRawBytes,
 	})
-	return &xEncoder{
+	return &encoder81{
 		writer:          w,
 		buf:             newEncbuf(),
 		typeEnc:         typeEnc,
@@ -124,11 +124,11 @@ type encoderMode int
 
 const (
 	encoderRegular     encoderMode = iota
-	encoderForTypes                // xEncoder is embedded in TypeEncoder
-	encoderForRawBytes             // xEncoder is used to encode RawBytes
+	encoderForTypes                // encoder81 is embedded in TypeEncoder
+	encoderForRawBytes             // encoder81 is used to encode RawBytes
 )
 
-type xEncoder struct {
+type encoder81 struct {
 	stack []encoderStackEntry
 	// We use buf to buffer up the encoded value. The buffering is necessary so
 	// that we can compute the total message length.
@@ -188,14 +188,14 @@ func (entry *encoderStackEntry) nextValueIsAny() bool {
 	return false
 }
 
-func (e *xEncoder) top() *encoderStackEntry {
+func (e *encoder81) top() *encoderStackEntry {
 	if len(e.stack) == 0 {
 		return nil
 	}
 	return &e.stack[len(e.stack)-1]
 }
 
-func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
+func (e *encoder81) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) error {
 	// RawBytes doesn't need type messages to be encoded, since it holds the types
 	// in-memory.
 	if e.mode == encoderForRawBytes {
@@ -213,11 +213,11 @@ func (e *xEncoder) encodeWireType(tid TypeId, wt wireType, typeIncomplete bool) 
 	return wt.VDLWrite(e)
 }
 
-func (e *xEncoder) SetNextStartValueIsOptional() {
+func (e *encoder81) SetNextStartValueIsOptional() {
 	e.nextStartValueIsOptional = true
 }
 
-func (e *xEncoder) NilValue(tt *vdl.Type) error {
+func (e *encoder81) NilValue(tt *vdl.Type) error {
 	switch tt.Kind() {
 	case vdl.Any, vdl.Optional:
 	default:
@@ -257,7 +257,7 @@ func (e *xEncoder) NilValue(tt *vdl.Type) error {
 	return nil
 }
 
-func (e *xEncoder) StartValue(tt *vdl.Type) error {
+func (e *encoder81) StartValue(tt *vdl.Type) error {
 	switch tt.Kind() {
 	case vdl.Any, vdl.Optional:
 		return fmt.Errorf("only concrete types allowed for StartValue (type was %v)", tt)
@@ -302,7 +302,7 @@ func (e *xEncoder) StartValue(tt *vdl.Type) error {
 	return nil
 }
 
-func (e *xEncoder) startMessage(tt *vdl.Type) error {
+func (e *encoder81) startMessage(tt *vdl.Type) error {
 	e.buf.Reset()
 	e.buf.Grow(paddingLen)
 	e.msgType = tt
@@ -338,7 +338,7 @@ func (e *xEncoder) startMessage(tt *vdl.Type) error {
 	return nil
 }
 
-func (e *xEncoder) FinishValue() error {
+func (e *encoder81) FinishValue() error {
 	e.isParentBytes = false
 	oldStackTop := len(e.stack) - 1
 	if oldStackTop == -1 {
@@ -355,7 +355,7 @@ func (e *xEncoder) FinishValue() error {
 	return nil
 }
 
-func (e *xEncoder) finishMessage() error {
+func (e *encoder81) finishMessage() error {
 	if e.mode == encoderForRawBytes {
 		// Only encode the value portion for RawBytes.
 		msg := e.buf.Bytes()
@@ -410,7 +410,7 @@ func (e *xEncoder) finishMessage() error {
 	return err
 }
 
-func (e *xEncoder) NextEntry(done bool) error {
+func (e *encoder81) NextEntry(done bool) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -432,7 +432,7 @@ func (e *xEncoder) NextEntry(done bool) error {
 	return nil
 }
 
-func (e *xEncoder) NextField(name string) error {
+func (e *encoder81) NextField(name string) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -450,7 +450,7 @@ func (e *xEncoder) NextField(name string) error {
 	return nil
 }
 
-func (e *xEncoder) SetLenHint(lenHint int) error {
+func (e *encoder81) SetLenHint(lenHint int) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -464,12 +464,12 @@ func (e *xEncoder) SetLenHint(lenHint int) error {
 	return nil
 }
 
-func (e *xEncoder) EncodeBool(value bool) error {
+func (e *encoder81) EncodeBool(value bool) error {
 	binaryEncodeBool(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeUint(value uint64) error {
+func (e *encoder81) EncodeUint(value uint64) error {
 	// Handle a special-case where normally single bytes are written out as
 	// variable sized numbers, which use 2 bytes to encode bytes > 127.  But each
 	// byte contained in a list or array is written out as one byte.  E.g.
@@ -483,17 +483,17 @@ func (e *xEncoder) EncodeUint(value uint64) error {
 	return nil
 }
 
-func (e *xEncoder) EncodeInt(value int64) error {
+func (e *encoder81) EncodeInt(value int64) error {
 	binaryEncodeInt(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeFloat(value float64) error {
+func (e *encoder81) EncodeFloat(value float64) error {
 	binaryEncodeFloat(e.buf, value)
 	return nil
 }
 
-func (e *xEncoder) EncodeBytes(value []byte) error {
+func (e *encoder81) EncodeBytes(value []byte) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -507,7 +507,7 @@ func (e *xEncoder) EncodeBytes(value []byte) error {
 	return nil
 }
 
-func (e *xEncoder) EncodeString(value string) error {
+func (e *encoder81) EncodeString(value string) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -524,7 +524,7 @@ func (e *xEncoder) EncodeString(value string) error {
 	return nil
 }
 
-func (e *xEncoder) EncodeTypeObject(value *vdl.Type) error {
+func (e *encoder81) EncodeTypeObject(value *vdl.Type) error {
 	tid, err := e.typeEnc.encode(value)
 	if err != nil {
 		return err
@@ -540,7 +540,7 @@ func (e *xEncoder) EncodeTypeObject(value *vdl.Type) error {
 // REQUIRES: e.version == rb.Version && len(e.stack) == 0
 //
 // TODO(toddw): Code a variant of this that performs the re-writing.
-func (e *xEncoder) writeRawBytes(rb *RawBytes) error {
+func (e *encoder81) writeRawBytes(rb *RawBytes) error {
 	if rb.IsNil() {
 		return e.NilValue(rb.Type)
 	}

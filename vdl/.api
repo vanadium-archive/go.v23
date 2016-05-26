@@ -31,7 +31,6 @@ pkg vdl, func ArrayType(int, *Type) *Type
 pkg vdl, func BoolValue(*Type, bool) *Value
 pkg vdl, func BytesValue(*Type, []byte) *Value
 pkg vdl, func Compatible(*Type, *Type) bool
-pkg vdl, func Compatible2(*Type, *Type) bool
 pkg vdl, func Convert(interface{}, interface{}) error
 pkg vdl, func ConvertReflect(reflect.Value, reflect.Value) error
 pkg vdl, func CopyValue(*Value) *Value

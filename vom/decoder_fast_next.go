@@ -10,8 +10,6 @@ import (
 	"v.io/v23/vdl"
 )
 
-// TODO(toddw): Use the same technique as xencoder_fast.go to remove boilerplate
-
 // This file contains the NextEntryValue* methods.  The semantics of these
 // methods is the same as if NextEntry, StartValue, Decode*, FinishValue were
 // called in sequence.  The implementation is faster than actually calling that
@@ -75,7 +73,7 @@ const (
 	// remind us to decode the Optional header.
 )
 
-func (d *xDecoder) NextEntryValueBool() (done bool, value bool, err error) {
+func (d *decoder81) NextEntryValueBool() (done bool, value bool, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -96,7 +94,7 @@ func (d *xDecoder) NextEntryValueBool() (done bool, value bool, err error) {
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, false, err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, false, err
 		}
@@ -111,11 +109,11 @@ func (d *xDecoder) NextEntryValueBool() (done bool, value bool, err error) {
 		}
 	}
 	// Decode
-	value, err = binaryDecodeBool(d.old.buf)
+	value, err = binaryDecodeBool(d.buf)
 	return false, value, err
 }
 
-func (d *xDecoder) NextEntryValueString() (done bool, value string, err error) {
+func (d *decoder81) NextEntryValueString() (done bool, value string, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -137,7 +135,7 @@ func (d *xDecoder) NextEntryValueString() (done bool, value string, err error) {
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, "", err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, "", err
 		}
@@ -154,14 +152,14 @@ func (d *xDecoder) NextEntryValueString() (done bool, value string, err error) {
 	// Decode
 	switch ttNext.Kind() {
 	case vdl.String:
-		value, err = binaryDecodeString(d.old.buf)
+		value, err = binaryDecodeString(d.buf)
 	case vdl.Enum:
 		value, err = d.binaryDecodeEnum(ttNext)
 	}
 	return false, value, err
 }
 
-func (d *xDecoder) NextEntryValueUint(bitlen int) (done bool, value uint64, err error) {
+func (d *decoder81) NextEntryValueUint(bitlen int) (done bool, value uint64, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -183,7 +181,7 @@ func (d *xDecoder) NextEntryValueUint(bitlen int) (done bool, value uint64, err 
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, 0, err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, 0, err
 		}
@@ -197,7 +195,7 @@ func (d *xDecoder) NextEntryValueUint(bitlen int) (done bool, value uint64, err 
 		case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
 			top.NextEntryData = nextEntryMustConvert
 		case vdl.Byte:
-			if d.isParentBytes {
+			if d.flag.IsParentBytes() {
 				top.NextEntryData = nextEntryParentBytes
 			} else {
 				top.NextEntryData = 8 // byte is 8 bits
@@ -209,10 +207,10 @@ func (d *xDecoder) NextEntryValueUint(bitlen int) (done bool, value uint64, err 
 	// Decode, avoiding unnecessary number conversions.
 	switch flag := top.NextEntryData; {
 	case flag <= nextEntryData(bitlen):
-		value, err = binaryDecodeUint(d.old.buf)
+		value, err = binaryDecodeUint(d.buf)
 	case flag == nextEntryParentBytes:
 		var b byte
-		b, err = d.old.buf.ReadByte()
+		b, err = d.buf.ReadByte()
 		value = uint64(b)
 	default: // must convert
 		value, err = d.decodeUint(ttNext, uint(bitlen))
@@ -220,7 +218,7 @@ func (d *xDecoder) NextEntryValueUint(bitlen int) (done bool, value uint64, err 
 	return false, value, err
 }
 
-func (d *xDecoder) NextEntryValueInt(bitlen int) (done bool, value int64, err error) {
+func (d *decoder81) NextEntryValueInt(bitlen int) (done bool, value int64, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -242,7 +240,7 @@ func (d *xDecoder) NextEntryValueInt(bitlen int) (done bool, value int64, err er
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, 0, err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, 0, err
 		}
@@ -262,14 +260,14 @@ func (d *xDecoder) NextEntryValueInt(bitlen int) (done bool, value int64, err er
 	// Decode, avoiding unnecessary number conversions.
 	switch flag := top.NextEntryData; {
 	case flag <= nextEntryData(bitlen):
-		value, err = binaryDecodeInt(d.old.buf)
+		value, err = binaryDecodeInt(d.buf)
 	default: // must convert
 		value, err = d.decodeInt(ttNext, uint(bitlen))
 	}
 	return false, value, err
 }
 
-func (d *xDecoder) NextEntryValueFloat(bitlen int) (done bool, value float64, err error) {
+func (d *decoder81) NextEntryValueFloat(bitlen int) (done bool, value float64, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -291,7 +289,7 @@ func (d *xDecoder) NextEntryValueFloat(bitlen int) (done bool, value float64, er
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, 0, err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, 0, err
 		}
@@ -311,14 +309,14 @@ func (d *xDecoder) NextEntryValueFloat(bitlen int) (done bool, value float64, er
 	// Decode, avoiding unnecessary number conversions.
 	switch flag := top.NextEntryData; {
 	case flag <= nextEntryData(bitlen):
-		value, err = binaryDecodeFloat(d.old.buf)
+		value, err = binaryDecodeFloat(d.buf)
 	default: // must convert
 		value, err = d.decodeFloat(ttNext, uint(bitlen))
 	}
 	return false, value, err
 }
 
-func (d *xDecoder) NextEntryValueTypeObject() (done bool, value *vdl.Type, err error) {
+func (d *decoder81) NextEntryValueTypeObject() (done bool, value *vdl.Type, err error) {
 	// NextEntry
 	top := d.top()
 	if top == nil {
@@ -339,7 +337,7 @@ func (d *xDecoder) NextEntryValueTypeObject() (done bool, value *vdl.Type, err e
 		if ttNext, err = d.dfsNextType(); err != nil {
 			return false, nil, err
 		}
-		var flag decoderFlag
+		var flag decStackFlag
 		if ttNext, _, flag, err = d.setupType(ttNext, nil); err != nil {
 			return false, nil, err
 		}

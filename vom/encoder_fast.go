@@ -50,7 +50,7 @@ func (x encodeBytes) encode(buf *encbuf) {
 }
 
 // writeValue implements the equivalent of StartValue, Encode*, FinishValue.
-func (e *xEncoder) writeValue(tt *vdl.Type, encode func(*encbuf)) error {
+func (e *encoder81) writeValue(tt *vdl.Type, encode func(*encbuf)) error {
 	top := e.top()
 	if top == nil {
 		// Top-level value.
@@ -92,7 +92,7 @@ func (e *xEncoder) writeValue(tt *vdl.Type, encode func(*encbuf)) error {
 
 // nextEntryValue implements the equivalent of NextEntry(false), StartValue,
 // Encode*, FinishValue.
-func (e *xEncoder) nextEntryValue(tt *vdl.Type, encode func(*encbuf)) error {
+func (e *encoder81) nextEntryValue(tt *vdl.Type, encode func(*encbuf)) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -135,7 +135,7 @@ func (e *xEncoder) nextEntryValue(tt *vdl.Type, encode func(*encbuf)) error {
 
 // nextFieldValue implements the equivalent of NextField(name), StartValue,
 // Encode*, FinishValue.
-func (e *xEncoder) nextFieldValue(name string, tt *vdl.Type, encode func(*encbuf)) error {
+func (e *encoder81) nextFieldValue(name string, tt *vdl.Type, encode func(*encbuf)) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
@@ -173,11 +173,11 @@ func (e *xEncoder) nextFieldValue(name string, tt *vdl.Type, encode func(*encbuf
 
 // WriteValue* methods
 
-func (e *xEncoder) WriteValueBool(tt *vdl.Type, value bool) error {
+func (e *encoder81) WriteValueBool(tt *vdl.Type, value bool) error {
 	return e.writeValue(tt, encodeBool{value}.encode)
 }
 
-func (e *xEncoder) WriteValueString(tt *vdl.Type, value string) error {
+func (e *encoder81) WriteValueString(tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
 		index := tt.EnumIndex(value)
 		if index < 0 {
@@ -189,7 +189,7 @@ func (e *xEncoder) WriteValueString(tt *vdl.Type, value string) error {
 	}
 }
 
-func (e *xEncoder) WriteValueUint(tt *vdl.Type, value uint64) error {
+func (e *encoder81) WriteValueUint(tt *vdl.Type, value uint64) error {
 	if top := e.top(); top != nil && top.Type.IsBytes() {
 		return e.writeValue(tt, encodeOneByte{byte(value)}.encode)
 	} else {
@@ -197,15 +197,15 @@ func (e *xEncoder) WriteValueUint(tt *vdl.Type, value uint64) error {
 	}
 }
 
-func (e *xEncoder) WriteValueInt(tt *vdl.Type, value int64) error {
+func (e *encoder81) WriteValueInt(tt *vdl.Type, value int64) error {
 	return e.writeValue(tt, encodeInt{value}.encode)
 }
 
-func (e *xEncoder) WriteValueFloat(tt *vdl.Type, value float64) error {
+func (e *encoder81) WriteValueFloat(tt *vdl.Type, value float64) error {
 	return e.writeValue(tt, encodeFloat{value}.encode)
 }
 
-func (e *xEncoder) WriteValueTypeObject(value *vdl.Type) error {
+func (e *encoder81) WriteValueTypeObject(value *vdl.Type) error {
 	// TypeObject is hard to implement, so we call the methods in sequence.
 	if err := e.StartValue(vdl.TypeObjectType); err != nil {
 		return err
@@ -216,17 +216,17 @@ func (e *xEncoder) WriteValueTypeObject(value *vdl.Type) error {
 	return e.FinishValue()
 }
 
-func (e *xEncoder) WriteValueBytes(tt *vdl.Type, value []byte) error {
+func (e *encoder81) WriteValueBytes(tt *vdl.Type, value []byte) error {
 	return e.writeValue(tt, encodeBytes{value, tt.Kind()}.encode)
 }
 
 // NextEntryValue* methods
 
-func (e *xEncoder) NextEntryValueBool(tt *vdl.Type, value bool) error {
+func (e *encoder81) NextEntryValueBool(tt *vdl.Type, value bool) error {
 	return e.nextEntryValue(tt, encodeBool{value}.encode)
 }
 
-func (e *xEncoder) NextEntryValueString(tt *vdl.Type, value string) error {
+func (e *encoder81) NextEntryValueString(tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
 		index := tt.EnumIndex(value)
 		if index < 0 {
@@ -238,7 +238,7 @@ func (e *xEncoder) NextEntryValueString(tt *vdl.Type, value string) error {
 	}
 }
 
-func (e *xEncoder) NextEntryValueUint(tt *vdl.Type, value uint64) error {
+func (e *encoder81) NextEntryValueUint(tt *vdl.Type, value uint64) error {
 	if top := e.top(); top != nil && top.Type.IsBytes() {
 		return e.nextEntryValue(tt, encodeOneByte{byte(value)}.encode)
 	} else {
@@ -246,15 +246,15 @@ func (e *xEncoder) NextEntryValueUint(tt *vdl.Type, value uint64) error {
 	}
 }
 
-func (e *xEncoder) NextEntryValueInt(tt *vdl.Type, value int64) error {
+func (e *encoder81) NextEntryValueInt(tt *vdl.Type, value int64) error {
 	return e.nextEntryValue(tt, encodeInt{value}.encode)
 }
 
-func (e *xEncoder) NextEntryValueFloat(tt *vdl.Type, value float64) error {
+func (e *encoder81) NextEntryValueFloat(tt *vdl.Type, value float64) error {
 	return e.nextEntryValue(tt, encodeFloat{value}.encode)
 }
 
-func (e *xEncoder) NextEntryValueTypeObject(value *vdl.Type) error {
+func (e *encoder81) NextEntryValueTypeObject(value *vdl.Type) error {
 	// TypeObject is hard to implement, so we call the methods in sequence.
 	if err := e.NextEntry(false); err != nil {
 		return err
@@ -262,17 +262,17 @@ func (e *xEncoder) NextEntryValueTypeObject(value *vdl.Type) error {
 	return e.WriteValueTypeObject(value)
 }
 
-func (e *xEncoder) NextEntryValueBytes(tt *vdl.Type, value []byte) error {
+func (e *encoder81) NextEntryValueBytes(tt *vdl.Type, value []byte) error {
 	return e.nextEntryValue(tt, encodeBytes{value, tt.Kind()}.encode)
 }
 
 // NextFieldValue* methods
 
-func (e *xEncoder) NextFieldValueBool(name string, tt *vdl.Type, value bool) error {
+func (e *encoder81) NextFieldValueBool(name string, tt *vdl.Type, value bool) error {
 	return e.nextFieldValue(name, tt, encodeBool{value}.encode)
 }
 
-func (e *xEncoder) NextFieldValueString(name string, tt *vdl.Type, value string) error {
+func (e *encoder81) NextFieldValueString(name string, tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
 		index := tt.EnumIndex(value)
 		if index < 0 {
@@ -284,7 +284,7 @@ func (e *xEncoder) NextFieldValueString(name string, tt *vdl.Type, value string)
 	}
 }
 
-func (e *xEncoder) NextFieldValueUint(name string, tt *vdl.Type, value uint64) error {
+func (e *encoder81) NextFieldValueUint(name string, tt *vdl.Type, value uint64) error {
 	if top := e.top(); top != nil && top.Type.IsBytes() {
 		return e.nextFieldValue(name, tt, encodeOneByte{byte(value)}.encode)
 	} else {
@@ -292,15 +292,15 @@ func (e *xEncoder) NextFieldValueUint(name string, tt *vdl.Type, value uint64) e
 	}
 }
 
-func (e *xEncoder) NextFieldValueInt(name string, tt *vdl.Type, value int64) error {
+func (e *encoder81) NextFieldValueInt(name string, tt *vdl.Type, value int64) error {
 	return e.nextFieldValue(name, tt, encodeInt{value}.encode)
 }
 
-func (e *xEncoder) NextFieldValueFloat(name string, tt *vdl.Type, value float64) error {
+func (e *encoder81) NextFieldValueFloat(name string, tt *vdl.Type, value float64) error {
 	return e.nextFieldValue(name, tt, encodeFloat{value}.encode)
 }
 
-func (e *xEncoder) NextFieldValueTypeObject(name string, value *vdl.Type) error {
+func (e *encoder81) NextFieldValueTypeObject(name string, value *vdl.Type) error {
 	// TypeObject is hard to implement, so we call the methods in sequence.
 	if err := e.NextField(name); err != nil {
 		return err
@@ -308,6 +308,6 @@ func (e *xEncoder) NextFieldValueTypeObject(name string, value *vdl.Type) error 
 	return e.WriteValueTypeObject(value)
 }
 
-func (e *xEncoder) NextFieldValueBytes(name string, tt *vdl.Type, value []byte) error {
+func (e *encoder81) NextFieldValueBytes(name string, tt *vdl.Type, value []byte) error {
 	return e.nextFieldValue(name, tt, encodeBytes{value, tt.Kind()}.encode)
 }

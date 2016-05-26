@@ -363,7 +363,7 @@ func (d *pipeDecoder) StartValue(want *Type) error {
 	// this check for top-level decoded values, and subsequently for decoded any
 	// values.
 	if len(d.Enc.Stack) == 1 || d.IsAny() {
-		if tt := d.Type(); !Compatible2(tt, want) {
+		if tt := d.Type(); !Compatible(tt, want) {
 			return d.Enc.closeLocked(fmt.Errorf("vdl: pipe incompatible decode from %v into %v", tt, want))
 		}
 	}

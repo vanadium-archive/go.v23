@@ -10,6 +10,19 @@ import (
 	"unsafe"
 )
 
+const (
+	// IEEE 754 represents float64 using 52 bits to represent the mantissa, with
+	// an extra implied leading bit.  That gives us 53 bits to store integers
+	// without overflow - i.e. [0, (2^53)-1].  And since 2^53 is a small power of
+	// two, it can also be stored without loss via mantissa=1 exponent=53.  Thus
+	// we have our max and min values.  Ditto for float32, which uses 23 bits with
+	// an extra implied leading bit.
+	float64MaxInt = (1 << 53)
+	float64MinInt = -(1 << 53)
+	float32MaxInt = (1 << 24)
+	float32MinInt = -(1 << 24)
+)
+
 var (
 	bitlenReflect = [...]uintptr{
 		reflect.Uint8:   8,
@@ -104,7 +117,7 @@ func rvFlattenPointers(rv reflect.Value) reflect.Value {
 type zeroDecoder struct{ tt *Type }
 
 func (z zeroDecoder) StartValue(want *Type) error {
-	if !Compatible2(z.tt, want) {
+	if !Compatible(z.tt, want) {
 		return fmt.Errorf("vdl: zero incompatible decode from %v into %v", z.tt, want)
 	}
 	return nil
