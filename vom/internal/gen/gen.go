@@ -314,16 +314,14 @@ func BenchmarkVom___EncodeMany_%[1]s(b *testing.B) {
 }`, name, value)
 }
 
-func genVomDecode(name, typ, value string) string {
+func genVomDecode(name, value, typ string) string {
 	return fmt.Sprintf(`
 func BenchmarkVom___Decode_____%[1]s(b *testing.B) {
-	var tofill %[2]s
-	vomDecode(b, &tofill, %[3]s)
+	vomDecode(b, %[2]s, func() interface{} { return new(%[3]s) })
 }
 func BenchmarkVom___DecodeMany_%[1]s(b *testing.B) {
-	var tofill %[2]s
-	vomDecodeMany(b, &tofill, %[3]s)
-}`, name, typ, value)
+	vomDecodeMany(b, %[2]s, func() interface{} { return new(%[3]s) })
+}`, name, value, typ)
 }
 
 func genGobEncode(name, value string) string {
@@ -336,16 +334,14 @@ func BenchmarkGob___EncodeMany_%[1]s(b *testing.B) {
 }`, name, value)
 }
 
-func genGobDecode(name, typ, value string) string {
+func genGobDecode(name, value, typ string) string {
 	return fmt.Sprintf(`
 func BenchmarkGob___Decode_____%[1]s(b *testing.B) {
-	var tofill %[2]s
-	gobDecode(b, &tofill, %[3]s)
+	gobDecode(b, %[2]s, func() interface{} { return new(%[3]s) })
 }
 func BenchmarkGob___DecodeMany_%[1]s(b *testing.B) {
-	var tofill %[2]s
-	gobDecodeMany(b, &tofill, %[3]s)
-}`, name, typ, value)
+	gobDecodeMany(b, %[2]s, func() interface{} { return new(%[3]s) })
+}`, name, value, typ)
 }
 
 func genBenchmark(entry GeneratorEntry) string {
@@ -354,9 +350,9 @@ func genBenchmark(entry GeneratorEntry) string {
 	if shouldGenGob(entry) {
 		str += genGobEncode(entry.Name, entry.Value)
 	}
-	str += genVomDecode(entry.Name, entry.Type, entry.Value)
+	str += genVomDecode(entry.Name, entry.Value, entry.Type)
 	if shouldGenGob(entry) {
-		str += genGobDecode(entry.Name, entry.Type, entry.Value)
+		str += genGobDecode(entry.Name, entry.Value, entry.Type)
 	}
 	return str
 }

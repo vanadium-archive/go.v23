@@ -33,20 +33,16 @@ func BenchmarkGob___EncodeMany_XNumber(b *testing.B) {
 	gobEncodeMany(b, XNumber(2))
 }
 func BenchmarkVom___Decode_____XNumber(b *testing.B) {
-	var tofill XNumber
-	vomDecode(b, &tofill, XNumber(2))
+	vomDecode(b, XNumber(2), func() interface{} { return new(XNumber) })
 }
 func BenchmarkVom___DecodeMany_XNumber(b *testing.B) {
-	var tofill XNumber
-	vomDecodeMany(b, &tofill, XNumber(2))
+	vomDecodeMany(b, XNumber(2), func() interface{} { return new(XNumber) })
 }
 func BenchmarkGob___Decode_____XNumber(b *testing.B) {
-	var tofill XNumber
-	gobDecode(b, &tofill, XNumber(2))
+	gobDecode(b, XNumber(2), func() interface{} { return new(XNumber) })
 }
 func BenchmarkGob___DecodeMany_XNumber(b *testing.B) {
-	var tofill XNumber
-	gobDecodeMany(b, &tofill, XNumber(2))
+	gobDecodeMany(b, XNumber(2), func() interface{} { return new(XNumber) })
 }
 func BenchmarkVom___Encode_____VNumber(b *testing.B) {
 	vomEncode(b, VNumber(2))
@@ -55,12 +51,10 @@ func BenchmarkVom___EncodeMany_VNumber(b *testing.B) {
 	vomEncodeMany(b, VNumber(2))
 }
 func BenchmarkVom___Decode_____VNumber(b *testing.B) {
-	var tofill VNumber
-	vomDecode(b, &tofill, VNumber(2))
+	vomDecode(b, VNumber(2), func() interface{} { return new(VNumber) })
 }
 func BenchmarkVom___DecodeMany_VNumber(b *testing.B) {
-	var tofill VNumber
-	vomDecodeMany(b, &tofill, VNumber(2))
+	vomDecodeMany(b, VNumber(2), func() interface{} { return new(VNumber) })
 }
 func BenchmarkVom___Encode_____XStringSmall(b *testing.B) {
 	vomEncode(b, XString("abc"))
@@ -75,20 +69,16 @@ func BenchmarkGob___EncodeMany_XStringSmall(b *testing.B) {
 	gobEncodeMany(b, XString("abc"))
 }
 func BenchmarkVom___Decode_____XStringSmall(b *testing.B) {
-	var tofill XString
-	vomDecode(b, &tofill, XString("abc"))
+	vomDecode(b, XString("abc"), func() interface{} { return new(XString) })
 }
 func BenchmarkVom___DecodeMany_XStringSmall(b *testing.B) {
-	var tofill XString
-	vomDecodeMany(b, &tofill, XString("abc"))
+	vomDecodeMany(b, XString("abc"), func() interface{} { return new(XString) })
 }
 func BenchmarkGob___Decode_____XStringSmall(b *testing.B) {
-	var tofill XString
-	gobDecode(b, &tofill, XString("abc"))
+	gobDecode(b, XString("abc"), func() interface{} { return new(XString) })
 }
 func BenchmarkGob___DecodeMany_XStringSmall(b *testing.B) {
-	var tofill XString
-	gobDecodeMany(b, &tofill, XString("abc"))
+	gobDecodeMany(b, XString("abc"), func() interface{} { return new(XString) })
 }
 func BenchmarkVom___Encode_____VStringSmall(b *testing.B) {
 	vomEncode(b, VString("abc"))
@@ -97,12 +87,10 @@ func BenchmarkVom___EncodeMany_VStringSmall(b *testing.B) {
 	vomEncodeMany(b, VString("abc"))
 }
 func BenchmarkVom___Decode_____VStringSmall(b *testing.B) {
-	var tofill VString
-	vomDecode(b, &tofill, VString("abc"))
+	vomDecode(b, VString("abc"), func() interface{} { return new(VString) })
 }
 func BenchmarkVom___DecodeMany_VStringSmall(b *testing.B) {
-	var tofill VString
-	vomDecodeMany(b, &tofill, VString("abc"))
+	vomDecodeMany(b, VString("abc"), func() interface{} { return new(VString) })
 }
 func BenchmarkVom___Encode_____XStringLarge(b *testing.B) {
 	vomEncode(b, XString(createString(65536)))
@@ -117,20 +105,16 @@ func BenchmarkGob___EncodeMany_XStringLarge(b *testing.B) {
 	gobEncodeMany(b, XString(createString(65536)))
 }
 func BenchmarkVom___Decode_____XStringLarge(b *testing.B) {
-	var tofill XString
-	vomDecode(b, &tofill, XString(createString(65536)))
+	vomDecode(b, XString(createString(65536)), func() interface{} { return new(XString) })
 }
 func BenchmarkVom___DecodeMany_XStringLarge(b *testing.B) {
-	var tofill XString
-	vomDecodeMany(b, &tofill, XString(createString(65536)))
+	vomDecodeMany(b, XString(createString(65536)), func() interface{} { return new(XString) })
 }
 func BenchmarkGob___Decode_____XStringLarge(b *testing.B) {
-	var tofill XString
-	gobDecode(b, &tofill, XString(createString(65536)))
+	gobDecode(b, XString(createString(65536)), func() interface{} { return new(XString) })
 }
 func BenchmarkGob___DecodeMany_XStringLarge(b *testing.B) {
-	var tofill XString
-	gobDecodeMany(b, &tofill, XString(createString(65536)))
+	gobDecodeMany(b, XString(createString(65536)), func() interface{} { return new(XString) })
 }
 func BenchmarkVom___Encode_____VStringLarge(b *testing.B) {
 	vomEncode(b, VString(createString(65536)))
@@ -139,12 +123,10 @@ func BenchmarkVom___EncodeMany_VStringLarge(b *testing.B) {
 	vomEncodeMany(b, VString(createString(65536)))
 }
 func BenchmarkVom___Decode_____VStringLarge(b *testing.B) {
-	var tofill VString
-	vomDecode(b, &tofill, VString(createString(65536)))
+	vomDecode(b, VString(createString(65536)), func() interface{} { return new(VString) })
 }
 func BenchmarkVom___DecodeMany_VStringLarge(b *testing.B) {
-	var tofill VString
-	vomDecodeMany(b, &tofill, VString(createString(65536)))
+	vomDecodeMany(b, VString(createString(65536)), func() interface{} { return new(VString) })
 }
 func BenchmarkVom___Encode_____VEnum(b *testing.B) {
 	vomEncode(b, VEnumA)
@@ -153,12 +135,10 @@ func BenchmarkVom___EncodeMany_VEnum(b *testing.B) {
 	vomEncodeMany(b, VEnumA)
 }
 func BenchmarkVom___Decode_____VEnum(b *testing.B) {
-	var tofill VEnum
-	vomDecode(b, &tofill, VEnumA)
+	vomDecode(b, VEnumA, func() interface{} { return new(VEnum) })
 }
 func BenchmarkVom___DecodeMany_VEnum(b *testing.B) {
-	var tofill VEnum
-	vomDecodeMany(b, &tofill, VEnumA)
+	vomDecodeMany(b, VEnumA, func() interface{} { return new(VEnum) })
 }
 func BenchmarkVom___Encode_____XByteListSmall(b *testing.B) {
 	vomEncode(b, XByteList{1, 2, 3})
@@ -173,20 +153,16 @@ func BenchmarkGob___EncodeMany_XByteListSmall(b *testing.B) {
 	gobEncodeMany(b, XByteList{1, 2, 3})
 }
 func BenchmarkVom___Decode_____XByteListSmall(b *testing.B) {
-	var tofill XByteList
-	vomDecode(b, &tofill, XByteList{1, 2, 3})
+	vomDecode(b, XByteList{1, 2, 3}, func() interface{} { return new(XByteList) })
 }
 func BenchmarkVom___DecodeMany_XByteListSmall(b *testing.B) {
-	var tofill XByteList
-	vomDecodeMany(b, &tofill, XByteList{1, 2, 3})
+	vomDecodeMany(b, XByteList{1, 2, 3}, func() interface{} { return new(XByteList) })
 }
 func BenchmarkGob___Decode_____XByteListSmall(b *testing.B) {
-	var tofill XByteList
-	gobDecode(b, &tofill, XByteList{1, 2, 3})
+	gobDecode(b, XByteList{1, 2, 3}, func() interface{} { return new(XByteList) })
 }
 func BenchmarkGob___DecodeMany_XByteListSmall(b *testing.B) {
-	var tofill XByteList
-	gobDecodeMany(b, &tofill, XByteList{1, 2, 3})
+	gobDecodeMany(b, XByteList{1, 2, 3}, func() interface{} { return new(XByteList) })
 }
 func BenchmarkVom___Encode_____VByteListSmall(b *testing.B) {
 	vomEncode(b, VByteList{1, 2, 3})
@@ -195,12 +171,10 @@ func BenchmarkVom___EncodeMany_VByteListSmall(b *testing.B) {
 	vomEncodeMany(b, VByteList{1, 2, 3})
 }
 func BenchmarkVom___Decode_____VByteListSmall(b *testing.B) {
-	var tofill VByteList
-	vomDecode(b, &tofill, VByteList{1, 2, 3})
+	vomDecode(b, VByteList{1, 2, 3}, func() interface{} { return new(VByteList) })
 }
 func BenchmarkVom___DecodeMany_VByteListSmall(b *testing.B) {
-	var tofill VByteList
-	vomDecodeMany(b, &tofill, VByteList{1, 2, 3})
+	vomDecodeMany(b, VByteList{1, 2, 3}, func() interface{} { return new(VByteList) })
 }
 func BenchmarkVom___Encode_____XByteListLarge(b *testing.B) {
 	vomEncode(b, XByteList(createByteList(65536)))
@@ -215,20 +189,16 @@ func BenchmarkGob___EncodeMany_XByteListLarge(b *testing.B) {
 	gobEncodeMany(b, XByteList(createByteList(65536)))
 }
 func BenchmarkVom___Decode_____XByteListLarge(b *testing.B) {
-	var tofill XByteList
-	vomDecode(b, &tofill, XByteList(createByteList(65536)))
+	vomDecode(b, XByteList(createByteList(65536)), func() interface{} { return new(XByteList) })
 }
 func BenchmarkVom___DecodeMany_XByteListLarge(b *testing.B) {
-	var tofill XByteList
-	vomDecodeMany(b, &tofill, XByteList(createByteList(65536)))
+	vomDecodeMany(b, XByteList(createByteList(65536)), func() interface{} { return new(XByteList) })
 }
 func BenchmarkGob___Decode_____XByteListLarge(b *testing.B) {
-	var tofill XByteList
-	gobDecode(b, &tofill, XByteList(createByteList(65536)))
+	gobDecode(b, XByteList(createByteList(65536)), func() interface{} { return new(XByteList) })
 }
 func BenchmarkGob___DecodeMany_XByteListLarge(b *testing.B) {
-	var tofill XByteList
-	gobDecodeMany(b, &tofill, XByteList(createByteList(65536)))
+	gobDecodeMany(b, XByteList(createByteList(65536)), func() interface{} { return new(XByteList) })
 }
 func BenchmarkVom___Encode_____VByteListLarge(b *testing.B) {
 	vomEncode(b, VByteList(createByteList(65536)))
@@ -237,12 +207,10 @@ func BenchmarkVom___EncodeMany_VByteListLarge(b *testing.B) {
 	vomEncodeMany(b, VByteList(createByteList(65536)))
 }
 func BenchmarkVom___Decode_____VByteListLarge(b *testing.B) {
-	var tofill VByteList
-	vomDecode(b, &tofill, VByteList(createByteList(65536)))
+	vomDecode(b, VByteList(createByteList(65536)), func() interface{} { return new(VByteList) })
 }
 func BenchmarkVom___DecodeMany_VByteListLarge(b *testing.B) {
-	var tofill VByteList
-	vomDecodeMany(b, &tofill, VByteList(createByteList(65536)))
+	vomDecodeMany(b, VByteList(createByteList(65536)), func() interface{} { return new(VByteList) })
 }
 func BenchmarkVom___Encode_____XByteArray(b *testing.B) {
 	vomEncode(b, XByteArray{1, 2, 3})
@@ -257,20 +225,16 @@ func BenchmarkGob___EncodeMany_XByteArray(b *testing.B) {
 	gobEncodeMany(b, XByteArray{1, 2, 3})
 }
 func BenchmarkVom___Decode_____XByteArray(b *testing.B) {
-	var tofill XByteArray
-	vomDecode(b, &tofill, XByteArray{1, 2, 3})
+	vomDecode(b, XByteArray{1, 2, 3}, func() interface{} { return new(XByteArray) })
 }
 func BenchmarkVom___DecodeMany_XByteArray(b *testing.B) {
-	var tofill XByteArray
-	vomDecodeMany(b, &tofill, XByteArray{1, 2, 3})
+	vomDecodeMany(b, XByteArray{1, 2, 3}, func() interface{} { return new(XByteArray) })
 }
 func BenchmarkGob___Decode_____XByteArray(b *testing.B) {
-	var tofill XByteArray
-	gobDecode(b, &tofill, XByteArray{1, 2, 3})
+	gobDecode(b, XByteArray{1, 2, 3}, func() interface{} { return new(XByteArray) })
 }
 func BenchmarkGob___DecodeMany_XByteArray(b *testing.B) {
-	var tofill XByteArray
-	gobDecodeMany(b, &tofill, XByteArray{1, 2, 3})
+	gobDecodeMany(b, XByteArray{1, 2, 3}, func() interface{} { return new(XByteArray) })
 }
 func BenchmarkVom___Encode_____VByteArray(b *testing.B) {
 	vomEncode(b, VByteArray{1, 2, 3})
@@ -279,12 +243,10 @@ func BenchmarkVom___EncodeMany_VByteArray(b *testing.B) {
 	vomEncodeMany(b, VByteArray{1, 2, 3})
 }
 func BenchmarkVom___Decode_____VByteArray(b *testing.B) {
-	var tofill VByteArray
-	vomDecode(b, &tofill, VByteArray{1, 2, 3})
+	vomDecode(b, VByteArray{1, 2, 3}, func() interface{} { return new(VByteArray) })
 }
 func BenchmarkVom___DecodeMany_VByteArray(b *testing.B) {
-	var tofill VByteArray
-	vomDecodeMany(b, &tofill, VByteArray{1, 2, 3})
+	vomDecodeMany(b, VByteArray{1, 2, 3}, func() interface{} { return new(VByteArray) })
 }
 func BenchmarkVom___Encode_____XArray(b *testing.B) {
 	vomEncode(b, XArray{1, 2, 3})
@@ -299,20 +261,16 @@ func BenchmarkGob___EncodeMany_XArray(b *testing.B) {
 	gobEncodeMany(b, XArray{1, 2, 3})
 }
 func BenchmarkVom___Decode_____XArray(b *testing.B) {
-	var tofill XArray
-	vomDecode(b, &tofill, XArray{1, 2, 3})
+	vomDecode(b, XArray{1, 2, 3}, func() interface{} { return new(XArray) })
 }
 func BenchmarkVom___DecodeMany_XArray(b *testing.B) {
-	var tofill XArray
-	vomDecodeMany(b, &tofill, XArray{1, 2, 3})
+	vomDecodeMany(b, XArray{1, 2, 3}, func() interface{} { return new(XArray) })
 }
 func BenchmarkGob___Decode_____XArray(b *testing.B) {
-	var tofill XArray
-	gobDecode(b, &tofill, XArray{1, 2, 3})
+	gobDecode(b, XArray{1, 2, 3}, func() interface{} { return new(XArray) })
 }
 func BenchmarkGob___DecodeMany_XArray(b *testing.B) {
-	var tofill XArray
-	gobDecodeMany(b, &tofill, XArray{1, 2, 3})
+	gobDecodeMany(b, XArray{1, 2, 3}, func() interface{} { return new(XArray) })
 }
 func BenchmarkVom___Encode_____VArray(b *testing.B) {
 	vomEncode(b, VArray{1, 2, 3})
@@ -321,12 +279,10 @@ func BenchmarkVom___EncodeMany_VArray(b *testing.B) {
 	vomEncodeMany(b, VArray{1, 2, 3})
 }
 func BenchmarkVom___Decode_____VArray(b *testing.B) {
-	var tofill VArray
-	vomDecode(b, &tofill, VArray{1, 2, 3})
+	vomDecode(b, VArray{1, 2, 3}, func() interface{} { return new(VArray) })
 }
 func BenchmarkVom___DecodeMany_VArray(b *testing.B) {
-	var tofill VArray
-	vomDecodeMany(b, &tofill, VArray{1, 2, 3})
+	vomDecodeMany(b, VArray{1, 2, 3}, func() interface{} { return new(VArray) })
 }
 func BenchmarkVom___Encode_____XListSmall(b *testing.B) {
 	vomEncode(b, XList{1, 2, 3})
@@ -341,20 +297,16 @@ func BenchmarkGob___EncodeMany_XListSmall(b *testing.B) {
 	gobEncodeMany(b, XList{1, 2, 3})
 }
 func BenchmarkVom___Decode_____XListSmall(b *testing.B) {
-	var tofill XList
-	vomDecode(b, &tofill, XList{1, 2, 3})
+	vomDecode(b, XList{1, 2, 3}, func() interface{} { return new(XList) })
 }
 func BenchmarkVom___DecodeMany_XListSmall(b *testing.B) {
-	var tofill XList
-	vomDecodeMany(b, &tofill, XList{1, 2, 3})
+	vomDecodeMany(b, XList{1, 2, 3}, func() interface{} { return new(XList) })
 }
 func BenchmarkGob___Decode_____XListSmall(b *testing.B) {
-	var tofill XList
-	gobDecode(b, &tofill, XList{1, 2, 3})
+	gobDecode(b, XList{1, 2, 3}, func() interface{} { return new(XList) })
 }
 func BenchmarkGob___DecodeMany_XListSmall(b *testing.B) {
-	var tofill XList
-	gobDecodeMany(b, &tofill, XList{1, 2, 3})
+	gobDecodeMany(b, XList{1, 2, 3}, func() interface{} { return new(XList) })
 }
 func BenchmarkVom___Encode_____VListSmall(b *testing.B) {
 	vomEncode(b, VList{1, 2, 3})
@@ -363,12 +315,10 @@ func BenchmarkVom___EncodeMany_VListSmall(b *testing.B) {
 	vomEncodeMany(b, VList{1, 2, 3})
 }
 func BenchmarkVom___Decode_____VListSmall(b *testing.B) {
-	var tofill VList
-	vomDecode(b, &tofill, VList{1, 2, 3})
+	vomDecode(b, VList{1, 2, 3}, func() interface{} { return new(VList) })
 }
 func BenchmarkVom___DecodeMany_VListSmall(b *testing.B) {
-	var tofill VList
-	vomDecodeMany(b, &tofill, VList{1, 2, 3})
+	vomDecodeMany(b, VList{1, 2, 3}, func() interface{} { return new(VList) })
 }
 func BenchmarkVom___Encode_____XListLarge(b *testing.B) {
 	vomEncode(b, XList(createList(65536)))
@@ -383,20 +333,16 @@ func BenchmarkGob___EncodeMany_XListLarge(b *testing.B) {
 	gobEncodeMany(b, XList(createList(65536)))
 }
 func BenchmarkVom___Decode_____XListLarge(b *testing.B) {
-	var tofill XList
-	vomDecode(b, &tofill, XList(createList(65536)))
+	vomDecode(b, XList(createList(65536)), func() interface{} { return new(XList) })
 }
 func BenchmarkVom___DecodeMany_XListLarge(b *testing.B) {
-	var tofill XList
-	vomDecodeMany(b, &tofill, XList(createList(65536)))
+	vomDecodeMany(b, XList(createList(65536)), func() interface{} { return new(XList) })
 }
 func BenchmarkGob___Decode_____XListLarge(b *testing.B) {
-	var tofill XList
-	gobDecode(b, &tofill, XList(createList(65536)))
+	gobDecode(b, XList(createList(65536)), func() interface{} { return new(XList) })
 }
 func BenchmarkGob___DecodeMany_XListLarge(b *testing.B) {
-	var tofill XList
-	gobDecodeMany(b, &tofill, XList(createList(65536)))
+	gobDecodeMany(b, XList(createList(65536)), func() interface{} { return new(XList) })
 }
 func BenchmarkVom___Encode_____VListLarge(b *testing.B) {
 	vomEncode(b, VList(createList(65536)))
@@ -405,12 +351,10 @@ func BenchmarkVom___EncodeMany_VListLarge(b *testing.B) {
 	vomEncodeMany(b, VList(createList(65536)))
 }
 func BenchmarkVom___Decode_____VListLarge(b *testing.B) {
-	var tofill VList
-	vomDecode(b, &tofill, VList(createList(65536)))
+	vomDecode(b, VList(createList(65536)), func() interface{} { return new(VList) })
 }
 func BenchmarkVom___DecodeMany_VListLarge(b *testing.B) {
-	var tofill VList
-	vomDecodeMany(b, &tofill, VList(createList(65536)))
+	vomDecodeMany(b, VList(createList(65536)), func() interface{} { return new(VList) })
 }
 func BenchmarkVom___Encode_____XListAnySmall(b *testing.B) {
 	vomEncode(b, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
@@ -419,12 +363,10 @@ func BenchmarkVom___EncodeMany_XListAnySmall(b *testing.B) {
 	vomEncodeMany(b, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
 }
 func BenchmarkVom___Decode_____XListAnySmall(b *testing.B) {
-	var tofill XListAny
-	vomDecode(b, &tofill, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+	vomDecode(b, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}, func() interface{} { return new(XListAny) })
 }
 func BenchmarkVom___DecodeMany_XListAnySmall(b *testing.B) {
-	var tofill XListAny
-	vomDecodeMany(b, &tofill, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+	vomDecodeMany(b, XListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}, func() interface{} { return new(XListAny) })
 }
 func BenchmarkVom___Encode_____VListAnySmall(b *testing.B) {
 	vomEncode(b, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
@@ -433,12 +375,10 @@ func BenchmarkVom___EncodeMany_VListAnySmall(b *testing.B) {
 	vomEncodeMany(b, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
 }
 func BenchmarkVom___Decode_____VListAnySmall(b *testing.B) {
-	var tofill VListAny
-	vomDecode(b, &tofill, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+	vomDecode(b, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}, func() interface{} { return new(VListAny) })
 }
 func BenchmarkVom___DecodeMany_VListAnySmall(b *testing.B) {
-	var tofill VListAny
-	vomDecodeMany(b, &tofill, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)})
+	vomDecodeMany(b, VListAny{vom.RawBytesOf(1), vom.RawBytesOf(2), vom.RawBytesOf(3)}, func() interface{} { return new(VListAny) })
 }
 func BenchmarkVom___Encode_____XListAnyLarge(b *testing.B) {
 	vomEncode(b, XListAny(createListAny(65536)))
@@ -447,12 +387,10 @@ func BenchmarkVom___EncodeMany_XListAnyLarge(b *testing.B) {
 	vomEncodeMany(b, XListAny(createListAny(65536)))
 }
 func BenchmarkVom___Decode_____XListAnyLarge(b *testing.B) {
-	var tofill XListAny
-	vomDecode(b, &tofill, XListAny(createListAny(65536)))
+	vomDecode(b, XListAny(createListAny(65536)), func() interface{} { return new(XListAny) })
 }
 func BenchmarkVom___DecodeMany_XListAnyLarge(b *testing.B) {
-	var tofill XListAny
-	vomDecodeMany(b, &tofill, XListAny(createListAny(65536)))
+	vomDecodeMany(b, XListAny(createListAny(65536)), func() interface{} { return new(XListAny) })
 }
 func BenchmarkVom___Encode_____VListAnyLarge(b *testing.B) {
 	vomEncode(b, VListAny(createListAny(65536)))
@@ -461,12 +399,10 @@ func BenchmarkVom___EncodeMany_VListAnyLarge(b *testing.B) {
 	vomEncodeMany(b, VListAny(createListAny(65536)))
 }
 func BenchmarkVom___Decode_____VListAnyLarge(b *testing.B) {
-	var tofill VListAny
-	vomDecode(b, &tofill, VListAny(createListAny(65536)))
+	vomDecode(b, VListAny(createListAny(65536)), func() interface{} { return new(VListAny) })
 }
 func BenchmarkVom___DecodeMany_VListAnyLarge(b *testing.B) {
-	var tofill VListAny
-	vomDecodeMany(b, &tofill, VListAny(createListAny(65536)))
+	vomDecodeMany(b, VListAny(createListAny(65536)), func() interface{} { return new(VListAny) })
 }
 func BenchmarkVom___Encode_____VSet(b *testing.B) {
 	vomEncode(b, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}})
@@ -475,12 +411,10 @@ func BenchmarkVom___EncodeMany_VSet(b *testing.B) {
 	vomEncodeMany(b, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}})
 }
 func BenchmarkVom___Decode_____VSet(b *testing.B) {
-	var tofill VSet
-	vomDecode(b, &tofill, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}})
+	vomDecode(b, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}}, func() interface{} { return new(VSet) })
 }
 func BenchmarkVom___DecodeMany_VSet(b *testing.B) {
-	var tofill VSet
-	vomDecodeMany(b, &tofill, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}})
+	vomDecodeMany(b, VSet{"A": struct{}{}, "B": struct{}{}, "C": struct{}{}}, func() interface{} { return new(VSet) })
 }
 func BenchmarkVom___Encode_____XMap(b *testing.B) {
 	vomEncode(b, XMap{"A": true, "B": false, "C": true})
@@ -495,20 +429,16 @@ func BenchmarkGob___EncodeMany_XMap(b *testing.B) {
 	gobEncodeMany(b, XMap{"A": true, "B": false, "C": true})
 }
 func BenchmarkVom___Decode_____XMap(b *testing.B) {
-	var tofill XMap
-	vomDecode(b, &tofill, XMap{"A": true, "B": false, "C": true})
+	vomDecode(b, XMap{"A": true, "B": false, "C": true}, func() interface{} { return new(XMap) })
 }
 func BenchmarkVom___DecodeMany_XMap(b *testing.B) {
-	var tofill XMap
-	vomDecodeMany(b, &tofill, XMap{"A": true, "B": false, "C": true})
+	vomDecodeMany(b, XMap{"A": true, "B": false, "C": true}, func() interface{} { return new(XMap) })
 }
 func BenchmarkGob___Decode_____XMap(b *testing.B) {
-	var tofill XMap
-	gobDecode(b, &tofill, XMap{"A": true, "B": false, "C": true})
+	gobDecode(b, XMap{"A": true, "B": false, "C": true}, func() interface{} { return new(XMap) })
 }
 func BenchmarkGob___DecodeMany_XMap(b *testing.B) {
-	var tofill XMap
-	gobDecodeMany(b, &tofill, XMap{"A": true, "B": false, "C": true})
+	gobDecodeMany(b, XMap{"A": true, "B": false, "C": true}, func() interface{} { return new(XMap) })
 }
 func BenchmarkVom___Encode_____VMap(b *testing.B) {
 	vomEncode(b, VMap{"A": true, "B": false, "C": true})
@@ -517,12 +447,10 @@ func BenchmarkVom___EncodeMany_VMap(b *testing.B) {
 	vomEncodeMany(b, VMap{"A": true, "B": false, "C": true})
 }
 func BenchmarkVom___Decode_____VMap(b *testing.B) {
-	var tofill VMap
-	vomDecode(b, &tofill, VMap{"A": true, "B": false, "C": true})
+	vomDecode(b, VMap{"A": true, "B": false, "C": true}, func() interface{} { return new(VMap) })
 }
 func BenchmarkVom___DecodeMany_VMap(b *testing.B) {
-	var tofill VMap
-	vomDecodeMany(b, &tofill, VMap{"A": true, "B": false, "C": true})
+	vomDecodeMany(b, VMap{"A": true, "B": false, "C": true}, func() interface{} { return new(VMap) })
 }
 func BenchmarkVom___Encode_____XSmallStruct(b *testing.B) {
 	vomEncode(b, XSmallStruct{1, "A", true})
@@ -537,20 +465,16 @@ func BenchmarkGob___EncodeMany_XSmallStruct(b *testing.B) {
 	gobEncodeMany(b, XSmallStruct{1, "A", true})
 }
 func BenchmarkVom___Decode_____XSmallStruct(b *testing.B) {
-	var tofill XSmallStruct
-	vomDecode(b, &tofill, XSmallStruct{1, "A", true})
+	vomDecode(b, XSmallStruct{1, "A", true}, func() interface{} { return new(XSmallStruct) })
 }
 func BenchmarkVom___DecodeMany_XSmallStruct(b *testing.B) {
-	var tofill XSmallStruct
-	vomDecodeMany(b, &tofill, XSmallStruct{1, "A", true})
+	vomDecodeMany(b, XSmallStruct{1, "A", true}, func() interface{} { return new(XSmallStruct) })
 }
 func BenchmarkGob___Decode_____XSmallStruct(b *testing.B) {
-	var tofill XSmallStruct
-	gobDecode(b, &tofill, XSmallStruct{1, "A", true})
+	gobDecode(b, XSmallStruct{1, "A", true}, func() interface{} { return new(XSmallStruct) })
 }
 func BenchmarkGob___DecodeMany_XSmallStruct(b *testing.B) {
-	var tofill XSmallStruct
-	gobDecodeMany(b, &tofill, XSmallStruct{1, "A", true})
+	gobDecodeMany(b, XSmallStruct{1, "A", true}, func() interface{} { return new(XSmallStruct) })
 }
 func BenchmarkVom___Encode_____VSmallStruct(b *testing.B) {
 	vomEncode(b, VSmallStruct{1, "A", true})
@@ -559,12 +483,10 @@ func BenchmarkVom___EncodeMany_VSmallStruct(b *testing.B) {
 	vomEncodeMany(b, VSmallStruct{1, "A", true})
 }
 func BenchmarkVom___Decode_____VSmallStruct(b *testing.B) {
-	var tofill VSmallStruct
-	vomDecode(b, &tofill, VSmallStruct{1, "A", true})
+	vomDecode(b, VSmallStruct{1, "A", true}, func() interface{} { return new(VSmallStruct) })
 }
 func BenchmarkVom___DecodeMany_VSmallStruct(b *testing.B) {
-	var tofill VSmallStruct
-	vomDecodeMany(b, &tofill, VSmallStruct{1, "A", true})
+	vomDecodeMany(b, VSmallStruct{1, "A", true}, func() interface{} { return new(VSmallStruct) })
 }
 func BenchmarkVom___Encode_____XLargeStruct(b *testing.B) {
 	vomEncode(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
@@ -579,20 +501,16 @@ func BenchmarkGob___EncodeMany_XLargeStruct(b *testing.B) {
 	gobEncodeMany(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
 }
 func BenchmarkVom___Decode_____XLargeStruct(b *testing.B) {
-	var tofill XLargeStruct
-	vomDecode(b, &tofill, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	vomDecode(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkVom___DecodeMany_XLargeStruct(b *testing.B) {
-	var tofill XLargeStruct
-	vomDecodeMany(b, &tofill, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	vomDecodeMany(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkGob___Decode_____XLargeStruct(b *testing.B) {
-	var tofill XLargeStruct
-	gobDecode(b, &tofill, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	gobDecode(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkGob___DecodeMany_XLargeStruct(b *testing.B) {
-	var tofill XLargeStruct
-	gobDecodeMany(b, &tofill, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	gobDecodeMany(b, XLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkVom___Encode_____VLargeStruct(b *testing.B) {
 	vomEncode(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
@@ -601,12 +519,10 @@ func BenchmarkVom___EncodeMany_VLargeStruct(b *testing.B) {
 	vomEncodeMany(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
 }
 func BenchmarkVom___Decode_____VLargeStruct(b *testing.B) {
-	var tofill VLargeStruct
-	vomDecode(b, &tofill, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	vomDecode(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(VLargeStruct) })
 }
 func BenchmarkVom___DecodeMany_VLargeStruct(b *testing.B) {
-	var tofill VLargeStruct
-	vomDecodeMany(b, &tofill, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50})
+	vomDecodeMany(b, VLargeStruct{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50}, func() interface{} { return new(VLargeStruct) })
 }
 func BenchmarkVom___Encode_____XLargeStructZero(b *testing.B) {
 	vomEncode(b, XLargeStruct{})
@@ -621,20 +537,16 @@ func BenchmarkGob___EncodeMany_XLargeStructZero(b *testing.B) {
 	gobEncodeMany(b, XLargeStruct{})
 }
 func BenchmarkVom___Decode_____XLargeStructZero(b *testing.B) {
-	var tofill XLargeStruct
-	vomDecode(b, &tofill, XLargeStruct{})
+	vomDecode(b, XLargeStruct{}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkVom___DecodeMany_XLargeStructZero(b *testing.B) {
-	var tofill XLargeStruct
-	vomDecodeMany(b, &tofill, XLargeStruct{})
+	vomDecodeMany(b, XLargeStruct{}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkGob___Decode_____XLargeStructZero(b *testing.B) {
-	var tofill XLargeStruct
-	gobDecode(b, &tofill, XLargeStruct{})
+	gobDecode(b, XLargeStruct{}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkGob___DecodeMany_XLargeStructZero(b *testing.B) {
-	var tofill XLargeStruct
-	gobDecodeMany(b, &tofill, XLargeStruct{})
+	gobDecodeMany(b, XLargeStruct{}, func() interface{} { return new(XLargeStruct) })
 }
 func BenchmarkVom___Encode_____VLargeStructZero(b *testing.B) {
 	vomEncode(b, VLargeStruct{})
@@ -643,12 +555,10 @@ func BenchmarkVom___EncodeMany_VLargeStructZero(b *testing.B) {
 	vomEncodeMany(b, VLargeStruct{})
 }
 func BenchmarkVom___Decode_____VLargeStructZero(b *testing.B) {
-	var tofill VLargeStruct
-	vomDecode(b, &tofill, VLargeStruct{})
+	vomDecode(b, VLargeStruct{}, func() interface{} { return new(VLargeStruct) })
 }
 func BenchmarkVom___DecodeMany_VLargeStructZero(b *testing.B) {
-	var tofill VLargeStruct
-	vomDecodeMany(b, &tofill, VLargeStruct{})
+	vomDecodeMany(b, VLargeStruct{}, func() interface{} { return new(VLargeStruct) })
 }
 func BenchmarkVom___Encode_____VSmallUnion(b *testing.B) {
 	vomEncode(b, VSmallUnionA{1})
@@ -657,12 +567,10 @@ func BenchmarkVom___EncodeMany_VSmallUnion(b *testing.B) {
 	vomEncodeMany(b, VSmallUnionA{1})
 }
 func BenchmarkVom___Decode_____VSmallUnion(b *testing.B) {
-	var tofill VSmallUnion
-	vomDecode(b, &tofill, VSmallUnionA{1})
+	vomDecode(b, VSmallUnionA{1}, func() interface{} { return new(VSmallUnion) })
 }
 func BenchmarkVom___DecodeMany_VSmallUnion(b *testing.B) {
-	var tofill VSmallUnion
-	vomDecodeMany(b, &tofill, VSmallUnionA{1})
+	vomDecodeMany(b, VSmallUnionA{1}, func() interface{} { return new(VSmallUnion) })
 }
 func BenchmarkVom___Encode_____Time(b *testing.B) {
 	vomEncode(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
@@ -677,20 +585,16 @@ func BenchmarkGob___EncodeMany_Time(b *testing.B) {
 	gobEncodeMany(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
 }
 func BenchmarkVom___Decode_____Time(b *testing.B) {
-	var tofill time.Time
-	vomDecode(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+	vomDecode(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC), func() interface{} { return new(time.Time) })
 }
 func BenchmarkVom___DecodeMany_Time(b *testing.B) {
-	var tofill time.Time
-	vomDecodeMany(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+	vomDecodeMany(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC), func() interface{} { return new(time.Time) })
 }
 func BenchmarkGob___Decode_____Time(b *testing.B) {
-	var tofill time.Time
-	gobDecode(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+	gobDecode(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC), func() interface{} { return new(time.Time) })
 }
 func BenchmarkGob___DecodeMany_Time(b *testing.B) {
-	var tofill time.Time
-	gobDecodeMany(b, &tofill, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC))
+	gobDecodeMany(b, time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC), func() interface{} { return new(time.Time) })
 }
 func BenchmarkVom___Encode_____Blessings(b *testing.B) {
 	vomEncode(b, createTypicalBlessings())
@@ -699,12 +603,10 @@ func BenchmarkVom___EncodeMany_Blessings(b *testing.B) {
 	vomEncodeMany(b, createTypicalBlessings())
 }
 func BenchmarkVom___Decode_____Blessings(b *testing.B) {
-	var tofill security.Blessings
-	vomDecode(b, &tofill, createTypicalBlessings())
+	vomDecode(b, createTypicalBlessings(), func() interface{} { return new(security.Blessings) })
 }
 func BenchmarkVom___DecodeMany_Blessings(b *testing.B) {
-	var tofill security.Blessings
-	vomDecodeMany(b, &tofill, createTypicalBlessings())
+	vomDecodeMany(b, createTypicalBlessings(), func() interface{} { return new(security.Blessings) })
 }
 func BenchmarkVom___Encode_____RPCRequestZero(b *testing.B) {
 	vomEncode(b, rpc.Request{})
@@ -713,12 +615,10 @@ func BenchmarkVom___EncodeMany_RPCRequestZero(b *testing.B) {
 	vomEncodeMany(b, rpc.Request{})
 }
 func BenchmarkVom___Decode_____RPCRequestZero(b *testing.B) {
-	var tofill rpc.Request
-	vomDecode(b, &tofill, rpc.Request{})
+	vomDecode(b, rpc.Request{}, func() interface{} { return new(rpc.Request) })
 }
 func BenchmarkVom___DecodeMany_RPCRequestZero(b *testing.B) {
-	var tofill rpc.Request
-	vomDecodeMany(b, &tofill, rpc.Request{})
+	vomDecodeMany(b, rpc.Request{}, func() interface{} { return new(rpc.Request) })
 }
 func BenchmarkVom___Encode_____RPCRequestFull(b *testing.B) {
 	vomEncode(b, rpc.Request{
@@ -759,8 +659,7 @@ func BenchmarkVom___EncodeMany_RPCRequestFull(b *testing.B) {
 	})
 }
 func BenchmarkVom___Decode_____RPCRequestFull(b *testing.B) {
-	var tofill rpc.Request
-	vomDecode(b, &tofill, rpc.Request{
+	vomDecode(b, rpc.Request{
 		Suffix:        "a suffix",
 		Method:        "a method",
 		NumPosArgs:    23,
@@ -776,11 +675,10 @@ func BenchmarkVom___Decode_____RPCRequestFull(b *testing.B) {
 			LogLevel: 3,
 		},
 		Language: "en-us",
-	})
+	}, func() interface{} { return new(rpc.Request) })
 }
 func BenchmarkVom___DecodeMany_RPCRequestFull(b *testing.B) {
-	var tofill rpc.Request
-	vomDecodeMany(b, &tofill, rpc.Request{
+	vomDecodeMany(b, rpc.Request{
 		Suffix:        "a suffix",
 		Method:        "a method",
 		NumPosArgs:    23,
@@ -796,7 +694,7 @@ func BenchmarkVom___DecodeMany_RPCRequestFull(b *testing.B) {
 			LogLevel: 3,
 		},
 		Language: "en-us",
-	})
+	}, func() interface{} { return new(rpc.Request) })
 }
 func BenchmarkVom___Encode_____RPCResponseZero(b *testing.B) {
 	vomEncode(b, rpc.Response{})
@@ -805,12 +703,10 @@ func BenchmarkVom___EncodeMany_RPCResponseZero(b *testing.B) {
 	vomEncodeMany(b, rpc.Response{})
 }
 func BenchmarkVom___Decode_____RPCResponseZero(b *testing.B) {
-	var tofill rpc.Response
-	vomDecode(b, &tofill, rpc.Response{})
+	vomDecode(b, rpc.Response{}, func() interface{} { return new(rpc.Response) })
 }
 func BenchmarkVom___DecodeMany_RPCResponseZero(b *testing.B) {
-	var tofill rpc.Response
-	vomDecodeMany(b, &tofill, rpc.Response{})
+	vomDecodeMany(b, rpc.Response{}, func() interface{} { return new(rpc.Response) })
 }
 func BenchmarkVom___Encode_____RPCResponseFull(b *testing.B) {
 	vomEncode(b, rpc.Response{
@@ -869,8 +765,7 @@ func BenchmarkVom___EncodeMany_RPCResponseFull(b *testing.B) {
 	})
 }
 func BenchmarkVom___Decode_____RPCResponseFull(b *testing.B) {
-	var tofill rpc.Response
-	vomDecode(b, &tofill, rpc.Response{
+	vomDecode(b, rpc.Response{
 		Error:            errors.New("testerror"),
 		EndStreamResults: true,
 		NumPosResults:    4,
@@ -895,11 +790,10 @@ func BenchmarkVom___Decode_____RPCResponseFull(b *testing.B) {
 				},
 			},
 		},
-	})
+	}, func() interface{} { return new(rpc.Response) })
 }
 func BenchmarkVom___DecodeMany_RPCResponseFull(b *testing.B) {
-	var tofill rpc.Response
-	vomDecodeMany(b, &tofill, rpc.Response{
+	vomDecodeMany(b, rpc.Response{
 		Error:            errors.New("testerror"),
 		EndStreamResults: true,
 		NumPosResults:    4,
@@ -924,5 +818,5 @@ func BenchmarkVom___DecodeMany_RPCResponseFull(b *testing.B) {
 				},
 			},
 		},
-	})
+	}, func() interface{} { return new(rpc.Response) })
 }

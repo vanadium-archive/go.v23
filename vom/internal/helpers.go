@@ -30,18 +30,18 @@ func vomEncode(b *testing.B, value interface{}) {
 	}
 }
 
-func vomDecode(b *testing.B, tofill, value interface{}) {
+func vomDecode(b *testing.B, value interface{}, make func() interface{}) {
 	// Encode once to get the data, and decode once to make sure it succeeds.
 	data, err := vom.Encode(value)
 	if err != nil {
 		b.Fatal(err)
 	}
-	if err := vom.Decode(data, tofill); err != nil {
+	if err := vom.Decode(data, make()); err != nil {
 		b.Fatal(err)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if err := vom.Decode(data, tofill); err != nil {
+		if err := vom.Decode(data, make()); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -63,7 +63,7 @@ func vomEncodeMany(b *testing.B, value interface{}) {
 	}
 }
 
-func vomDecodeMany(b *testing.B, tofill, value interface{}) {
+func vomDecodeMany(b *testing.B, value interface{}, make func() interface{}) {
 	var buf bytes.Buffer
 	enc := vom.NewEncoder(&buf)
 	// Encode once first to write the type and value.
@@ -80,15 +80,14 @@ func vomDecodeMany(b *testing.B, tofill, value interface{}) {
 	reader := bytes.NewReader(buf.Bytes())
 	dec := vom.NewDecoder(reader)
 	for i := 0; i < 2; i++ {
-		if err := dec.Decode(tofill); err != nil {
+		if err := dec.Decode(make()); err != nil {
 			b.Fatal(err)
 		}
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(valueOffset, 0)
-		// TODO(toddw): Change benchmark to create a new value each time.
-		if err := dec.Decode(tofill); err != nil {
+		if err := dec.Decode(make()); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -109,20 +108,20 @@ func gobEncode(b *testing.B, value interface{}) {
 	}
 }
 
-func gobDecode(b *testing.B, tofill, value interface{}) {
+func gobDecode(b *testing.B, value interface{}, make func() interface{}) {
 	// Encode once to get the data, and decode once to make sure it succeeds.
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(value); err != nil {
 		b.Fatal(err)
 	}
 	reader := bytes.NewReader(buf.Bytes())
-	if err := gob.NewDecoder(reader).Decode(tofill); err != nil {
+	if err := gob.NewDecoder(reader).Decode(make()); err != nil {
 		b.Fatal(err)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(0, 0)
-		if err := gob.NewDecoder(reader).Decode(tofill); err != nil {
+		if err := gob.NewDecoder(reader).Decode(make()); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -145,7 +144,7 @@ func gobEncodeMany(b *testing.B, value interface{}) {
 	}
 }
 
-func gobDecodeMany(b *testing.B, tofill, value interface{}) {
+func gobDecodeMany(b *testing.B, value interface{}, make func() interface{}) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	// Encode once first to write the type and value.
@@ -162,14 +161,14 @@ func gobDecodeMany(b *testing.B, tofill, value interface{}) {
 	reader := bytes.NewReader(buf.Bytes())
 	dec := gob.NewDecoder(reader)
 	for i := 0; i < 2; i++ {
-		if err := dec.Decode(tofill); err != nil {
+		if err := dec.Decode(make()); err != nil {
 			b.Fatal(err)
 		}
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader.Seek(valueOffset, 0)
-		if err := dec.Decode(tofill); err != nil {
+		if err := dec.Decode(make()); err != nil {
 			b.Fatal(err)
 		}
 	}
