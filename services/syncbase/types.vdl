@@ -404,3 +404,18 @@ type StoreChange struct {
 	// Note: FromSync is always false for initial state Changes.
 	FromSync bool
 }
+
+// Types of discovery service attributes.
+const (
+	// DiscoveryAttrPeer is the globally unique identifier of the advertised syncbase.
+	DiscoveryAttrPeer              = "p"
+	// DiscoveryAttrSyncgroupName is the name of the advertised syncgroup.
+	DiscoveryAttrSyncgroupName     = "s"
+	// DiscoveryAttrSyncgroupBlessing is the blessing of the creator of the syncgroup.
+	DiscoveryAttrSyncgroupBlessing = "sb"
+	// DiscoveryAttrDatabaseName is the name component of a database ID, that this syncgroup is a part of.
+	DiscoveryAttrDatabaseName      = "d"
+	// DiscoveryAttrDatabaseBlessing is the app blessing component of a database ID,
+	// that this syncgroup is a part of.
+	DiscoveryAttrDatabaseBlessing  = "db"
+)

@@ -1,5 +1,6 @@
 pkg syncbase, const DeleteChange ChangeType
 pkg syncbase, const PutChange ChangeType
+pkg syncbase, func NewDiscovery(*context.T) (discovery.T, error)
 pkg syncbase, func NewService(string) Service
 pkg syncbase, func NewValue(*context.T, interface{}) (*Value, error)
 pkg syncbase, func Prefix(string) PrefixRange
@@ -12,6 +13,8 @@ pkg syncbase, method (*Conflict) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRowSet) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictScanSet) VDLRead(vdl.Decoder) error
+pkg syncbase, method (*Discovery) Advertise(*context.T, *discovery.Advertisement, []security.BlessingPattern) (<-chan struct{}, error)
+pkg syncbase, method (*Discovery) Scan(*context.T, string) (<-chan discovery.Update, error)
 pkg syncbase, method (*Resolution) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ResolvedRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*Value) Get(interface{}) error
@@ -128,6 +131,7 @@ pkg syncbase, type DatabaseHandle interface, FullName() string
 pkg syncbase, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseHandle interface, Id() wire.Id
 pkg syncbase, type DatabaseHandle interface, ListCollections(*context.T) ([]wire.Id, error)
+pkg syncbase, type Discovery struct
 pkg syncbase, type PrefixRange interface { Limit, Prefix, Start }
 pkg syncbase, type PrefixRange interface, Limit() string
 pkg syncbase, type PrefixRange interface, Prefix() string

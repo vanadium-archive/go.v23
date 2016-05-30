@@ -2777,6 +2777,22 @@ const BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
 const BlobDevTypeLeaf = int32(2)   // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
 const NullBlobRef = BlobRef("")
 
+// DiscoveryAttrPeer is the globally unique identifier of the advertised syncbase.
+const DiscoveryAttrPeer = "p"
+
+// DiscoveryAttrSyncgroupName is the name of the advertised syncgroup.
+const DiscoveryAttrSyncgroupName = "s"
+
+// DiscoveryAttrSyncgroupBlessing is the blessing of the creator of the syncgroup.
+const DiscoveryAttrSyncgroupBlessing = "sb"
+
+// DiscoveryAttrDatabaseName is the name component of a database ID, that this syncgroup is a part of.
+const DiscoveryAttrDatabaseName = "d"
+
+// DiscoveryAttrDatabaseBlessing is the app blessing component of a database ID,
+// that this syncgroup is a part of.
+const DiscoveryAttrDatabaseBlessing = "db"
+
 //////////////////////////////////////////////////
 // Error definitions
 

@@ -7,6 +7,11 @@ pkg syncbase, const BlobFetchStateDone BlobFetchState
 pkg syncbase, const BlobFetchStateFetching BlobFetchState
 pkg syncbase, const BlobFetchStateLocating BlobFetchState
 pkg syncbase, const BlobFetchStatePending BlobFetchState
+pkg syncbase, const DiscoveryAttrDatabaseBlessing ideal-string
+pkg syncbase, const DiscoveryAttrDatabaseName ideal-string
+pkg syncbase, const DiscoveryAttrPeer ideal-string
+pkg syncbase, const DiscoveryAttrSyncgroupBlessing ideal-string
+pkg syncbase, const DiscoveryAttrSyncgroupName ideal-string
 pkg syncbase, const NullBlobRef BlobRef
 pkg syncbase, const ResolverTypeAppResolves ResolverType
 pkg syncbase, const ResolverTypeDefer ResolverType
