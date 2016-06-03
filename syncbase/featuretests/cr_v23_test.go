@@ -322,7 +322,7 @@ func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool)
 	sh.StartRootMountTable()
 	sbs := setupSyncbases(t, sh, 2, devMode)
 
-	sgId = wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId = wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	// Create syncgroup and populate data on s0.
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))

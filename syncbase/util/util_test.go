@@ -5,11 +5,15 @@
 package util_test
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
+	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase/util"
+	"v.io/v23/verror"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
@@ -150,6 +154,183 @@ func TestIsPrefix(t *testing.T) {
 		result := util.IsPrefix(test.start, test.limit)
 		if result != test.isPrefix {
 			t.Errorf("%q, %q: got %v, want %v", test.start, test.limit, result, test.isPrefix)
+		}
+	}
+}
+
+func TestAppAndUserPatternFromBlessings(t *testing.T) {
+	for _, test := range []struct {
+		blessings []string
+		wantApp   string
+		wantUser  string
+		wantErr   error
+	}{
+		{
+			[]string{},
+			"$",
+			"$",
+			util.NewErrFoundNoConventionalBlessings(nil),
+		},
+		{
+			[]string{"foo", "bar:x:baz"},
+			"$",
+			"$",
+			util.NewErrFoundNoConventionalBlessings(nil),
+		},
+		// non-conventional blessings are ignored if a conventional blessing is present
+		{
+			[]string{"foo", "root:o:angrybirds:alice", "bar:x:baz"},
+			"root:o:angrybirds",
+			"root:o:angrybirds:alice",
+			nil,
+		},
+		// user blessings are ignored when an app:user blessing is present
+		{
+			[]string{"foo", "root:u:alice", "root:o:angrybirds:alice:device:phone", "bar:x:baz"},
+			"root:o:angrybirds",
+			"root:o:angrybirds:alice",
+			nil,
+		},
+		// user blessings are ignored when an app:user blessing is present, even if multiple
+		{
+			[]string{"foo", "root:u:bob", "root:o:todos:dave:friend:alice", "root:u:carol", "bar:x:baz"},
+			"root:o:todos",
+			"root:o:todos:dave",
+			nil,
+		},
+		// multiple blessings for the same app:user are allowed
+		{
+			[]string{"foo", "root:u:bob", "root:o:todos:dave:friend:alice", "root:u:carol", "root:o:todos:dave:device:phone", "bar:x:baz"},
+			"root:o:todos",
+			"root:o:todos:dave",
+			nil,
+		},
+		// multiple blessings for different apps, users, or identity providers are not allowed
+		{
+			[]string{"foo", "root:u:bob", "root:o:todos:dave:friend:alice", "root:o:angrybirds:dave", "root:o:todos:dave:device:phone", "bar:x:baz"},
+			"$",
+			"$",
+			util.NewErrFoundMultipleAppUserBlessings(nil, "root:o:todos:dave", "root:o:angrybirds:dave"),
+		},
+		{
+			[]string{"foo", "root:u:bob", "root:o:todos:dave:friend:alice", "root:o:todos:fred"},
+			"$",
+			"$",
+			util.NewErrFoundMultipleAppUserBlessings(nil, "root:o:todos:dave", "root:o:todos:fred"),
+		},
+		{
+			[]string{"foo", "root:u:bob", "root:o:todos:dave:friend:alice", "google:o:todos:dave"},
+			"$",
+			"$",
+			util.NewErrFoundMultipleAppUserBlessings(nil, "root:o:todos:dave", "google:o:todos:dave"),
+		},
+		// non-conventional blessings are ignored if a conventional blessing is present
+		{
+			[]string{"foo", "root:u:bob", "bar:x:baz"},
+			"...",
+			"root:u:bob",
+			nil,
+		},
+		// multiple blessings for the same user are allowed
+		{
+			[]string{"foo", "root:u:bob:angrybirds", "root:u:bob:todos:phone", "bar:x:baz"},
+			"...",
+			"root:u:bob",
+			nil,
+		},
+		// multiple blessings for different users or identity providers are not allowed
+		{
+			[]string{"foo", "root:u:bob:angrybirds", "root:u:bob:todos:phone", "root:u:carol", "root:u:dave", "bar:x:baz"},
+			"$",
+			"$",
+			util.NewErrFoundMultipleUserBlessings(nil, "root:u:bob", "root:u:carol"),
+		},
+		{
+			[]string{"foo", "root:u:bob:angrybirds", "google:u:bob:todos:phone", "bar:x:baz"},
+			"$",
+			"$",
+			util.NewErrFoundMultipleUserBlessings(nil, "root:u:bob", "google:u:bob"),
+		},
+	} {
+		app, user, err := util.AppAndUserPatternFromBlessings(test.blessings...)
+		if verror.ErrorID(err) != verror.ErrorID(test.wantErr) || fmt.Sprint(err) != fmt.Sprint(test.wantErr) {
+			t.Errorf("AppAndUserPatternFromBlessings(%v): got error %v, want %v", test.blessings, err, test.wantErr)
+		}
+		if string(app) != test.wantApp {
+			t.Errorf("AppAndUserPatternFromBlessings(%v): got app %s, want %s", test.blessings, app, test.wantApp)
+		}
+		if string(user) != test.wantUser {
+			t.Errorf("AppAndUserPatternFromBlessings(%v): got user %s, want %s", test.blessings, user, test.wantUser)
+		}
+	}
+}
+
+func TestFilterTags(t *testing.T) {
+	for _, test := range []struct {
+		input     access.Permissions
+		allowTags []access.Tag
+		want      access.Permissions
+	}{
+		{
+			access.Permissions{}.
+				Add("root", access.TagStrings(access.Read, access.Write, access.Admin)...).
+				Add("root:alice", access.TagStrings(access.Read, access.Write)...),
+			[]access.Tag{},
+			access.Permissions{},
+		},
+		{
+			access.Permissions{}.
+				Add("root", access.TagStrings(access.Read, access.Write, access.Admin)...).
+				Add("root:alice", access.TagStrings(access.Read, access.Write)...),
+			[]access.Tag{access.Admin, access.Read},
+			access.Permissions{}.
+				Add("root", access.TagStrings(access.Read, access.Admin)...).
+				Add("root:alice", access.TagStrings(access.Read)...),
+		},
+		{
+			access.Permissions{}.
+				Add("alice", access.TagStrings(access.Admin)...).
+				Add("bob", access.TagStrings(access.Read, access.Write)...).
+				Add("carol", access.TagStrings(access.Write, access.Admin)...),
+			[]access.Tag{access.Read, access.Write},
+			access.Permissions{}.
+				Add("bob", access.TagStrings(access.Read, access.Write)...).
+				Add("carol", access.TagStrings(access.Write)...),
+		},
+		{
+			access.Permissions{},
+			[]access.Tag{access.Read, access.Write, access.Admin},
+			access.Permissions{},
+		},
+		{
+			access.Permissions{}.
+				Add("alice", access.TagStrings(access.Admin)...).
+				Add("bob", access.TagStrings(access.Read, access.Write, access.Admin)...).
+				Blacklist("bob:tablet", access.TagStrings(access.Write, access.Admin)...),
+			[]access.Tag{access.Read, access.Write},
+			access.Permissions{}.
+				Add("bob", access.TagStrings(access.Read, access.Write)...).
+				Blacklist("bob:tablet", access.TagStrings(access.Write)...),
+		},
+		{
+			access.Permissions{}.
+				Add("alice", access.TagStrings(access.Admin)...).
+				Add("bob", access.TagStrings(access.Read, access.Write)...).
+				Blacklist("bob:tablet", access.TagStrings(access.Write)...),
+			[]access.Tag{access.Admin, access.Read},
+			access.Permissions{}.
+				Add("alice", access.TagStrings(access.Admin)...).
+				Add("bob", access.TagStrings(access.Read)...),
+		},
+	} {
+		inputCopy := test.input.Copy()
+		filtered := util.FilterTags(inputCopy, test.allowTags...)
+		// Modify the input perms to ensure the filtered copy is unaffected.
+		if adminAcl, ok := inputCopy[string(access.Admin)]; ok && len(adminAcl.In) > 0 {
+			adminAcl.In[0] = "mallory"
+		}
+		if got, want := filtered, test.want.Normalize(); !reflect.DeepEqual(got, want) {
+			t.Errorf("FilterTags(%v, %v): got %v, want %v", test.input, test.allowTags, got, want)
 		}
 	}
 }

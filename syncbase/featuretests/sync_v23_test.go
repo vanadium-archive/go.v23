@@ -55,7 +55,7 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 2, false)
 
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
@@ -66,7 +66,7 @@ func TestV23VSyncCompEval(t *testing.T) {
 	// on the first syncgroup do not get any data belonging to this
 	// syncgroup. This triggers the handling of filtered log records in the
 	// restartability code.
-	sgId1 := wire.Id{Name: "SG2", Blessing: sbBlessings(sbs)}
+	sgId1 := wire.Id{Name: "SG2", Blessing: testCx.Blessing}
 
 	// Verify data syncing (client0 updates).
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId1, "c1", "", sbBlessings(sbs), nil, clBlessings(sbs)))
@@ -135,7 +135,7 @@ func TestV23VSyncWithPutDelWatch(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 2, false)
 
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c1,c2", "", sbBlessings(sbs), nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c1", "foo", 0, 10))
@@ -177,17 +177,17 @@ func TestV23VSyncWithAcls(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 2, false)
 
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c", "foo", "", 0, 10))
 
-	ok(t, setCollectionPermissions(sbs[1].clientCtx, sbs[1].sbName, "root:c1"))
+	ok(t, setCollectionPermissions(sbs[1].clientCtx, sbs[1].sbName, "root:o:app:client:c1"))
 	ok(t, verifyLostAccess(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 
-	ok(t, setCollectionPermissions(sbs[1].clientCtx, sbs[1].sbName, "root:c0;root:c1"))
+	ok(t, setCollectionPermissions(sbs[1].clientCtx, sbs[1].sbName, "root:o:app:client:c0;root:o:app:client:c1"))
 	ok(t, verifySyncgroupData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", "", 0, 10))
 }
 
@@ -209,9 +209,9 @@ func TestV23VSyncWithPeerSyncgroups(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 3, false)
 
 	sb1Name := sbs[0].sbName
-	sg1Id := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sg1Id := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 	sb2Name := sbs[1].sbName
-	sg2Id := wire.Id{Name: "SG2", Blessing: sbBlessings(sbs)}
+	sg2Id := wire.Id{Name: "SG2", Blessing: testCx.Blessing}
 
 	// Pre-populate the data before creating the syncgroup.
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, "c"))
@@ -246,7 +246,7 @@ func TestV23VSyncSyncgroups(t *testing.T) {
 	sbs := setupSyncbases(t, sh, 3, false)
 
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
@@ -304,7 +304,7 @@ func setSyncgroupSpec(ctx *context.T, syncbaseName string, sgId wire.Id, sgDesc,
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	if perms == nil {
-		perms = tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
+		perms = tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(blessingPatterns, ";")...)
 	}
 
 	spec := wire.SyncgroupSpec{
@@ -327,7 +327,7 @@ func deleteData(ctx *context.T, syncbaseName string, collectionName, keyPrefix s
 	}
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	c := d.CollectionForId(collectionId)
 
 	for i := start; i < end; i++ {
@@ -344,7 +344,7 @@ func setCollectionPermissions(ctx *context.T, syncbaseName string, blessingPatte
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.CollectionForId(testCx)
 
-	perms := tu.DefaultPerms(strings.Split(blessingPatterns, ";")...)
+	perms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(blessingPatterns, ";")...)
 
 	if err := c.SetPermissions(ctx, perms); err != nil {
 		return fmt.Errorf("c.SetPermissions() failed: %v\n", err)
@@ -373,8 +373,8 @@ func populateAndCreateSyncgroupMulti(ctx *context.T, syncbaseName string, numApp
 	}
 	mtName := roots[0]
 
-	sbperms := tu.DefaultPerms(strings.Split(sbBlessings, ";")...)
-	clperms := tu.DefaultPerms(strings.Split(clBlessings, ";")...)
+	sgperms := tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(sbBlessings, ";")...)
+	clperms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
 
 	svc := syncbase.NewService(syncbaseName)
 
@@ -391,7 +391,7 @@ func populateAndCreateSyncgroupMulti(ctx *context.T, syncbaseName string, numApp
 			var sgColls []wire.Id
 			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
-				cId := wire.Id{"u", cName}
+				cId := wire.Id{testCx.Blessing, cName}
 				c := d.CollectionForId(cId)
 				if err := c.Create(ctx, clperms); err != nil {
 					return fmt.Errorf("{%q, %v} c.Create failed %v", syncbaseName, cId, err)
@@ -413,10 +413,10 @@ func populateAndCreateSyncgroupMulti(ctx *context.T, syncbaseName string, numApp
 
 			// Create one syncgroup per database across all collections.
 			sgName := fmt.Sprintf("%s_%s", appName, dbName)
-			sgId := wire.Id{Name: sgName, Blessing: "blessing"}
+			sgId := wire.Id{Name: sgName, Blessing: testCx.Blessing}
 			spec := wire.SyncgroupSpec{
 				Description: fmt.Sprintf("test sg %s/%s", appName, dbName),
-				Perms:       sbperms,
+				Perms:       sgperms,
 				Collections: sgColls,
 				MountTables: []string{mtName},
 			}
@@ -442,7 +442,7 @@ func joinSyncgroupMulti(ctx *context.T, sbNameLocal, sbNameRemote string, numApp
 			d := svc.DatabaseForId(wire.Id{appName, dbName}, nil)
 
 			sgName := fmt.Sprintf("%s_%s", appName, dbName)
-			sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: "blessing"})
+			sg := d.SyncgroupForId(wire.Id{Name: sgName, Blessing: testCx.Blessing})
 			info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 			if _, err := sg.Join(ctx, sbNameRemote, nil, info); err != nil {
 				return fmt.Errorf("Join SG Multi %q failed: %v\n", sgName, err)
@@ -472,7 +472,7 @@ func verifySyncgroupSpec(ctx *context.T, syncbaseName string, sgId wire.Id, want
 	sg := d.SyncgroupForId(sgId)
 
 	wantCollections := parseSgCollections(wantColls)
-	wantPerms := tu.DefaultPerms(strings.Split(wantBlessingPatterns, ";")...)
+	wantPerms := tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(wantBlessingPatterns, ";")...)
 
 	var spec wire.SyncgroupSpec
 	var err error
@@ -495,7 +495,7 @@ func verifySyncgroupSpec(ctx *context.T, syncbaseName string, sgId wire.Id, want
 
 func verifySyncgroupDeletedData(ctx *context.T, syncbaseName, collectionName, keyPrefix, valuePrefix string, start, count int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	c := d.CollectionForId(collectionId)
 
 	// Wait for a bit for deletions to propagate.
@@ -551,7 +551,7 @@ func verifySyncgroupDataWithWatch(ctx *context.T, syncbaseName, collectionName, 
 	}
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -606,7 +606,7 @@ func verifySyncgroupDataWithWatch(ctx *context.T, syncbaseName, collectionName, 
 
 func verifyLostAccess(ctx *context.T, syncbaseName, collectionName, keyPrefix string, start, count int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	c := d.CollectionForId(collectionId)
 
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
@@ -643,7 +643,7 @@ func verifySyncgroupDataMulti(ctx *context.T, syncbaseName string, numApps, numD
 
 			for k := 0; k < numCxs; k++ {
 				cName := fmt.Sprintf("c%d", k)
-				c := d.CollectionForId(wire.Id{"u", cName})
+				c := d.CollectionForId(wire.Id{testCx.Blessing, cName})
 
 				prefixes := strings.Split(prefixStr, ",")
 				for _, pfx := range prefixes {

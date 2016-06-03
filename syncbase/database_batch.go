@@ -5,8 +5,10 @@
 package syncbase
 
 import (
+	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/security"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
 	"v.io/v23/syncbase/util"
@@ -47,12 +49,14 @@ func (d *databaseBatch) FullName() string {
 
 // Collection implements DatabaseHandle.Collection.
 func (d *databaseBatch) Collection(ctx *context.T, name string) Collection {
-	blessing, err := util.UserBlessingFromContext(ctx)
+	_, user, err := util.AppAndUserPatternFromBlessings(security.DefaultBlessingNames(v23.GetPrincipal(ctx))...)
 	if err != nil {
-		// TODO(sadovsky): Return invalid Collection handle.
-		panic(err)
+		ctx.Error(verror.New(wire.ErrInferUserBlessingFailed, ctx, "Collection", name, err))
+		// A handle with a no-match Id blessing is returned, so all RPCs will fail.
+		// TODO(ivanpi): Return the more specific error from RPCs instead of logging
+		// it here.
 	}
-	return newCollection(d.fullName, wire.Id{Blessing: blessing, Name: name}, d.bh)
+	return newCollection(d.fullName, wire.Id{Blessing: string(user), Name: name}, d.bh)
 }
 
 // CollectionForId implements DatabaseHandle.CollectionForId.

@@ -10,6 +10,16 @@
 //
 // TODO(sadovsky): Write a detailed package description, or provide a reference
 // to the Syncbase documentation.
+//
+// Security notes:
+// The Syncbase service uses permissions tags from v23/security/access.Tag,
+// restricted on each hierarchy level to tags used at that level:
+// - Valid Service permissions tags are all v23/security/access.Tag tags.
+// - Valid Database permissions tags are Admin, Read, Write, Resolve.
+// - Valid Collection permissions tags are Admin, Read, Write.
+// - Valid Syncgroup permissions tags are Admin, Read.
+// Other tags are not allowed and are reserved for future use.
+// TODO(ivanpi): Add and implement other security notes.
 package syncbase
 
 import (
@@ -448,10 +458,12 @@ func (x *KeyValue) VDLRead(dec vdl.Decoder) error {
 type SyncgroupSpec struct {
 	// Human-readable description of this syncgroup.
 	Description string
-	// Optional. If present then any syncbase that is the admin of this syncgroup
-	// is responsible for ensuring that the syncgroup is published to this syncbase instance.
+	// Optional. If present, any syncbase that is the admin of this syncgroup
+	// is responsible for ensuring that the syncgroup is published to this
+	// syncbase instance.
 	PublishSyncbaseName string
-	// Permissions governing access to this syncgroup.
+	// Permissions governing access to this syncgroup. Must include at least one
+	// admin.
 	Perms access.Permissions
 	// Data (set of collectionIds) covered by this syncgroup.
 	Collections []Id
@@ -2771,6 +2783,27 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 //////////////////////////////////////////////////
 // Const definitions
 
+// Access tags used in Syncbase database ACLs.
+var AllDatabaseTags = []access.Tag{
+	"Admin",
+	"Read",
+	"Write",
+	"Resolve",
+}
+
+// Access tags used in Syncbase collection ACLs.
+var AllCollectionTags = []access.Tag{
+	"Admin",
+	"Read",
+	"Write",
+}
+
+// Access tags used in Syncbase syncgroup ACLs.
+var AllSyncgroupTags = []access.Tag{
+	"Admin",
+	"Read",
+}
+
 const BlobDevTypeServer = int32(0) // Blobs migrate toward servers, which store them.  (example: server in cloud)
 const BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
 const BlobDevTypeLeaf = int32(2)   // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
@@ -2807,6 +2840,10 @@ var (
 	ErrSyncgroupJoinFailed      = verror.Register("v.io/v23/services/syncbase.SyncgroupJoinFailed", verror.NoRetry, "{1:}{2:} syncgroup join failed{:_}")
 	ErrBadExecStreamHeader      = verror.Register("v.io/v23/services/syncbase.BadExecStreamHeader", verror.NoRetry, "{1:}{2:} Exec stream header improperly formatted")
 	ErrInvalidPermissionsChange = verror.Register("v.io/v23/services/syncbase.InvalidPermissionsChange", verror.NoRetry, "{1:}{2:} the sequence of permission changes is invalid")
+	ErrUnauthorizedCreateId     = verror.Register("v.io/v23/services/syncbase.UnauthorizedCreateId", verror.NoRetry, "{1:}{2:} not authorized to create object with id blessing '{3}' (name '{4}'){:_}")
+	ErrInferAppBlessingFailed   = verror.Register("v.io/v23/services/syncbase.InferAppBlessingFailed", verror.NoRetry, "{1:}{2:} failed to infer app blessing pattern for {3} '{4}'{:_}")
+	ErrInferUserBlessingFailed  = verror.Register("v.io/v23/services/syncbase.InferUserBlessingFailed", verror.NoRetry, "{1:}{2:} failed to infer user blessing pattern for {3} '{4}'{:_}")
+	ErrInferDefaultPermsFailed  = verror.Register("v.io/v23/services/syncbase.InferDefaultPermsFailed", verror.NoRetry, "{1:}{2:} failed to infer default perms for user for {3} '{4}'{:_}")
 )
 
 // NewErrNotInDevMode returns an error with the ErrNotInDevMode ID.
@@ -2862,6 +2899,26 @@ func NewErrBadExecStreamHeader(ctx *context.T) error {
 // NewErrInvalidPermissionsChange returns an error with the ErrInvalidPermissionsChange ID.
 func NewErrInvalidPermissionsChange(ctx *context.T) error {
 	return verror.New(ErrInvalidPermissionsChange, ctx)
+}
+
+// NewErrUnauthorizedCreateId returns an error with the ErrUnauthorizedCreateId ID.
+func NewErrUnauthorizedCreateId(ctx *context.T, blessing string, name string) error {
+	return verror.New(ErrUnauthorizedCreateId, ctx, blessing, name)
+}
+
+// NewErrInferAppBlessingFailed returns an error with the ErrInferAppBlessingFailed ID.
+func NewErrInferAppBlessingFailed(ctx *context.T, entity string, name string) error {
+	return verror.New(ErrInferAppBlessingFailed, ctx, entity, name)
+}
+
+// NewErrInferUserBlessingFailed returns an error with the ErrInferUserBlessingFailed ID.
+func NewErrInferUserBlessingFailed(ctx *context.T, entity string, name string) error {
+	return verror.New(ErrInferUserBlessingFailed, ctx, entity, name)
+}
+
+// NewErrInferDefaultPermsFailed returns an error with the ErrInferDefaultPermsFailed ID.
+func NewErrInferDefaultPermsFailed(ctx *context.T, entity string, id string) error {
+	return verror.New(ErrInferDefaultPermsFailed, ctx, entity, id)
 }
 
 //////////////////////////////////////////////////
@@ -3365,7 +3422,7 @@ var descDatabaseWatcher = rpc.InterfaceDesc{
 				{"resumeMarker", ``}, // watch.ResumeMarker
 				{"patterns", ``},     // []CollectionRowPattern
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }
@@ -5068,8 +5125,8 @@ type DatabaseClientMethods interface {
 	// ConflictManager interface provides all the methods necessary to handle
 	// conflict resolution for a given database.
 	ConflictManagerClientMethods
-	// Create creates this Database.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Database. Permissions must be non-nil and include at
+	// least one admin.
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Database, permanently removing all of its data.
@@ -5361,8 +5418,8 @@ type DatabaseServerMethods interface {
 	// ConflictManager interface provides all the methods necessary to handle
 	// conflict resolution for a given database.
 	ConflictManagerServerMethods
-	// Create creates this Database.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Database. Permissions must be non-nil and include at
+	// least one admin.
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
@@ -5508,8 +5565,8 @@ type DatabaseServerStubMethods interface {
 	// ConflictManager interface provides all the methods necessary to handle
 	// conflict resolution for a given database.
 	ConflictManagerServerStubMethods
-	// Create creates this Database.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Database. Permissions must be non-nil and include at
+	// least one admin.
 	// Create requires the caller to have Write permission at the Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
@@ -5670,7 +5727,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Database.\n// TODO(sadovsky): Specify what happens if perms is nil.\n// Create requires the caller to have Write permission at the Service.",
+			Doc:  "// Create creates this Database. Permissions must be non-nil and include at\n// least one admin.\n// Create requires the caller to have Write permission at the Service.",
 			InArgs: []rpc.ArgDesc{
 				{"metadata", ``}, // *SchemaMetadata
 				{"perms", ``},    // access.Permissions
@@ -5800,8 +5857,8 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection.
 type CollectionClientMethods interface {
-	// Create creates this Collection.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Collection. Permissions must be non-nil and include at
+	// least one admin.
 	Create(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
@@ -5810,10 +5867,13 @@ type CollectionClientMethods interface {
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
+	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
+	// on Collection.
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
+	// Permissions must include at least one admin.
 	SetPermissions(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -5955,8 +6015,8 @@ func (c *implCollectionScanClientCall) Finish() (err error) {
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection.
 type CollectionServerMethods interface {
-	// Create creates this Collection.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Collection. Permissions must be non-nil and include at
+	// least one admin.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
@@ -5965,10 +6025,13 @@ type CollectionServerMethods interface {
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
+	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
+	// on Collection.
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
+	// Permissions must include at least one admin.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -5986,8 +6049,8 @@ type CollectionServerMethods interface {
 // The only difference between this interface and CollectionServerMethods
 // is the streaming methods.
 type CollectionServerStubMethods interface {
-	// Create creates this Collection.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Collection. Permissions must be non-nil and include at
+	// least one admin.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
@@ -5996,10 +6059,13 @@ type CollectionServerStubMethods interface {
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
+	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
+	// on Collection.
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
+	// Permissions must include at least one admin.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
@@ -6088,7 +6154,7 @@ var descCollection = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Collection.\n// TODO(sadovsky): Specify what happens if perms is nil.",
+			Doc:  "// Create creates this Collection. Permissions must be non-nil and include at\n// least one admin.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
@@ -6105,14 +6171,14 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Collection exists. Insufficient\n// permissions cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			Doc:  "// Exists returns true only if this Collection exists. Insufficient\n// permissions cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.\n// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid\n// on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "GetPermissions",
@@ -6127,7 +6193,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "SetPermissions",
-			Doc:  "// SetPermissions replaces the current Permissions for the Collection.",
+			Doc:  "// SetPermissions replaces the current Permissions for the Collection.\n// Permissions must include at least one admin.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
@@ -6530,6 +6596,10 @@ func __VDLInit() struct{} {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrSyncgroupJoinFailed.ID), "{1:}{2:} syncgroup join failed{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadExecStreamHeader.ID), "{1:}{2:} Exec stream header improperly formatted")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInvalidPermissionsChange.ID), "{1:}{2:} the sequence of permission changes is invalid")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnauthorizedCreateId.ID), "{1:}{2:} not authorized to create object with id blessing '{3}' (name '{4}'){:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInferAppBlessingFailed.ID), "{1:}{2:} failed to infer app blessing pattern for {3} '{4}'{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInferUserBlessingFailed.ID), "{1:}{2:} failed to infer user blessing pattern for {3} '{4}'{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInferDefaultPermsFailed.ID), "{1:}{2:} failed to infer default perms for user for {3} '{4}'{:_}")
 
 	return struct{}{}
 }

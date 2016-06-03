@@ -39,12 +39,16 @@ pkg syncbase, func NewErrBadExecStreamHeader(*context.T) error
 pkg syncbase, func NewErrBlobNotCommitted(*context.T) error
 pkg syncbase, func NewErrConcurrentBatch(*context.T) error
 pkg syncbase, func NewErrCorruptDatabase(*context.T, string) error
+pkg syncbase, func NewErrInferAppBlessingFailed(*context.T, string, string) error
+pkg syncbase, func NewErrInferDefaultPermsFailed(*context.T, string, string) error
+pkg syncbase, func NewErrInferUserBlessingFailed(*context.T, string, string) error
 pkg syncbase, func NewErrInvalidName(*context.T, string) error
 pkg syncbase, func NewErrInvalidPermissionsChange(*context.T) error
 pkg syncbase, func NewErrNotBoundToBatch(*context.T) error
 pkg syncbase, func NewErrNotInDevMode(*context.T) error
 pkg syncbase, func NewErrReadOnlyBatch(*context.T) error
 pkg syncbase, func NewErrSyncgroupJoinFailed(*context.T) error
+pkg syncbase, func NewErrUnauthorizedCreateId(*context.T, string, string) error
 pkg syncbase, func NewErrUnknownBatch(*context.T) error
 pkg syncbase, func ParseId(string) (Id, error)
 pkg syncbase, func ResolverTypeFromString(string) (ResolverType, error)
@@ -725,6 +729,9 @@ pkg syncbase, type Value struct, State ValueState
 pkg syncbase, type Value struct, WriteTs time.Time
 pkg syncbase, type ValueSelection int
 pkg syncbase, type ValueState int
+pkg syncbase, var AllCollectionTags []access.Tag
+pkg syncbase, var AllDatabaseTags []access.Tag
+pkg syncbase, var AllSyncgroupTags []access.Tag
 pkg syncbase, var BatchSourceAll [...]BatchSource
 pkg syncbase, var BlobFetchStateAll [...]BlobFetchState
 pkg syncbase, var BlobManagerDesc rpc.InterfaceDesc
@@ -736,12 +743,16 @@ pkg syncbase, var ErrBadExecStreamHeader unknown-type
 pkg syncbase, var ErrBlobNotCommitted unknown-type
 pkg syncbase, var ErrConcurrentBatch unknown-type
 pkg syncbase, var ErrCorruptDatabase unknown-type
+pkg syncbase, var ErrInferAppBlessingFailed unknown-type
+pkg syncbase, var ErrInferDefaultPermsFailed unknown-type
+pkg syncbase, var ErrInferUserBlessingFailed unknown-type
 pkg syncbase, var ErrInvalidName unknown-type
 pkg syncbase, var ErrInvalidPermissionsChange unknown-type
 pkg syncbase, var ErrNotBoundToBatch unknown-type
 pkg syncbase, var ErrNotInDevMode unknown-type
 pkg syncbase, var ErrReadOnlyBatch unknown-type
 pkg syncbase, var ErrSyncgroupJoinFailed unknown-type
+pkg syncbase, var ErrUnauthorizedCreateId unknown-type
 pkg syncbase, var ErrUnknownBatch unknown-type
 pkg syncbase, var ResolverTypeAll [...]ResolverType
 pkg syncbase, var RowDesc rpc.InterfaceDesc

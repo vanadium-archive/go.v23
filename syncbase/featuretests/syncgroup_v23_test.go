@@ -35,7 +35,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 
 	// Syncbase s0 is the creator.
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 
@@ -78,7 +78,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sbName := sbs[N].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 
@@ -131,10 +131,8 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	// TODO(hpucha): Change it to multi-admin scenario.
 	principals := sbBlessings(sbs)
 	perms := access.Permissions{}
-	for _, tag := range []access.Tag{access.Read, access.Write} {
-		for _, pattern := range strings.Split(principals, ";") {
-			perms.Add(security.BlessingPattern(pattern), string(tag))
-		}
+	for _, pattern := range strings.Split(principals, ";") {
+		perms.Add(security.BlessingPattern(pattern), string(access.Read))
 	}
 	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
 
@@ -177,7 +175,7 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
 	sbName := sbs[0].sbName
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, testCx.Name, "", sbBlessings(sbs), clBlessings(sbs)))
 
 	// Remaining syncbases join the syncgroup concurrently.

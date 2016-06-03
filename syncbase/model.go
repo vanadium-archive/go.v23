@@ -106,7 +106,8 @@ type Database interface {
 	DatabaseHandle
 
 	// Create creates this Database.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// If perms is nil, the user blessing derived from the context is given all
+	// permissions.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Database, permanently removing all of its data.
@@ -154,12 +155,12 @@ type Database interface {
 	// See watch.GlobWatcher for a detailed explanation of the behavior.
 	Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patterns []wire.CollectionRowPattern) WatchStream
 
-	// SyncgroupForId returns a handle to the syncgroup with the given Id.
-	SyncgroupForId(id wire.Id) Syncgroup
-
-	// Syncgroup returns a handle to the syncgroup with the given name and with the user
-	// blessing.
+	// Syncgroup returns the Syncgroup with the given relative name.
+	// The user blessing is derived from the context.
 	Syncgroup(ctx *context.T, name string) Syncgroup
+
+	// SyncgroupForId returns the Syncgroup with the given user blessing and name.
+	SyncgroupForId(id wire.Id) Syncgroup
 
 	// ListSyncgroups returns all Syncgroups attached to this database.
 	ListSyncgroups(ctx *context.T) ([]wire.Id, error)
@@ -232,7 +233,8 @@ type Collection interface {
 	Exists(ctx *context.T) (bool, error)
 
 	// Create creates this Collection.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// If perms is nil, the user blessing derived from the context is given all
+	// permissions.
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Collection, permanently removing all of its data.

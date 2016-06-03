@@ -67,11 +67,13 @@ type SyncgroupSpec struct {
 	// Human-readable description of this syncgroup.
 	Description string
 
-	// Optional. If present then any syncbase that is the admin of this syncgroup
-	// is responsible for ensuring that the syncgroup is published to this syncbase instance.
+	// Optional. If present, any syncbase that is the admin of this syncgroup
+	// is responsible for ensuring that the syncgroup is published to this
+	// syncbase instance.
 	PublishSyncbaseName string
 
-	// Permissions governing access to this syncgroup.
+	// Permissions governing access to this syncgroup. Must include at least one
+	// admin.
 	Perms access.Permissions
 
 	// Data (set of collectionIds) covered by this syncgroup.

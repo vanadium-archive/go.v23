@@ -36,7 +36,7 @@ func TestName(t *testing.T) {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
 
-	if d.Id() != (tu.DbId("d")) {
+	if d.Id() != (wire.Id{"root:o:app", "d"}) {
 		t.Errorf("Wrong id: %q", d.Id())
 	}
 	if d.FullName() != naming.Join(sName, util.EncodeId(d.Id())) {
@@ -52,63 +52,63 @@ func TestName(t *testing.T) {
 
 // Test that a batch cannot add a permission, make a change, and remove a permission
 // since that change isn't able to be validated by remote syncbases.
-func TestMakeCollectionInBatch(test *testing.T) {
+func TestPermsChangeInBatch(test *testing.T) {
 	ctx, serverName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	service := syncbase.NewService(serverName)
 	db := tu.CreateDatabase(test, ctx, service, "d")
 
+	// Create the collection outside of batch, ensuring that the initial perms
+	// do not have write permission. (Had the collection been created inside the
+	// batch, initial perms in batch verification would have been the implicit
+	// perms, which allow the creator to write, so would not trigger the failure.
+	// Creating before the batch results in initial batch perms being ones passed
+	// in to collection Create.)
+	// TODO(ivanpi): Test that the other case doesn't fail.
+	perms := tu.DefaultPerms(wire.AllCollectionTags, "root:o:app:client")
+	perms.Clear("root:o:app:client", "Write")
+	if err := db.Collection(ctx, "newname").Create(ctx, perms); err != nil {
+		test.Fatalf("db.Collection().Create() failed, %v", err)
+	}
+
 	batch, err := db.BeginBatch(ctx, wire.BatchOptions{})
 	if err != nil {
-		test.Fatalf("d.BeginBatch() failed: %v", err)
+		test.Fatalf("db.BeginBatch() failed: %v", err)
 	}
-
-	// Create the collection, ensuring that the initial perms do not have write permission.
-	dbperms, _, err := db.GetPermissions(ctx)
-	if err != nil {
-		test.Fatalf("d.GetPermissions() failed: %v", err)
-	}
-	dbperms.Clear("root:client", "Write")
-	if err := batch.Collection(ctx, "newname").Create(ctx, dbperms); err != nil {
-		test.Fatalf("batch.Collection().Create() failed, %v", err)
-	}
-	batchCollection := batch.CollectionForId(tu.CxId("newname"))
+	batchCollection := batch.Collection(ctx, "newname")
 
 	// Add the Write permission.
-	perms, err := batchCollection.GetPermissions(ctx)
+	perms, err = batchCollection.GetPermissions(ctx)
 	if err != nil {
-		test.Fatalf("d.GetPermissions() failed: %v", err)
+		test.Fatalf("bc.GetPermissions() failed: %v", err)
 	}
-	perms.Add("root:client", "Write")
+	perms.Add("root:o:app:client", "Write")
 	if err := batchCollection.SetPermissions(ctx, perms); err != nil {
-		test.Fatalf("SetPermissions() failed: %v", err)
+		test.Fatalf("bc.SetPermissions() failed: %v", err)
 	}
 
 	// Attempt a Put.
 	if err := batchCollection.Put(ctx, "fooKey", "fooValue"); err != nil {
-		test.Fatalf("Put() failed: %v", err)
+		test.Fatalf("bc.Put() failed: %v", err)
 	}
 
 	// Remove the Write permission.
 	perms, err = batchCollection.GetPermissions(ctx)
-	perms.Clear("root:client", "Write")
+	perms.Clear("root:o:app:client", "Write")
 	if err := batchCollection.SetPermissions(ctx, perms); err != nil {
-		test.Fatalf("SetPermissions() failed: %v", err)
+		test.Fatalf("bc.SetPermissions() failed: %v", err)
 	}
 
-	// Commit the batch
-	err = batch.Commit(ctx)
-	if err == nil {
-		test.Fatalf("commit should have failed but instead it succeeded")
+	// Commit the batch.
+	if err := batch.Commit(ctx); verror.ErrorID(err) != wire.ErrInvalidPermissionsChange.ID {
+		test.Fatalf("b.Commit() should have failed with ErrInvalidPermissionsChange, got: %v", err)
 	}
 
-	collection := db.CollectionForId(tu.CxId("newname"))
-	exists, err := collection.Exists(ctx)
-	if err != nil {
-		test.Fatalf("Exists() failed, %v", err)
-	}
-	if exists {
-		test.Fatalf("the collection should not exist since the commit failed")
+	row := db.Collection(ctx, "newname").Row("fooKey")
+	if exists, err := row.Exists(ctx); err != nil {
+		test.Fatalf("r.Exists() failed: %v", err)
+	} else if exists {
+		test.Fatalf("the row should not exist since the commit failed")
 	}
 }
 
@@ -130,7 +130,7 @@ func TestBatchBasics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c = b1.CollectionForId(tu.CxId("c"))
+	b1c = b1.Collection(ctx, "c")
 
 	if err := b1c.Put(ctx, "fooKey", "fooValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
@@ -199,7 +199,7 @@ func TestBatchBasics(t *testing.T) {
 	if b2, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c, b2c = b1.CollectionForId(tu.CxId("c")), b2.CollectionForId(tu.CxId("c"))
+	b1c, b2c = b1.Collection(ctx, "c"), b2.Collection(ctx, "c")
 
 	if err := b1c.Put(ctx, "barKey", "barValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
@@ -240,10 +240,11 @@ func TestBatchListCollections(t *testing.T) {
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 	tu.CreateCollection(t, ctx, d, "c")
+	user := "root:o:app:client"
 	b, err := d.BeginBatch(ctx, wire.BatchOptions{})
 
 	got, err := d.ListCollections(ctx)
-	want := []wire.Id{tu.CxId("c")}
+	want := []wire.Id{{user, "c"}}
 	if err != nil {
 		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
@@ -255,7 +256,7 @@ func TestBatchListCollections(t *testing.T) {
 
 	// Non-batch should see c_nonbatch; batch should only see c.
 	got, err = d.ListCollections(ctx)
-	want = []wire.Id{tu.CxId("c"), tu.CxId("c_nonbatch")}
+	want = []wire.Id{{user, "c"}, {user, "c_nonbatch"}}
 	if err != nil {
 		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
@@ -264,7 +265,7 @@ func TestBatchListCollections(t *testing.T) {
 	}
 
 	got, err = b.ListCollections(ctx)
-	want = []wire.Id{tu.CxId("c")}
+	want = []wire.Id{{user, "c"}}
 	if err != nil {
 		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
@@ -273,16 +274,16 @@ func TestBatchListCollections(t *testing.T) {
 	}
 
 	// Create and destroy collections within a batch.
-	if err := b.CollectionForId(tu.CxId("c_batch")).Create(ctx, nil); err != nil {
+	if err := b.Collection(ctx, "c_batch").Create(ctx, nil); err != nil {
 		t.Fatalf("b.c_batch.Create() failed: %v", err)
 	}
-	if err := b.CollectionForId(tu.CxId("c")).Destroy(ctx); err != nil {
+	if err := b.Collection(ctx, "c").Destroy(ctx); err != nil {
 		t.Fatalf("b.c.Destroy() failed: %v", err)
 	}
 
 	// Non-batch should see c and c_nonbatch; batch should only see c_batch.
 	got, err = d.ListCollections(ctx)
-	want = []wire.Id{tu.CxId("c"), tu.CxId("c_nonbatch")}
+	want = []wire.Id{{user, "c"}, {user, "c_nonbatch"}}
 	if err != nil {
 		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
@@ -291,7 +292,7 @@ func TestBatchListCollections(t *testing.T) {
 	}
 
 	got, err = b.ListCollections(ctx)
-	want = []wire.Id{tu.CxId("c_batch")}
+	want = []wire.Id{{user, "c_batch"}}
 	if err != nil {
 		t.Fatalf("self.ListCollections() failed: %v", err)
 	}
@@ -468,7 +469,7 @@ func TestBatchExec(t *testing.T) {
 			{vom.RawBytesOf("foo"), vom.RawBytesOf(foo)},
 		})
 
-	rwBatchTb := rwBatch.CollectionForId(tu.CxId("c"))
+	rwBatchTb := rwBatch.Collection(ctx, "c")
 
 	// Add a row in this batch
 	newRow := Baz{Name: "Snow White", Active: true}
@@ -563,7 +564,7 @@ func TestReadOnlyBatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c := b1.CollectionForId(tu.CxId("c"))
+	b1c := b1.Collection(ctx, "c")
 
 	if err := b1c.Put(ctx, "barKey", "barValue"); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 		t.Fatalf("Put() should have failed: %v", err)
@@ -586,7 +587,7 @@ func TestOpAfterFinalize(t *testing.T) {
 	// TODO(sadovsky): Add some sort of "op after finalize" error type and check
 	// for it specifically below.
 	checkOpsFail := func(b syncbase.BatchDatabase) {
-		bc := b.CollectionForId(tu.CxId("c"))
+		bc := b.Collection(ctx, "c")
 		var got string
 		if err := bc.Get(ctx, "fooKey", &got); err == nil {
 			tu.Fatal(t, "Get() should have failed")
@@ -615,7 +616,7 @@ func TestOpAfterFinalize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c := b1.CollectionForId(tu.CxId("c"))
+	b1c := b1.Collection(ctx, "c")
 
 	if err := b1c.Put(ctx, "fooKey", "fooValue"); err != nil {
 		t.Fatalf("Put() failed: %v", err)
@@ -630,7 +631,7 @@ func TestOpAfterFinalize(t *testing.T) {
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c = b1.CollectionForId(tu.CxId("c"))
+	b1c = b1.Collection(ctx, "c")
 
 	// Conflicts with future b1c.Get().
 	if err := c.Put(ctx, "fooKey", "v2"); err != nil {
@@ -655,7 +656,7 @@ func TestOpAfterFinalize(t *testing.T) {
 	if b1, err = d.BeginBatch(ctx, wire.BatchOptions{}); err != nil {
 		t.Fatalf("d.BeginBatch() failed: %v", err)
 	}
-	b1c = b1.CollectionForId(tu.CxId("c"))
+	b1c = b1.Collection(ctx, "c")
 	b1.Abort(ctx)
 	checkOpsFail(b1)
 }
@@ -693,18 +694,18 @@ func tryWithConcurrentWrites(t *testing.T, ctx *context.T, d syncbase.Database, 
 	return syncbase.RunInBatch(ctx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
 		retries++
 		// Read foo.
-		if err := b.CollectionForId(tu.CxId("c")).Get(ctx, fmt.Sprintf("foo-%d", retries), &value); verror.ErrorID(err) != verror.ErrNoExist.ID {
+		if err := b.Collection(ctx, "c").Get(ctx, fmt.Sprintf("foo-%d", retries), &value); verror.ErrorID(err) != verror.ErrNoExist.ID {
 			t.Errorf("b.Get() should have failed with ErrNoExist, got: %v", err)
 		}
 		// If we need to fail, write to foo in a separate concurrent batch. This
 		// is always written on every attempt.
 		if retries < failTimes {
-			if err := d.CollectionForId(tu.CxId("c")).Put(ctx, fmt.Sprintf("foo-%d", retries), "foo"); err != nil {
+			if err := d.Collection(ctx, "c").Put(ctx, fmt.Sprintf("foo-%d", retries), "foo"); err != nil {
 				t.Errorf("d.Put() failed: %v", err)
 			}
 		}
 		// Write to bar. This is only committed on a successful attempt.
-		if err := b.CollectionForId(tu.CxId("c")).Put(ctx, fmt.Sprintf("bar-%d", retries), "bar"); err != nil {
+		if err := b.Collection(ctx, "c").Put(ctx, fmt.Sprintf("bar-%d", retries), "bar"); err != nil {
 			t.Errorf("b.Put() failed: %v", err)
 		}
 		// Return user defined error.
@@ -780,26 +781,26 @@ func TestRunInBatchReadOnly(t *testing.T) {
 	if err := syncbase.RunInBatch(ctx, d, wire.BatchOptions{ReadOnly: true}, func(b syncbase.BatchDatabase) error {
 		var value int32
 		// Read foo.
-		if err := b.CollectionForId(tu.CxId("c")).Get(ctx, "foo", &value); err != nil {
+		if err := b.Collection(ctx, "c").Get(ctx, "foo", &value); err != nil {
 			t.Fatalf("b.Get() failed: %v", err)
 		}
 		newValue := value + 1
 		// Write to foo in a separate concurrent batch. This is always written on
 		// every iteration. It should not cause a retry since readonly batches are
 		// not committed.
-		if err := d.CollectionForId(tu.CxId("c")).Put(ctx, "foo", newValue); err != nil {
+		if err := d.Collection(ctx, "c").Put(ctx, "foo", newValue); err != nil {
 			t.Errorf("d.Put() failed: %v", err)
 		}
 		// Read foo again. Batch should not see the incremented value.
 		var rereadValue int32
-		if err := b.CollectionForId(tu.CxId("c")).Get(ctx, "foo", &rereadValue); err != nil {
+		if err := b.Collection(ctx, "c").Get(ctx, "foo", &rereadValue); err != nil {
 			t.Fatalf("b.Get() failed: %v", err)
 		}
 		if value != rereadValue {
 			t.Fatal("batch should not see value change outside batch")
 		}
 		// Try writing to bar. This should fail since the batch is readonly.
-		if err := b.CollectionForId(tu.CxId("c")).Put(ctx, "bar", value); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
+		if err := b.Collection(ctx, "c").Put(ctx, "bar", value); verror.ErrorID(err) != wire.ErrReadOnlyBatch.ID {
 			t.Errorf("b.Put() should have failed with ErrReadOnlyBatch, got: %v", err)
 		}
 		return nil

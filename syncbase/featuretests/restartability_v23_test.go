@@ -25,14 +25,14 @@ import (
 )
 
 const (
-	acl = `{"Read": {"In":["root:u:client"]}, "Write": {"In":["root:u:client"]}, "Resolve": {"In":["root:u:client"]}}`
+	acl = `{"Read": {"In":["root:o:app:client"]}, "Write": {"In":["root:o:app:client"]}, "Admin": {"In":["root:o:app:client"]}, "Resolve": {"In":["root:o:app:client"]}}`
 )
 
 func restartabilityInit(sh *v23test.Shell) (rootDir string, clientCtx *context.T, serverCreds *v23test.Credentials) {
 	sh.StartRootMountTable()
 
 	rootDir = sh.MakeTempDir()
-	clientCtx = sh.ForkContext("u:client")
+	clientCtx = sh.ForkContext("o:app:client")
 	serverCreds = sh.ForkCredentials("r:server")
 	return
 }
@@ -82,8 +82,8 @@ func TestV23RestartabilityCrash(t *testing.T) {
 }
 
 var (
-	dbIds = []wire.Id{{"a1", "d1"}, {"a1", "d2"}, {"a2", "d1"}, {"a2", "d2"}}
-	cxIds = []wire.Id{{"u", "c1"}, {"u", "c2"}}
+	dbIds = []wire.Id{{"root", "d1"}, {"root", "d2"}, {"root:o:app", "d1"}, {"root:o:app", "d2"}}
+	cxIds = []wire.Id{{"root:o:app:client", "c1"}, {"root:o:app:client", "c2"}}
 )
 
 // Creates dbs, collections, and rows.
@@ -124,7 +124,7 @@ func checkHierarchy(t *testing.T, ctx *context.T) {
 	}
 	for _, dbId := range wantIds {
 		d := s.DatabaseForId(dbId, nil)
-		var got, want []wire.Id = nil, []wire.Id{{"u", "c1"}, {"u", "c2"}}
+		var got, want []wire.Id = nil, cxIds
 		if got, err = d.ListCollections(ctx); err != nil {
 			tu.Fatalf(t, "d.ListCollections() failed: %v", err)
 		}
@@ -464,12 +464,12 @@ func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 
 	cleanup = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
 
-	// Recreate a1/d1 since that is the one that got corrupted.
-	d := syncbase.NewService(testSbName).DatabaseForId(wire.Id{"a1", "d1"}, nil)
+	// Recreate root/d1 since that is the one that got corrupted.
+	d := syncbase.NewService(testSbName).DatabaseForId(wire.Id{"root", "d1"}, nil)
 	if err := d.Create(clientCtx, nil); err != nil {
 		t.Fatalf("d.Create() failed: %v", err)
 	}
-	for _, cxId := range []wire.Id{{"u", "c1"}, {"u", "c2"}} {
+	for _, cxId := range cxIds {
 		c := d.CollectionForId(cxId)
 		if err := c.Create(clientCtx, nil); err != nil {
 			t.Fatalf("c.Create() failed: %v", err)

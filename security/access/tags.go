@@ -24,3 +24,13 @@ func TypicalTagType() *vdl.Type {
 func AllTypicalTags() []Tag {
 	return []Tag{Admin, Read, Write, Debug, Resolve}
 }
+
+// TagStrings converts access.Tag values into []string for use with methods on
+// access.Permissions.
+func TagStrings(tags ...Tag) []string {
+	sts := make([]string, 0, len(tags))
+	for _, t := range tags {
+		sts = append(sts, string(t))
+	}
+	return sts
+}

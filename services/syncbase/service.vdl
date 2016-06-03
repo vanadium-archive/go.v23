@@ -7,6 +7,16 @@
 //
 // TODO(sadovsky): Write a detailed package description, or provide a reference
 // to the Syncbase documentation.
+//
+// Security notes:
+// The Syncbase service uses permissions tags from v23/security/access.Tag,
+// restricted on each hierarchy level to tags used at that level:
+// - Valid Service permissions tags are all v23/security/access.Tag tags.
+// - Valid Database permissions tags are Admin, Read, Write, Resolve.
+// - Valid Collection permissions tags are Admin, Read, Write.
+// - Valid Syncgroup permissions tags are Admin, Read.
+// Other tags are not allowed and are reserved for future use.
+// TODO(ivanpi): Add and implement other security notes.
 package syncbase
 
 import (
@@ -17,7 +27,14 @@ import (
 	"v.io/v23/services/watch"
 )
 
-
+const (
+	// Access tags used in Syncbase database ACLs.
+	AllDatabaseTags   = []access.Tag{access.Admin, access.Read, access.Write, access.Resolve}
+	// Access tags used in Syncbase collection ACLs.
+	AllCollectionTags = []access.Tag{access.Admin, access.Read, access.Write}
+	// Access tags used in Syncbase syncgroup ACLs.
+	AllSyncgroupTags  = []access.Tag{access.Admin, access.Read}
+)
 
 // NOTE(sadovsky): Various methods below may end up needing additional options.
 
@@ -38,6 +55,7 @@ type Service interface {
 	DevModeGetTime() (time.Time | error) {access.Admin}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
+	// Permissions must include at least one admin.
 	permissions.Object
 }
 
@@ -45,8 +63,8 @@ type Service interface {
 // watch all operate at the Database level.
 // Database.Glob operates over Collection ids.
 type Database interface {
-	// Create creates this Database.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Database. Permissions must be non-nil and include at
+	// least one admin.
 	// Create requires the caller to have Write permission at the Service.
 	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
 
@@ -108,6 +126,7 @@ type Database interface {
 	ResumeSync() error {access.Write}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
+	// Permissions must include at least one admin.
 	permissions.Object
 
 	// DatabaseWatcher implements the API to watch for updates in the database.
@@ -133,8 +152,8 @@ type Database interface {
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection.
 type Collection interface {
-	// Create creates this Collection.
-	// TODO(sadovsky): Specify what happens if perms is nil.
+	// Create creates this Collection. Permissions must be non-nil and include at
+	// least one admin.
 	Create(bh BatchHandle, perms access.Permissions) error {access.Write}
 
 	// Destroy destroys this Collection, permanently removing all of its data.
@@ -145,12 +164,15 @@ type Collection interface {
 	// permissions cause Exists to return false instead of an error.
 	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
 	// do not exist.
-	Exists(bh BatchHandle) (bool | error) {access.Resolve}
+	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
+	// on Collection.
+	Exists(bh BatchHandle) (bool | error) {access.Read}
 
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(bh BatchHandle) (access.Permissions | error) {access.Admin}
 
 	// SetPermissions replaces the current Permissions for the Collection.
+	// Permissions must include at least one admin.
 	SetPermissions(bh BatchHandle, perms access.Permissions) error {access.Admin}
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
@@ -381,7 +403,7 @@ type DatabaseWatcher interface {
 
 	// WatchPatterns returns a stream of changes that match any of the specified
 	// patterns. At least one pattern must be specified.
-	WatchPatterns(resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) stream<_, watch.Change> error {access.Resolve}
+	WatchPatterns(resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) stream<_, watch.Change> error {access.Read}
 
 	watch.GlobWatcher
 }
@@ -398,4 +420,8 @@ error (
 	SyncgroupJoinFailed() {"en": "syncgroup join failed{:_}"}
 	BadExecStreamHeader() {"en": "Exec stream header improperly formatted"}
 	InvalidPermissionsChange() {"en": "the sequence of permission changes is invalid"}
+	UnauthorizedCreateId(blessing, name string) {"en": "not authorized to create object with id blessing '{blessing}' (name '{name}'){:_}"}
+	InferAppBlessingFailed(entity, name string) {"en": "failed to infer app blessing pattern for {entity} '{name}'{:_}"}
+	InferUserBlessingFailed(entity, name string) {"en": "failed to infer user blessing pattern for {entity} '{name}'{:_}"}
+	InferDefaultPermsFailed(entity, id string) {"en": "failed to infer default perms for user for {entity} '{id}'{:_}"}
 )

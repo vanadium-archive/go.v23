@@ -26,11 +26,11 @@ func TestV23ClientPutGet(t *testing.T) {
 	serverCreds := sh.ForkCredentials("server")
 	// TODO(aghassemi): Resolve permission is currently needed for Watch.
 	// See https://github.com/vanadium/issues/issues/1110
-	sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName}, `{"Resolve": {"In":["root:server", "root:client"]}, "Read": {"In":["root:server", "root:client"]}, "Write": {"In":["root:server", "root:client"]}}`)
+	sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName}, `{"Resolve": {"In":["root:server", "root:o:app:client"]}, "Read": {"In":["root:server", "root:o:app:client"]}, "Write": {"In":["root:server", "root:o:app:client"]}, "Admin": {"In":["root:server", "root:o:app:client"]}}`)
 
 	// Create database and collection.
 	// TODO(ivanpi): Use setupAppA.
-	ctx := sh.ForkContext("client")
+	ctx := sh.ForkContext("o:app:client")
 	d := syncbase.NewService(testSbName).DatabaseForId(testDb, nil)
 	if err := d.Create(ctx, nil); err != nil {
 		t.Fatalf("unable to create a database: %v", err)

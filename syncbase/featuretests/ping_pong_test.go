@@ -58,7 +58,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 		// Setup *numGroup Syncgroups
 		for g := 0; g < *numGroup; g++ {
 			// Syncbase s0 is the creator.
-			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: sbBlessings(sbs)}
+			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: testCx.Blessing}
 
 			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
 

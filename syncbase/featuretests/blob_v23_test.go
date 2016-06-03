@@ -26,7 +26,7 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 
 	sbs := setupSyncbases(t, sh, 2, false)
 
-	sgId := wire.Id{Name: "SG1", Blessing: sbBlessings(sbs)}
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))

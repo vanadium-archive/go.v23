@@ -28,8 +28,8 @@ const (
 )
 
 var (
-	testDb = wire.Id{Blessing: "a", Name: "d"}
-	testCx = wire.Id{Blessing: "u", Name: "c"}
+	testDb = wire.Id{Blessing: "root:o:app", Name: "d"}
+	testCx = wire.Id{Blessing: "root:o:app:client", Name: "c"}
 )
 
 ////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ func setupHierarchy(ctx *context.T, syncbaseName string) error {
 
 func createCollection(ctx *context.T, syncbaseName, collectionName string) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	return d.CollectionForId(collectionId).Create(ctx, nil)
 }
 
@@ -59,7 +59,7 @@ type testSyncbase struct {
 func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
 	for i, _ := range sbs {
-		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("c%d", i)
+		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("o:app:client:c%d", i)
 		sbs[i] = &testSyncbase{
 			sbName:    sbName,
 			sbCreds:   sh.ForkCredentials(sbName),
@@ -105,7 +105,7 @@ func populateData(ctx *context.T, syncbaseName, collectionName, keyPrefix string
 	}
 
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	c := d.CollectionForId(collectionId)
 
 	for i := start; i < end; i++ {
@@ -183,7 +183,7 @@ func sendSignal(ctx *context.T, d syncbase.Database, signalKey string) error {
 
 func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix, valuePrefix string, start, count int) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	collectionId := wire.Id{Blessing: "u", Name: collectionName}
+	collectionId := wire.Id{Blessing: testCx.Blessing, Name: collectionName}
 	c := d.CollectionForId(collectionId)
 
 	// Wait a bit (up to 10 seconds) for the last key to appear.
@@ -231,9 +231,9 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	if perms == nil {
-		perms = tu.DefaultPerms(strings.Split(sbBlessings, ";")...)
+		perms = tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(sbBlessings, ";")...)
 	}
-	clperms := tu.DefaultPerms(strings.Split(clBlessings, ";")...)
+	clperms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
 
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
@@ -244,6 +244,9 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 
 	// Change the collection ACLs to enable syncing.
 	for _, cId := range spec.Collections {
+		// TODO(ivanpi,hpucha): Switch to blessings of the form "idp:o:root:c<n>"
+		// (different users instead of delegates of one user) and get the collection
+		// id from context.
 		c := d.CollectionForId(cId)
 		// Ignore the error since sometimes a collection might already exist.
 		c.Create(ctx, nil)
@@ -305,13 +308,13 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 // Syncbase-specific testing helpers
 
 // parseSgCollections converts, for example, "a,c" to
-// [Collection: {"u", "a"}, Collection: {"u", "c"}].
-// TODO(ivanpi): Change format to support user blessings other than "u".
+// [Collection: {"root:o:app:client", "a"}, Collection: {"root:o:app:client", "c"}].
+// TODO(ivanpi): Change format to support user blessings other than "root:o:app:client".
 func parseSgCollections(csv string) []wire.Id {
 	strs := strings.Split(csv, ",")
 	res := make([]wire.Id, len(strs))
 	for i, v := range strs {
-		res[i] = wire.Id{"u", v}
+		res[i] = wire.Id{"root:o:app:client", v}
 	}
 	return res
 }

@@ -353,7 +353,14 @@ func (i RejectedBlessing) String() string {
 	return fmt.Sprintf("{%q: %v}", i.Blessing, i.Err)
 }
 
-// DefaultBlessingPatterns returns the BlessingsPatterns of the Default Blessings
+// DefaultBlessingNames returns the blessing names of the Default Blessings of
+// the provided Principal.
+func DefaultBlessingNames(p Principal) (names []string) {
+	blessings, _ := p.BlessingStore().Default()
+	return BlessingNames(p, blessings)
+}
+
+// DefaultBlessingPatterns returns the BlessingPatterns of the Default Blessings
 // of the provided Principal.
 func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 	blessings, _ := p.BlessingStore().Default()

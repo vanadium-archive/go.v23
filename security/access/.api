@@ -15,6 +15,7 @@ pkg access, func NewErrUnenforceablePatterns(*context.T, []security.BlessingPatt
 pkg access, func PermissionsAuthorizer(Permissions, *vdl.Type) (security.Authorizer, error)
 pkg access, func PermissionsAuthorizerFromFile(string, *vdl.Type) (security.Authorizer, error)
 pkg access, func ReadPermissions(io.Reader) (Permissions, error)
+pkg access, func TagStrings(...Tag) []string
 pkg access, func TypicalTagType() *vdl.Type
 pkg access, func TypicalTagTypePermissionsAuthorizer(Permissions) security.Authorizer
 pkg access, func WritePermissions(io.Writer, Permissions) error

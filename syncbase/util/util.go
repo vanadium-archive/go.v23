@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"v.io/v23/context"
+	"v.io/v23/conventions"
 	"v.io/v23/naming"
 	"v.io/v23/query/pattern"
 	"v.io/v23/security"
@@ -78,6 +79,7 @@ const (
 
 // ValidateId returns nil iff the given Id is a valid database, collection, or
 // syncgroup Id.
+// TODO(ivanpi): Use verror.New instead of fmt.Errorf everywhere.
 func ValidateId(id wire.Id) error {
 	if x := len([]byte(id.Blessing)); x == 0 {
 		return fmt.Errorf("Id blessing cannot be empty")
@@ -89,7 +91,9 @@ func ValidateId(id wire.Id) error {
 	} else if x > maxNameLen {
 		return fmt.Errorf("Id name %q exceeds %d bytes", id.Name, maxNameLen)
 	}
-	if !security.BlessingPattern(id.Blessing).IsValid() {
+	if bp := security.BlessingPattern(id.Blessing); bp == security.NoExtension {
+		return fmt.Errorf("Id blessing %q cannot match any blessings, check blessing conventions", id.Blessing)
+	} else if !bp.IsValid() {
 		return fmt.Errorf("Id blessing %q is not a valid blessing pattern", id.Blessing)
 	}
 	if containsAnyOf(id.Blessing, reservedBytes) {
@@ -185,20 +189,56 @@ type AccessController interface {
 	GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error)
 }
 
-// AppBlessingFromContext returns an app blessing pattern from the given
-// context.
-// TODO(sadovsky,ashankar): Implement.
-func AppBlessingFromContext(ctx *context.T) (string, error) {
-	// NOTE(sadovsky): For now, we use a blessing string that will be easy to
-	// find-replace when we actually implement this method.
-	return "v.io:a:xyz", nil
+// AppAndUserPatternFromBlessings infers the app and user blessing pattern from
+// the given set of blessing names.
+// <idp>:o:<app>:<user> blessings are preferred, with a fallback to
+// <idp>:u:<user> and unrestricted app. Returns an error and no-match patterns
+// if the inferred pattern is ambiguous (multiple blessings for different apps
+// or users are found), or if no blessings matching conventions are found.
+// TODO(ivanpi): Allow caller to restrict format to app:user or user instead of
+// automatic fallback?
+func AppAndUserPatternFromBlessings(blessings ...string) (app, user security.BlessingPattern, err error) {
+	pbs := conventions.ParseBlessingNames(blessings...)
+	found := false
+	// Find a blessing of the form app:user; ensure there is only one app:user pair.
+	for _, b := range pbs {
+		a, au := b.AppPattern(), b.AppUserPattern()
+		if a != security.NoExtension && au != security.NoExtension {
+			if found && (a != app || au != user) {
+				return security.NoExtension, security.NoExtension, NewErrFoundMultipleAppUserBlessings(nil, string(user), string(au))
+			}
+			app, user, found = a, au, true
+		}
+	}
+	if found {
+		return app, user, nil
+	}
+	// Fall back to a user blessing; ensure there is only one user.
+	for _, b := range pbs {
+		u := b.UserPattern()
+		if u != security.NoExtension {
+			if found && (u != user) {
+				return security.NoExtension, security.NoExtension, NewErrFoundMultipleUserBlessings(nil, string(user), string(u))
+			}
+			app, user, found = security.AllPrincipals, u, true
+		}
+	}
+	if found {
+		return app, user, nil
+	}
+	// No app:user or user blessings found.
+	return security.NoExtension, security.NoExtension, NewErrFoundNoConventionalBlessings(nil)
 }
 
-// UserBlessingFromContext returns a user blessing pattern from the given
-// context.
-// TODO(sadovsky,ashankar): Implement.
-func UserBlessingFromContext(ctx *context.T) (string, error) {
-	// NOTE(sadovsky): For now, we use a blessing string that will be easy to
-	// find-replace when we actually implement this method.
-	return "v.io:u:sam", nil
+// FilterTags returns a copy of the provided perms, filtered to include only
+// entries for tags allowed by the allowTags whitelist.
+func FilterTags(perms access.Permissions, allowTags ...access.Tag) (filtered access.Permissions) {
+	filtered = access.Permissions{}
+	for _, allowTag := range allowTags {
+		if acl, ok := perms[string(allowTag)]; ok {
+			filtered[string(allowTag)] = acl
+		}
+	}
+	// Copy to make sure lists in ACLs don't share backing arrays.
+	return filtered.Copy()
 }

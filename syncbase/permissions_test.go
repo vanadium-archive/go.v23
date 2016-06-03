@@ -6,14 +6,18 @@ package syncbase_test
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
+	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
+	"v.io/v23/syncbase/util"
 	"v.io/v23/verror"
+	vsecurity "v.io/x/ref/lib/security"
 	_ "v.io/x/ref/runtime/factories/roaming"
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
@@ -75,7 +79,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
-			return s.SetPermissions(ctx, nil, "")
+			return s.SetPermissions(ctx, tu.DefaultPerms(access.AllTypicalTags(), "root"), "")
 		}},
 		name:     "service.SetPermissions",
 		patterns: []string{"A___"},
@@ -85,7 +89,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 	// Database tests.
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
-			return s.DatabaseForId(wire.Id{"a", "dNew"}, nil).Create(ctx, nil)
+			return s.DatabaseForId(wire.Id{"root", "dNew"}, nil).Create(ctx, tu.DefaultPerms(wire.AllDatabaseTags, "root"))
 		}},
 		name:     "database.Create",
 		patterns: []string{"W___"},
@@ -109,7 +113,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 	},
 	{
 		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
-			return d.SetPermissions(ctx, nil, "")
+			return d.SetPermissions(ctx, tu.DefaultPerms(wire.AllDatabaseTags, "root"), "")
 		}},
 		name:     "database.SetPermissions",
 		patterns: []string{"_A__"},
@@ -232,14 +236,10 @@ func prepareTests() (deniedTests, staticAllowedTests, mutatingAllowedTests []sec
 
 func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	// Create permissions.
-	servicePerms := tu.DefaultPerms("root:admin")
-	addPerms(servicePerms, 0, tests...)
-	databasePerms := tu.DefaultPerms("root:admin")
-	addPerms(databasePerms, 1, tests...)
-	collectionPerms := tu.DefaultPerms("root:admin")
-	addPerms(collectionPerms, 2, tests...)
-	sgPerms := tu.DefaultPerms("root:admin")
-	addPerms(sgPerms, 3, tests...)
+	servicePerms := makePerms("root:admin", 0, access.AllTypicalTags(), tests...)
+	databasePerms := makePerms("root:admin", 1, wire.AllDatabaseTags, tests...)
+	collectionPerms := makePerms("root:admin", 2, wire.AllCollectionTags, tests...)
+	//sgPerms := makePerms("root:admin", 3, wire.AllSyncgroupTags, tests...)
 
 	// Create service/database/collection/row with permissions above.
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
@@ -248,11 +248,11 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	if err := s.SetPermissions(adminCtx, servicePerms, ""); err != nil {
 		tu.Fatalf(t, "s.SetPermissions failed: %v", err)
 	}
-	d := s.DatabaseForId(wire.Id{"a", "d"}, nil)
+	d := s.DatabaseForId(wire.Id{"root", "d"}, nil)
 	if err := d.Create(adminCtx, databasePerms); err != nil {
 		tu.Fatalf(t, "d.Create failed: %v", err)
 	}
-	c := d.CollectionForId(wire.Id{"u", "c"})
+	c := d.CollectionForId(wire.Id{"root:admin", "c"})
 	if err := c.Create(adminCtx, collectionPerms); err != nil {
 		tu.Fatalf(t, "c.Create failed: %v", err)
 	}
@@ -281,10 +281,11 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	}
 }
 
-// addPerms add permissions to the perms object for each test.
+// makePerms creates a perms object with permissions for each test.
 // For each test we add a blessing pattern "root:clientXX" with a tag
 // corresponding test.pattern[index].
-func addPerms(perms access.Permissions, index int, tests ...securitySpecTest) {
+func makePerms(admin string, index int, allowTags []access.Tag, tests ...securitySpecTest) access.Permissions {
+	perms := tu.DefaultPerms(allowTags, admin)
 	tagsMap := map[byte]string{
 		'X': "Resolve",
 		'R': "Read",
@@ -294,6 +295,417 @@ func addPerms(perms access.Permissions, index int, tests ...securitySpecTest) {
 	for i, t := range tests {
 		if tag, ok := tagsMap[t.pattern[index]]; ok {
 			perms.Add(security.BlessingPattern(fmt.Sprintf("root:client%d", i)), tag)
+		}
+	}
+	return util.FilterTags(perms, allowTags...)
+}
+
+var (
+	inferBlessingsOk = []struct {
+		exts     []string
+		wantApp  string
+		wantUser string
+	}{
+		{
+			[]string{"o:angrybirds:alice"},
+			"root:o:angrybirds", "root:o:angrybirds:alice",
+		},
+		{
+			[]string{"foo", "o:angrybirds:alice", "x:baz"},
+			"root:o:angrybirds", "root:o:angrybirds:alice",
+		},
+		{
+			[]string{"foo", "u:alice", "o:angrybirds:alice:device:phone", "x:baz"},
+			"root:o:angrybirds", "root:o:angrybirds:alice",
+		},
+		{
+			[]string{"foo", "u:bob", "o:todos:dave:friend:alice", "u:carol", "x:baz"},
+			"root:o:todos", "root:o:todos:dave",
+		},
+		{
+			[]string{"foo", "u:bob", "o:todos:dave:friend:alice", "u:carol", "o:todos:dave:device:phone", "x:baz"},
+			"root:o:todos", "root:o:todos:dave",
+		},
+		{
+			[]string{"u:bob"},
+			"...", "root:u:bob",
+		},
+		{
+			[]string{"foo", "u:bob", "x:baz"},
+			"...", "root:u:bob",
+		},
+		{
+			[]string{"foo", "u:bob:angrybirds", "u:bob:todos:phone", "x:baz"},
+			"...", "root:u:bob",
+		},
+	}
+
+	inferBlessingsFail = [][]string{
+		{},
+		{"foo", "x:baz"},
+		{"foo", "u:bob", "o:todos:dave:friend:alice", "o:angrybirds:dave", "o:todos:dave:device:phone", "x:baz"},
+		{"foo", "u:bob", "o:todos:dave:friend:alice", "o:todos:fred"},
+		{"foo", "u:bob:angrybirds", "u:bob:todos:phone", "u:carol", "u:dave", "x:baz"},
+	}
+
+	dummyPerms = access.Permissions{}.Add("root:u:nobody", string(access.Admin))
+)
+
+// TestIdBlessingInfer tests that Database/Collection/Syncgroup getter variants
+// taking a context and name correctly infer the Id blessing from the context,
+// failing when ambiguous.
+func TestIdBlessingInfer(t *testing.T) {
+	anchorPerms := access.Permissions{}.Add("root:u:admin", string(access.Admin)).Add("root", string(access.Resolve), string(access.Read), string(access.Write))
+	rootCtx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("u:admin", "server", anchorPerms)
+	defer cleanup()
+	s := syncbase.NewService(sName)
+	rd := s.Database(adminCtx, "anchor", nil)
+	if err := rd.Create(adminCtx, anchorPerms); err != nil {
+		t.Fatalf("rd.Create() failed: %v", err)
+	}
+	rc := rd.Collection(adminCtx, "anchor")
+	if err := rc.Create(adminCtx, util.FilterTags(anchorPerms, wire.AllCollectionTags...)); err != nil {
+		t.Fatalf("rc.Create() failed: %v", err)
+	}
+	sgSpec := wire.SyncgroupSpec{
+		Description: "dummy syncgroup",
+		Collections: []wire.Id{rc.Id()},
+		Perms:       dummyPerms,
+	}
+	sgInfo := wire.SyncgroupMemberInfo{
+		SyncPriority: 42,
+	}
+
+	for i, test := range inferBlessingsOk {
+		ctx := forkContextMultiPattern(rootCtx, rootp, test.exts)
+		nameSuffix := fmt.Sprintf("ok_%02d", i)
+
+		d := s.Database(ctx, "db_"+nameSuffix, nil)
+		if got, want := d.Id(), (wire.Id{Blessing: test.wantApp, Name: "db_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred database id %v, got %v", test.exts, want, got)
+		}
+		if err := d.Create(ctx, dummyPerms); err != nil {
+			t.Errorf("blessings %v: d.Create() failed: %v", test.exts, err)
+		}
+
+		c := rd.Collection(ctx, "cx_"+nameSuffix)
+		if got, want := c.Id(), (wire.Id{Blessing: test.wantUser, Name: "cx_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred collection id %v, got %v", test.exts, want, got)
+		}
+		if err := c.Create(ctx, dummyPerms); err != nil {
+			t.Errorf("blessings %v: c.Create() failed: %v", test.exts, err)
+		}
+
+		sg := rd.Syncgroup(ctx, "sg_"+nameSuffix)
+		if got, want := sg.Id(), (wire.Id{Blessing: test.wantUser, Name: "sg_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred syncgroup id %v, got %v", test.exts, want, got)
+		}
+		if err := sg.Create(ctx, sgSpec, sgInfo); err != nil {
+			t.Errorf("blessings %v: sg.Create() failed: %v", test.exts, err)
+		}
+	}
+
+	for i, exts := range inferBlessingsFail {
+		ctx := forkContextMultiPattern(rootCtx, rootp, exts)
+		nameSuffix := fmt.Sprintf("notok_%02d", i)
+
+		d := s.Database(ctx, "db_"+nameSuffix, nil)
+		if got, want := d.Id(), (wire.Id{Blessing: "$", Name: "db_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred database id %v, got %v", exts, want, got)
+		}
+		if err := d.Create(ctx, dummyPerms); verror.ErrorID(err) != wire.ErrInvalidName.ID {
+			t.Errorf("blessings %v: d.Create() should have failed with ErrInvalidName, got: %v", exts, err)
+		}
+
+		c := rd.Collection(ctx, "cx_"+nameSuffix)
+		if got, want := c.Id(), (wire.Id{Blessing: "$", Name: "cx_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred collection id %v, got %v", exts, want, got)
+		}
+		if err := c.Create(ctx, dummyPerms); verror.ErrorID(err) != wire.ErrInvalidName.ID {
+			t.Errorf("blessings %v: c.Create() should have failed with ErrInvalidName, got: %v", exts, err)
+		}
+
+		sg := rd.Syncgroup(ctx, "sg_"+nameSuffix)
+		if got, want := sg.Id(), (wire.Id{Blessing: "$", Name: "sg_" + nameSuffix}); got != want {
+			t.Errorf("blessings %v: expected inferred syncgroup id %v, got %v", exts, want, got)
+		}
+		if err := sg.Create(ctx, sgSpec, sgInfo); verror.ErrorID(err) != wire.ErrInvalidName.ID {
+			t.Errorf("blessings %v: sg.Create() should have failed with ErrInvalidName, got: %v", exts, err)
+		}
+	}
+}
+
+// TestIdBlessingInfer tests that Database/Collection Create() calls correctly
+// infer default perms from the context when nil perms are passed in, failing
+// when ambiguous.
+func TestCreatePermsInfer(t *testing.T) {
+	anchorPerms := access.Permissions{}.Add("root:u:admin", string(access.Admin)).Add("root", string(access.Resolve), string(access.Read), string(access.Write))
+	rootCtx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("u:admin", "server", anchorPerms)
+	defer cleanup()
+	s := syncbase.NewService(sName)
+	rd := s.Database(adminCtx, "anchor", nil)
+	if err := rd.Create(adminCtx, anchorPerms); err != nil {
+		t.Fatalf("rd.Create() failed: %v", err)
+	}
+
+	for i, test := range inferBlessingsOk {
+		ctx := forkContextMultiPattern(rootCtx, rootp, test.exts)
+		nameSuffix := fmt.Sprintf("ok_%02d", i)
+
+		d := s.DatabaseForId(wire.Id{Blessing: "root", Name: "db_" + nameSuffix}, nil)
+		if err := d.Create(ctx, nil); err != nil {
+			t.Errorf("blessings %v: d.Create() failed: %v", test.exts, err)
+		}
+		if got, _, err := d.GetPermissions(ctx); err != nil {
+			t.Fatalf("d.GetPermissions() failed: %v", err)
+		} else if want := tu.DefaultPerms(wire.AllDatabaseTags, test.wantUser); !reflect.DeepEqual(got, want) {
+			t.Errorf("blessings %v: expected inferred database perms %v, got %v", test.exts, want, got)
+		}
+
+		c := rd.CollectionForId(wire.Id{Blessing: "root", Name: "cx_" + nameSuffix})
+		if err := c.Create(ctx, nil); err != nil {
+			t.Errorf("blessings %v: c.Create() failed: %v", test.exts, err)
+		}
+		if got, err := c.GetPermissions(ctx); err != nil {
+			t.Fatalf("c.GetPermissions() failed: %v", err)
+		} else if want := tu.DefaultPerms(wire.AllCollectionTags, test.wantUser); !reflect.DeepEqual(got, want) {
+			t.Errorf("blessings %v: expected inferred collection perms %v, got %v", test.exts, want, got)
+		}
+	}
+
+	for i, exts := range inferBlessingsFail {
+		if len(exts) == 0 {
+			continue
+		}
+		ctx := forkContextMultiPattern(rootCtx, rootp, exts)
+		nameSuffix := fmt.Sprintf("notok_%02d", i)
+
+		d := s.DatabaseForId(wire.Id{Blessing: "root", Name: "db_" + nameSuffix}, nil)
+		if err := d.Create(ctx, nil); verror.ErrorID(err) != wire.ErrInferDefaultPermsFailed.ID {
+			t.Errorf("blessings %v: d.Create() should have failed with ErrInferDefaultPermsFailed, got: %v", exts, err)
+		}
+		if err := d.Create(ctx, dummyPerms); err != nil {
+			t.Errorf("blessings %v: d.Create() with explicit perms failed: %v", exts, err)
+		}
+
+		c := rd.CollectionForId(wire.Id{Blessing: "root", Name: "cx_" + nameSuffix})
+		if err := c.Create(ctx, nil); verror.ErrorID(err) != wire.ErrInferDefaultPermsFailed.ID {
+			t.Errorf("blessings %v: c.Create() should have failed with ErrInferDefaultPermsFailed, got: %v", exts, err)
+		}
+		if err := c.Create(ctx, dummyPerms); err != nil {
+			t.Errorf("blessings %v: c.Create() with explicit perms failed: %v", exts, err)
+		}
+	}
+}
+
+func forkContextMultiPattern(rootCtx *context.T, rootp security.Principal, extensions []string) *context.T {
+	p, _ := vsecurity.NewPrincipal()
+	db, _ := rootp.BlessingStore().Default()
+	security.AddToRoots(p, db)
+	bs := make([]security.Blessings, 0, len(extensions))
+	for _, ext := range extensions {
+		b, _ := rootp.Bless(p.PublicKey(), db, ext, security.UnconstrainedUse())
+		bs = append(bs, b)
+	}
+	b, _ := security.UnionOfBlessings(bs...)
+	p.BlessingStore().SetDefault(b)
+	p.BlessingStore().Set(b, "...")
+	ctx, _ := v23.WithPrincipal(rootCtx, p)
+	return ctx
+}
+
+// TestCreateIdBlessingEnforce tests that only clients matching the blessing
+// pattern in the Id are allowed to create a Database/Collection/Syncgroup.
+// This requirement is waived for admin clients for Database, but not Collection
+// or Syncgroup creation.
+func TestCreateIdBlessingEnforce(t *testing.T) {
+	anchorPerms := access.Permissions{}.Add("root:u:admin", string(access.Admin)).Add("root", string(access.Resolve), string(access.Read), string(access.Write))
+	rootCtx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("u:admin", "server", anchorPerms)
+	defer cleanup()
+	clientCtx := tu.NewCtx(rootCtx, rootp, "u:client")
+	s := syncbase.NewService(sName)
+	rd := s.Database(adminCtx, "anchor", nil)
+	if err := rd.Create(adminCtx, anchorPerms); err != nil {
+		t.Fatalf("rd.Create() failed: %v", err)
+	}
+	rc := rd.Collection(adminCtx, "anchor")
+	if err := rc.Create(adminCtx, util.FilterTags(anchorPerms, wire.AllCollectionTags...)); err != nil {
+		t.Fatalf("rc.Create() failed: %v", err)
+	}
+	sgSpec := wire.SyncgroupSpec{
+		Description: "dummy syncgroup",
+		Collections: []wire.Id{rc.Id()},
+		Perms:       dummyPerms,
+	}
+	sgInfo := wire.SyncgroupMemberInfo{
+		SyncPriority: 42,
+	}
+
+	patternsOk := []string{"...", "root", "root:u", "root:u:client", "root:u:client:$"}
+	patternsFail := []string{"root:$", "root:u:$", "root:u:admin", "root:u:client:phone", "foobar"}
+
+	for i, pattern := range patternsOk {
+		nameSuffix := fmt.Sprintf("ok_%02d", i)
+
+		d := s.DatabaseForId(wire.Id{Blessing: pattern, Name: "db_" + nameSuffix}, nil)
+		if err := d.Create(clientCtx, dummyPerms); err != nil {
+			t.Errorf("blessing %q: d.Create() failed: %v", pattern, err)
+		}
+
+		c := rd.CollectionForId(wire.Id{Blessing: pattern, Name: "cx_" + nameSuffix})
+		if err := c.Create(clientCtx, dummyPerms); err != nil {
+			t.Errorf("blessing %q: c.Create() failed: %v", pattern, err)
+		}
+
+		sg := rd.SyncgroupForId(wire.Id{Blessing: pattern, Name: "sg_" + nameSuffix})
+		if err := sg.Create(clientCtx, sgSpec, sgInfo); err != nil {
+			t.Errorf("blessing %q: sg.Create() failed: %v", pattern, err)
+		}
+	}
+
+	for i, pattern := range patternsFail {
+		nameSuffix := fmt.Sprintf("notok_%02d", i)
+
+		d := s.DatabaseForId(wire.Id{Blessing: pattern, Name: "db_" + nameSuffix}, nil)
+		if err := d.Create(clientCtx, dummyPerms); verror.ErrorID(err) != wire.ErrUnauthorizedCreateId.ID {
+			t.Errorf("blessing %q: d.Create() should have failed with ErrUnauthorizedCreateId, got: %v", pattern, err)
+		}
+
+		c := rd.CollectionForId(wire.Id{Blessing: pattern, Name: "cx_" + nameSuffix})
+		if err := c.Create(clientCtx, dummyPerms); verror.ErrorID(err) != wire.ErrUnauthorizedCreateId.ID {
+			t.Errorf("blessing %q: c.Create() should have failed with ErrUnauthorizedCreateId, got: %v", pattern, err)
+		}
+
+		sg := rd.SyncgroupForId(wire.Id{Blessing: pattern, Name: "sg_" + nameSuffix})
+		if err := sg.Create(clientCtx, sgSpec, sgInfo); verror.ErrorID(err) != wire.ErrUnauthorizedCreateId.ID {
+			t.Errorf("blessing %q: sg.Create() should have failed with ErrUnauthorizedCreateId, got: %v", pattern, err)
+		}
+	}
+
+	// Give full admin permissions to the client.
+	clientAdminPerms := anchorPerms.Copy().Add("root:u:client", string(access.Admin))
+	if err := s.SetPermissions(adminCtx, clientAdminPerms, ""); err != nil {
+		t.Fatalf("s.SetPermissions() failed: %v", err)
+	}
+	if err := rd.SetPermissions(adminCtx, clientAdminPerms, ""); err != nil {
+		t.Fatalf("rd.SetPermissions() failed: %v", err)
+	}
+	if err := rc.SetPermissions(adminCtx, util.FilterTags(clientAdminPerms, wire.AllCollectionTags...)); err != nil {
+		t.Fatalf("rc.SetPermissions() failed: %v", err)
+	}
+
+	// Admin permissions override the Id blessing enforcement for databases, but
+	// not for collections or syncgroups.
+	for i, pattern := range patternsFail {
+		nameSuffix := fmt.Sprintf("admin_%02d", i)
+
+		d := s.DatabaseForId(wire.Id{Blessing: pattern, Name: "db_" + nameSuffix}, nil)
+		if err := d.Create(clientCtx, dummyPerms); err != nil {
+			t.Errorf("blessing %q: admin d.Create() failed: %v", pattern, err)
+		}
+
+		c := rd.CollectionForId(wire.Id{Blessing: pattern, Name: "cx_" + nameSuffix})
+		if err := c.Create(clientCtx, dummyPerms); verror.ErrorID(err) != wire.ErrUnauthorizedCreateId.ID {
+			t.Errorf("blessing %q: admin c.Create() should have failed with ErrUnauthorizedCreateId, got: %v", pattern, err)
+		}
+
+		sg := rd.SyncgroupForId(wire.Id{Blessing: pattern, Name: "sg_" + nameSuffix})
+		if err := sg.Create(clientCtx, sgSpec, sgInfo); verror.ErrorID(err) != wire.ErrUnauthorizedCreateId.ID {
+			t.Errorf("blessing %q: admin sg.Create() should have failed with ErrUnauthorizedCreateId, got: %v", pattern, err)
+		}
+	}
+}
+
+// TestPermsValidation tests that all operations that create or modify
+// permissions properly validate the new permissions.
+func TestPermsValidation(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(nil)
+	defer cleanup()
+	s := syncbase.NewService(sName)
+	rd := tu.CreateDatabase(t, ctx, s, "anchor")
+	rc := tu.CreateCollection(t, ctx, rd, "anchor")
+	rsg := tu.CreateSyncgroup(t, ctx, rd, rc, "anchor", "anchor syncgroup")
+
+	permsEmpty := access.Permissions{}
+	permsNoAdmin := access.Permissions{}.Add("root:o:app:client", string(access.Read))
+	permsXRWAD := access.Permissions{}.Add("root:o:app:client", access.TagStrings(access.AllTypicalTags()...)...)
+	permsXRWA := access.Permissions{}.Add("root:o:app:client", access.TagStrings(wire.AllDatabaseTags...)...)
+	permsRWA := access.Permissions{}.Add("root:o:app:client", access.TagStrings(wire.AllCollectionTags...)...)
+	permsRA := access.Permissions{}.Add("root:o:app:client", access.TagStrings(wire.AllSyncgroupTags...)...)
+	permsAdminOnly := access.Permissions{}.Add("root:o:app:client", string(access.Admin))
+	permsComplex := permsRA.Copy().Add("root:u:client", string(access.Read)).Blacklist("root:o:app:client:phone", string(access.Admin))
+
+	testPermsValidationOp(t, "d.Create()",
+		[]access.Permissions{nil /* infer */, permsAdminOnly, permsComplex, permsRA, permsRWA, permsXRWA},
+		[]access.Permissions{permsEmpty, permsNoAdmin, permsXRWAD},
+		func(nameSuffix string, perms access.Permissions) error {
+			d := s.DatabaseForId(wire.Id{Blessing: "root", Name: "db_" + nameSuffix}, nil)
+			return d.Create(ctx, perms)
+		})
+
+	testPermsValidationOp(t, "c.Create()",
+		[]access.Permissions{nil /* infer */, permsAdminOnly, permsComplex, permsRA, permsRWA},
+		[]access.Permissions{permsEmpty, permsNoAdmin, permsXRWA, permsXRWAD},
+		func(nameSuffix string, perms access.Permissions) error {
+			c := rd.CollectionForId(wire.Id{Blessing: "root", Name: "cx_" + nameSuffix})
+			return c.Create(ctx, perms)
+		})
+
+	testPermsValidationOp(t, "sg.Create()",
+		[]access.Permissions{permsAdminOnly, permsComplex, permsRA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsRWA, permsXRWA, permsXRWAD},
+		func(nameSuffix string, perms access.Permissions) error {
+			sg := rd.SyncgroupForId(wire.Id{Blessing: "root", Name: "sg_" + nameSuffix})
+			return sg.Create(ctx, wire.SyncgroupSpec{
+				Collections: []wire.Id{rc.Id()},
+				Perms:       perms,
+			}, wire.SyncgroupMemberInfo{SyncPriority: 42})
+		})
+
+	testPermsValidationOp(t, "s.SetPermissions()",
+		[]access.Permissions{permsAdminOnly, permsComplex, permsRA, permsRWA, permsXRWA, permsXRWAD},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin},
+		func(_ string, perms access.Permissions) error {
+			return s.SetPermissions(ctx, perms, "")
+		})
+
+	testPermsValidationOp(t, "d.SetPermissions()",
+		[]access.Permissions{permsAdminOnly, permsComplex, permsRA, permsRWA, permsXRWA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsXRWAD},
+		func(_ string, perms access.Permissions) error {
+			return rd.SetPermissions(ctx, perms, "")
+		})
+
+	testPermsValidationOp(t, "c.SetPermissions()",
+		[]access.Permissions{permsAdminOnly, permsComplex, permsRA, permsRWA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsXRWA, permsXRWAD},
+		func(_ string, perms access.Permissions) error {
+			return rc.SetPermissions(ctx, perms)
+		})
+
+	testPermsValidationOp(t, "sg.SetSpec()",
+		[]access.Permissions{permsAdminOnly, permsComplex, permsRA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsRWA, permsXRWA, permsXRWAD},
+		func(_ string, perms access.Permissions) error {
+			return rsg.SetSpec(ctx, wire.SyncgroupSpec{
+				Collections: []wire.Id{rc.Id()},
+				Perms:       perms,
+			}, "")
+		})
+}
+
+func testPermsValidationOp(t *testing.T, desc string, validPerms, invalidPerms []access.Permissions, op func(nameSuffix string, perms access.Permissions) error) {
+	for i, p := range validPerms {
+		nameSuffix := fmt.Sprintf("ok_%02d", i)
+		if err := op(nameSuffix, p); err != nil {
+			t.Errorf("perms %v: %s failed: %v", p, desc, err)
+		}
+	}
+
+	for i, p := range invalidPerms {
+		nameSuffix := fmt.Sprintf("notok_%02d", i)
+		if err := op(nameSuffix, p); err == nil {
+			t.Errorf("perms %v: %s should have failed", p, desc)
 		}
 	}
 }

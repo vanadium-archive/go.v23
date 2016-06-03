@@ -14,6 +14,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/discovery"
 	"v.io/v23/security"
+	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
 	"v.io/v23/verror"
@@ -22,29 +23,27 @@ import (
 )
 
 func TestSyncgroupDiscovery(t *testing.T) {
-	_, ctx, sName, rootp, cleanup := tu.SetupOrDieCustom(
-		"client1", "server", perms("root:client1"))
+	_, ctx, sName, rootp, cleanup := tu.SetupOrDieCustom("o:app1:client1", "server",
+		tu.DefaultPerms(access.AllTypicalTags(), "root:o:app1:client1"))
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
-	collection1 := wire.Id{"v.io:u:sam", "c1"}
-	collection2 := wire.Id{"v.io:u:sam", "c2"}
-	tu.CreateCollection(t, ctx, d, collection1.Name)
-	tu.CreateCollection(t, ctx, d, collection2.Name)
+	collection1 := tu.CreateCollection(t, ctx, d, "c1")
+	collection2 := tu.CreateCollection(t, ctx, d, "c2")
 
-	c1Updates, err := scanAs(ctx, rootp, "client1")
+	c1Updates, err := scanAs(ctx, rootp, "o:app1:client1")
 	if err != nil {
 		panic(err)
 	}
-	c2Updates, err := scanAs(ctx, rootp, "client2")
+	c2Updates, err := scanAs(ctx, rootp, "o:app1:client2")
 	if err != nil {
 		panic(err)
 	}
 
-	sgId := wire.Id{Name: "sg1", Blessing: "b1"}
+	sgId := d.Syncgroup(ctx, "sg1").Id()
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
-		Perms:       perms("root:server", "root:client1"),
-		Collections: []wire.Id{collection1},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:server", "root:o:app1:client1"),
+		Collections: []wire.Id{collection1.Id()},
 	}
 	createSyncgroup(t, ctx, d, sgId, spec, verror.ID(""))
 
@@ -62,15 +61,15 @@ func TestSyncgroupDiscovery(t *testing.T) {
 
 	sg1Attrs := discovery.Attributes{
 		wire.DiscoveryAttrDatabaseName:      "d",
-		wire.DiscoveryAttrDatabaseBlessing:  "v.io:a:xyz",
+		wire.DiscoveryAttrDatabaseBlessing:  "root:o:app1",
 		wire.DiscoveryAttrSyncgroupName:     "sg1",
-		wire.DiscoveryAttrSyncgroupBlessing: "b1",
+		wire.DiscoveryAttrSyncgroupBlessing: "root:o:app1:client1",
 	}
 	sg2Attrs := discovery.Attributes{
 		wire.DiscoveryAttrDatabaseName:      "d",
-		wire.DiscoveryAttrDatabaseBlessing:  "v.io:a:xyz",
+		wire.DiscoveryAttrDatabaseBlessing:  "root:o:app1",
 		wire.DiscoveryAttrSyncgroupName:     "sg2",
-		wire.DiscoveryAttrSyncgroupBlessing: "b1",
+		wire.DiscoveryAttrSyncgroupBlessing: "root:o:app1:client1",
 	}
 
 	// Then we should see an update for the created syncgroup.
@@ -80,7 +79,7 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	}
 
 	// Now update the spec to add client2 to the permissions.
-	spec.Perms = perms("root:server", "root:client1", "root:client2")
+	spec.Perms = tu.DefaultPerms(wire.AllSyncgroupTags, "root:server", "root:o:app1:client1", "root:o:app1:client2")
 	if err := d.SyncgroupForId(sgId).SetSpec(ctx, spec, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
 	}
@@ -95,11 +94,11 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	}
 
 	// Now create a second syncgroup.
-	sg2Id := wire.Id{Name: "sg2", Blessing: "b1"}
+	sg2Id := d.Syncgroup(ctx, "sg2").Id()
 	spec2 := wire.SyncgroupSpec{
 		Description: "test syncgroup sg2",
-		Perms:       perms("root:server", "root:client1", "root:client2"),
-		Collections: []wire.Id{collection2},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:server", "root:o:app1:client1", "root:o:app1:client2"),
+		Collections: []wire.Id{collection2.Id()},
 	}
 	createSyncgroup(t, ctx, d, sg2Id, spec2, verror.ID(""))
 
@@ -112,7 +111,7 @@ func TestSyncgroupDiscovery(t *testing.T) {
 		t.Error(err)
 	}
 
-	spec2.Perms = perms("root:server", "root:client1")
+	spec2.Perms = tu.DefaultPerms(wire.AllSyncgroupTags, "root:server", "root:o:app1:client1")
 	if err := d.SyncgroupForId(sg2Id).SetSpec(ctx, spec2, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
 	}

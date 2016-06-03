@@ -5,10 +5,13 @@
 package syncbase
 
 import (
+	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase/util"
+	"v.io/v23/verror"
 )
 
 func NewService(fullName string) Service {
@@ -32,12 +35,14 @@ func (s *service) FullName() string {
 
 // Database implements Service.Database.
 func (s *service) Database(ctx *context.T, name string, schema *Schema) Database {
-	blessing, err := util.AppBlessingFromContext(ctx)
+	app, _, err := util.AppAndUserPatternFromBlessings(security.DefaultBlessingNames(v23.GetPrincipal(ctx))...)
 	if err != nil {
-		// TODO(sadovsky): Return invalid Database handle.
-		panic(err)
+		ctx.Error(verror.New(wire.ErrInferAppBlessingFailed, ctx, "Database", name, err))
+		// A handle with a no-match Id blessing is returned, so all RPCs will fail.
+		// TODO(ivanpi): Return the more specific error from RPCs instead of logging
+		// it here.
 	}
-	return newDatabase(s.fullName, wire.Id{Blessing: blessing, Name: name}, schema)
+	return newDatabase(s.fullName, wire.Id{Blessing: string(app), Name: name}, schema)
 }
 
 // DatabaseForId implements Service.DatabaseForId.

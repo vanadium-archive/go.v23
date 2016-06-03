@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"v.io/v23/context"
-	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase"
@@ -17,17 +16,15 @@ import (
 	tu "v.io/x/ref/services/syncbase/testutil"
 )
 
-var testCollection = wire.Id{"v.io:u:sam", "c"}
-
 // Tests that Syncgroup.Create works as expected.
 func TestCreateSyncgroup(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
+	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncgroupSpec{}
-	sg1 := wire.Id{Name: "sg1", Blessing: "b1"}
+	sg1 := d.Syncgroup(ctx, "sg1").Id()
 
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ErrBadArg.ID)
 
@@ -46,8 +43,8 @@ func TestCreateSyncgroup(t *testing.T) {
 	// Create successfully.
 	spec = wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
-		Perms:       nil,
-		Collections: []wire.Id{testCollection},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client"),
+		Collections: []wire.Id{c.Id()},
 	}
 	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
 
@@ -62,7 +59,7 @@ func TestCreateSyncgroup(t *testing.T) {
 
 	// Create a peer syncgroup.
 	spec.Description = "test syncgroup sg2"
-	sg2 := wire.Id{Name: "sg2", Blessing: "b2"}
+	sg2 := d.Syncgroup(ctx, "sg2").Id()
 	createSyncgroup(t, ctx, d, sg2, spec, verror.ID(""))
 
 	wantGroups = []wire.Id{sg1, sg2}
@@ -72,19 +69,19 @@ func TestCreateSyncgroup(t *testing.T) {
 	// Check if creating a syncgroup on a non-existing collection fails.
 	spec.Description = "test syncgroup sg3"
 	spec.Collections = []wire.Id{wire.Id{"u", "c1"}}
-	sg3 := wire.Id{Name: "sg3", Blessing: "b3"}
+	sg3 := d.Syncgroup(ctx, "sg3").Id()
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ErrNoExist.ID)
 	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 
 	// Check that create fails if the perms disallow access.
-	perms := perms("root:client")
-	perms.Blacklist("root:client", string(access.Read))
+	perms := tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client")
+	perms.Blacklist("root:o:app:client", string(access.Read))
 	if err := d.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 	spec.Description = "test syncgroup sg4"
 	spec.Collections = []wire.Id{wire.Id{"u", "c"}}
-	sg4 := wire.Id{Name: "sg4", Blessing: "b4"}
+	sg4 := d.Syncgroup(ctx, "sg4").Id()
 	createSyncgroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
 	verifySyncgroups(t, ctx, d, nil, verror.ErrNoAccess.ID)
 }
@@ -94,25 +91,25 @@ func TestCreateSyncgroup(t *testing.T) {
 // join it.
 func TestJoinSyncgroup(t *testing.T) {
 	// Create client1-server pair.
-	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("client1", "server", perms("root:client1"))
+	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("o:app:client1", "server", tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client1"))
 	defer cleanup()
 
 	d1 := tu.CreateDatabase(t, ctx1, syncbase.NewService(sName), "d")
-	tu.CreateCollection(t, ctx1, d1, "c")
+	c := tu.CreateCollection(t, ctx1, d1, "c")
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
-		Perms:       perms("root:client1"),
-		Collections: []wire.Id{testCollection},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client1"),
+		Collections: []wire.Id{c.Id()},
 	}
-	sgIdA := wire.Id{Name: "sgA", Blessing: "bA"}
+	sgIdA := wire.Id{Name: "sgA", Blessing: "root:o:app:client1"}
 	createSyncgroup(t, ctx1, d1, sgIdA, specA, verror.ID(""))
 
 	// Check that creator can call join successfully.
 	joinSyncgroup(t, ctx1, d1, sName, sgIdA, verror.ID(""))
 
 	// Create client2.
-	ctx2 := tu.NewCtx(ctx, rootp, "client2")
-	d2 := syncbase.NewService(sName).DatabaseForId(tu.DbId("d"), nil)
+	ctx2 := tu.NewCtx(ctx, rootp, "o:app:client2")
+	d2 := syncbase.NewService(sName).Database(ctx2, "d", nil)
 
 	// Check that client2's join fails if the perms disallow access.
 	joinSyncgroup(t, ctx2, d2, sName, sgIdA, verror.ErrNoAccess.ID)
@@ -120,12 +117,12 @@ func TestJoinSyncgroup(t *testing.T) {
 	verifySyncgroups(t, ctx2, d2, nil, verror.ErrNoAccess.ID)
 
 	// Client1 gives access to client2.
-	if err := d1.SetPermissions(ctx1, perms("root:client1", "root:client2"), ""); err != nil {
+	if err := d1.SetPermissions(ctx1, tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client1", "root:o:app:client2"), ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 
 	// Verify client2 has access.
-	if err := d2.SetPermissions(ctx2, perms("root:client1", "root:client2"), ""); err != nil {
+	if err := d2.SetPermissions(ctx2, tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client1", "root:o:app:client2"), ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
 
@@ -135,10 +132,10 @@ func TestJoinSyncgroup(t *testing.T) {
 	// Create a different syncgroup.
 	specB := wire.SyncgroupSpec{
 		Description: "test syncgroup sgB",
-		Perms:       perms("root:client1", "root:client2"),
-		Collections: []wire.Id{testCollection},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client1", "root:o:app:client2"),
+		Collections: []wire.Id{c.Id()},
 	}
-	sgIdB := wire.Id{Name: "sgB", Blessing: "bB"}
+	sgIdB := wire.Id{Name: "sgB", Blessing: "root:o:app:client1"}
 	createSyncgroup(t, ctx1, d1, sgIdB, specB, verror.ID(""))
 
 	// Check that client2's join now succeeds.
@@ -155,17 +152,17 @@ func TestJoinSyncgroup(t *testing.T) {
 
 // Tests that Syncgroup.SetSpec works as expected.
 func TestSetSpecSyncgroup(t *testing.T) {
-	ctx, sName, cleanup := tu.SetupOrDie(perms("root:client"))
+	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
 	defer cleanup()
 	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
-	tu.CreateCollection(t, ctx, d, "c")
+	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Create successfully.
-	sgId := wire.Id{Name: "sg1", Blessing: "b1"}
+	sgId := wire.Id{Name: "sg1", Blessing: "root:o:app:client"}
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg1",
-		Perms:       perms("root:client"),
-		Collections: []wire.Id{testCollection},
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client"),
+		Collections: []wire.Id{c.Id()},
 	}
 	createSyncgroup(t, ctx, d, sgId, spec, verror.ID(""))
 
@@ -175,7 +172,7 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
 
 	spec.Description = "test syncgroup sg1 update"
-	spec.Perms = perms("root:client", "root:client1")
+	spec.Perms = tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client", "root:o:app:client1")
 
 	sg := d.SyncgroupForId(sgId)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {
@@ -226,16 +223,4 @@ func verifySyncgroupInfo(t *testing.T, ctx *context.T, d syncbase.Database, sgId
 	if err != nil || len(members) != wantMembers {
 		t.Fatalf("sg.GetMembers() failed, got %v, want %v, err %v", members, wantMembers, err)
 	}
-}
-
-// TODO(sadovsky): This appears to be identical to tu.DefaultPerms(). We should
-// just use that.
-func perms(bps ...string) access.Permissions {
-	perms := access.Permissions{}
-	for _, bp := range bps {
-		for _, tag := range access.AllTypicalTags() {
-			perms.Add(security.BlessingPattern(bp), string(tag))
-		}
-	}
-	return perms
 }

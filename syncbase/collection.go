@@ -5,11 +5,14 @@
 package syncbase
 
 import (
+	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/naming"
+	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/syncbase/util"
+	"v.io/v23/verror"
 )
 
 func newCollection(parentFullName string, id wire.Id, bh wire.BatchHandle) Collection {
@@ -48,6 +51,14 @@ func (c *collection) Exists(ctx *context.T) (bool, error) {
 
 // Create implements Collection.Create.
 func (c *collection) Create(ctx *context.T, perms access.Permissions) error {
+	if perms == nil {
+		// Default to giving full permissions to the creator.
+		_, user, err := util.AppAndUserPatternFromBlessings(security.DefaultBlessingNames(v23.GetPrincipal(ctx))...)
+		if err != nil {
+			return verror.New(wire.ErrInferDefaultPermsFailed, ctx, "Collection", util.EncodeId(c.id), err)
+		}
+		perms = access.Permissions{}.Add(user, access.TagStrings(wire.AllCollectionTags...)...)
+	}
 	return c.c.Create(ctx, c.bh, perms)
 }
 

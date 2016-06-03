@@ -8,7 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/security"
 	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/v23/services/watch"
@@ -71,6 +73,14 @@ func (d *database) Create(ctx *context.T, perms access.Permissions) error {
 	if d.schema != nil {
 		schemaMetadata = &d.schema.Metadata
 	}
+	if perms == nil {
+		// Default to giving full permissions to the creator.
+		_, user, err := util.AppAndUserPatternFromBlessings(security.DefaultBlessingNames(v23.GetPrincipal(ctx))...)
+		if err != nil {
+			return verror.New(wire.ErrInferDefaultPermsFailed, ctx, "Database", util.EncodeId(d.id), err)
+		}
+		perms = access.Permissions{}.Add(user, access.TagStrings(wire.AllDatabaseTags...)...)
+	}
 	return d.c.Create(ctx, schemaMetadata, perms)
 }
 
@@ -113,19 +123,21 @@ func (d *database) Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patter
 	return newWatchStream(cancel, call)
 }
 
+// Syncgroup implements Database.Syncgroup.
+func (d *database) Syncgroup(ctx *context.T, name string) Syncgroup {
+	_, user, err := util.AppAndUserPatternFromBlessings(security.DefaultBlessingNames(v23.GetPrincipal(ctx))...)
+	if err != nil {
+		ctx.Error(verror.New(wire.ErrInferUserBlessingFailed, ctx, "Syncgroup", name, err))
+		// A handle with a no-match Id blessing is returned, so all RPCs will fail.
+		// TODO(ivanpi): Return the more specific error from RPCs instead of logging
+		// it here.
+	}
+	return newSyncgroup(d.fullName, wire.Id{Blessing: string(user), Name: name})
+}
+
 // SyncgroupForId implements Database.SyncgroupForId.
 func (d *database) SyncgroupForId(id wire.Id) Syncgroup {
 	return newSyncgroup(d.fullName, id)
-}
-
-// Syncgroup implements Database.Syncgroup.
-func (d *database) Syncgroup(ctx *context.T, name string) Syncgroup {
-	blessing, err := util.UserBlessingFromContext(ctx)
-	if err != nil {
-		// TODO(sadovsky): Return invalid Syncgroup handle.
-		panic(err)
-	}
-	return newSyncgroup(d.fullName, wire.Id{Name: name, Blessing: blessing})
 }
 
 // ListSyncgroups implements Database.ListSyncgroups.
