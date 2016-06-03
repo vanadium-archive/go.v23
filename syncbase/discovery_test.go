@@ -56,7 +56,7 @@ func TestSyncgroupDiscovery(t *testing.T) {
 		t.Errorf("Got %v, expected only a peer name.", attrs)
 	}
 	// Client2 should see the same.
-	if err := expect(c2Updates, find, discovery.Attributes{wire.DiscoveryAttrPeer: peer}); err != nil {
+	if err := expect(c2Updates, &discovery.AdId{}, find, discovery.Attributes{wire.DiscoveryAttrPeer: peer}); err != nil {
 		t.Error(err)
 	}
 
@@ -74,7 +74,8 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	}
 
 	// Then we should see an update for the created syncgroup.
-	if err := expect(c1Updates, find, sg1Attrs); err != nil {
+	var sg1AdId discovery.AdId
+	if err := expect(c1Updates, &sg1AdId, find, sg1Attrs); err != nil {
 		t.Error(err)
 	}
 
@@ -85,11 +86,11 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	}
 
 	// Client1 should see a lost and a found message.
-	if err := expect(c1Updates, both, sg1Attrs); err != nil {
+	if err := expect(c1Updates, &sg1AdId, both, sg1Attrs); err != nil {
 		t.Error(err)
 	}
 	// Client2 should just now see the found message.
-	if err := expect(c2Updates, find, sg1Attrs); err != nil {
+	if err := expect(c2Updates, &sg1AdId, find, sg1Attrs); err != nil {
 		t.Error(err)
 	}
 
@@ -103,10 +104,11 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	createSyncgroup(t, ctx, d, sg2Id, spec2, verror.ID(""))
 
 	// Both clients should see the new syncgroup.
-	if err := expect(c1Updates, find, sg2Attrs); err != nil {
+	var sg2AdId discovery.AdId
+	if err := expect(c1Updates, &sg2AdId, find, sg2Attrs); err != nil {
 		t.Error(err)
 	}
-	if err := expect(c2Updates, find, sg2Attrs); err != nil {
+	if err := expect(c2Updates, &sg2AdId, find, sg2Attrs); err != nil {
 		t.Error(err)
 	}
 
@@ -114,7 +116,7 @@ func TestSyncgroupDiscovery(t *testing.T) {
 	if err := d.SyncgroupForId(sg2Id).SetSpec(ctx, spec2, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
 	}
-	if err := expect(c2Updates, lose, sg2Attrs); err != nil {
+	if err := expect(c2Updates, &sg2AdId, lose, sg2Attrs); err != nil {
 		t.Error(err)
 	}
 }
@@ -142,13 +144,21 @@ const (
 	both = "both"
 )
 
-func expect(ch <-chan discovery.Update, typ string, want discovery.Attributes) error {
+func expect(ch <-chan discovery.Update, id *discovery.AdId, typ string, want discovery.Attributes) error {
 	select {
 	case u := <-ch:
 		if (u.IsLost() && typ == find) || (!u.IsLost() && typ == lose) {
 			return fmt.Errorf("IsLost mismatch.  Got %v, wanted %v", u, typ)
 		}
-		got := u.Advertisement().Attributes
+		ad := u.Advertisement()
+		got := ad.Attributes
+		if id.IsValid() {
+			if *id != ad.Id {
+				return fmt.Errorf("mismatched id, got %v, want %v", ad.Id, id)
+			}
+		} else {
+			*id = ad.Id
+		}
 		if !reflect.DeepEqual(got, want) {
 			return fmt.Errorf("got %v, want %v", got, want)
 		}
@@ -157,7 +167,7 @@ func expect(ch <-chan discovery.Update, typ string, want discovery.Attributes) e
 			if u.IsLost() {
 				typ = find
 			}
-			return expect(ch, typ, want)
+			return expect(ch, id, typ, want)
 		}
 		return nil
 	case <-time.After(2 * time.Second):

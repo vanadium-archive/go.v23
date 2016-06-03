@@ -81,7 +81,9 @@ func (d *Discovery) Advertise(ctx *context.T, ad *discovery.Advertisement, visib
 		patterns := joinPatterns(visibility)
 		adCopy.Attributes[visibilityKey] = patterns
 	}
-	return d.nhDiscovery.Advertise(ctx, &adCopy, nil)
+	ch, err := d.nhDiscovery.Advertise(ctx, &adCopy, nil)
+	ad.Id = adCopy.Id
+	return ch, err
 }
 
 func matchesPatterns(ctx *context.T, patterns []security.BlessingPattern) bool {
