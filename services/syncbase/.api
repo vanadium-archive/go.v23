@@ -46,6 +46,7 @@ pkg syncbase, func NewErrNotInDevMode(*context.T) error
 pkg syncbase, func NewErrReadOnlyBatch(*context.T) error
 pkg syncbase, func NewErrSyncgroupJoinFailed(*context.T) error
 pkg syncbase, func NewErrUnknownBatch(*context.T) error
+pkg syncbase, func ParseId(string) (Id, error)
 pkg syncbase, func ResolverTypeFromString(string) (ResolverType, error)
 pkg syncbase, func RowClient(string) RowClientStub
 pkg syncbase, func RowServer(RowServerMethods) RowServerStub
@@ -141,6 +142,7 @@ pkg syncbase, method (CrRule) VDLIsZero() bool
 pkg syncbase, method (CrRule) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (DevModeUpdateVClockOpts) VDLIsZero() bool
 pkg syncbase, method (DevModeUpdateVClockOpts) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (Id) String() string
 pkg syncbase, method (Id) VDLIsZero() bool
 pkg syncbase, method (Id) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (KeyValue) VDLIsZero() bool

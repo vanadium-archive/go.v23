@@ -35,7 +35,6 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 // Type definitions
 
 // Id is a {blessing, name} pair, used to identify a database or a collection.
-// TODO(sadovsky): Maybe implement Id.String().
 type Id struct {
 	Blessing string
 	Name     string

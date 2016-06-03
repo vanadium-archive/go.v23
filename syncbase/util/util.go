@@ -37,11 +37,7 @@ func Decode(s string) (string, error) {
 
 // EncodeId encodes the given Id for use in a Syncbase object name.
 func EncodeId(id wire.Id) string {
-	// Note that "," is not allowed to appear in blessing patterns. We also
-	// could've used "/" as a separator, but then we would've had to be more
-	// careful with decoding and splitting name components elsewhere.
-	// TODO(sadovsky): Maybe define "," constant in v23/services/syncbase.
-	return Encode(id.Blessing + "," + id.Name)
+	return Encode(id.String())
 }
 
 // DecodeId is the inverse of EncodeId.
@@ -50,11 +46,7 @@ func DecodeId(s string) (wire.Id, error) {
 	if err != nil {
 		return wire.Id{}, err
 	}
-	parts := strings.SplitN(dec, ",", 2)
-	if len(parts) != 2 {
-		return wire.Id{}, fmt.Errorf("failed to decode id: %s", s)
-	}
-	return wire.Id{Blessing: parts[0], Name: parts[1]}, nil
+	return wire.ParseId(dec)
 }
 
 // Currently we use \xff for perms index storage and \xfe as a component

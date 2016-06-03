@@ -10,7 +10,6 @@ import (
 )
 
 // Id is a {blessing, name} pair, used to identify a database or a collection.
-// TODO(sadovsky): Maybe implement Id.String().
 type Id struct {
 	Blessing string
 	Name     string
