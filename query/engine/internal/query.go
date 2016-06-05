@@ -294,6 +294,7 @@ func execStatement(db ds.Database, s *query_parser.Statement) ([]string, syncql.
 		deleteCount := int64(0)
 		for keyValueStream.Advance() {
 			if st.Limit != nil && deleteCount >= st.Limit.Limit.Value {
+				defer keyValueStream.Cancel()
 				break
 			}
 			k, v := keyValueStream.KeyValue()

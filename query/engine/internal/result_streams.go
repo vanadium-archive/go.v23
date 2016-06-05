@@ -26,6 +26,7 @@ type selectResultStreamImpl struct {
 
 func (rs *selectResultStreamImpl) Advance() bool {
 	if rs.selectStatement.Limit != nil && rs.resultCount >= rs.selectStatement.Limit.Limit.Value {
+		rs.keyValueStream.Cancel()
 		return false
 	}
 	for rs.keyValueStream.Advance() {

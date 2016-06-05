@@ -619,15 +619,20 @@ func TestWatchBasic(t *testing.T) {
 	defer cancel()
 	wstream := d.Watch(ctxWithTimeout, resumeMarkers[0], []wire.CollectionRowPattern{util.RowPrefixPattern(c.Id(), "a")})
 	tu.CheckWatch(t, wstream, allChanges)
+	wstream.Cancel()
 	wstream = d.Watch(ctxWithTimeout, resumeMarkers[1], []wire.CollectionRowPattern{util.RowPrefixPattern(c.Id(), "a")})
 	tu.CheckWatch(t, wstream, allChanges[1:])
+	wstream.Cancel()
 	wstream = d.Watch(ctxWithTimeout, resumeMarkers[2], []wire.CollectionRowPattern{util.RowPrefixPattern(c.Id(), "a")})
 	tu.CheckWatch(t, wstream, allChanges[2:])
+	wstream.Cancel()
 
 	wstream = d.Watch(ctxWithTimeout, resumeMarkers[0], []wire.CollectionRowPattern{util.RowPrefixPattern(c.Id(), "abc")})
 	tu.CheckWatch(t, wstream, allChanges[:2])
+	wstream.Cancel()
 	wstream = d.Watch(ctxWithTimeout, resumeMarkers[1], []wire.CollectionRowPattern{util.RowPrefixPattern(c.Id(), "abc")})
 	tu.CheckWatch(t, wstream, allChanges[1:2])
+	wstream.Cancel()
 }
 
 // TestWatchWithBatchAndInitialState tests that the client watch correctly
@@ -807,6 +812,9 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// Admin watch with empty prefix should have seen all the continued changes as
 	// separate batches.
 	tu.CheckWatch(t, wstreamAllAdmin, continuedChanges)
+	wstreamAllAdmin.Cancel()
+	wstreamD.Cancel()
+	wstreamAll.Cancel()
 }
 
 // TestBlockingWatch tests that the server side of the client watch correctly
@@ -852,6 +860,7 @@ func TestBlockingWatch(t *testing.T) {
 			t.Fatalf("Unexpected watch change: got %v, want %v", got, want)
 		}
 	}
+	wstream.Cancel()
 }
 
 // TestBlockedWatchCancel tests that the watch call blocked on the server side
@@ -1174,4 +1183,7 @@ func TestWatchMulti(t *testing.T) {
 		},
 	}
 	tu.CheckWatch(t, wstream3, continuedChanges3)
+	wstream1.Cancel()
+	wstream2.Cancel()
+	wstream3.Cancel()
 }
