@@ -118,6 +118,7 @@ func (d *database) Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patter
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.WatchPatterns(ctx, resumeMarker, patterns)
 	if err != nil {
+		cancel()
 		return &invalidWatchStream{invalidStream{err: err}}
 	}
 	return newWatchStream(cancel, call)

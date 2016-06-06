@@ -90,6 +90,7 @@ func (d *databaseBatch) Exec(ctx *context.T, query string, params ...interface{}
 	ctx, cancel := context.WithCancel(ctx)
 	call, err := d.c.Exec(ctx, d.bh, query, paramsVom)
 	if err != nil {
+		cancel()
 		return nil, nil, err
 	}
 	resultStream := newResultStream(cancel, call)
