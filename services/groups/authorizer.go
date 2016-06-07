@@ -9,8 +9,6 @@
 package groups
 
 import (
-	"reflect"
-
 	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
@@ -44,11 +42,6 @@ type authorizer struct {
 }
 
 func (a *authorizer) Authorize(ctx *context.T, call security.Call) error {
-	// "Self-RPCs" are always authorized.
-	if l, r := call.LocalBlessings().PublicKey(), call.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
-		return nil
-	}
-
 	blessings, invalid := security.RemoteBlessingNames(ctx, call)
 	hasTag := false
 	for _, tag := range call.MethodTags() {

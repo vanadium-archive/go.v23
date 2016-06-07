@@ -273,10 +273,8 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 		p         = newPrincipal(t)
 		client, _ = p.BlessSelf("client")
 		server, _ = p.BlessSelf("server")
-		// Authorizer with a access.Permissions that grants read access to
-		// anyone, write/execute access to noone.
-		typ           internal.MyTag
-		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody:$"}}}, vdl.TypeOf(typ))
+		// Authorizer with access.Permissions that grant access to noone.
+		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody:$"}}}, vdl.TypeOf(internal.Read))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags"} {
 		params := &security.CallParams{
@@ -286,8 +284,9 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 			Method:          test,
 			MethodTags:      methodTags(test),
 		}
-		if err := authorize(authorizer, params); err != nil {
-			t.Errorf("Got error %v for method %q", err, test)
+		// Self-RPCs should not be treated differently.
+		if err := authorize(authorizer, params); err == nil {
+			t.Errorf("Access to %q granted to %v", test, client)
 		}
 	}
 }
