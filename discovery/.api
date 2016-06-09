@@ -29,7 +29,7 @@ pkg discovery, type DataOrError struct, Error error
 pkg discovery, type T interface { Advertise, Scan }
 pkg discovery, type T interface, Advertise(*context.T, *Advertisement, []security.BlessingPattern) (<-chan struct{}, error)
 pkg discovery, type T interface, Scan(*context.T, string) (<-chan Update, error)
-pkg discovery, type Update interface { Addresses, Advertisement, Attachment, Attribute, Id, InterfaceName, IsLost }
+pkg discovery, type Update interface { Addresses, Advertisement, Attachment, Attribute, Id, InterfaceName, IsLost, Timestamp }
 pkg discovery, type Update interface, Addresses() []string
 pkg discovery, type Update interface, Advertisement() Advertisement
 pkg discovery, type Update interface, Attachment(*context.T, string) <-chan DataOrError
@@ -37,3 +37,4 @@ pkg discovery, type Update interface, Attribute(string) string
 pkg discovery, type Update interface, Id() AdId
 pkg discovery, type Update interface, InterfaceName() string
 pkg discovery, type Update interface, IsLost() bool
+pkg discovery, type Update interface, Timestamp() time.Time

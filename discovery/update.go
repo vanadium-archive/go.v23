@@ -4,7 +4,11 @@
 
 package discovery
 
-import "v.io/v23/context"
+import (
+	"time"
+
+	"v.io/v23/context"
+)
 
 // Update is the interface for a discovery update.
 type Update interface {
@@ -40,6 +44,10 @@ type Update interface {
 	//
 	// The returned advertisement may not include all attachments.
 	Advertisement() Advertisement
+
+	// Timestamp returns the time when advertising began for the corresponding
+	// Advertisement.
+	Timestamp() time.Time
 }
 
 // DataOrError contains either an attachment data or an error
