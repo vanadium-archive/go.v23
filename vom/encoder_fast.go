@@ -23,11 +23,11 @@ import (
 // and nextFieldValue methods.
 type (
 	encodeBool    struct{ Value bool }
-	encodeString  struct{ Value string }
 	encodeOneByte struct{ Value byte }
 	encodeUint    struct{ Value uint64 }
 	encodeInt     struct{ Value int64 }
 	encodeFloat   struct{ Value float64 }
+	encodeString  struct{ Value string }
 	encodeBytes   struct {
 		Value []byte
 		Kind  vdl.Kind
@@ -35,11 +35,14 @@ type (
 )
 
 func (x encodeBool) encode(buf *encbuf)    { binaryEncodeBool(buf, x.Value) }
-func (x encodeString) encode(buf *encbuf)  { binaryEncodeString(buf, x.Value) }
 func (x encodeOneByte) encode(buf *encbuf) { buf.WriteOneByte(x.Value) }
 func (x encodeUint) encode(buf *encbuf)    { binaryEncodeUint(buf, x.Value) }
 func (x encodeInt) encode(buf *encbuf)     { binaryEncodeInt(buf, x.Value) }
 func (x encodeFloat) encode(buf *encbuf)   { binaryEncodeFloat(buf, x.Value) }
+func (x encodeString) encode(buf *encbuf) {
+	binaryEncodeUint(buf, uint64(len(x.Value)))
+	buf.WriteString(x.Value)
+}
 func (x encodeBytes) encode(buf *encbuf) {
 	if x.Kind == vdl.Array {
 		binaryEncodeUint(buf, 0)
@@ -133,18 +136,19 @@ func (e *encoder81) nextEntryValue(tt *vdl.Type, encode func(*encbuf)) error {
 	return nil
 }
 
-// nextFieldValue implements the equivalent of NextField(name), StartValue,
+// nextFieldValue implements the equivalent of NextField(index), StartValue,
 // Encode*, FinishValue.
-func (e *encoder81) nextFieldValue(name string, tt *vdl.Type, encode func(*encbuf)) error {
+func (e *encoder81) nextFieldValue(index int, tt *vdl.Type, encode func(*encbuf)) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
 	}
 	// NextField
-	if _, top.Index = top.Type.FieldByName(name); top.Index == -1 {
-		return fmt.Errorf("vom: NextField called with invalid field %q", name)
+	if index < -1 || index >= top.Type.NumField() {
+		return fmt.Errorf("vom: NextField called with invalid index %d", index)
 	}
-	binaryEncodeUint(e.buf, uint64(top.Index))
+	binaryEncodeUint(e.buf, uint64(index))
+	top.Index = index
 	// StartValue
 	top.NumStarted++
 	isInsideAny := top.nextValueIsAny()
@@ -179,11 +183,11 @@ func (e *encoder81) WriteValueBool(tt *vdl.Type, value bool) error {
 
 func (e *encoder81) WriteValueString(tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
-		index := tt.EnumIndex(value)
-		if index < 0 {
+		enumIndex := tt.EnumIndex(value)
+		if enumIndex < 0 {
 			return verror.New(errLabelNotInType, nil, value, tt)
 		}
-		return e.writeValue(tt, encodeUint{uint64(index)}.encode)
+		return e.writeValue(tt, encodeUint{uint64(enumIndex)}.encode)
 	} else {
 		return e.writeValue(tt, encodeString{value}.encode)
 	}
@@ -228,11 +232,11 @@ func (e *encoder81) NextEntryValueBool(tt *vdl.Type, value bool) error {
 
 func (e *encoder81) NextEntryValueString(tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
-		index := tt.EnumIndex(value)
-		if index < 0 {
+		enumIndex := tt.EnumIndex(value)
+		if enumIndex < 0 {
 			return verror.New(errLabelNotInType, nil, value, tt)
 		}
-		return e.nextEntryValue(tt, encodeUint{uint64(index)}.encode)
+		return e.nextEntryValue(tt, encodeUint{uint64(enumIndex)}.encode)
 	} else {
 		return e.nextEntryValue(tt, encodeString{value}.encode)
 	}
@@ -268,46 +272,46 @@ func (e *encoder81) NextEntryValueBytes(tt *vdl.Type, value []byte) error {
 
 // NextFieldValue* methods
 
-func (e *encoder81) NextFieldValueBool(name string, tt *vdl.Type, value bool) error {
-	return e.nextFieldValue(name, tt, encodeBool{value}.encode)
+func (e *encoder81) NextFieldValueBool(index int, tt *vdl.Type, value bool) error {
+	return e.nextFieldValue(index, tt, encodeBool{value}.encode)
 }
 
-func (e *encoder81) NextFieldValueString(name string, tt *vdl.Type, value string) error {
+func (e *encoder81) NextFieldValueString(index int, tt *vdl.Type, value string) error {
 	if tt.Kind() == vdl.Enum {
-		index := tt.EnumIndex(value)
-		if index < 0 {
+		enumIndex := tt.EnumIndex(value)
+		if enumIndex < 0 {
 			return verror.New(errLabelNotInType, nil, value, tt)
 		}
-		return e.nextFieldValue(name, tt, encodeUint{uint64(index)}.encode)
+		return e.nextFieldValue(index, tt, encodeUint{uint64(enumIndex)}.encode)
 	} else {
-		return e.nextFieldValue(name, tt, encodeString{value}.encode)
+		return e.nextFieldValue(index, tt, encodeString{value}.encode)
 	}
 }
 
-func (e *encoder81) NextFieldValueUint(name string, tt *vdl.Type, value uint64) error {
+func (e *encoder81) NextFieldValueUint(index int, tt *vdl.Type, value uint64) error {
 	if top := e.top(); top != nil && top.Type.IsBytes() {
-		return e.nextFieldValue(name, tt, encodeOneByte{byte(value)}.encode)
+		return e.nextFieldValue(index, tt, encodeOneByte{byte(value)}.encode)
 	} else {
-		return e.nextFieldValue(name, tt, encodeUint{value}.encode)
+		return e.nextFieldValue(index, tt, encodeUint{value}.encode)
 	}
 }
 
-func (e *encoder81) NextFieldValueInt(name string, tt *vdl.Type, value int64) error {
-	return e.nextFieldValue(name, tt, encodeInt{value}.encode)
+func (e *encoder81) NextFieldValueInt(index int, tt *vdl.Type, value int64) error {
+	return e.nextFieldValue(index, tt, encodeInt{value}.encode)
 }
 
-func (e *encoder81) NextFieldValueFloat(name string, tt *vdl.Type, value float64) error {
-	return e.nextFieldValue(name, tt, encodeFloat{value}.encode)
+func (e *encoder81) NextFieldValueFloat(index int, tt *vdl.Type, value float64) error {
+	return e.nextFieldValue(index, tt, encodeFloat{value}.encode)
 }
 
-func (e *encoder81) NextFieldValueTypeObject(name string, value *vdl.Type) error {
+func (e *encoder81) NextFieldValueTypeObject(index int, value *vdl.Type) error {
 	// TypeObject is hard to implement, so we call the methods in sequence.
-	if err := e.NextField(name); err != nil {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueTypeObject(value)
 }
 
-func (e *encoder81) NextFieldValueBytes(name string, tt *vdl.Type, value []byte) error {
-	return e.nextFieldValue(name, tt, encodeBytes{value, tt.Kind()}.encode)
+func (e *encoder81) NextFieldValueBytes(index int, tt *vdl.Type, value []byte) error {
+	return e.nextFieldValue(index, tt, encodeBytes{value, tt.Kind()}.encode)
 }

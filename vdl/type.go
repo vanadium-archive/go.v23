@@ -323,13 +323,23 @@ func (t *Type) Field(index int) Field {
 var fieldByNameAllowed = []Kind{Struct, Union}
 
 // FieldByName returns a description of the Struct or Union field with the given
-// name, and its integer field index.  Returns -1 if the name doesn't exist.
+// name, and its index.  Returns -1 if the name doesn't exist.
 func (t *Type) FieldByName(name string) (Field, int) {
 	t.checkKind("FieldByName", fieldByNameAllowed...)
 	if index, ok := t.fieldIndices[name]; ok {
 		return t.fields[index], index
 	}
 	return Field{}, -1
+}
+
+// FieldIndexByName returns the index of the Struct or Union field with
+// the given name.  Returns -1 if the name doesn't exist.
+func (t *Type) FieldIndexByName(name string) int {
+	t.checkKind("FieldIndexByName", fieldByNameAllowed...)
+	if index, ok := t.fieldIndices[name]; ok {
+		return index
+	}
+	return -1
 }
 
 var numFieldAllowed = []Kind{Struct, Union}

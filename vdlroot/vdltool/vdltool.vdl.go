@@ -328,16 +328,16 @@ func (x GoZero) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Mode != GoZeroModeUnknown {
-		if err := enc.NextFieldValueString("Mode", __VDLType_enum_3, x.Mode.String()); err != nil {
+		if err := enc.NextFieldValueString(0, __VDLType_enum_3, x.Mode.String()); err != nil {
 			return err
 		}
 	}
 	if x.IsZero != "" {
-		if err := enc.NextFieldValueString("IsZero", vdl.StringType, x.IsZero); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.IsZero); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -348,15 +348,26 @@ func (x *GoZero) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Mode":
+		}
+		if decType != __VDLType_struct_4 {
+			index = __VDLType_struct_4.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -365,16 +376,12 @@ func (x *GoZero) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "IsZero":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.IsZero = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -404,16 +411,16 @@ func (x GoImport) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Path != "" {
-		if err := enc.NextFieldValueString("Path", vdl.StringType, x.Path); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Path); err != nil {
 			return err
 		}
 	}
 	if x.Name != "" {
-		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -424,31 +431,38 @@ func (x *GoImport) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Path":
+		}
+		if decType != __VDLType_struct_5 {
+			index = __VDLType_struct_5.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Path = value
 			}
-		case "Name":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Name = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -513,17 +527,17 @@ func (x GoType) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Kind != GoKindStruct {
-		if err := enc.NextFieldValueString("Kind", __VDLType_enum_2, x.Kind.String()); err != nil {
+		if err := enc.NextFieldValueString(0, __VDLType_enum_2, x.Kind.String()); err != nil {
 			return err
 		}
 	}
 	if x.Type != "" {
-		if err := enc.NextFieldValueString("Type", vdl.StringType, x.Type); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Type); err != nil {
 			return err
 		}
 	}
 	if x.Zero != (GoZero{}) {
-		if err := enc.NextField("Zero"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := x.Zero.VDLWrite(enc); err != nil {
@@ -531,24 +545,24 @@ func (x GoType) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.ToNative != "" {
-		if err := enc.NextFieldValueString("ToNative", vdl.StringType, x.ToNative); err != nil {
+		if err := enc.NextFieldValueString(3, vdl.StringType, x.ToNative); err != nil {
 			return err
 		}
 	}
 	if x.FromNative != "" {
-		if err := enc.NextFieldValueString("FromNative", vdl.StringType, x.FromNative); err != nil {
+		if err := enc.NextFieldValueString(4, vdl.StringType, x.FromNative); err != nil {
 			return err
 		}
 	}
 	if len(x.Imports) != 0 {
-		if err := enc.NextField("Imports"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.Imports); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -580,15 +594,26 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_6); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Kind":
+		}
+		if decType != __VDLType_struct_6 {
+			index = __VDLType_struct_6.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -597,37 +622,33 @@ func (x *GoType) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "Type":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Type = value
 			}
-		case "Zero":
+		case 2:
 			if err := x.Zero.VDLRead(dec); err != nil {
 				return err
 			}
-		case "ToNative":
+		case 3:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.ToNative = value
 			}
-		case "FromNative":
+		case 4:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.FromNative = value
 			}
-		case "Imports":
+		case 5:
 			if err := __VDLReadAnon_list_1(dec, &x.Imports); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
@@ -702,14 +723,14 @@ func (x GoConfig) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.WireToNativeTypes) != 0 {
-		if err := enc.NextField("WireToNativeTypes"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_2(enc, x.WireToNativeTypes); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -741,20 +762,27 @@ func (x *GoConfig) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_8); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "WireToNativeTypes":
-			if err := __VDLReadAnon_map_2(dec, &x.WireToNativeTypes); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_8 {
+			index = __VDLType_struct_8.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_map_2(dec, &x.WireToNativeTypes); err != nil {
 				return err
 			}
 		}
@@ -845,7 +873,7 @@ func (x JavaConfig) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.WireToNativeTypes) != 0 {
-		if err := enc.NextField("WireToNativeTypes"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_3(enc, x.WireToNativeTypes); err != nil {
@@ -853,14 +881,14 @@ func (x JavaConfig) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.WireTypeRenames) != 0 {
-		if err := enc.NextField("WireTypeRenames"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_3(enc, x.WireTypeRenames); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -892,24 +920,31 @@ func (x *JavaConfig) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_10); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "WireToNativeTypes":
+		}
+		if decType != __VDLType_struct_10 {
+			index = __VDLType_struct_10.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := __VDLReadAnon_map_3(dec, &x.WireToNativeTypes); err != nil {
 				return err
 			}
-		case "WireTypeRenames":
+		case 1:
 			if err := __VDLReadAnon_map_3(dec, &x.WireTypeRenames); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
@@ -964,7 +999,7 @@ func (x JavascriptConfig) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_struct_12); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -975,18 +1010,25 @@ func (x *JavascriptConfig) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_12); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_12 {
+			index = __VDLType_struct_12.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
+		}
+		switch index {
 		}
 	}
 }
@@ -1049,14 +1091,14 @@ func (x SwiftConfig) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.WireToNativeTypes) != 0 {
-		if err := enc.NextField("WireToNativeTypes"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_3(enc, x.WireToNativeTypes); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -1067,20 +1109,27 @@ func (x *SwiftConfig) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_13); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "WireToNativeTypes":
-			if err := __VDLReadAnon_map_3(dec, &x.WireToNativeTypes); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_13 {
+			index = __VDLType_struct_13.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_map_3(dec, &x.WireToNativeTypes); err != nil {
 				return err
 			}
 		}
@@ -1131,7 +1180,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.GenLanguages) != 0 {
-		if err := enc.NextField("GenLanguages"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_set_4(enc, x.GenLanguages); err != nil {
@@ -1139,7 +1188,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.Go.VDLIsZero() {
-		if err := enc.NextField("Go"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := x.Go.VDLWrite(enc); err != nil {
@@ -1147,7 +1196,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.Java.VDLIsZero() {
-		if err := enc.NextField("Java"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := x.Java.VDLWrite(enc); err != nil {
@@ -1155,7 +1204,7 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Javascript != (JavascriptConfig{}) {
-		if err := enc.NextField("Javascript"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := x.Javascript.VDLWrite(enc); err != nil {
@@ -1163,14 +1212,14 @@ func (x Config) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.Swift.VDLIsZero() {
-		if err := enc.NextField("Swift"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		if err := x.Swift.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -1199,36 +1248,43 @@ func (x *Config) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_14); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "GenLanguages":
+		}
+		if decType != __VDLType_struct_14 {
+			index = __VDLType_struct_14.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := __VDLReadAnon_set_4(dec, &x.GenLanguages); err != nil {
 				return err
 			}
-		case "Go":
+		case 1:
 			if err := x.Go.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Java":
+		case 2:
 			if err := x.Java.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Javascript":
+		case 3:
 			if err := x.Javascript.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Swift":
+		case 4:
 			if err := x.Swift.VDLRead(dec); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

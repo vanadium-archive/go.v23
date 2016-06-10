@@ -276,26 +276,26 @@ func writeNextEntryFastpath(enc Encoder, rv reflect.Value, tt *Type) error {
 	return enc.NextEntryValueBytes(tt, extractBytes(rv, tt))
 }
 
-func writeNextFieldFastpath(enc Encoder, rv reflect.Value, tt *Type, name string) error {
+func writeNextFieldFastpath(enc Encoder, rv reflect.Value, tt *Type, index int) error {
 	switch tt.Kind() {
 	case Bool:
-		return enc.NextFieldValueBool(name, tt, rv.Bool())
+		return enc.NextFieldValueBool(index, tt, rv.Bool())
 	case String:
-		return enc.NextFieldValueString(name, tt, rv.String())
+		return enc.NextFieldValueString(index, tt, rv.String())
 	case Enum:
 		// TypeFromReflect already validated String(); call without error checking.
-		return enc.NextFieldValueString(name, tt, rv.Interface().(stringer).String())
+		return enc.NextFieldValueString(index, tt, rv.Interface().(stringer).String())
 	case Byte, Uint16, Uint32, Uint64:
-		return enc.NextFieldValueUint(name, tt, rv.Uint())
+		return enc.NextFieldValueUint(index, tt, rv.Uint())
 	case Int8, Int16, Int32, Int64:
-		return enc.NextFieldValueInt(name, tt, rv.Int())
+		return enc.NextFieldValueInt(index, tt, rv.Int())
 	case Float32, Float64:
-		return enc.NextFieldValueFloat(name, tt, rv.Float())
+		return enc.NextFieldValueFloat(index, tt, rv.Float())
 	}
 	if !tt.IsBytes() {
 		return fmt.Errorf("vdl: writeNextFieldFastpath called on non-fastpath type %v, %v", tt, rv.Type())
 	}
-	return enc.NextFieldValueBytes(name, tt, extractBytes(rv, tt))
+	return enc.NextFieldValueBytes(index, tt, extractBytes(rv, tt))
 }
 
 func writeArrayOrList(enc Encoder, rv reflect.Value, tt *Type) error {
@@ -354,8 +354,8 @@ func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
 	rt := rv.Type()
 	// Loop through tt fields rather than rt fields, since the VDL type tt might
 	// have ignored some of the fields in rt, e.g. unexported fields.
-	for ix := 0; ix < tt.NumField(); ix++ {
-		field := tt.Field(ix)
+	for index := 0; index < tt.NumField(); index++ {
+		field := tt.Field(index)
 		rvField := rv.Field(rtFieldIndexByName(rt, field.Name))
 		switch isZero, err := rvIsZeroValue(rvField, field.Type); {
 		case err != nil:
@@ -364,11 +364,11 @@ func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
 			continue // skip zero-valued fields
 		}
 		if ttWriteHasFastpath(field.Type) {
-			if err := writeNextFieldFastpath(enc, rvField, field.Type, field.Name); err != nil {
+			if err := writeNextFieldFastpath(enc, rvField, field.Type, index); err != nil {
 				return err
 			}
 		} else {
-			if err := enc.NextField(field.Name); err != nil {
+			if err := enc.NextField(index); err != nil {
 				return err
 			}
 			if err := writeReflect(enc, rvField, field.Type); err != nil {
@@ -376,28 +376,28 @@ func writeStruct(enc Encoder, rv reflect.Value, tt *Type) error {
 			}
 		}
 	}
-	return enc.NextField("")
+	return enc.NextField(-1)
 }
 
 func writeUnion(enc Encoder, rv reflect.Value, tt *Type) error {
-	// TypeFromReflect already validated Name() and Index().
+	// TypeFromReflect already validated Index().
 	iface := rv.Interface()
-	name, index := iface.(namer).Name(), iface.(indexer).Index()
+	index := iface.(indexer).Index()
 	ttField := tt.Field(index).Type
 	// Since this is a non-nil union, we're guaranteed rv is the concrete field
 	// struct, so we can just grab the "Value" field.
 	rvField := rv.Field(0)
 	if ttWriteHasFastpath(ttField) {
-		if err := writeNextFieldFastpath(enc, rvField, ttField, name); err != nil {
+		if err := writeNextFieldFastpath(enc, rvField, ttField, index); err != nil {
 			return err
 		}
 	} else {
-		if err := enc.NextField(name); err != nil {
+		if err := enc.NextField(index); err != nil {
 			return err
 		}
 		if err := writeReflect(enc, rvField, ttField); err != nil {
 			return err
 		}
 	}
-	return enc.NextField("")
+	return enc.NextField(-1)
 }

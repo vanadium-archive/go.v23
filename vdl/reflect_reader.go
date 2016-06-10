@@ -502,7 +502,8 @@ func readFixedLenList(dec Decoder, name string, len int, rv reflect.Value, tt *T
 	if ttReadIntoScalar(ttElem) {
 		// Handle scalar element fastpath.
 		for index := 0; index < len; index++ {
-			switch done, err := readNextEntryScalar(dec, rv.Index(index), ttElem); {
+			rvIndex := rv.Index(index)
+			switch done, err := readNextEntryScalar(dec, rvIndex, ttElem); {
 			case err != nil:
 				return err
 			case done:
@@ -666,7 +667,7 @@ func readMap(dec Decoder, rv reflect.Value, tt *Type) error {
 }
 
 func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
-	rt := rv.Type()
+	rt, decType := rv.Type(), dec.Type()
 	// Reset to the zero struct, since fields may be missing.
 	//
 	// TODO(toddw): Avoid repeated zero-setting of nested structs.
@@ -676,27 +677,32 @@ func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
 	}
 	rv.Set(rvZero)
 	for {
-		name, err := dec.NextField()
+		index, err := dec.NextField()
 		switch {
 		case err != nil:
 			return err
-		case name == "":
+		case index == -1:
 			return nil
 		}
-		switch ttField, index := tt.FieldByName(name); {
-		case index != -1:
-			rvField := rv.Field(rtFieldIndexByName(rt, name))
-			if ttReadIntoScalar(ttField.Type) {
-				if err := readValueScalar(dec, rvField, ttField.Type); err != nil {
+		var ttField Field
+		if decType == tt {
+			ttField = tt.Field(index)
+		} else {
+			ttField, index = tt.FieldByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
 					return err
 				}
-			} else {
-				if err := readReflect(dec, false, rvField, ttField.Type); err != nil {
-					return err
-				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		rvField := rv.Field(rtFieldIndexByName(rt, ttField.Name))
+		if ttReadIntoScalar(ttField.Type) {
+			if err := readValueScalar(dec, rvField, ttField.Type); err != nil {
+				return err
+			}
+		} else {
+			if err := readReflect(dec, false, rvField, ttField.Type); err != nil {
 				return err
 			}
 		}
@@ -704,17 +710,24 @@ func readStruct(dec Decoder, rv reflect.Value, tt *Type) error {
 }
 
 func readUnion(dec Decoder, rv reflect.Value, tt *Type) error {
-	rt := rv.Type()
-	name, err := dec.NextField()
+	rt, decType := rv.Type(), dec.Type()
+	index, err := dec.NextField()
 	switch {
 	case err != nil:
 		return err
-	case name == "":
-		return fmt.Errorf("missing field in union %v, from %v", rt, dec.Type())
+	case index == -1:
+		return fmt.Errorf("missing field in union %v, from %v", rt, decType)
 	}
-	ttField, index := tt.FieldByName(name)
-	if index == -1 {
-		return fmt.Errorf("field %q not in union %v, from %v", name, rt, dec.Type())
+	var ttField Field
+	if decType == tt {
+		ttField = tt.Field(index)
+	} else {
+		name := decType.Field(index).Name
+		ttField, index = tt.FieldByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %v, from %v", name, rt, decType)
+
+		}
 	}
 	// We have a union interface.  Create a new field based on its rep type, fill
 	// in its value, and assign the field to the interface.
@@ -733,11 +746,11 @@ func readUnion(dec Decoder, rv reflect.Value, tt *Type) error {
 		}
 	}
 	rv.Set(rvField)
-	switch name, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case name != "":
-		return fmt.Errorf("extra field %q in union %v, from %v", name, rt, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %v, from %v", index, rt, decType)
 	}
 	return nil
 }

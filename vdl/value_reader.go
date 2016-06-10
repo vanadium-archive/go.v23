@@ -267,49 +267,59 @@ func (vv *Value) readMap(dec Decoder) error {
 func (vv *Value) readStruct(dec Decoder) error {
 	// Reset to zero struct, since fields may be missing.
 	vv.Assign(nil)
+	tt, decType := vv.Type(), dec.Type()
 	for {
-		name, err := dec.NextField()
+		index, err := dec.NextField()
 		switch {
 		case err != nil:
 			return err
-		case name == "":
+		case index == -1:
 			return nil
 		}
-		switch field := vv.StructFieldByName(name); {
-		case field != nil:
-			if err := field.read(dec); err != nil {
-				return err
+		if decType != tt {
+			index = tt.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
+		}
+		if err := vv.StructField(index).read(dec); err != nil {
+			return err
 		}
 	}
 }
 
 func (vv *Value) readUnion(dec Decoder) error {
-	name, err := dec.NextField()
+	tt, decType := vv.Type(), dec.Type()
+	index, err := dec.NextField()
 	switch {
 	case err != nil:
 		return err
-	case name == "":
-		return fmt.Errorf("missing field in union %v, from %v", vv.Type(), dec.Type())
+	case index == -1:
+		return fmt.Errorf("missing field in union %v, from %v", tt, decType)
 	}
-	field, index := vv.Type().FieldByName(name)
-	if index < 0 {
-		return fmt.Errorf("field %q not in union %v, from %v", name, vv.Type(), dec.Type())
+	var ttField Field
+	if decType == tt {
+		ttField = tt.Field(index)
+	} else {
+		name := decType.Field(index).Name
+		ttField, index = tt.FieldByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %v, from %v", name, tt, decType)
+		}
 	}
-	elem := ZeroValue(field.Type)
-	if err := elem.read(dec); err != nil {
+	vvElem := ZeroValue(ttField.Type)
+	if err := vvElem.read(dec); err != nil {
 		return err
 	}
-	vv.AssignField(index, elem)
-	switch name, err := dec.NextField(); {
+	vv.AssignField(index, vvElem)
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case name != "":
-		return fmt.Errorf("extra field %q in union %v, from %v", name, vv.Type(), dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %v, from %v", index, tt, decType)
 	}
 	return nil
 }

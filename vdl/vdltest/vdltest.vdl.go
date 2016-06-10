@@ -49,22 +49,22 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.IsCanonical {
-		if err := enc.NextFieldValueBool("IsCanonical", vdl.BoolType, x.IsCanonical); err != nil {
+		if err := enc.NextFieldValueBool(0, vdl.BoolType, x.IsCanonical); err != nil {
 			return err
 		}
 	}
 	if x.Label != "" {
-		if err := enc.NextFieldValueString("Label", vdl.StringType, x.Label); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Label); err != nil {
 			return err
 		}
 	}
 	if x.TargetLabel != "" {
-		if err := enc.NextFieldValueString("TargetLabel", vdl.StringType, x.TargetLabel); err != nil {
+		if err := enc.NextFieldValueString(2, vdl.StringType, x.TargetLabel); err != nil {
 			return err
 		}
 	}
 	if x.Target != nil {
-		if err := enc.NextField("Target"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := vdl.Write(enc, x.Target); err != nil {
@@ -72,19 +72,19 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.SourceLabel != "" {
-		if err := enc.NextFieldValueString("SourceLabel", vdl.StringType, x.SourceLabel); err != nil {
+		if err := enc.NextFieldValueString(4, vdl.StringType, x.SourceLabel); err != nil {
 			return err
 		}
 	}
 	if x.Source != nil {
-		if err := enc.NextField("Source"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		if err := vdl.Write(enc, x.Source); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -95,58 +95,65 @@ func (x *vdlEntry) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "IsCanonical":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.IsCanonical = value
 			}
-		case "Label":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Label = value
 			}
-		case "TargetLabel":
+		case 2:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.TargetLabel = value
 			}
-		case "Target":
+		case 3:
 			var readAny interface{}
 			if err := vdl.Read(dec, &readAny); err != nil {
 				return err
 			}
 			x.Target = readAny
-		case "SourceLabel":
+		case 4:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.SourceLabel = value
 			}
-		case "Source":
+		case 5:
 			var readAny interface{}
 			if err := vdl.Read(dec, &readAny); err != nil {
 				return err
 			}
 			x.Source = readAny
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
 		}
 	}
 }
@@ -403,7 +410,7 @@ func (x VStructEmpty) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_struct_7); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -414,18 +421,25 @@ func (x *VStructEmpty) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_7); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_7 {
+			index = __VDLType_struct_7.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
+		}
+		switch index {
 		}
 	}
 }
@@ -449,16 +463,16 @@ func (x VNamedError) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Id != "" {
-		if err := enc.NextFieldValueString("Id", vdl.StringType, x.Id); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Id); err != nil {
 			return err
 		}
 	}
 	if x.Msg != "" {
-		if err := enc.NextFieldValueString("Msg", vdl.StringType, x.Msg); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Msg); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -469,31 +483,38 @@ func (x *VNamedError) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_8); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Id":
+		}
+		if decType != __VDLType_struct_8 {
+			index = __VDLType_struct_8.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Id = value
 			}
-		case "Msg":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Msg = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -4309,7 +4330,7 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F0 != nil {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := vdl.Write(enc, x.F0); err != nil {
@@ -4317,52 +4338,52 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F1 {
-		if err := enc.NextFieldValueBool("F1", vdl.BoolType, x.F1); err != nil {
+		if err := enc.NextFieldValueBool(1, vdl.BoolType, x.F1); err != nil {
 			return err
 		}
 	}
 	if x.F2 {
-		if err := enc.NextFieldValueBool("F2", __VDLType_bool_2, bool(x.F2)); err != nil {
+		if err := enc.NextFieldValueBool(2, __VDLType_bool_2, bool(x.F2)); err != nil {
 			return err
 		}
 	}
 	if x.F3 != "" {
-		if err := enc.NextFieldValueString("F3", vdl.StringType, x.F3); err != nil {
+		if err := enc.NextFieldValueString(3, vdl.StringType, x.F3); err != nil {
 			return err
 		}
 	}
 	if x.F4 != "" {
-		if err := enc.NextFieldValueString("F4", __VDLType_string_3, string(x.F4)); err != nil {
+		if err := enc.NextFieldValueString(4, __VDLType_string_3, string(x.F4)); err != nil {
 			return err
 		}
 	}
 	if x.F5 != nil && x.F5 != vdl.AnyType {
-		if err := enc.NextFieldValueTypeObject("F5", x.F5); err != nil {
+		if err := enc.NextFieldValueTypeObject(5, x.F5); err != nil {
 			return err
 		}
 	}
 	if x.F6 != 0 {
-		if err := enc.NextFieldValueUint("F6", vdl.ByteType, uint64(x.F6)); err != nil {
+		if err := enc.NextFieldValueUint(6, vdl.ByteType, uint64(x.F6)); err != nil {
 			return err
 		}
 	}
 	if x.F7 != 0 {
-		if err := enc.NextFieldValueUint("F7", __VDLType_byte_4, uint64(x.F7)); err != nil {
+		if err := enc.NextFieldValueUint(7, __VDLType_byte_4, uint64(x.F7)); err != nil {
 			return err
 		}
 	}
 	if x.F8 != VEnumAbcA {
-		if err := enc.NextFieldValueString("F8", __VDLType_enum_5, x.F8.String()); err != nil {
+		if err := enc.NextFieldValueString(8, __VDLType_enum_5, x.F8.String()); err != nil {
 			return err
 		}
 	}
 	if x.F9 != VEnumBcdB {
-		if err := enc.NextFieldValueString("F9", __VDLType_enum_6, x.F9.String()); err != nil {
+		if err := enc.NextFieldValueString(9, __VDLType_enum_6, x.F9.String()); err != nil {
 			return err
 		}
 	}
 	if x.F10 != (VStructEmpty{}) {
-		if err := enc.NextField("F10"); err != nil {
+		if err := enc.NextField(10); err != nil {
 			return err
 		}
 		if err := x.F10.VDLWrite(enc); err != nil {
@@ -4370,7 +4391,7 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F11 != (VNamedError{}) {
-		if err := enc.NextField("F11"); err != nil {
+		if err := enc.NextField(11); err != nil {
 			return err
 		}
 		if err := x.F11.VDLWrite(enc); err != nil {
@@ -4378,7 +4399,7 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F12 != nil {
-		if err := enc.NextField("F12"); err != nil {
+		if err := enc.NextField(12); err != nil {
 			return err
 		}
 		if err := verror.VDLWrite(enc, x.F12); err != nil {
@@ -4386,97 +4407,97 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F13 != 0 {
-		if err := enc.NextFieldValueUint("F13", vdl.Uint16Type, uint64(x.F13)); err != nil {
+		if err := enc.NextFieldValueUint(13, vdl.Uint16Type, uint64(x.F13)); err != nil {
 			return err
 		}
 	}
 	if x.F14 != 0 {
-		if err := enc.NextFieldValueUint("F14", __VDLType_uint16_9, uint64(x.F14)); err != nil {
+		if err := enc.NextFieldValueUint(14, __VDLType_uint16_9, uint64(x.F14)); err != nil {
 			return err
 		}
 	}
 	if x.F15 != 0 {
-		if err := enc.NextFieldValueUint("F15", vdl.Uint32Type, uint64(x.F15)); err != nil {
+		if err := enc.NextFieldValueUint(15, vdl.Uint32Type, uint64(x.F15)); err != nil {
 			return err
 		}
 	}
 	if x.F16 != 0 {
-		if err := enc.NextFieldValueUint("F16", __VDLType_uint32_10, uint64(x.F16)); err != nil {
+		if err := enc.NextFieldValueUint(16, __VDLType_uint32_10, uint64(x.F16)); err != nil {
 			return err
 		}
 	}
 	if x.F17 != 0 {
-		if err := enc.NextFieldValueUint("F17", vdl.Uint64Type, x.F17); err != nil {
+		if err := enc.NextFieldValueUint(17, vdl.Uint64Type, x.F17); err != nil {
 			return err
 		}
 	}
 	if x.F18 != 0 {
-		if err := enc.NextFieldValueUint("F18", __VDLType_uint64_11, uint64(x.F18)); err != nil {
+		if err := enc.NextFieldValueUint(18, __VDLType_uint64_11, uint64(x.F18)); err != nil {
 			return err
 		}
 	}
 	if x.F19 != 0 {
-		if err := enc.NextFieldValueInt("F19", vdl.Int8Type, int64(x.F19)); err != nil {
+		if err := enc.NextFieldValueInt(19, vdl.Int8Type, int64(x.F19)); err != nil {
 			return err
 		}
 	}
 	if x.F20 != 0 {
-		if err := enc.NextFieldValueInt("F20", __VDLType_int8_12, int64(x.F20)); err != nil {
+		if err := enc.NextFieldValueInt(20, __VDLType_int8_12, int64(x.F20)); err != nil {
 			return err
 		}
 	}
 	if x.F21 != 0 {
-		if err := enc.NextFieldValueInt("F21", vdl.Int16Type, int64(x.F21)); err != nil {
+		if err := enc.NextFieldValueInt(21, vdl.Int16Type, int64(x.F21)); err != nil {
 			return err
 		}
 	}
 	if x.F22 != 0 {
-		if err := enc.NextFieldValueInt("F22", __VDLType_int16_13, int64(x.F22)); err != nil {
+		if err := enc.NextFieldValueInt(22, __VDLType_int16_13, int64(x.F22)); err != nil {
 			return err
 		}
 	}
 	if x.F23 != 0 {
-		if err := enc.NextFieldValueInt("F23", vdl.Int32Type, int64(x.F23)); err != nil {
+		if err := enc.NextFieldValueInt(23, vdl.Int32Type, int64(x.F23)); err != nil {
 			return err
 		}
 	}
 	if x.F24 != 0 {
-		if err := enc.NextFieldValueInt("F24", __VDLType_int32_14, int64(x.F24)); err != nil {
+		if err := enc.NextFieldValueInt(24, __VDLType_int32_14, int64(x.F24)); err != nil {
 			return err
 		}
 	}
 	if x.F25 != 0 {
-		if err := enc.NextFieldValueInt("F25", vdl.Int64Type, x.F25); err != nil {
+		if err := enc.NextFieldValueInt(25, vdl.Int64Type, x.F25); err != nil {
 			return err
 		}
 	}
 	if x.F26 != 0 {
-		if err := enc.NextFieldValueInt("F26", __VDLType_int64_15, int64(x.F26)); err != nil {
+		if err := enc.NextFieldValueInt(26, __VDLType_int64_15, int64(x.F26)); err != nil {
 			return err
 		}
 	}
 	if x.F27 != 0 {
-		if err := enc.NextFieldValueFloat("F27", vdl.Float32Type, float64(x.F27)); err != nil {
+		if err := enc.NextFieldValueFloat(27, vdl.Float32Type, float64(x.F27)); err != nil {
 			return err
 		}
 	}
 	if x.F28 != 0 {
-		if err := enc.NextFieldValueFloat("F28", __VDLType_float32_16, float64(x.F28)); err != nil {
+		if err := enc.NextFieldValueFloat(28, __VDLType_float32_16, float64(x.F28)); err != nil {
 			return err
 		}
 	}
 	if x.F29 != 0 {
-		if err := enc.NextFieldValueFloat("F29", vdl.Float64Type, x.F29); err != nil {
+		if err := enc.NextFieldValueFloat(29, vdl.Float64Type, x.F29); err != nil {
 			return err
 		}
 	}
 	if x.F30 != 0 {
-		if err := enc.NextFieldValueFloat("F30", __VDLType_float64_17, float64(x.F30)); err != nil {
+		if err := enc.NextFieldValueFloat(30, __VDLType_float64_17, float64(x.F30)); err != nil {
 			return err
 		}
 	}
 	if x.F31 != nil {
-		if err := enc.NextField("F31"); err != nil {
+		if err := enc.NextField(31); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -4485,7 +4506,7 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F32 != nil {
-		if err := enc.NextField("F32"); err != nil {
+		if err := enc.NextField(32); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -4493,7 +4514,7 @@ func (x VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -4506,70 +4527,81 @@ func (x *VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_82); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
+		}
+		if decType != __VDLType_struct_82 {
+			index = __VDLType_struct_82.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			var readAny interface{}
 			if err := vdl.Read(dec, &readAny); err != nil {
 				return err
 			}
 			x.F0 = readAny
-		case "F1":
+		case 1:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.F1 = value
 			}
-		case "F2":
+		case 2:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.F2 = VBool(value)
 			}
-		case "F3":
+		case 3:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.F3 = value
 			}
-		case "F4":
+		case 4:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.F4 = VString(value)
 			}
-		case "F5":
+		case 5:
 			switch value, err := dec.ReadValueTypeObject(); {
 			case err != nil:
 				return err
 			default:
 				x.F5 = value
 			}
-		case "F6":
+		case 6:
 			switch value, err := dec.ReadValueUint(8); {
 			case err != nil:
 				return err
 			default:
 				x.F6 = byte(value)
 			}
-		case "F7":
+		case 7:
 			switch value, err := dec.ReadValueUint(8); {
 			case err != nil:
 				return err
 			default:
 				x.F7 = VByte(value)
 			}
-		case "F8":
+		case 8:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -4578,7 +4610,7 @@ func (x *VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "F9":
+		case 9:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -4587,145 +4619,145 @@ func (x *VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "F10":
+		case 10:
 			if err := x.F10.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F11":
+		case 11:
 			if err := x.F11.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F12":
+		case 12:
 			if err := verror.VDLRead(dec, &x.F12); err != nil {
 				return err
 			}
-		case "F13":
+		case 13:
 			switch value, err := dec.ReadValueUint(16); {
 			case err != nil:
 				return err
 			default:
 				x.F13 = uint16(value)
 			}
-		case "F14":
+		case 14:
 			switch value, err := dec.ReadValueUint(16); {
 			case err != nil:
 				return err
 			default:
 				x.F14 = VUint16(value)
 			}
-		case "F15":
+		case 15:
 			switch value, err := dec.ReadValueUint(32); {
 			case err != nil:
 				return err
 			default:
 				x.F15 = uint32(value)
 			}
-		case "F16":
+		case 16:
 			switch value, err := dec.ReadValueUint(32); {
 			case err != nil:
 				return err
 			default:
 				x.F16 = VUint32(value)
 			}
-		case "F17":
+		case 17:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.F17 = value
 			}
-		case "F18":
+		case 18:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.F18 = VUint64(value)
 			}
-		case "F19":
+		case 19:
 			switch value, err := dec.ReadValueInt(8); {
 			case err != nil:
 				return err
 			default:
 				x.F19 = int8(value)
 			}
-		case "F20":
+		case 20:
 			switch value, err := dec.ReadValueInt(8); {
 			case err != nil:
 				return err
 			default:
 				x.F20 = VInt8(value)
 			}
-		case "F21":
+		case 21:
 			switch value, err := dec.ReadValueInt(16); {
 			case err != nil:
 				return err
 			default:
 				x.F21 = int16(value)
 			}
-		case "F22":
+		case 22:
 			switch value, err := dec.ReadValueInt(16); {
 			case err != nil:
 				return err
 			default:
 				x.F22 = VInt16(value)
 			}
-		case "F23":
+		case 23:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F23 = int32(value)
 			}
-		case "F24":
+		case 24:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F24 = VInt32(value)
 			}
-		case "F25":
+		case 25:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.F25 = value
 			}
-		case "F26":
+		case 26:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.F26 = VInt64(value)
 			}
-		case "F27":
+		case 27:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.F27 = float32(value)
 			}
-		case "F28":
+		case 28:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.F28 = VFloat32(value)
 			}
-		case "F29":
+		case 29:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.F29 = value
 			}
-		case "F30":
+		case 30:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.F30 = VFloat64(value)
 			}
-		case "F31":
+		case 31:
 			if err := dec.StartValue(__VDLType_optional_35); err != nil {
 				return err
 			}
@@ -4741,7 +4773,7 @@ func (x *VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "F32":
+		case 32:
 			if err := dec.StartValue(__VDLType_optional_37); err != nil {
 				return err
 			}
@@ -4756,10 +4788,6 @@ func (x *VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 				if err := x.F32.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -4783,14 +4811,14 @@ func (x VStructDepth1_Any) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F0 != nil {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := vdl.Write(enc, x.F0); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -4801,24 +4829,31 @@ func (x *VStructDepth1_Any) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_83); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
+		}
+		if decType != __VDLType_struct_83 {
+			index = __VDLType_struct_83.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			var readAny interface{}
 			if err := vdl.Read(dec, &readAny); err != nil {
 				return err
 			}
 			x.F0 = readAny
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
 		}
 	}
 }
@@ -4841,11 +4876,11 @@ func (x VStructDepth1_Bool) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F1 {
-		if err := enc.NextFieldValueBool("F1", vdl.BoolType, x.F1); err != nil {
+		if err := enc.NextFieldValueBool(0, vdl.BoolType, x.F1); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -4856,24 +4891,31 @@ func (x *VStructDepth1_Bool) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_84); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F1":
+		}
+		if decType != __VDLType_struct_84 {
+			index = __VDLType_struct_84.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.F1 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -4897,11 +4939,11 @@ func (x VStructDepth1_VBool) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F2 {
-		if err := enc.NextFieldValueBool("F2", __VDLType_bool_2, bool(x.F2)); err != nil {
+		if err := enc.NextFieldValueBool(0, __VDLType_bool_2, bool(x.F2)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -4912,24 +4954,31 @@ func (x *VStructDepth1_VBool) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_85); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F2":
+		}
+		if decType != __VDLType_struct_85 {
+			index = __VDLType_struct_85.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.F2 = VBool(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -4953,11 +5002,11 @@ func (x VStructDepth1_String) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F3 != "" {
-		if err := enc.NextFieldValueString("F3", vdl.StringType, x.F3); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.F3); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -4968,24 +5017,31 @@ func (x *VStructDepth1_String) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_86); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F3":
+		}
+		if decType != __VDLType_struct_86 {
+			index = __VDLType_struct_86.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.F3 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5009,11 +5065,11 @@ func (x VStructDepth1_VString) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F4 != "" {
-		if err := enc.NextFieldValueString("F4", __VDLType_string_3, string(x.F4)); err != nil {
+		if err := enc.NextFieldValueString(0, __VDLType_string_3, string(x.F4)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5024,24 +5080,31 @@ func (x *VStructDepth1_VString) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_87); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F4":
+		}
+		if decType != __VDLType_struct_87 {
+			index = __VDLType_struct_87.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.F4 = VString(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5068,11 +5131,11 @@ func (x VStructDepth1_TypeObject) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F5 != nil && x.F5 != vdl.AnyType {
-		if err := enc.NextFieldValueTypeObject("F5", x.F5); err != nil {
+		if err := enc.NextFieldValueTypeObject(0, x.F5); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5085,24 +5148,31 @@ func (x *VStructDepth1_TypeObject) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_88); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F5":
+		}
+		if decType != __VDLType_struct_88 {
+			index = __VDLType_struct_88.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueTypeObject(); {
 			case err != nil:
 				return err
 			default:
 				x.F5 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5126,11 +5196,11 @@ func (x VStructDepth1_Byte) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F6 != 0 {
-		if err := enc.NextFieldValueUint("F6", vdl.ByteType, uint64(x.F6)); err != nil {
+		if err := enc.NextFieldValueUint(0, vdl.ByteType, uint64(x.F6)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5141,24 +5211,31 @@ func (x *VStructDepth1_Byte) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_89); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F6":
+		}
+		if decType != __VDLType_struct_89 {
+			index = __VDLType_struct_89.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(8); {
 			case err != nil:
 				return err
 			default:
 				x.F6 = byte(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5182,11 +5259,11 @@ func (x VStructDepth1_VByte) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F7 != 0 {
-		if err := enc.NextFieldValueUint("F7", __VDLType_byte_4, uint64(x.F7)); err != nil {
+		if err := enc.NextFieldValueUint(0, __VDLType_byte_4, uint64(x.F7)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5197,24 +5274,31 @@ func (x *VStructDepth1_VByte) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_90); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F7":
+		}
+		if decType != __VDLType_struct_90 {
+			index = __VDLType_struct_90.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(8); {
 			case err != nil:
 				return err
 			default:
 				x.F7 = VByte(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5238,11 +5322,11 @@ func (x VStructDepth1_VEnumAbc) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F8 != VEnumAbcA {
-		if err := enc.NextFieldValueString("F8", __VDLType_enum_5, x.F8.String()); err != nil {
+		if err := enc.NextFieldValueString(0, __VDLType_enum_5, x.F8.String()); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5253,15 +5337,26 @@ func (x *VStructDepth1_VEnumAbc) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_91); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F8":
+		}
+		if decType != __VDLType_struct_91 {
+			index = __VDLType_struct_91.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -5269,10 +5364,6 @@ func (x *VStructDepth1_VEnumAbc) VDLRead(dec vdl.Decoder) error {
 				if err := x.F8.Set(value); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5296,11 +5387,11 @@ func (x VStructDepth1_VEnumBcd) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F9 != VEnumBcdB {
-		if err := enc.NextFieldValueString("F9", __VDLType_enum_6, x.F9.String()); err != nil {
+		if err := enc.NextFieldValueString(0, __VDLType_enum_6, x.F9.String()); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5311,15 +5402,26 @@ func (x *VStructDepth1_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_92); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F9":
+		}
+		if decType != __VDLType_struct_92 {
+			index = __VDLType_struct_92.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -5327,10 +5429,6 @@ func (x *VStructDepth1_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 				if err := x.F9.Set(value); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5354,14 +5452,14 @@ func (x VStructDepth1_VStructEmpty) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F10 != (VStructEmpty{}) {
-		if err := enc.NextField("F10"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F10.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5372,20 +5470,27 @@ func (x *VStructDepth1_VStructEmpty) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_93); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F10":
-			if err := x.F10.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_93 {
+			index = __VDLType_struct_93.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F10.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -5410,14 +5515,14 @@ func (x VStructDepth1_VNamedError) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F11 != (VNamedError{}) {
-		if err := enc.NextField("F11"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F11.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5428,20 +5533,27 @@ func (x *VStructDepth1_VNamedError) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_94); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F11":
-			if err := x.F11.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_94 {
+			index = __VDLType_struct_94.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F11.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -5466,14 +5578,14 @@ func (x VStructDepth1_Error) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F12 != nil {
-		if err := enc.NextField("F12"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := verror.VDLWrite(enc, x.F12); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5484,20 +5596,27 @@ func (x *VStructDepth1_Error) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_95); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F12":
-			if err := verror.VDLRead(dec, &x.F12); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_95 {
+			index = __VDLType_struct_95.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := verror.VDLRead(dec, &x.F12); err != nil {
 				return err
 			}
 		}
@@ -5522,11 +5641,11 @@ func (x VStructDepth1_Uint16) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F13 != 0 {
-		if err := enc.NextFieldValueUint("F13", vdl.Uint16Type, uint64(x.F13)); err != nil {
+		if err := enc.NextFieldValueUint(0, vdl.Uint16Type, uint64(x.F13)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5537,24 +5656,31 @@ func (x *VStructDepth1_Uint16) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_96); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F13":
+		}
+		if decType != __VDLType_struct_96 {
+			index = __VDLType_struct_96.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(16); {
 			case err != nil:
 				return err
 			default:
 				x.F13 = uint16(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5578,11 +5704,11 @@ func (x VStructDepth1_VUint16) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F14 != 0 {
-		if err := enc.NextFieldValueUint("F14", __VDLType_uint16_9, uint64(x.F14)); err != nil {
+		if err := enc.NextFieldValueUint(0, __VDLType_uint16_9, uint64(x.F14)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5593,24 +5719,31 @@ func (x *VStructDepth1_VUint16) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_97); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F14":
+		}
+		if decType != __VDLType_struct_97 {
+			index = __VDLType_struct_97.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(16); {
 			case err != nil:
 				return err
 			default:
 				x.F14 = VUint16(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5634,11 +5767,11 @@ func (x VStructDepth1_Uint32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F15 != 0 {
-		if err := enc.NextFieldValueUint("F15", vdl.Uint32Type, uint64(x.F15)); err != nil {
+		if err := enc.NextFieldValueUint(0, vdl.Uint32Type, uint64(x.F15)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5649,24 +5782,31 @@ func (x *VStructDepth1_Uint32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_98); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F15":
+		}
+		if decType != __VDLType_struct_98 {
+			index = __VDLType_struct_98.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(32); {
 			case err != nil:
 				return err
 			default:
 				x.F15 = uint32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5690,11 +5830,11 @@ func (x VStructDepth1_VUint32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F16 != 0 {
-		if err := enc.NextFieldValueUint("F16", __VDLType_uint32_10, uint64(x.F16)); err != nil {
+		if err := enc.NextFieldValueUint(0, __VDLType_uint32_10, uint64(x.F16)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5705,24 +5845,31 @@ func (x *VStructDepth1_VUint32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_99); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F16":
+		}
+		if decType != __VDLType_struct_99 {
+			index = __VDLType_struct_99.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(32); {
 			case err != nil:
 				return err
 			default:
 				x.F16 = VUint32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5746,11 +5893,11 @@ func (x VStructDepth1_Uint64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F17 != 0 {
-		if err := enc.NextFieldValueUint("F17", vdl.Uint64Type, x.F17); err != nil {
+		if err := enc.NextFieldValueUint(0, vdl.Uint64Type, x.F17); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5761,24 +5908,31 @@ func (x *VStructDepth1_Uint64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_100); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F17":
+		}
+		if decType != __VDLType_struct_100 {
+			index = __VDLType_struct_100.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.F17 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5802,11 +5956,11 @@ func (x VStructDepth1_VUint64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F18 != 0 {
-		if err := enc.NextFieldValueUint("F18", __VDLType_uint64_11, uint64(x.F18)); err != nil {
+		if err := enc.NextFieldValueUint(0, __VDLType_uint64_11, uint64(x.F18)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5817,24 +5971,31 @@ func (x *VStructDepth1_VUint64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_101); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F18":
+		}
+		if decType != __VDLType_struct_101 {
+			index = __VDLType_struct_101.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.F18 = VUint64(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5858,11 +6019,11 @@ func (x VStructDepth1_Int8) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F19 != 0 {
-		if err := enc.NextFieldValueInt("F19", vdl.Int8Type, int64(x.F19)); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int8Type, int64(x.F19)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5873,24 +6034,31 @@ func (x *VStructDepth1_Int8) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_102); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F19":
+		}
+		if decType != __VDLType_struct_102 {
+			index = __VDLType_struct_102.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(8); {
 			case err != nil:
 				return err
 			default:
 				x.F19 = int8(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5914,11 +6082,11 @@ func (x VStructDepth1_VInt8) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F20 != 0 {
-		if err := enc.NextFieldValueInt("F20", __VDLType_int8_12, int64(x.F20)); err != nil {
+		if err := enc.NextFieldValueInt(0, __VDLType_int8_12, int64(x.F20)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5929,24 +6097,31 @@ func (x *VStructDepth1_VInt8) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_103); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F20":
+		}
+		if decType != __VDLType_struct_103 {
+			index = __VDLType_struct_103.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(8); {
 			case err != nil:
 				return err
 			default:
 				x.F20 = VInt8(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -5970,11 +6145,11 @@ func (x VStructDepth1_Int16) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F21 != 0 {
-		if err := enc.NextFieldValueInt("F21", vdl.Int16Type, int64(x.F21)); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int16Type, int64(x.F21)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -5985,24 +6160,31 @@ func (x *VStructDepth1_Int16) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_104); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F21":
+		}
+		if decType != __VDLType_struct_104 {
+			index = __VDLType_struct_104.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(16); {
 			case err != nil:
 				return err
 			default:
 				x.F21 = int16(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6026,11 +6208,11 @@ func (x VStructDepth1_VInt16) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F22 != 0 {
-		if err := enc.NextFieldValueInt("F22", __VDLType_int16_13, int64(x.F22)); err != nil {
+		if err := enc.NextFieldValueInt(0, __VDLType_int16_13, int64(x.F22)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6041,24 +6223,31 @@ func (x *VStructDepth1_VInt16) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_105); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F22":
+		}
+		if decType != __VDLType_struct_105 {
+			index = __VDLType_struct_105.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(16); {
 			case err != nil:
 				return err
 			default:
 				x.F22 = VInt16(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6082,11 +6271,11 @@ func (x VStructDepth1_Int32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F23 != 0 {
-		if err := enc.NextFieldValueInt("F23", vdl.Int32Type, int64(x.F23)); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int32Type, int64(x.F23)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6097,24 +6286,31 @@ func (x *VStructDepth1_Int32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_106); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F23":
+		}
+		if decType != __VDLType_struct_106 {
+			index = __VDLType_struct_106.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F23 = int32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6138,11 +6334,11 @@ func (x VStructDepth1_VInt32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F24 != 0 {
-		if err := enc.NextFieldValueInt("F24", __VDLType_int32_14, int64(x.F24)); err != nil {
+		if err := enc.NextFieldValueInt(0, __VDLType_int32_14, int64(x.F24)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6153,24 +6349,31 @@ func (x *VStructDepth1_VInt32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_107); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F24":
+		}
+		if decType != __VDLType_struct_107 {
+			index = __VDLType_struct_107.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F24 = VInt32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6194,11 +6397,11 @@ func (x VStructDepth1_Int64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F25 != 0 {
-		if err := enc.NextFieldValueInt("F25", vdl.Int64Type, x.F25); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.F25); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6209,24 +6412,31 @@ func (x *VStructDepth1_Int64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_108); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F25":
+		}
+		if decType != __VDLType_struct_108 {
+			index = __VDLType_struct_108.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.F25 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6250,11 +6460,11 @@ func (x VStructDepth1_VInt64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F26 != 0 {
-		if err := enc.NextFieldValueInt("F26", __VDLType_int64_15, int64(x.F26)); err != nil {
+		if err := enc.NextFieldValueInt(0, __VDLType_int64_15, int64(x.F26)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6265,24 +6475,31 @@ func (x *VStructDepth1_VInt64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_109); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F26":
+		}
+		if decType != __VDLType_struct_109 {
+			index = __VDLType_struct_109.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.F26 = VInt64(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6306,11 +6523,11 @@ func (x VStructDepth1_Float32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F27 != 0 {
-		if err := enc.NextFieldValueFloat("F27", vdl.Float32Type, float64(x.F27)); err != nil {
+		if err := enc.NextFieldValueFloat(0, vdl.Float32Type, float64(x.F27)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6321,24 +6538,31 @@ func (x *VStructDepth1_Float32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_110); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F27":
+		}
+		if decType != __VDLType_struct_110 {
+			index = __VDLType_struct_110.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.F27 = float32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6362,11 +6586,11 @@ func (x VStructDepth1_VFloat32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F28 != 0 {
-		if err := enc.NextFieldValueFloat("F28", __VDLType_float32_16, float64(x.F28)); err != nil {
+		if err := enc.NextFieldValueFloat(0, __VDLType_float32_16, float64(x.F28)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6377,24 +6601,31 @@ func (x *VStructDepth1_VFloat32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_111); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F28":
+		}
+		if decType != __VDLType_struct_111 {
+			index = __VDLType_struct_111.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.F28 = VFloat32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6418,11 +6649,11 @@ func (x VStructDepth1_Float64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F29 != 0 {
-		if err := enc.NextFieldValueFloat("F29", vdl.Float64Type, x.F29); err != nil {
+		if err := enc.NextFieldValueFloat(0, vdl.Float64Type, x.F29); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6433,24 +6664,31 @@ func (x *VStructDepth1_Float64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_112); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F29":
+		}
+		if decType != __VDLType_struct_112 {
+			index = __VDLType_struct_112.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.F29 = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6474,11 +6712,11 @@ func (x VStructDepth1_VFloat64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F30 != 0 {
-		if err := enc.NextFieldValueFloat("F30", __VDLType_float64_17, float64(x.F30)); err != nil {
+		if err := enc.NextFieldValueFloat(0, __VDLType_float64_17, float64(x.F30)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6489,24 +6727,31 @@ func (x *VStructDepth1_VFloat64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_113); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F30":
+		}
+		if decType != __VDLType_struct_113 {
+			index = __VDLType_struct_113.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.F30 = VFloat64(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6530,7 +6775,7 @@ func (x VStructDepth1_OptVStructEmpty) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F31 != nil {
-		if err := enc.NextField("F31"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -6538,7 +6783,7 @@ func (x VStructDepth1_OptVStructEmpty) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6549,15 +6794,26 @@ func (x *VStructDepth1_OptVStructEmpty) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_114); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F31":
+		}
+		if decType != __VDLType_struct_114 {
+			index = __VDLType_struct_114.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := dec.StartValue(__VDLType_optional_35); err != nil {
 				return err
 			}
@@ -6572,10 +6828,6 @@ func (x *VStructDepth1_OptVStructEmpty) VDLRead(dec vdl.Decoder) error {
 				if err := x.F31.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -6599,7 +6851,7 @@ func (x VStructDepth1_OptVNamedError) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F32 != nil {
-		if err := enc.NextField("F32"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -6607,7 +6859,7 @@ func (x VStructDepth1_OptVNamedError) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -6618,15 +6870,26 @@ func (x *VStructDepth1_OptVNamedError) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_115); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F32":
+		}
+		if decType != __VDLType_struct_115 {
+			index = __VDLType_struct_115.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := dec.StartValue(__VDLType_optional_37); err != nil {
 				return err
 			}
@@ -6641,10 +6904,6 @@ func (x *VStructDepth1_OptVNamedError) VDLRead(dec vdl.Decoder) error {
 				if err := x.F32.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -7073,13 +7332,13 @@ func (x VUnionDepth1_AllF0) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := vdl.Write(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7089,10 +7348,10 @@ func (x VUnionDepth1_AllF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBool("F1", vdl.BoolType, x.Value); err != nil {
+	if err := enc.NextFieldValueBool(1, vdl.BoolType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7102,10 +7361,10 @@ func (x VUnionDepth1_AllF2) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBool("F2", __VDLType_bool_2, bool(x.Value)); err != nil {
+	if err := enc.NextFieldValueBool(2, __VDLType_bool_2, bool(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7115,10 +7374,10 @@ func (x VUnionDepth1_AllF3) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F3", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(3, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7128,10 +7387,10 @@ func (x VUnionDepth1_AllF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F4", __VDLType_string_3, string(x.Value)); err != nil {
+	if err := enc.NextFieldValueString(4, __VDLType_string_3, string(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7141,10 +7400,10 @@ func (x VUnionDepth1_AllF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueTypeObject("F5", x.Value); err != nil {
+	if err := enc.NextFieldValueTypeObject(5, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7154,10 +7413,10 @@ func (x VUnionDepth1_AllF6) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F6", vdl.ByteType, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(6, vdl.ByteType, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7167,10 +7426,10 @@ func (x VUnionDepth1_AllF7) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F7", __VDLType_byte_4, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(7, __VDLType_byte_4, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7180,10 +7439,10 @@ func (x VUnionDepth1_AllF8) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F8", __VDLType_enum_5, x.Value.String()); err != nil {
+	if err := enc.NextFieldValueString(8, __VDLType_enum_5, x.Value.String()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7193,10 +7452,10 @@ func (x VUnionDepth1_AllF9) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F9", __VDLType_enum_6, x.Value.String()); err != nil {
+	if err := enc.NextFieldValueString(9, __VDLType_enum_6, x.Value.String()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7206,13 +7465,13 @@ func (x VUnionDepth1_AllF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F10"); err != nil {
+	if err := enc.NextField(10); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7222,13 +7481,13 @@ func (x VUnionDepth1_AllF11) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F11"); err != nil {
+	if err := enc.NextField(11); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7238,13 +7497,13 @@ func (x VUnionDepth1_AllF12) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F12"); err != nil {
+	if err := enc.NextField(12); err != nil {
 		return err
 	}
 	if err := verror.VDLWrite(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7254,10 +7513,10 @@ func (x VUnionDepth1_AllF13) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F13", vdl.Uint16Type, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(13, vdl.Uint16Type, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7267,10 +7526,10 @@ func (x VUnionDepth1_AllF14) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F14", __VDLType_uint16_9, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(14, __VDLType_uint16_9, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7280,10 +7539,10 @@ func (x VUnionDepth1_AllF15) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F15", vdl.Uint32Type, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(15, vdl.Uint32Type, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7293,10 +7552,10 @@ func (x VUnionDepth1_AllF16) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F16", __VDLType_uint32_10, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(16, __VDLType_uint32_10, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7306,10 +7565,10 @@ func (x VUnionDepth1_AllF17) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F17", vdl.Uint64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueUint(17, vdl.Uint64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7319,10 +7578,10 @@ func (x VUnionDepth1_AllF18) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F18", __VDLType_uint64_11, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(18, __VDLType_uint64_11, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7332,10 +7591,10 @@ func (x VUnionDepth1_AllF19) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F19", vdl.Int8Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(19, vdl.Int8Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7345,10 +7604,10 @@ func (x VUnionDepth1_AllF20) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F20", __VDLType_int8_12, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(20, __VDLType_int8_12, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7358,10 +7617,10 @@ func (x VUnionDepth1_AllF21) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F21", vdl.Int16Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(21, vdl.Int16Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7371,10 +7630,10 @@ func (x VUnionDepth1_AllF22) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F22", __VDLType_int16_13, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(22, __VDLType_int16_13, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7384,10 +7643,10 @@ func (x VUnionDepth1_AllF23) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F23", vdl.Int32Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(23, vdl.Int32Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7397,10 +7656,10 @@ func (x VUnionDepth1_AllF24) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F24", __VDLType_int32_14, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(24, __VDLType_int32_14, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7410,10 +7669,10 @@ func (x VUnionDepth1_AllF25) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F25", vdl.Int64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueInt(25, vdl.Int64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7423,10 +7682,10 @@ func (x VUnionDepth1_AllF26) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F26", __VDLType_int64_15, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(26, __VDLType_int64_15, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7436,10 +7695,10 @@ func (x VUnionDepth1_AllF27) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F27", vdl.Float32Type, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(27, vdl.Float32Type, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7449,10 +7708,10 @@ func (x VUnionDepth1_AllF28) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F28", __VDLType_float32_16, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(28, __VDLType_float32_16, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7462,10 +7721,10 @@ func (x VUnionDepth1_AllF29) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F29", vdl.Float64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueFloat(29, vdl.Float64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7475,10 +7734,10 @@ func (x VUnionDepth1_AllF30) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F30", __VDLType_float64_17, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(30, __VDLType_float64_17, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7488,7 +7747,7 @@ func (x VUnionDepth1_AllF31) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F31"); err != nil {
+	if err := enc.NextField(31); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -7501,7 +7760,7 @@ func (x VUnionDepth1_AllF31) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7511,7 +7770,7 @@ func (x VUnionDepth1_AllF32) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	if err := enc.NextField("F32"); err != nil {
+	if err := enc.NextField(32); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -7524,7 +7783,7 @@ func (x VUnionDepth1_AllF32) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7534,12 +7793,23 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 	if err := dec.StartValue(__VDLType_union_116); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_116 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_116.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_AllF0
 		var readAny interface{}
 		if err := vdl.Read(dec, &readAny); err != nil {
@@ -7547,7 +7817,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 		}
 		field.Value = readAny
 		*x = field
-	case "F1":
+	case 1:
 		var field VUnionDepth1_AllF1
 		switch value, err := dec.ReadValueBool(); {
 		case err != nil:
@@ -7556,7 +7826,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F2":
+	case 2:
 		var field VUnionDepth1_AllF2
 		switch value, err := dec.ReadValueBool(); {
 		case err != nil:
@@ -7565,7 +7835,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VBool(value)
 		}
 		*x = field
-	case "F3":
+	case 3:
 		var field VUnionDepth1_AllF3
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -7574,7 +7844,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F4":
+	case 4:
 		var field VUnionDepth1_AllF4
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -7583,7 +7853,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VString(value)
 		}
 		*x = field
-	case "F5":
+	case 5:
 		var field VUnionDepth1_AllF5
 		switch value, err := dec.ReadValueTypeObject(); {
 		case err != nil:
@@ -7592,7 +7862,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F6":
+	case 6:
 		var field VUnionDepth1_AllF6
 		switch value, err := dec.ReadValueUint(8); {
 		case err != nil:
@@ -7601,7 +7871,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = byte(value)
 		}
 		*x = field
-	case "F7":
+	case 7:
 		var field VUnionDepth1_AllF7
 		switch value, err := dec.ReadValueUint(8); {
 		case err != nil:
@@ -7610,7 +7880,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VByte(value)
 		}
 		*x = field
-	case "F8":
+	case 8:
 		var field VUnionDepth1_AllF8
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -7621,7 +7891,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			}
 		}
 		*x = field
-	case "F9":
+	case 9:
 		var field VUnionDepth1_AllF9
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -7632,25 +7902,25 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			}
 		}
 		*x = field
-	case "F10":
+	case 10:
 		var field VUnionDepth1_AllF10
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F11":
+	case 11:
 		var field VUnionDepth1_AllF11
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F12":
+	case 12:
 		var field VUnionDepth1_AllF12
 		if err := verror.VDLRead(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F13":
+	case 13:
 		var field VUnionDepth1_AllF13
 		switch value, err := dec.ReadValueUint(16); {
 		case err != nil:
@@ -7659,7 +7929,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = uint16(value)
 		}
 		*x = field
-	case "F14":
+	case 14:
 		var field VUnionDepth1_AllF14
 		switch value, err := dec.ReadValueUint(16); {
 		case err != nil:
@@ -7668,7 +7938,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VUint16(value)
 		}
 		*x = field
-	case "F15":
+	case 15:
 		var field VUnionDepth1_AllF15
 		switch value, err := dec.ReadValueUint(32); {
 		case err != nil:
@@ -7677,7 +7947,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = uint32(value)
 		}
 		*x = field
-	case "F16":
+	case 16:
 		var field VUnionDepth1_AllF16
 		switch value, err := dec.ReadValueUint(32); {
 		case err != nil:
@@ -7686,7 +7956,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VUint32(value)
 		}
 		*x = field
-	case "F17":
+	case 17:
 		var field VUnionDepth1_AllF17
 		switch value, err := dec.ReadValueUint(64); {
 		case err != nil:
@@ -7695,7 +7965,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F18":
+	case 18:
 		var field VUnionDepth1_AllF18
 		switch value, err := dec.ReadValueUint(64); {
 		case err != nil:
@@ -7704,7 +7974,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VUint64(value)
 		}
 		*x = field
-	case "F19":
+	case 19:
 		var field VUnionDepth1_AllF19
 		switch value, err := dec.ReadValueInt(8); {
 		case err != nil:
@@ -7713,7 +7983,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = int8(value)
 		}
 		*x = field
-	case "F20":
+	case 20:
 		var field VUnionDepth1_AllF20
 		switch value, err := dec.ReadValueInt(8); {
 		case err != nil:
@@ -7722,7 +7992,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VInt8(value)
 		}
 		*x = field
-	case "F21":
+	case 21:
 		var field VUnionDepth1_AllF21
 		switch value, err := dec.ReadValueInt(16); {
 		case err != nil:
@@ -7731,7 +8001,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = int16(value)
 		}
 		*x = field
-	case "F22":
+	case 22:
 		var field VUnionDepth1_AllF22
 		switch value, err := dec.ReadValueInt(16); {
 		case err != nil:
@@ -7740,7 +8010,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VInt16(value)
 		}
 		*x = field
-	case "F23":
+	case 23:
 		var field VUnionDepth1_AllF23
 		switch value, err := dec.ReadValueInt(32); {
 		case err != nil:
@@ -7749,7 +8019,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = int32(value)
 		}
 		*x = field
-	case "F24":
+	case 24:
 		var field VUnionDepth1_AllF24
 		switch value, err := dec.ReadValueInt(32); {
 		case err != nil:
@@ -7758,7 +8028,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VInt32(value)
 		}
 		*x = field
-	case "F25":
+	case 25:
 		var field VUnionDepth1_AllF25
 		switch value, err := dec.ReadValueInt(64); {
 		case err != nil:
@@ -7767,7 +8037,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F26":
+	case 26:
 		var field VUnionDepth1_AllF26
 		switch value, err := dec.ReadValueInt(64); {
 		case err != nil:
@@ -7776,7 +8046,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VInt64(value)
 		}
 		*x = field
-	case "F27":
+	case 27:
 		var field VUnionDepth1_AllF27
 		switch value, err := dec.ReadValueFloat(32); {
 		case err != nil:
@@ -7785,7 +8055,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = float32(value)
 		}
 		*x = field
-	case "F28":
+	case 28:
 		var field VUnionDepth1_AllF28
 		switch value, err := dec.ReadValueFloat(32); {
 		case err != nil:
@@ -7794,7 +8064,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VFloat32(value)
 		}
 		*x = field
-	case "F29":
+	case 29:
 		var field VUnionDepth1_AllF29
 		switch value, err := dec.ReadValueFloat(64); {
 		case err != nil:
@@ -7803,7 +8073,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = value
 		}
 		*x = field
-	case "F30":
+	case 30:
 		var field VUnionDepth1_AllF30
 		switch value, err := dec.ReadValueFloat(64); {
 		case err != nil:
@@ -7812,7 +8082,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			field.Value = VFloat64(value)
 		}
 		*x = field
-	case "F31":
+	case 31:
 		var field VUnionDepth1_AllF31
 		if err := dec.StartValue(__VDLType_optional_35); err != nil {
 			return err
@@ -7830,7 +8100,7 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			}
 		}
 		*x = field
-	case "F32":
+	case 32:
 		var field VUnionDepth1_AllF32
 		if err := dec.StartValue(__VDLType_optional_37); err != nil {
 			return err
@@ -7848,16 +8118,12 @@ func VDLReadVUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth1_All) error {
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -7901,13 +8167,13 @@ func (x VUnionDepth1_AnyF0) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_117); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := vdl.Write(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7917,12 +8183,23 @@ func VDLReadVUnionDepth1_Any(dec vdl.Decoder, x *VUnionDepth1_Any) error {
 	if err := dec.StartValue(__VDLType_union_117); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_117 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_117.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_AnyF0
 		var readAny interface{}
 		if err := vdl.Read(dec, &readAny); err != nil {
@@ -7930,16 +8207,12 @@ func VDLReadVUnionDepth1_Any(dec vdl.Decoder, x *VUnionDepth1_Any) error {
 		}
 		field.Value = readAny
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -7983,10 +8256,10 @@ func (x VUnionDepth1_BoolF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_118); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBool("F1", vdl.BoolType, x.Value); err != nil {
+	if err := enc.NextFieldValueBool(0, vdl.BoolType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -7996,12 +8269,23 @@ func VDLReadVUnionDepth1_Bool(dec vdl.Decoder, x *VUnionDepth1_Bool) error {
 	if err := dec.StartValue(__VDLType_union_118); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F1":
+	if decType != __VDLType_union_118 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_118.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_BoolF1
 		switch value, err := dec.ReadValueBool(); {
 		case err != nil:
@@ -8010,16 +8294,12 @@ func VDLReadVUnionDepth1_Bool(dec vdl.Decoder, x *VUnionDepth1_Bool) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8063,10 +8343,10 @@ func (x VUnionDepth1_VBoolF2) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_119); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBool("F2", __VDLType_bool_2, bool(x.Value)); err != nil {
+	if err := enc.NextFieldValueBool(0, __VDLType_bool_2, bool(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8076,12 +8356,23 @@ func VDLReadVUnionDepth1_VBool(dec vdl.Decoder, x *VUnionDepth1_VBool) error {
 	if err := dec.StartValue(__VDLType_union_119); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F2":
+	if decType != __VDLType_union_119 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_119.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VBoolF2
 		switch value, err := dec.ReadValueBool(); {
 		case err != nil:
@@ -8090,16 +8381,12 @@ func VDLReadVUnionDepth1_VBool(dec vdl.Decoder, x *VUnionDepth1_VBool) error {
 			field.Value = VBool(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8143,10 +8430,10 @@ func (x VUnionDepth1_StringF3) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_120); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F3", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8156,12 +8443,23 @@ func VDLReadVUnionDepth1_String(dec vdl.Decoder, x *VUnionDepth1_String) error {
 	if err := dec.StartValue(__VDLType_union_120); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F3":
+	if decType != __VDLType_union_120 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_120.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_StringF3
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -8170,16 +8468,12 @@ func VDLReadVUnionDepth1_String(dec vdl.Decoder, x *VUnionDepth1_String) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8223,10 +8517,10 @@ func (x VUnionDepth1_VStringF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_121); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F4", __VDLType_string_3, string(x.Value)); err != nil {
+	if err := enc.NextFieldValueString(0, __VDLType_string_3, string(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8236,12 +8530,23 @@ func VDLReadVUnionDepth1_VString(dec vdl.Decoder, x *VUnionDepth1_VString) error
 	if err := dec.StartValue(__VDLType_union_121); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F4":
+	if decType != __VDLType_union_121 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_121.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VStringF4
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -8250,16 +8555,12 @@ func VDLReadVUnionDepth1_VString(dec vdl.Decoder, x *VUnionDepth1_VString) error
 			field.Value = VString(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8303,10 +8604,10 @@ func (x VUnionDepth1_TypeObjectF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_122); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueTypeObject("F5", x.Value); err != nil {
+	if err := enc.NextFieldValueTypeObject(0, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8316,12 +8617,23 @@ func VDLReadVUnionDepth1_TypeObject(dec vdl.Decoder, x *VUnionDepth1_TypeObject)
 	if err := dec.StartValue(__VDLType_union_122); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F5":
+	if decType != __VDLType_union_122 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_122.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_TypeObjectF5
 		switch value, err := dec.ReadValueTypeObject(); {
 		case err != nil:
@@ -8330,16 +8642,12 @@ func VDLReadVUnionDepth1_TypeObject(dec vdl.Decoder, x *VUnionDepth1_TypeObject)
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8383,10 +8691,10 @@ func (x VUnionDepth1_ByteF6) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_123); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F6", vdl.ByteType, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, vdl.ByteType, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8396,12 +8704,23 @@ func VDLReadVUnionDepth1_Byte(dec vdl.Decoder, x *VUnionDepth1_Byte) error {
 	if err := dec.StartValue(__VDLType_union_123); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F6":
+	if decType != __VDLType_union_123 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_123.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_ByteF6
 		switch value, err := dec.ReadValueUint(8); {
 		case err != nil:
@@ -8410,16 +8729,12 @@ func VDLReadVUnionDepth1_Byte(dec vdl.Decoder, x *VUnionDepth1_Byte) error {
 			field.Value = byte(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8463,10 +8778,10 @@ func (x VUnionDepth1_VByteF7) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_124); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F7", __VDLType_byte_4, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, __VDLType_byte_4, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8476,12 +8791,23 @@ func VDLReadVUnionDepth1_VByte(dec vdl.Decoder, x *VUnionDepth1_VByte) error {
 	if err := dec.StartValue(__VDLType_union_124); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F7":
+	if decType != __VDLType_union_124 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_124.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VByteF7
 		switch value, err := dec.ReadValueUint(8); {
 		case err != nil:
@@ -8490,16 +8816,12 @@ func VDLReadVUnionDepth1_VByte(dec vdl.Decoder, x *VUnionDepth1_VByte) error {
 			field.Value = VByte(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8543,10 +8865,10 @@ func (x VUnionDepth1_VEnumAbcF8) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_125); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F8", __VDLType_enum_5, x.Value.String()); err != nil {
+	if err := enc.NextFieldValueString(0, __VDLType_enum_5, x.Value.String()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8556,12 +8878,23 @@ func VDLReadVUnionDepth1_VEnumAbc(dec vdl.Decoder, x *VUnionDepth1_VEnumAbc) err
 	if err := dec.StartValue(__VDLType_union_125); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F8":
+	if decType != __VDLType_union_125 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_125.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VEnumAbcF8
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -8572,16 +8905,12 @@ func VDLReadVUnionDepth1_VEnumAbc(dec vdl.Decoder, x *VUnionDepth1_VEnumAbc) err
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8625,10 +8954,10 @@ func (x VUnionDepth1_VEnumBcdF9) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_126); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("F9", __VDLType_enum_6, x.Value.String()); err != nil {
+	if err := enc.NextFieldValueString(0, __VDLType_enum_6, x.Value.String()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8638,12 +8967,23 @@ func VDLReadVUnionDepth1_VEnumBcd(dec vdl.Decoder, x *VUnionDepth1_VEnumBcd) err
 	if err := dec.StartValue(__VDLType_union_126); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F9":
+	if decType != __VDLType_union_126 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_126.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VEnumBcdF9
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -8654,16 +8994,12 @@ func VDLReadVUnionDepth1_VEnumBcd(dec vdl.Decoder, x *VUnionDepth1_VEnumBcd) err
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8707,13 +9043,13 @@ func (x VUnionDepth1_VStructEmptyF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_127); err != nil {
 		return err
 	}
-	if err := enc.NextField("F10"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8723,27 +9059,34 @@ func VDLReadVUnionDepth1_VStructEmpty(dec vdl.Decoder, x *VUnionDepth1_VStructEm
 	if err := dec.StartValue(__VDLType_union_127); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F10":
+	if decType != __VDLType_union_127 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_127.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VStructEmptyF10
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8787,13 +9130,13 @@ func (x VUnionDepth1_VNamedErrorF11) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_128); err != nil {
 		return err
 	}
-	if err := enc.NextField("F11"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8803,27 +9146,34 @@ func VDLReadVUnionDepth1_VNamedError(dec vdl.Decoder, x *VUnionDepth1_VNamedErro
 	if err := dec.StartValue(__VDLType_union_128); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F11":
+	if decType != __VDLType_union_128 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_128.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VNamedErrorF11
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8867,13 +9217,13 @@ func (x VUnionDepth1_ErrorF12) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_129); err != nil {
 		return err
 	}
-	if err := enc.NextField("F12"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := verror.VDLWrite(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8883,27 +9233,34 @@ func VDLReadVUnionDepth1_Error(dec vdl.Decoder, x *VUnionDepth1_Error) error {
 	if err := dec.StartValue(__VDLType_union_129); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F12":
+	if decType != __VDLType_union_129 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_129.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_ErrorF12
 		if err := verror.VDLRead(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -8947,10 +9304,10 @@ func (x VUnionDepth1_Uint16F13) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_130); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F13", vdl.Uint16Type, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, vdl.Uint16Type, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -8960,12 +9317,23 @@ func VDLReadVUnionDepth1_Uint16(dec vdl.Decoder, x *VUnionDepth1_Uint16) error {
 	if err := dec.StartValue(__VDLType_union_130); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F13":
+	if decType != __VDLType_union_130 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_130.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Uint16F13
 		switch value, err := dec.ReadValueUint(16); {
 		case err != nil:
@@ -8974,16 +9342,12 @@ func VDLReadVUnionDepth1_Uint16(dec vdl.Decoder, x *VUnionDepth1_Uint16) error {
 			field.Value = uint16(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9027,10 +9391,10 @@ func (x VUnionDepth1_VUint16F14) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_131); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F14", __VDLType_uint16_9, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, __VDLType_uint16_9, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9040,12 +9404,23 @@ func VDLReadVUnionDepth1_VUint16(dec vdl.Decoder, x *VUnionDepth1_VUint16) error
 	if err := dec.StartValue(__VDLType_union_131); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F14":
+	if decType != __VDLType_union_131 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_131.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VUint16F14
 		switch value, err := dec.ReadValueUint(16); {
 		case err != nil:
@@ -9054,16 +9429,12 @@ func VDLReadVUnionDepth1_VUint16(dec vdl.Decoder, x *VUnionDepth1_VUint16) error
 			field.Value = VUint16(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9107,10 +9478,10 @@ func (x VUnionDepth1_Uint32F15) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_132); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F15", vdl.Uint32Type, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, vdl.Uint32Type, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9120,12 +9491,23 @@ func VDLReadVUnionDepth1_Uint32(dec vdl.Decoder, x *VUnionDepth1_Uint32) error {
 	if err := dec.StartValue(__VDLType_union_132); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F15":
+	if decType != __VDLType_union_132 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_132.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Uint32F15
 		switch value, err := dec.ReadValueUint(32); {
 		case err != nil:
@@ -9134,16 +9516,12 @@ func VDLReadVUnionDepth1_Uint32(dec vdl.Decoder, x *VUnionDepth1_Uint32) error {
 			field.Value = uint32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9187,10 +9565,10 @@ func (x VUnionDepth1_VUint32F16) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_133); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F16", __VDLType_uint32_10, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, __VDLType_uint32_10, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9200,12 +9578,23 @@ func VDLReadVUnionDepth1_VUint32(dec vdl.Decoder, x *VUnionDepth1_VUint32) error
 	if err := dec.StartValue(__VDLType_union_133); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F16":
+	if decType != __VDLType_union_133 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_133.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VUint32F16
 		switch value, err := dec.ReadValueUint(32); {
 		case err != nil:
@@ -9214,16 +9603,12 @@ func VDLReadVUnionDepth1_VUint32(dec vdl.Decoder, x *VUnionDepth1_VUint32) error
 			field.Value = VUint32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9267,10 +9652,10 @@ func (x VUnionDepth1_Uint64F17) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_134); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F17", vdl.Uint64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueUint(0, vdl.Uint64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9280,12 +9665,23 @@ func VDLReadVUnionDepth1_Uint64(dec vdl.Decoder, x *VUnionDepth1_Uint64) error {
 	if err := dec.StartValue(__VDLType_union_134); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F17":
+	if decType != __VDLType_union_134 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_134.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Uint64F17
 		switch value, err := dec.ReadValueUint(64); {
 		case err != nil:
@@ -9294,16 +9690,12 @@ func VDLReadVUnionDepth1_Uint64(dec vdl.Decoder, x *VUnionDepth1_Uint64) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9347,10 +9739,10 @@ func (x VUnionDepth1_VUint64F18) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_135); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueUint("F18", __VDLType_uint64_11, uint64(x.Value)); err != nil {
+	if err := enc.NextFieldValueUint(0, __VDLType_uint64_11, uint64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9360,12 +9752,23 @@ func VDLReadVUnionDepth1_VUint64(dec vdl.Decoder, x *VUnionDepth1_VUint64) error
 	if err := dec.StartValue(__VDLType_union_135); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F18":
+	if decType != __VDLType_union_135 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_135.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VUint64F18
 		switch value, err := dec.ReadValueUint(64); {
 		case err != nil:
@@ -9374,16 +9777,12 @@ func VDLReadVUnionDepth1_VUint64(dec vdl.Decoder, x *VUnionDepth1_VUint64) error
 			field.Value = VUint64(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9427,10 +9826,10 @@ func (x VUnionDepth1_Int8F19) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_136); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F19", vdl.Int8Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, vdl.Int8Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9440,12 +9839,23 @@ func VDLReadVUnionDepth1_Int8(dec vdl.Decoder, x *VUnionDepth1_Int8) error {
 	if err := dec.StartValue(__VDLType_union_136); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F19":
+	if decType != __VDLType_union_136 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_136.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Int8F19
 		switch value, err := dec.ReadValueInt(8); {
 		case err != nil:
@@ -9454,16 +9864,12 @@ func VDLReadVUnionDepth1_Int8(dec vdl.Decoder, x *VUnionDepth1_Int8) error {
 			field.Value = int8(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9507,10 +9913,10 @@ func (x VUnionDepth1_VInt8F20) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_137); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F20", __VDLType_int8_12, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, __VDLType_int8_12, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9520,12 +9926,23 @@ func VDLReadVUnionDepth1_VInt8(dec vdl.Decoder, x *VUnionDepth1_VInt8) error {
 	if err := dec.StartValue(__VDLType_union_137); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F20":
+	if decType != __VDLType_union_137 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_137.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VInt8F20
 		switch value, err := dec.ReadValueInt(8); {
 		case err != nil:
@@ -9534,16 +9951,12 @@ func VDLReadVUnionDepth1_VInt8(dec vdl.Decoder, x *VUnionDepth1_VInt8) error {
 			field.Value = VInt8(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9587,10 +10000,10 @@ func (x VUnionDepth1_Int16F21) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_138); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F21", vdl.Int16Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, vdl.Int16Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9600,12 +10013,23 @@ func VDLReadVUnionDepth1_Int16(dec vdl.Decoder, x *VUnionDepth1_Int16) error {
 	if err := dec.StartValue(__VDLType_union_138); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F21":
+	if decType != __VDLType_union_138 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_138.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Int16F21
 		switch value, err := dec.ReadValueInt(16); {
 		case err != nil:
@@ -9614,16 +10038,12 @@ func VDLReadVUnionDepth1_Int16(dec vdl.Decoder, x *VUnionDepth1_Int16) error {
 			field.Value = int16(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9667,10 +10087,10 @@ func (x VUnionDepth1_VInt16F22) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_139); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F22", __VDLType_int16_13, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, __VDLType_int16_13, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9680,12 +10100,23 @@ func VDLReadVUnionDepth1_VInt16(dec vdl.Decoder, x *VUnionDepth1_VInt16) error {
 	if err := dec.StartValue(__VDLType_union_139); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F22":
+	if decType != __VDLType_union_139 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_139.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VInt16F22
 		switch value, err := dec.ReadValueInt(16); {
 		case err != nil:
@@ -9694,16 +10125,12 @@ func VDLReadVUnionDepth1_VInt16(dec vdl.Decoder, x *VUnionDepth1_VInt16) error {
 			field.Value = VInt16(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9747,10 +10174,10 @@ func (x VUnionDepth1_Int32F23) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_140); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F23", vdl.Int32Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, vdl.Int32Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9760,12 +10187,23 @@ func VDLReadVUnionDepth1_Int32(dec vdl.Decoder, x *VUnionDepth1_Int32) error {
 	if err := dec.StartValue(__VDLType_union_140); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F23":
+	if decType != __VDLType_union_140 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_140.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Int32F23
 		switch value, err := dec.ReadValueInt(32); {
 		case err != nil:
@@ -9774,16 +10212,12 @@ func VDLReadVUnionDepth1_Int32(dec vdl.Decoder, x *VUnionDepth1_Int32) error {
 			field.Value = int32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9827,10 +10261,10 @@ func (x VUnionDepth1_VInt32F24) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_141); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F24", __VDLType_int32_14, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, __VDLType_int32_14, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9840,12 +10274,23 @@ func VDLReadVUnionDepth1_VInt32(dec vdl.Decoder, x *VUnionDepth1_VInt32) error {
 	if err := dec.StartValue(__VDLType_union_141); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F24":
+	if decType != __VDLType_union_141 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_141.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VInt32F24
 		switch value, err := dec.ReadValueInt(32); {
 		case err != nil:
@@ -9854,16 +10299,12 @@ func VDLReadVUnionDepth1_VInt32(dec vdl.Decoder, x *VUnionDepth1_VInt32) error {
 			field.Value = VInt32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9907,10 +10348,10 @@ func (x VUnionDepth1_Int64F25) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_142); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F25", vdl.Int64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -9920,12 +10361,23 @@ func VDLReadVUnionDepth1_Int64(dec vdl.Decoder, x *VUnionDepth1_Int64) error {
 	if err := dec.StartValue(__VDLType_union_142); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F25":
+	if decType != __VDLType_union_142 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_142.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Int64F25
 		switch value, err := dec.ReadValueInt(64); {
 		case err != nil:
@@ -9934,16 +10386,12 @@ func VDLReadVUnionDepth1_Int64(dec vdl.Decoder, x *VUnionDepth1_Int64) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -9987,10 +10435,10 @@ func (x VUnionDepth1_VInt64F26) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_143); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("F26", __VDLType_int64_15, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, __VDLType_int64_15, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10000,12 +10448,23 @@ func VDLReadVUnionDepth1_VInt64(dec vdl.Decoder, x *VUnionDepth1_VInt64) error {
 	if err := dec.StartValue(__VDLType_union_143); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F26":
+	if decType != __VDLType_union_143 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_143.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VInt64F26
 		switch value, err := dec.ReadValueInt(64); {
 		case err != nil:
@@ -10014,16 +10473,12 @@ func VDLReadVUnionDepth1_VInt64(dec vdl.Decoder, x *VUnionDepth1_VInt64) error {
 			field.Value = VInt64(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10067,10 +10522,10 @@ func (x VUnionDepth1_Float32F27) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_144); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F27", vdl.Float32Type, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(0, vdl.Float32Type, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10080,12 +10535,23 @@ func VDLReadVUnionDepth1_Float32(dec vdl.Decoder, x *VUnionDepth1_Float32) error
 	if err := dec.StartValue(__VDLType_union_144); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F27":
+	if decType != __VDLType_union_144 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_144.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Float32F27
 		switch value, err := dec.ReadValueFloat(32); {
 		case err != nil:
@@ -10094,16 +10560,12 @@ func VDLReadVUnionDepth1_Float32(dec vdl.Decoder, x *VUnionDepth1_Float32) error
 			field.Value = float32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10147,10 +10609,10 @@ func (x VUnionDepth1_VFloat32F28) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_145); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F28", __VDLType_float32_16, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(0, __VDLType_float32_16, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10160,12 +10622,23 @@ func VDLReadVUnionDepth1_VFloat32(dec vdl.Decoder, x *VUnionDepth1_VFloat32) err
 	if err := dec.StartValue(__VDLType_union_145); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F28":
+	if decType != __VDLType_union_145 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_145.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VFloat32F28
 		switch value, err := dec.ReadValueFloat(32); {
 		case err != nil:
@@ -10174,16 +10647,12 @@ func VDLReadVUnionDepth1_VFloat32(dec vdl.Decoder, x *VUnionDepth1_VFloat32) err
 			field.Value = VFloat32(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10227,10 +10696,10 @@ func (x VUnionDepth1_Float64F29) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_146); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F29", vdl.Float64Type, x.Value); err != nil {
+	if err := enc.NextFieldValueFloat(0, vdl.Float64Type, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10240,12 +10709,23 @@ func VDLReadVUnionDepth1_Float64(dec vdl.Decoder, x *VUnionDepth1_Float64) error
 	if err := dec.StartValue(__VDLType_union_146); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F29":
+	if decType != __VDLType_union_146 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_146.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_Float64F29
 		switch value, err := dec.ReadValueFloat(64); {
 		case err != nil:
@@ -10254,16 +10734,12 @@ func VDLReadVUnionDepth1_Float64(dec vdl.Decoder, x *VUnionDepth1_Float64) error
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10307,10 +10783,10 @@ func (x VUnionDepth1_VFloat64F30) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_147); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueFloat("F30", __VDLType_float64_17, float64(x.Value)); err != nil {
+	if err := enc.NextFieldValueFloat(0, __VDLType_float64_17, float64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10320,12 +10796,23 @@ func VDLReadVUnionDepth1_VFloat64(dec vdl.Decoder, x *VUnionDepth1_VFloat64) err
 	if err := dec.StartValue(__VDLType_union_147); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F30":
+	if decType != __VDLType_union_147 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_147.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_VFloat64F30
 		switch value, err := dec.ReadValueFloat(64); {
 		case err != nil:
@@ -10334,16 +10821,12 @@ func VDLReadVUnionDepth1_VFloat64(dec vdl.Decoder, x *VUnionDepth1_VFloat64) err
 			field.Value = VFloat64(value)
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10387,7 +10870,7 @@ func (x VUnionDepth1_OptVStructEmptyF31) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_148); err != nil {
 		return err
 	}
-	if err := enc.NextField("F31"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -10400,7 +10883,7 @@ func (x VUnionDepth1_OptVStructEmptyF31) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10410,12 +10893,23 @@ func VDLReadVUnionDepth1_OptVStructEmpty(dec vdl.Decoder, x *VUnionDepth1_OptVSt
 	if err := dec.StartValue(__VDLType_union_148); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F31":
+	if decType != __VDLType_union_148 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_148.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_OptVStructEmptyF31
 		if err := dec.StartValue(__VDLType_optional_35); err != nil {
 			return err
@@ -10433,16 +10927,12 @@ func VDLReadVUnionDepth1_OptVStructEmpty(dec vdl.Decoder, x *VUnionDepth1_OptVSt
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -10486,7 +10976,7 @@ func (x VUnionDepth1_OptVNamedErrorF32) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_149); err != nil {
 		return err
 	}
-	if err := enc.NextField("F32"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -10499,7 +10989,7 @@ func (x VUnionDepth1_OptVNamedErrorF32) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -10509,12 +10999,23 @@ func VDLReadVUnionDepth1_OptVNamedError(dec vdl.Decoder, x *VUnionDepth1_OptVNam
 	if err := dec.StartValue(__VDLType_union_149); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F32":
+	if decType != __VDLType_union_149 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_149.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth1_OptVNamedErrorF32
 		if err := dec.StartValue(__VDLType_optional_37); err != nil {
 			return err
@@ -10532,16 +11033,12 @@ func VDLReadVUnionDepth1_OptVNamedError(dec vdl.Decoder, x *VUnionDepth1_OptVNam
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -12058,7 +12555,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F0.VDLIsZero() {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F0.VDLWrite(enc); err != nil {
@@ -12066,7 +12563,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F1 != (VArray1_Uint32{}) {
-		if err := enc.NextField("F1"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := x.F1.VDLWrite(enc); err != nil {
@@ -12074,7 +12571,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F2) != 0 {
-		if err := enc.NextField("F2"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_5(enc, x.F2); err != nil {
@@ -12082,7 +12579,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F3) != 0 {
-		if err := enc.NextField("F3"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := x.F3.VDLWrite(enc); err != nil {
@@ -12090,7 +12587,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F4) != 0 {
-		if err := enc.NextField("F4"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_set_6(enc, x.F4); err != nil {
@@ -12098,7 +12595,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F5) != 0 {
-		if err := enc.NextField("F5"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		if err := x.F5.VDLWrite(enc); err != nil {
@@ -12106,7 +12603,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F6) != 0 {
-		if err := enc.NextField("F6"); err != nil {
+		if err := enc.NextField(6); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_2(enc, x.F6); err != nil {
@@ -12114,7 +12611,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F7) != 0 {
-		if err := enc.NextField("F7"); err != nil {
+		if err := enc.NextField(7); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_7(enc, x.F7); err != nil {
@@ -12122,7 +12619,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.F8.VDLIsZero() {
-		if err := enc.NextField("F8"); err != nil {
+		if err := enc.NextField(8); err != nil {
 			return err
 		}
 		if err := x.F8.VDLWrite(enc); err != nil {
@@ -12130,7 +12627,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F9 != (VStructDepth1_Bool{}) {
-		if err := enc.NextField("F9"); err != nil {
+		if err := enc.NextField(9); err != nil {
 			return err
 		}
 		if err := x.F9.VDLWrite(enc); err != nil {
@@ -12138,7 +12635,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F10 != nil && !x.F10.VDLIsZero() {
-		if err := enc.NextField("F10"); err != nil {
+		if err := enc.NextField(10); err != nil {
 			return err
 		}
 		if err := x.F10.VDLWrite(enc); err != nil {
@@ -12146,7 +12643,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F11 != nil && !x.F11.VDLIsZero() {
-		if err := enc.NextField("F11"); err != nil {
+		if err := enc.NextField(11); err != nil {
 			return err
 		}
 		if err := x.F11.VDLWrite(enc); err != nil {
@@ -12154,7 +12651,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F12 != nil {
-		if err := enc.NextField("F12"); err != nil {
+		if err := enc.NextField(12); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -12163,7 +12660,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F13 != nil {
-		if err := enc.NextField("F13"); err != nil {
+		if err := enc.NextField(13); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -12171,7 +12668,7 @@ func (x VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12249,63 +12746,74 @@ func (x *VStructDepth2_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_176); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
+		}
+		if decType != __VDLType_struct_176 {
+			index = __VDLType_struct_176.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := x.F0.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F1":
+		case 1:
 			if err := x.F1.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F2":
+		case 2:
 			if err := __VDLReadAnon_list_5(dec, &x.F2); err != nil {
 				return err
 			}
-		case "F3":
+		case 3:
 			if err := x.F3.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F4":
+		case 4:
 			if err := __VDLReadAnon_set_6(dec, &x.F4); err != nil {
 				return err
 			}
-		case "F5":
+		case 5:
 			if err := x.F5.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F6":
+		case 6:
 			if err := __VDLReadAnon_map_2(dec, &x.F6); err != nil {
 				return err
 			}
-		case "F7":
+		case 7:
 			if err := __VDLReadAnon_map_7(dec, &x.F7); err != nil {
 				return err
 			}
-		case "F8":
+		case 8:
 			if err := x.F8.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F9":
+		case 9:
 			if err := x.F9.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F10":
+		case 10:
 			if err := VDLReadVUnionDepth1_All(dec, &x.F10); err != nil {
 				return err
 			}
-		case "F11":
+		case 11:
 			if err := VDLReadVUnionDepth1_Float64(dec, &x.F11); err != nil {
 				return err
 			}
-		case "F12":
+		case 12:
 			if err := dec.StartValue(__VDLType_optional_169); err != nil {
 				return err
 			}
@@ -12321,7 +12829,7 @@ func (x *VStructDepth2_All) VDLRead(dec vdl.Decoder) error {
 					return err
 				}
 			}
-		case "F13":
+		case 13:
 			if err := dec.StartValue(__VDLType_optional_180); err != nil {
 				return err
 			}
@@ -12336,10 +12844,6 @@ func (x *VStructDepth2_All) VDLRead(dec vdl.Decoder) error {
 				if err := x.F13.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -12442,14 +12946,14 @@ func (x VStructDepth2_VArray2_TypeObject) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F0.VDLIsZero() {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F0.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12465,20 +12969,27 @@ func (x *VStructDepth2_VArray2_TypeObject) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_181); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
-			if err := x.F0.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_181 {
+			index = __VDLType_struct_181.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F0.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -12503,14 +13014,14 @@ func (x VStructDepth2_VArray1_Uint32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F1 != (VArray1_Uint32{}) {
-		if err := enc.NextField("F1"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F1.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12521,20 +13032,27 @@ func (x *VStructDepth2_VArray1_Uint32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_182); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F1":
-			if err := x.F1.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_182 {
+			index = __VDLType_struct_182.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F1.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -12562,14 +13080,14 @@ func (x VStructDepth2_List_Int16) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F2) != 0 {
-		if err := enc.NextField("F2"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_5(enc, x.F2); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12580,20 +13098,27 @@ func (x *VStructDepth2_List_Int16) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_183); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F2":
-			if err := __VDLReadAnon_list_5(dec, &x.F2); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_183 {
+			index = __VDLType_struct_183.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_list_5(dec, &x.F2); err != nil {
 				return err
 			}
 		}
@@ -12621,14 +13146,14 @@ func (x VStructDepth2_VList_Any) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F3) != 0 {
-		if err := enc.NextField("F3"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F3.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12639,20 +13164,27 @@ func (x *VStructDepth2_VList_Any) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_184); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F3":
-			if err := x.F3.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_184 {
+			index = __VDLType_struct_184.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F3.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -12680,14 +13212,14 @@ func (x VStructDepth2_Set_Float64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F4) != 0 {
-		if err := enc.NextField("F4"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_set_6(enc, x.F4); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12698,20 +13230,27 @@ func (x *VStructDepth2_Set_Float64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_185); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F4":
-			if err := __VDLReadAnon_set_6(dec, &x.F4); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_185 {
+			index = __VDLType_struct_185.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_set_6(dec, &x.F4); err != nil {
 				return err
 			}
 		}
@@ -12739,14 +13278,14 @@ func (x VStructDepth2_VSet_VEnumBcd) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F5) != 0 {
-		if err := enc.NextField("F5"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F5.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12757,20 +13296,27 @@ func (x *VStructDepth2_VSet_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_186); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F5":
-			if err := x.F5.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_186 {
+			index = __VDLType_struct_186.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F5.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -12798,14 +13344,14 @@ func (x VStructDepth2_Map_Byte_Byte) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F6) != 0 {
-		if err := enc.NextField("F6"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_2(enc, x.F6); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12816,20 +13362,27 @@ func (x *VStructDepth2_Map_Byte_Byte) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_187); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F6":
-			if err := __VDLReadAnon_map_2(dec, &x.F6); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_187 {
+			index = __VDLType_struct_187.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_map_2(dec, &x.F6); err != nil {
 				return err
 			}
 		}
@@ -12857,14 +13410,14 @@ func (x VStructDepth2_Map_Uint32_Uint32) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F7) != 0 {
-		if err := enc.NextField("F7"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_7(enc, x.F7); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12875,20 +13428,27 @@ func (x *VStructDepth2_Map_Uint32_Uint32) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_188); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F7":
-			if err := __VDLReadAnon_map_7(dec, &x.F7); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_188 {
+			index = __VDLType_struct_188.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_map_7(dec, &x.F7); err != nil {
 				return err
 			}
 		}
@@ -12916,14 +13476,14 @@ func (x VStructDepth2_VStructDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F8.VDLIsZero() {
-		if err := enc.NextField("F8"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F8.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12938,20 +13498,27 @@ func (x *VStructDepth2_VStructDepth1_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_189); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F8":
-			if err := x.F8.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_189 {
+			index = __VDLType_struct_189.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F8.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -12976,14 +13543,14 @@ func (x VStructDepth2_VStructDepth1_Bool) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F9 != (VStructDepth1_Bool{}) {
-		if err := enc.NextField("F9"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F9.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -12994,20 +13561,27 @@ func (x *VStructDepth2_VStructDepth1_Bool) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_190); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F9":
-			if err := x.F9.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_190 {
+			index = __VDLType_struct_190.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F9.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -13035,14 +13609,14 @@ func (x VStructDepth2_VUnionDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F10 != nil && !x.F10.VDLIsZero() {
-		if err := enc.NextField("F10"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F10.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13055,20 +13629,27 @@ func (x *VStructDepth2_VUnionDepth1_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_191); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F10":
-			if err := VDLReadVUnionDepth1_All(dec, &x.F10); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_191 {
+			index = __VDLType_struct_191.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := VDLReadVUnionDepth1_All(dec, &x.F10); err != nil {
 				return err
 			}
 		}
@@ -13096,14 +13677,14 @@ func (x VStructDepth2_VUnionDepth1_Float64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F11 != nil && !x.F11.VDLIsZero() {
-		if err := enc.NextField("F11"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F11.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13116,20 +13697,27 @@ func (x *VStructDepth2_VUnionDepth1_Float64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_192); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F11":
-			if err := VDLReadVUnionDepth1_Float64(dec, &x.F11); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_192 {
+			index = __VDLType_struct_192.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := VDLReadVUnionDepth1_Float64(dec, &x.F11); err != nil {
 				return err
 			}
 		}
@@ -13154,7 +13742,7 @@ func (x VStructDepth2_OptVStructDepth1_VEnumBcd) VDLWrite(enc vdl.Encoder) error
 		return err
 	}
 	if x.F12 != nil {
-		if err := enc.NextField("F12"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -13162,7 +13750,7 @@ func (x VStructDepth2_OptVStructDepth1_VEnumBcd) VDLWrite(enc vdl.Encoder) error
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13173,15 +13761,26 @@ func (x *VStructDepth2_OptVStructDepth1_VEnumBcd) VDLRead(dec vdl.Decoder) error
 	if err := dec.StartValue(__VDLType_struct_193); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F12":
+		}
+		if decType != __VDLType_struct_193 {
+			index = __VDLType_struct_193.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := dec.StartValue(__VDLType_optional_169); err != nil {
 				return err
 			}
@@ -13196,10 +13795,6 @@ func (x *VStructDepth2_OptVStructDepth1_VEnumBcd) VDLRead(dec vdl.Decoder) error
 				if err := x.F12.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -13223,7 +13818,7 @@ func (x VStructDepth2_OptVStructDepth1_VUint16) VDLWrite(enc vdl.Encoder) error 
 		return err
 	}
 	if x.F13 != nil {
-		if err := enc.NextField("F13"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -13231,7 +13826,7 @@ func (x VStructDepth2_OptVStructDepth1_VUint16) VDLWrite(enc vdl.Encoder) error 
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13242,15 +13837,26 @@ func (x *VStructDepth2_OptVStructDepth1_VUint16) VDLRead(dec vdl.Decoder) error 
 	if err := dec.StartValue(__VDLType_struct_194); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F13":
+		}
+		if decType != __VDLType_struct_194 {
+			index = __VDLType_struct_194.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := dec.StartValue(__VDLType_optional_180); err != nil {
 				return err
 			}
@@ -13265,10 +13871,6 @@ func (x *VStructDepth2_OptVStructDepth1_VUint16) VDLRead(dec vdl.Decoder) error 
 				if err := x.F13.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -13469,13 +14071,13 @@ func (x VUnionDepth2_AllF0) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13485,10 +14087,10 @@ func (x VUnionDepth2_AllF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBytes("F1", __VDLType_array_25, reflect.ValueOf(x.Value[:]).Bytes()); err != nil {
+	if err := enc.NextFieldValueBytes(1, __VDLType_array_25, reflect.ValueOf(x.Value[:]).Bytes()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13498,10 +14100,10 @@ func (x VUnionDepth2_AllF2) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBytes("F2", __VDLType_list_45, reflect.ValueOf(x.Value).Bytes()); err != nil {
+	if err := enc.NextFieldValueBytes(2, __VDLType_list_45, reflect.ValueOf(x.Value).Bytes()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13511,13 +14113,13 @@ func (x VUnionDepth2_AllF3) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F3"); err != nil {
+	if err := enc.NextField(3); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13527,13 +14129,13 @@ func (x VUnionDepth2_AllF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F4"); err != nil {
+	if err := enc.NextField(4); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13543,13 +14145,13 @@ func (x VUnionDepth2_AllF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F5"); err != nil {
+	if err := enc.NextField(5); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13559,13 +14161,13 @@ func (x VUnionDepth2_AllF6) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F6"); err != nil {
+	if err := enc.NextField(6); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_map_8(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13575,13 +14177,13 @@ func (x VUnionDepth2_AllF7) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F7"); err != nil {
+	if err := enc.NextField(7); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13591,13 +14193,13 @@ func (x VUnionDepth2_AllF8) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F8"); err != nil {
+	if err := enc.NextField(8); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13607,13 +14209,13 @@ func (x VUnionDepth2_AllF9) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F9"); err != nil {
+	if err := enc.NextField(9); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13623,7 +14225,7 @@ func (x VUnionDepth2_AllF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F10"); err != nil {
+	if err := enc.NextField(10); err != nil {
 		return err
 	}
 	switch {
@@ -13637,7 +14239,7 @@ func (x VUnionDepth2_AllF10) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13647,7 +14249,7 @@ func (x VUnionDepth2_AllF11) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F11"); err != nil {
+	if err := enc.NextField(11); err != nil {
 		return err
 	}
 	switch {
@@ -13661,7 +14263,7 @@ func (x VUnionDepth2_AllF11) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13671,7 +14273,7 @@ func (x VUnionDepth2_AllF12) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F12"); err != nil {
+	if err := enc.NextField(12); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -13684,7 +14286,7 @@ func (x VUnionDepth2_AllF12) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13694,7 +14296,7 @@ func (x VUnionDepth2_AllF13) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	if err := enc.NextField("F13"); err != nil {
+	if err := enc.NextField(13); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -13707,7 +14309,7 @@ func (x VUnionDepth2_AllF13) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13738,25 +14340,36 @@ func VDLReadVUnionDepth2_All(dec vdl.Decoder, x *VUnionDepth2_All) error {
 	if err := dec.StartValue(__VDLType_union_195); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_195 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_195.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_AllF0
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F1":
+	case 1:
 		var field VUnionDepth2_AllF1
 		bytes := reflect.ValueOf(field.Value[:]).Bytes()
 		if err := dec.ReadValueBytes(2, &bytes); err != nil {
 			return err
 		}
 		*x = field
-	case "F2":
+	case 2:
 		var field VUnionDepth2_AllF2
 		var bytes []byte
 		if err := dec.ReadValueBytes(-1, &bytes); err != nil {
@@ -13764,61 +14377,61 @@ func VDLReadVUnionDepth2_All(dec vdl.Decoder, x *VUnionDepth2_All) error {
 		}
 		reflect.ValueOf(&field.Value).Elem().SetBytes(bytes)
 		*x = field
-	case "F3":
+	case 3:
 		var field VUnionDepth2_AllF3
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F4":
+	case 4:
 		var field VUnionDepth2_AllF4
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F5":
+	case 5:
 		var field VUnionDepth2_AllF5
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F6":
+	case 6:
 		var field VUnionDepth2_AllF6
 		if err := __VDLReadAnon_map_8(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F7":
+	case 7:
 		var field VUnionDepth2_AllF7
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F8":
+	case 8:
 		var field VUnionDepth2_AllF8
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F9":
+	case 9:
 		var field VUnionDepth2_AllF9
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F10":
+	case 10:
 		var field VUnionDepth2_AllF10
 		if err := VDLReadVUnionDepth1_All(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F11":
+	case 11:
 		var field VUnionDepth2_AllF11
 		if err := VDLReadVUnionDepth1_VUint32(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F12":
+	case 12:
 		var field VUnionDepth2_AllF12
 		if err := dec.StartValue(__VDLType_optional_169); err != nil {
 			return err
@@ -13836,7 +14449,7 @@ func VDLReadVUnionDepth2_All(dec vdl.Decoder, x *VUnionDepth2_All) error {
 			}
 		}
 		*x = field
-	case "F13":
+	case 13:
 		var field VUnionDepth2_AllF13
 		if err := dec.StartValue(__VDLType_optional_159); err != nil {
 			return err
@@ -13854,16 +14467,12 @@ func VDLReadVUnionDepth2_All(dec vdl.Decoder, x *VUnionDepth2_All) error {
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -13938,13 +14547,13 @@ func (x VUnionDepth2_VArray1_StringF0) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_197); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -13954,27 +14563,34 @@ func VDLReadVUnionDepth2_VArray1_String(dec vdl.Decoder, x *VUnionDepth2_VArray1
 	if err := dec.StartValue(__VDLType_union_197); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_197 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_197.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VArray1_StringF0
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14018,10 +14634,10 @@ func (x VUnionDepth2_VArray2_VByteF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_198); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBytes("F1", __VDLType_array_25, reflect.ValueOf(x.Value[:]).Bytes()); err != nil {
+	if err := enc.NextFieldValueBytes(0, __VDLType_array_25, reflect.ValueOf(x.Value[:]).Bytes()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14031,28 +14647,35 @@ func VDLReadVUnionDepth2_VArray2_VByte(dec vdl.Decoder, x *VUnionDepth2_VArray2_
 	if err := dec.StartValue(__VDLType_union_198); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F1":
+	if decType != __VDLType_union_198 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_198.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VArray2_VByteF1
 		bytes := reflect.ValueOf(field.Value[:]).Bytes()
 		if err := dec.ReadValueBytes(2, &bytes); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14096,10 +14719,10 @@ func (x VUnionDepth2_VList_VByteF2) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_199); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBytes("F2", __VDLType_list_45, reflect.ValueOf(x.Value).Bytes()); err != nil {
+	if err := enc.NextFieldValueBytes(0, __VDLType_list_45, reflect.ValueOf(x.Value).Bytes()); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14109,12 +14732,23 @@ func VDLReadVUnionDepth2_VList_VByte(dec vdl.Decoder, x *VUnionDepth2_VList_VByt
 	if err := dec.StartValue(__VDLType_union_199); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F2":
+	if decType != __VDLType_union_199 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_199.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VList_VByteF2
 		var bytes []byte
 		if err := dec.ReadValueBytes(-1, &bytes); err != nil {
@@ -14122,16 +14756,12 @@ func VDLReadVUnionDepth2_VList_VByte(dec vdl.Decoder, x *VUnionDepth2_VList_VByt
 		}
 		reflect.ValueOf(&field.Value).Elem().SetBytes(bytes)
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14176,13 +14806,13 @@ func (x VUnionDepth2_VList_OptVNamedErrorF3) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_200); err != nil {
 		return err
 	}
-	if err := enc.NextField("F3"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14192,27 +14822,34 @@ func VDLReadVUnionDepth2_VList_OptVNamedError(dec vdl.Decoder, x *VUnionDepth2_V
 	if err := dec.StartValue(__VDLType_union_200); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F3":
+	if decType != __VDLType_union_200 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_200.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VList_OptVNamedErrorF3
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14256,13 +14893,13 @@ func (x VUnionDepth2_VSet_VBoolF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_201); err != nil {
 		return err
 	}
-	if err := enc.NextField("F4"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14272,27 +14909,34 @@ func VDLReadVUnionDepth2_VSet_VBool(dec vdl.Decoder, x *VUnionDepth2_VSet_VBool)
 	if err := dec.StartValue(__VDLType_union_201); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F4":
+	if decType != __VDLType_union_201 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_201.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VSet_VBoolF4
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14336,13 +14980,13 @@ func (x VUnionDepth2_VSet_VNamedErrorF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_202); err != nil {
 		return err
 	}
-	if err := enc.NextField("F5"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14352,27 +14996,34 @@ func VDLReadVUnionDepth2_VSet_VNamedError(dec vdl.Decoder, x *VUnionDepth2_VSet_
 	if err := dec.StartValue(__VDLType_union_202); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F5":
+	if decType != __VDLType_union_202 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_202.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VSet_VNamedErrorF5
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14416,13 +15067,13 @@ func (x VUnionDepth2_Map_VBool_VBoolF6) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_203); err != nil {
 		return err
 	}
-	if err := enc.NextField("F6"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_map_8(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14432,27 +15083,34 @@ func VDLReadVUnionDepth2_Map_VBool_VBool(dec vdl.Decoder, x *VUnionDepth2_Map_VB
 	if err := dec.StartValue(__VDLType_union_203); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F6":
+	if decType != __VDLType_union_203 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_203.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_Map_VBool_VBoolF6
 		if err := __VDLReadAnon_map_8(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14496,13 +15154,13 @@ func (x VUnionDepth2_VMap_VBool_VBoolF7) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_204); err != nil {
 		return err
 	}
-	if err := enc.NextField("F7"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14512,27 +15170,34 @@ func VDLReadVUnionDepth2_VMap_VBool_VBool(dec vdl.Decoder, x *VUnionDepth2_VMap_
 	if err := dec.StartValue(__VDLType_union_204); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F7":
+	if decType != __VDLType_union_204 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_204.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VMap_VBool_VBoolF7
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14576,13 +15241,13 @@ func (x VUnionDepth2_VStructDepth1_AllF8) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_205); err != nil {
 		return err
 	}
-	if err := enc.NextField("F8"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14592,27 +15257,34 @@ func VDLReadVUnionDepth2_VStructDepth1_All(dec vdl.Decoder, x *VUnionDepth2_VStr
 	if err := dec.StartValue(__VDLType_union_205); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F8":
+	if decType != __VDLType_union_205 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_205.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VStructDepth1_AllF8
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14656,13 +15328,13 @@ func (x VUnionDepth2_VStructDepth1_Int8F9) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_206); err != nil {
 		return err
 	}
-	if err := enc.NextField("F9"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14672,27 +15344,34 @@ func VDLReadVUnionDepth2_VStructDepth1_Int8(dec vdl.Decoder, x *VUnionDepth2_VSt
 	if err := dec.StartValue(__VDLType_union_206); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F9":
+	if decType != __VDLType_union_206 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_206.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VStructDepth1_Int8F9
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14736,7 +15415,7 @@ func (x VUnionDepth2_VUnionDepth1_AllF10) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_207); err != nil {
 		return err
 	}
-	if err := enc.NextField("F10"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	switch {
@@ -14750,7 +15429,7 @@ func (x VUnionDepth2_VUnionDepth1_AllF10) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14760,27 +15439,34 @@ func VDLReadVUnionDepth2_VUnionDepth1_All(dec vdl.Decoder, x *VUnionDepth2_VUnio
 	if err := dec.StartValue(__VDLType_union_207); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F10":
+	if decType != __VDLType_union_207 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_207.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VUnionDepth1_AllF10
 		if err := VDLReadVUnionDepth1_All(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14825,7 +15511,7 @@ func (x VUnionDepth2_VUnionDepth1_VUint32F11) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_208); err != nil {
 		return err
 	}
-	if err := enc.NextField("F11"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	switch {
@@ -14839,7 +15525,7 @@ func (x VUnionDepth2_VUnionDepth1_VUint32F11) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14849,27 +15535,34 @@ func VDLReadVUnionDepth2_VUnionDepth1_VUint32(dec vdl.Decoder, x *VUnionDepth2_V
 	if err := dec.StartValue(__VDLType_union_208); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F11":
+	if decType != __VDLType_union_208 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_208.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_VUnionDepth1_VUint32F11
 		if err := VDLReadVUnionDepth1_VUint32(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -14914,7 +15607,7 @@ func (x VUnionDepth2_OptVStructDepth1_VEnumBcdF12) VDLWrite(enc vdl.Encoder) err
 	if err := enc.StartValue(__VDLType_union_209); err != nil {
 		return err
 	}
-	if err := enc.NextField("F12"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -14927,7 +15620,7 @@ func (x VUnionDepth2_OptVStructDepth1_VEnumBcdF12) VDLWrite(enc vdl.Encoder) err
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -14937,12 +15630,23 @@ func VDLReadVUnionDepth2_OptVStructDepth1_VEnumBcd(dec vdl.Decoder, x *VUnionDep
 	if err := dec.StartValue(__VDLType_union_209); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F12":
+	if decType != __VDLType_union_209 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_209.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_OptVStructDepth1_VEnumBcdF12
 		if err := dec.StartValue(__VDLType_optional_169); err != nil {
 			return err
@@ -14960,16 +15664,12 @@ func VDLReadVUnionDepth2_OptVStructDepth1_VEnumBcd(dec vdl.Decoder, x *VUnionDep
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -15014,7 +15714,7 @@ func (x VUnionDepth2_OptVStructDepth1_VFloat32F13) VDLWrite(enc vdl.Encoder) err
 	if err := enc.StartValue(__VDLType_union_210); err != nil {
 		return err
 	}
-	if err := enc.NextField("F13"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -15027,7 +15727,7 @@ func (x VUnionDepth2_OptVStructDepth1_VFloat32F13) VDLWrite(enc vdl.Encoder) err
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -15037,12 +15737,23 @@ func VDLReadVUnionDepth2_OptVStructDepth1_VFloat32(dec vdl.Decoder, x *VUnionDep
 	if err := dec.StartValue(__VDLType_union_210); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F13":
+	if decType != __VDLType_union_210 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_210.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth2_OptVStructDepth1_VFloat32F13
 		if err := dec.StartValue(__VDLType_optional_159); err != nil {
 			return err
@@ -15060,16 +15771,12 @@ func VDLReadVUnionDepth2_OptVStructDepth1_VFloat32(dec vdl.Decoder, x *VUnionDep
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -16560,7 +17267,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F0.VDLIsZero() {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F0.VDLWrite(enc); err != nil {
@@ -16568,7 +17275,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F1) != 0 {
-		if err := enc.NextField("F1"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_12(enc, x.F1); err != nil {
@@ -16576,7 +17283,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F2) != 0 {
-		if err := enc.NextField("F2"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := x.F2.VDLWrite(enc); err != nil {
@@ -16584,7 +17291,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.F3) != 0 {
-		if err := enc.NextField("F3"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_11(enc, x.F3); err != nil {
@@ -16592,7 +17299,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.F4.VDLIsZero() {
-		if err := enc.NextField("F4"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		if err := x.F4.VDLWrite(enc); err != nil {
@@ -16600,7 +17307,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F5 != nil && !x.F5.VDLIsZero() {
-		if err := enc.NextField("F5"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		if err := x.F5.VDLWrite(enc); err != nil {
@@ -16608,7 +17315,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.F6 != nil {
-		if err := enc.NextField("F6"); err != nil {
+		if err := enc.NextField(6); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -16616,7 +17323,7 @@ func (x VStructDepth3_All) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -16669,39 +17376,50 @@ func (x *VStructDepth3_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_235); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
+		}
+		if decType != __VDLType_struct_235 {
+			index = __VDLType_struct_235.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := x.F0.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F1":
+		case 1:
 			if err := __VDLReadAnon_list_12(dec, &x.F1); err != nil {
 				return err
 			}
-		case "F2":
+		case 2:
 			if err := x.F2.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F3":
+		case 3:
 			if err := __VDLReadAnon_map_11(dec, &x.F3); err != nil {
 				return err
 			}
-		case "F4":
+		case 4:
 			if err := x.F4.VDLRead(dec); err != nil {
 				return err
 			}
-		case "F5":
+		case 5:
 			if err := VDLReadVUnionDepth2_All(dec, &x.F5); err != nil {
 				return err
 			}
-		case "F6":
+		case 6:
 			if err := dec.StartValue(__VDLType_optional_221); err != nil {
 				return err
 			}
@@ -16716,10 +17434,6 @@ func (x *VStructDepth3_All) VDLRead(dec vdl.Decoder) error {
 				if err := x.F6.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -16771,14 +17485,14 @@ func (x VStructDepth3_VArray1_Set_VEnumBcd) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F0.VDLIsZero() {
-		if err := enc.NextField("F0"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F0.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -16789,20 +17503,27 @@ func (x *VStructDepth3_VArray1_Set_VEnumBcd) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_237); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F0":
-			if err := x.F0.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_237 {
+			index = __VDLType_struct_237.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F0.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -16830,14 +17551,14 @@ func (x VStructDepth3_List_VUnionDepth1_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.F1) != 0 {
-		if err := enc.NextField("F1"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_12(enc, x.F1); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -16848,20 +17569,27 @@ func (x *VStructDepth3_List_VUnionDepth1_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_238); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F1":
-			if err := __VDLReadAnon_list_12(dec, &x.F1); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_238 {
+			index = __VDLType_struct_238.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_list_12(dec, &x.F1); err != nil {
 				return err
 			}
 		}
@@ -16889,14 +17617,14 @@ func (x VStructDepth3_VSet_VArray1_VStructEmpty) VDLWrite(enc vdl.Encoder) error
 		return err
 	}
 	if len(x.F2) != 0 {
-		if err := enc.NextField("F2"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F2.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -16907,20 +17635,27 @@ func (x *VStructDepth3_VSet_VArray1_VStructEmpty) VDLRead(dec vdl.Decoder) error
 	if err := dec.StartValue(__VDLType_struct_239); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F2":
-			if err := x.F2.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_239 {
+			index = __VDLType_struct_239.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F2.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -16948,14 +17683,14 @@ func (x VStructDepth3_Map_VUnionDepth1_Float64_VUnionDepth1_Float64) VDLWrite(en
 		return err
 	}
 	if len(x.F3) != 0 {
-		if err := enc.NextField("F3"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_11(enc, x.F3); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -16966,20 +17701,27 @@ func (x *VStructDepth3_Map_VUnionDepth1_Float64_VUnionDepth1_Float64) VDLRead(de
 	if err := dec.StartValue(__VDLType_struct_240); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F3":
-			if err := __VDLReadAnon_map_11(dec, &x.F3); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_240 {
+			index = __VDLType_struct_240.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_map_11(dec, &x.F3); err != nil {
 				return err
 			}
 		}
@@ -17007,14 +17749,14 @@ func (x VStructDepth3_VStructDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if !x.F4.VDLIsZero() {
-		if err := enc.NextField("F4"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F4.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17037,20 +17779,27 @@ func (x *VStructDepth3_VStructDepth2_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_241); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F4":
-			if err := x.F4.VDLRead(dec); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_241 {
+			index = __VDLType_struct_241.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := x.F4.VDLRead(dec); err != nil {
 				return err
 			}
 		}
@@ -17078,14 +17827,14 @@ func (x VStructDepth3_VUnionDepth2_All) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F5 != nil && !x.F5.VDLIsZero() {
-		if err := enc.NextField("F5"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := x.F5.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17098,20 +17847,27 @@ func (x *VStructDepth3_VUnionDepth2_All) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_242); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F5":
-			if err := VDLReadVUnionDepth2_All(dec, &x.F5); err != nil {
-				return err
+		}
+		if decType != __VDLType_struct_242 {
+			index = __VDLType_struct_242.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
 			}
-		default:
-			if err := dec.SkipValue(); err != nil {
+		}
+		switch index {
+		case 0:
+			if err := VDLReadVUnionDepth2_All(dec, &x.F5); err != nil {
 				return err
 			}
 		}
@@ -17136,7 +17892,7 @@ func (x VStructDepth3_OptVStructDepth2_Set_Float64) VDLWrite(enc vdl.Encoder) er
 		return err
 	}
 	if x.F6 != nil {
-		if err := enc.NextField("F6"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -17144,7 +17900,7 @@ func (x VStructDepth3_OptVStructDepth2_Set_Float64) VDLWrite(enc vdl.Encoder) er
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17155,15 +17911,26 @@ func (x *VStructDepth3_OptVStructDepth2_Set_Float64) VDLRead(dec vdl.Decoder) er
 	if err := dec.StartValue(__VDLType_struct_243); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F6":
+		}
+		if decType != __VDLType_struct_243 {
+			index = __VDLType_struct_243.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := dec.StartValue(__VDLType_optional_221); err != nil {
 				return err
 			}
@@ -17178,10 +17945,6 @@ func (x *VStructDepth3_OptVStructDepth2_Set_Float64) VDLRead(dec vdl.Decoder) er
 				if err := x.F6.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -17304,13 +18067,13 @@ func (x VUnionDepth3_AllF0) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17320,13 +18083,13 @@ func (x VUnionDepth3_AllF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F1"); err != nil {
+	if err := enc.NextField(1); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_list_13(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17336,13 +18099,13 @@ func (x VUnionDepth3_AllF2) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F2"); err != nil {
+	if err := enc.NextField(2); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_set_14(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17352,13 +18115,13 @@ func (x VUnionDepth3_AllF3) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F3"); err != nil {
+	if err := enc.NextField(3); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17368,13 +18131,13 @@ func (x VUnionDepth3_AllF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F4"); err != nil {
+	if err := enc.NextField(4); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17384,7 +18147,7 @@ func (x VUnionDepth3_AllF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F5"); err != nil {
+	if err := enc.NextField(5); err != nil {
 		return err
 	}
 	switch {
@@ -17398,7 +18161,7 @@ func (x VUnionDepth3_AllF5) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17408,7 +18171,7 @@ func (x VUnionDepth3_AllF6) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	if err := enc.NextField("F6"); err != nil {
+	if err := enc.NextField(6); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -17421,7 +18184,7 @@ func (x VUnionDepth3_AllF6) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17473,48 +18236,59 @@ func VDLReadVUnionDepth3_All(dec vdl.Decoder, x *VUnionDepth3_All) error {
 	if err := dec.StartValue(__VDLType_union_244); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_244 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_244.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_AllF0
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F1":
+	case 1:
 		var field VUnionDepth3_AllF1
 		if err := __VDLReadAnon_list_13(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F2":
+	case 2:
 		var field VUnionDepth3_AllF2
 		if err := __VDLReadAnon_set_14(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F3":
+	case 3:
 		var field VUnionDepth3_AllF3
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F4":
+	case 4:
 		var field VUnionDepth3_AllF4
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "F5":
+	case 5:
 		var field VUnionDepth3_AllF5
 		if err := VDLReadVUnionDepth2_All(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "F6":
+	case 6:
 		var field VUnionDepth3_AllF6
 		if err := dec.StartValue(__VDLType_optional_221); err != nil {
 			return err
@@ -17532,16 +18306,12 @@ func VDLReadVUnionDepth3_All(dec vdl.Decoder, x *VUnionDepth3_All) error {
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -17641,13 +18411,13 @@ func (x VUnionDepth3_VArray3_OptVStructDepth1_VFloat32F0) VDLWrite(enc vdl.Encod
 	if err := enc.StartValue(__VDLType_union_247); err != nil {
 		return err
 	}
-	if err := enc.NextField("F0"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17657,27 +18427,34 @@ func VDLReadVUnionDepth3_VArray3_OptVStructDepth1_VFloat32(dec vdl.Decoder, x *V
 	if err := dec.StartValue(__VDLType_union_247); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F0":
+	if decType != __VDLType_union_247 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_247.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_VArray3_OptVStructDepth1_VFloat32F0
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -17721,13 +18498,13 @@ func (x VUnionDepth3_List_VList_ErrorF1) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_248); err != nil {
 		return err
 	}
-	if err := enc.NextField("F1"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_list_13(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17737,27 +18514,34 @@ func VDLReadVUnionDepth3_List_VList_Error(dec vdl.Decoder, x *VUnionDepth3_List_
 	if err := dec.StartValue(__VDLType_union_248); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F1":
+	if decType != __VDLType_union_248 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_248.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_List_VList_ErrorF1
 		if err := __VDLReadAnon_list_13(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -17804,13 +18588,13 @@ func (x VUnionDepth3_Set_VStructDepth1_StringF2) VDLWrite(enc vdl.Encoder) error
 	if err := enc.StartValue(__VDLType_union_249); err != nil {
 		return err
 	}
-	if err := enc.NextField("F2"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := __VDLWriteAnon_set_14(enc, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17820,27 +18604,34 @@ func VDLReadVUnionDepth3_Set_VStructDepth1_String(dec vdl.Decoder, x *VUnionDept
 	if err := dec.StartValue(__VDLType_union_249); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F2":
+	if decType != __VDLType_union_249 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_249.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_Set_VStructDepth1_StringF2
 		if err := __VDLReadAnon_set_14(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -17889,13 +18680,13 @@ func (x VUnionDepth3_VMap_VStructDepth1_VBool_VStructDepth1_VBoolF3) VDLWrite(en
 	if err := enc.StartValue(__VDLType_union_250); err != nil {
 		return err
 	}
-	if err := enc.NextField("F3"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17905,27 +18696,34 @@ func VDLReadVUnionDepth3_VMap_VStructDepth1_VBool_VStructDepth1_VBool(dec vdl.De
 	if err := dec.StartValue(__VDLType_union_250); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F3":
+	if decType != __VDLType_union_250 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_250.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_VMap_VStructDepth1_VBool_VStructDepth1_VBoolF3
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -17969,13 +18767,13 @@ func (x VUnionDepth3_VStructDepth2_AllF4) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_251); err != nil {
 		return err
 	}
-	if err := enc.NextField("F4"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if err := x.Value.VDLWrite(enc); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -17985,27 +18783,34 @@ func VDLReadVUnionDepth3_VStructDepth2_All(dec vdl.Decoder, x *VUnionDepth3_VStr
 	if err := dec.StartValue(__VDLType_union_251); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F4":
+	if decType != __VDLType_union_251 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_251.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_VStructDepth2_AllF4
 		if err := field.Value.VDLRead(dec); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -18049,7 +18854,7 @@ func (x VUnionDepth3_VUnionDepth2_AllF5) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_252); err != nil {
 		return err
 	}
-	if err := enc.NextField("F5"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	switch {
@@ -18063,7 +18868,7 @@ func (x VUnionDepth3_VUnionDepth2_AllF5) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18073,27 +18878,34 @@ func VDLReadVUnionDepth3_VUnionDepth2_All(dec vdl.Decoder, x *VUnionDepth3_VUnio
 	if err := dec.StartValue(__VDLType_union_252); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F5":
+	if decType != __VDLType_union_252 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_252.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_VUnionDepth2_AllF5
 		if err := VDLReadVUnionDepth2_All(dec, &field.Value); err != nil {
 			return err
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -18138,7 +18950,7 @@ func (x VUnionDepth3_OptVStructDepth2_Set_Float64F6) VDLWrite(enc vdl.Encoder) e
 	if err := enc.StartValue(__VDLType_union_253); err != nil {
 		return err
 	}
-	if err := enc.NextField("F6"); err != nil {
+	if err := enc.NextField(0); err != nil {
 		return err
 	}
 	if x.Value == nil {
@@ -18151,7 +18963,7 @@ func (x VUnionDepth3_OptVStructDepth2_Set_Float64F6) VDLWrite(enc vdl.Encoder) e
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18161,12 +18973,23 @@ func VDLReadVUnionDepth3_OptVStructDepth2_Set_Float64(dec vdl.Decoder, x *VUnion
 	if err := dec.StartValue(__VDLType_union_253); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "F6":
+	if decType != __VDLType_union_253 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_253.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VUnionDepth3_OptVStructDepth2_Set_Float64F6
 		if err := dec.StartValue(__VDLType_optional_221); err != nil {
 			return err
@@ -18184,16 +19007,12 @@ func VDLReadVUnionDepth3_OptVStructDepth2_Set_Float64(dec vdl.Decoder, x *VUnion
 			}
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -18218,12 +19037,12 @@ func (x VSelfCycle) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Data != 0 {
-		if err := enc.NextFieldValueInt("Data", vdl.Int64Type, x.Data); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.Data); err != nil {
 			return err
 		}
 	}
 	if x.Next != nil {
-		if err := enc.NextField("Next"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -18231,7 +19050,7 @@ func (x VSelfCycle) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18242,22 +19061,33 @@ func (x *VSelfCycle) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_254); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Data":
+		}
+		if decType != __VDLType_struct_254 {
+			index = __VDLType_struct_254.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.Data = value
 			}
-		case "Next":
+		case 1:
 			if err := dec.StartValue(__VDLType_optional_255); err != nil {
 				return err
 			}
@@ -18272,10 +19102,6 @@ func (x *VSelfCycle) VDLRead(dec vdl.Decoder) error {
 				if err := x.Next.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -18301,12 +19127,12 @@ func (x VMutualCycleB) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Data != 0 {
-		if err := enc.NextFieldValueInt("Data", vdl.Int64Type, x.Data); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.Data); err != nil {
 			return err
 		}
 	}
 	if x.A != nil {
-		if err := enc.NextField("A"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -18314,7 +19140,7 @@ func (x VMutualCycleB) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18325,22 +19151,33 @@ func (x *VMutualCycleB) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_256); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Data":
+		}
+		if decType != __VDLType_struct_256 {
+			index = __VDLType_struct_256.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.Data = value
 			}
-		case "A":
+		case 1:
 			if err := dec.StartValue(__VDLType_optional_257); err != nil {
 				return err
 			}
@@ -18355,10 +19192,6 @@ func (x *VMutualCycleB) VDLRead(dec vdl.Decoder) error {
 				if err := x.A.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -18384,12 +19217,12 @@ func (x VMutualCycleA) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Data != 0 {
-		if err := enc.NextFieldValueInt("Data", vdl.Int64Type, x.Data); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.Data); err != nil {
 			return err
 		}
 	}
 	if x.B != nil {
-		if err := enc.NextField("B"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		enc.SetNextStartValueIsOptional()
@@ -18397,7 +19230,7 @@ func (x VMutualCycleA) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18408,22 +19241,33 @@ func (x *VMutualCycleA) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_258); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Data":
+		}
+		if decType != __VDLType_struct_258 {
+			index = __VDLType_struct_258.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.Data = value
 			}
-		case "B":
+		case 1:
 			if err := dec.StartValue(__VDLType_optional_259); err != nil {
 				return err
 			}
@@ -18438,10 +19282,6 @@ func (x *VMutualCycleA) VDLRead(dec vdl.Decoder) error {
 				if err := x.B.VDLRead(dec); err != nil {
 					return err
 				}
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -18887,11 +19727,11 @@ func (x VWireStructNString) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18902,24 +19742,31 @@ func (x *VWireStructNString) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_272); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_272 {
+			index = __VDLType_struct_272.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -18943,11 +19790,11 @@ func (x VWireStructNStruct) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -18958,24 +19805,31 @@ func (x *VWireStructNStruct) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_273); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_273 {
+			index = __VDLType_struct_273.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -18999,11 +19853,11 @@ func (x VWireStructNArray) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19014,24 +19868,31 @@ func (x *VWireStructNArray) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_274); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_274 {
+			index = __VDLType_struct_274.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -19055,11 +19916,11 @@ func (x VWireStructNSlice) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19070,24 +19931,31 @@ func (x *VWireStructNSlice) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_275); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_275 {
+			index = __VDLType_struct_275.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -19111,11 +19979,11 @@ func (x VWireStructNPointer) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19126,24 +19994,31 @@ func (x *VWireStructNPointer) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_276); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_276 {
+			index = __VDLType_struct_276.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -19167,11 +20042,11 @@ func (x VWireStructNIface) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.X != "" {
-		if err := enc.NextFieldValueString("X", vdl.StringType, x.X); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.X); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19182,24 +20057,31 @@ func (x *VWireStructNIface) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_277); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "X":
+		}
+		if decType != __VDLType_struct_277 {
+			index = __VDLType_struct_277.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.X = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -19244,10 +20126,10 @@ func (x VWireUnionNStringX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_278); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19257,12 +20139,23 @@ func VDLReadVWireUnionNString(dec vdl.Decoder, x *VWireUnionNString) error {
 	if err := dec.StartValue(__VDLType_union_278); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_278 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_278.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNStringX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19271,16 +20164,12 @@ func VDLReadVWireUnionNString(dec vdl.Decoder, x *VWireUnionNString) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19324,10 +20213,10 @@ func (x VWireUnionNStructX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_279); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19337,12 +20226,23 @@ func VDLReadVWireUnionNStruct(dec vdl.Decoder, x *VWireUnionNStruct) error {
 	if err := dec.StartValue(__VDLType_union_279); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_279 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_279.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNStructX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19351,16 +20251,12 @@ func VDLReadVWireUnionNStruct(dec vdl.Decoder, x *VWireUnionNStruct) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19404,10 +20300,10 @@ func (x VWireUnionNArrayX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_280); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19417,12 +20313,23 @@ func VDLReadVWireUnionNArray(dec vdl.Decoder, x *VWireUnionNArray) error {
 	if err := dec.StartValue(__VDLType_union_280); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_280 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_280.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNArrayX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19431,16 +20338,12 @@ func VDLReadVWireUnionNArray(dec vdl.Decoder, x *VWireUnionNArray) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19484,10 +20387,10 @@ func (x VWireUnionNSliceX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_281); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19497,12 +20400,23 @@ func VDLReadVWireUnionNSlice(dec vdl.Decoder, x *VWireUnionNSlice) error {
 	if err := dec.StartValue(__VDLType_union_281); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_281 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_281.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNSliceX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19511,16 +20425,12 @@ func VDLReadVWireUnionNSlice(dec vdl.Decoder, x *VWireUnionNSlice) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19564,10 +20474,10 @@ func (x VWireUnionNPointerX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_282); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19577,12 +20487,23 @@ func VDLReadVWireUnionNPointer(dec vdl.Decoder, x *VWireUnionNPointer) error {
 	if err := dec.StartValue(__VDLType_union_282); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_282 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_282.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNPointerX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19591,16 +20512,12 @@ func VDLReadVWireUnionNPointer(dec vdl.Decoder, x *VWireUnionNPointer) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19644,10 +20561,10 @@ func (x VWireUnionNIfaceX) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_283); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("X", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(0, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -19657,12 +20574,23 @@ func VDLReadVWireUnionNIface(dec vdl.Decoder, x *VWireUnionNIface) error {
 	if err := dec.StartValue(__VDLType_union_283); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "X":
+	if decType != __VDLType_union_283 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_283.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VWireUnionNIfaceX
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -19671,16 +20599,12 @@ func VDLReadVWireUnionNIface(dec vdl.Decoder, x *VWireUnionNIface) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }
@@ -19804,7 +20728,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireBoolNBoolFromNative(&wire, x.BoolNBool); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueBool("BoolNBool", __VDLType_bool_260, bool(wire)); err != nil {
+		if err := enc.NextFieldValueBool(0, __VDLType_bool_260, bool(wire)); err != nil {
 			return err
 		}
 	}
@@ -19813,7 +20737,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireBoolNStringFromNative(&wire, x.BoolNString); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueBool("BoolNString", __VDLType_bool_261, bool(wire)); err != nil {
+		if err := enc.NextFieldValueBool(1, __VDLType_bool_261, bool(wire)); err != nil {
 			return err
 		}
 	}
@@ -19822,7 +20746,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireBoolNStructFromNative(&wire, x.BoolNStruct); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueBool("BoolNStruct", __VDLType_bool_262, bool(wire)); err != nil {
+		if err := enc.NextFieldValueBool(2, __VDLType_bool_262, bool(wire)); err != nil {
 			return err
 		}
 	}
@@ -19831,7 +20755,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireIntNIntFromNative(&wire, x.IntNInt); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueInt("IntNInt", __VDLType_int32_263, int64(wire)); err != nil {
+		if err := enc.NextFieldValueInt(3, __VDLType_int32_263, int64(wire)); err != nil {
 			return err
 		}
 	}
@@ -19840,7 +20764,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireIntNStringFromNative(&wire, x.IntNString); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueInt("IntNString", __VDLType_int32_264, int64(wire)); err != nil {
+		if err := enc.NextFieldValueInt(4, __VDLType_int32_264, int64(wire)); err != nil {
 			return err
 		}
 	}
@@ -19849,7 +20773,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireIntNStructFromNative(&wire, x.IntNStruct); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueInt("IntNStruct", __VDLType_int32_265, int64(wire)); err != nil {
+		if err := enc.NextFieldValueInt(5, __VDLType_int32_265, int64(wire)); err != nil {
 			return err
 		}
 	}
@@ -19858,7 +20782,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireStringNStringFromNative(&wire, x.StringNString); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueString("StringNString", __VDLType_string_266, string(wire)); err != nil {
+		if err := enc.NextFieldValueString(6, __VDLType_string_266, string(wire)); err != nil {
 			return err
 		}
 	}
@@ -19867,12 +20791,12 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		if err := VWireStringNStructFromNative(&wire, x.StringNStruct); err != nil {
 			return err
 		}
-		if err := enc.NextFieldValueString("StringNStruct", __VDLType_string_267, string(wire)); err != nil {
+		if err := enc.NextFieldValueString(7, __VDLType_string_267, string(wire)); err != nil {
 			return err
 		}
 	}
 	if x.ArrayNString != "" {
-		if err := enc.NextField("ArrayNString"); err != nil {
+		if err := enc.NextField(8); err != nil {
 			return err
 		}
 		var wire VWireArrayNString
@@ -19884,7 +20808,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.ArrayNStruct != (VNativeWireArrayNStruct{}) {
-		if err := enc.NextField("ArrayNStruct"); err != nil {
+		if err := enc.NextField(9); err != nil {
 			return err
 		}
 		var wire VWireArrayNStruct
@@ -19896,7 +20820,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.ListNString != "" {
-		if err := enc.NextField("ListNString"); err != nil {
+		if err := enc.NextField(10); err != nil {
 			return err
 		}
 		var wire VWireListNString
@@ -19908,7 +20832,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.ListNStruct != (VNativeWireListNStruct{}) {
-		if err := enc.NextField("ListNStruct"); err != nil {
+		if err := enc.NextField(11); err != nil {
 			return err
 		}
 		var wire VWireListNStruct
@@ -19920,7 +20844,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.StructNString != "" {
-		if err := enc.NextField("StructNString"); err != nil {
+		if err := enc.NextField(12); err != nil {
 			return err
 		}
 		var wire VWireStructNString
@@ -19932,7 +20856,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.StructNStruct != (VNativeWireStructNStruct{}) {
-		if err := enc.NextField("StructNStruct"); err != nil {
+		if err := enc.NextField(13); err != nil {
 			return err
 		}
 		var wire VWireStructNStruct
@@ -19944,7 +20868,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.StructNArray != (VNativeWireStructNArray{}) {
-		if err := enc.NextField("StructNArray"); err != nil {
+		if err := enc.NextField(14); err != nil {
 			return err
 		}
 		var wire VWireStructNArray
@@ -19956,7 +20880,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.StructNSlice.IsZero() {
-		if err := enc.NextField("StructNSlice"); err != nil {
+		if err := enc.NextField(15); err != nil {
 			return err
 		}
 		var wire VWireStructNSlice
@@ -19968,7 +20892,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.StructNPointer != (VWireStructNPointer{}) {
-		if err := enc.NextField("StructNPointer"); err != nil {
+		if err := enc.NextField(16); err != nil {
 			return err
 		}
 		if err := x.StructNPointer.VDLWrite(enc); err != nil {
@@ -19976,7 +20900,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.StructNIface != (VWireStructNIface{}) {
-		if err := enc.NextField("StructNIface"); err != nil {
+		if err := enc.NextField(17); err != nil {
 			return err
 		}
 		if err := x.StructNIface.VDLWrite(enc); err != nil {
@@ -19984,7 +20908,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.UnionNString != "" {
-		if err := enc.NextField("UnionNString"); err != nil {
+		if err := enc.NextField(18); err != nil {
 			return err
 		}
 		var wire VWireUnionNString
@@ -19996,7 +20920,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.UnionNStruct != (VNativeWireUnionNStruct{}) {
-		if err := enc.NextField("UnionNStruct"); err != nil {
+		if err := enc.NextField(19); err != nil {
 			return err
 		}
 		var wire VWireUnionNStruct
@@ -20008,7 +20932,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.UnionNArray != (VNativeWireUnionNArray{}) {
-		if err := enc.NextField("UnionNArray"); err != nil {
+		if err := enc.NextField(20); err != nil {
 			return err
 		}
 		var wire VWireUnionNArray
@@ -20020,7 +20944,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.UnionNSlice.IsZero() {
-		if err := enc.NextField("UnionNSlice"); err != nil {
+		if err := enc.NextField(21); err != nil {
 			return err
 		}
 		var wire VWireUnionNSlice
@@ -20032,7 +20956,7 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.UnionNPointer != nil && !x.UnionNPointer.VDLIsZero() {
-		if err := enc.NextField("UnionNPointer"); err != nil {
+		if err := enc.NextField(22); err != nil {
 			return err
 		}
 		if err := x.UnionNPointer.VDLWrite(enc); err != nil {
@@ -20040,14 +20964,14 @@ func (x VWireAll) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.UnionNIface != nil && !x.UnionNIface.VDLIsZero() {
-		if err := enc.NextField("UnionNIface"); err != nil {
+		if err := enc.NextField(23); err != nil {
 			return err
 		}
 		if err := x.UnionNIface.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -20061,15 +20985,26 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_284); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "BoolNBool":
+		}
+		if decType != __VDLType_struct_284 {
+			index = __VDLType_struct_284.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			var wire VWireBoolNBool
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20077,7 +21012,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireBoolNBoolToNative(wire, &x.BoolNBool); err != nil {
 				return err
 			}
-		case "BoolNString":
+		case 1:
 			var wire VWireBoolNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20085,7 +21020,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireBoolNStringToNative(wire, &x.BoolNString); err != nil {
 				return err
 			}
-		case "BoolNStruct":
+		case 2:
 			var wire VWireBoolNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20093,7 +21028,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireBoolNStructToNative(wire, &x.BoolNStruct); err != nil {
 				return err
 			}
-		case "IntNInt":
+		case 3:
 			var wire VWireIntNInt
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20101,7 +21036,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireIntNIntToNative(wire, &x.IntNInt); err != nil {
 				return err
 			}
-		case "IntNString":
+		case 4:
 			var wire VWireIntNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20109,7 +21044,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireIntNStringToNative(wire, &x.IntNString); err != nil {
 				return err
 			}
-		case "IntNStruct":
+		case 5:
 			var wire VWireIntNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20117,7 +21052,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireIntNStructToNative(wire, &x.IntNStruct); err != nil {
 				return err
 			}
-		case "StringNString":
+		case 6:
 			var wire VWireStringNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20125,7 +21060,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStringNStringToNative(wire, &x.StringNString); err != nil {
 				return err
 			}
-		case "StringNStruct":
+		case 7:
 			var wire VWireStringNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20133,7 +21068,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStringNStructToNative(wire, &x.StringNStruct); err != nil {
 				return err
 			}
-		case "ArrayNString":
+		case 8:
 			var wire VWireArrayNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20141,7 +21076,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireArrayNStringToNative(wire, &x.ArrayNString); err != nil {
 				return err
 			}
-		case "ArrayNStruct":
+		case 9:
 			var wire VWireArrayNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20149,7 +21084,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireArrayNStructToNative(wire, &x.ArrayNStruct); err != nil {
 				return err
 			}
-		case "ListNString":
+		case 10:
 			var wire VWireListNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20157,7 +21092,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireListNStringToNative(wire, &x.ListNString); err != nil {
 				return err
 			}
-		case "ListNStruct":
+		case 11:
 			var wire VWireListNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20165,7 +21100,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireListNStructToNative(wire, &x.ListNStruct); err != nil {
 				return err
 			}
-		case "StructNString":
+		case 12:
 			var wire VWireStructNString
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20173,7 +21108,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStructNStringToNative(wire, &x.StructNString); err != nil {
 				return err
 			}
-		case "StructNStruct":
+		case 13:
 			var wire VWireStructNStruct
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20181,7 +21116,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStructNStructToNative(wire, &x.StructNStruct); err != nil {
 				return err
 			}
-		case "StructNArray":
+		case 14:
 			var wire VWireStructNArray
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20189,7 +21124,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStructNArrayToNative(wire, &x.StructNArray); err != nil {
 				return err
 			}
-		case "StructNSlice":
+		case 15:
 			var wire VWireStructNSlice
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -20197,15 +21132,15 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireStructNSliceToNative(wire, &x.StructNSlice); err != nil {
 				return err
 			}
-		case "StructNPointer":
+		case 16:
 			if err := x.StructNPointer.VDLRead(dec); err != nil {
 				return err
 			}
-		case "StructNIface":
+		case 17:
 			if err := x.StructNIface.VDLRead(dec); err != nil {
 				return err
 			}
-		case "UnionNString":
+		case 18:
 			var wire VWireUnionNString
 			if err := VDLReadVWireUnionNString(dec, &wire); err != nil {
 				return err
@@ -20213,7 +21148,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireUnionNStringToNative(wire, &x.UnionNString); err != nil {
 				return err
 			}
-		case "UnionNStruct":
+		case 19:
 			var wire VWireUnionNStruct
 			if err := VDLReadVWireUnionNStruct(dec, &wire); err != nil {
 				return err
@@ -20221,7 +21156,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireUnionNStructToNative(wire, &x.UnionNStruct); err != nil {
 				return err
 			}
-		case "UnionNArray":
+		case 20:
 			var wire VWireUnionNArray
 			if err := VDLReadVWireUnionNArray(dec, &wire); err != nil {
 				return err
@@ -20229,7 +21164,7 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireUnionNArrayToNative(wire, &x.UnionNArray); err != nil {
 				return err
 			}
-		case "UnionNSlice":
+		case 21:
 			var wire VWireUnionNSlice
 			if err := VDLReadVWireUnionNSlice(dec, &wire); err != nil {
 				return err
@@ -20237,16 +21172,12 @@ func (x *VWireAll) VDLRead(dec vdl.Decoder) error {
 			if err := VWireUnionNSliceToNative(wire, &x.UnionNSlice); err != nil {
 				return err
 			}
-		case "UnionNPointer":
+		case 22:
 			if err := VDLReadVWireUnionNPointer(dec, &x.UnionNPointer); err != nil {
 				return err
 			}
-		case "UnionNIface":
+		case 23:
 			if err := VDLReadVWireUnionNIface(dec, &x.UnionNIface); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

@@ -253,50 +253,50 @@ func (e *pipeEncoder) NextEntryValueBytes(tt *Type, value []byte) error {
 	return e.WriteValueBytes(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueBool(name string, tt *Type, value bool) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueBool(index int, tt *Type, value bool) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueBool(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueString(name string, tt *Type, value string) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueString(index int, tt *Type, value string) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueString(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueUint(name string, tt *Type, value uint64) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueUint(index int, tt *Type, value uint64) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueUint(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueInt(name string, tt *Type, value int64) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueInt(index int, tt *Type, value int64) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueInt(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueFloat(name string, tt *Type, value float64) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueFloat(index int, tt *Type, value float64) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueFloat(tt, value)
 }
 
-func (e *pipeEncoder) NextFieldValueTypeObject(name string, value *Type) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueTypeObject(index int, value *Type) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueTypeObject(value)
 }
 
-func (e *pipeEncoder) NextFieldValueBytes(name string, tt *Type, value []byte) error {
-	if err := e.NextField(name); err != nil {
+func (e *pipeEncoder) NextFieldValueBytes(index int, tt *Type, value []byte) error {
+	if err := e.NextField(index); err != nil {
 		return err
 	}
 	return e.WriteValueBytes(tt, value)

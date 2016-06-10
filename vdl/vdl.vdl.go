@@ -138,29 +138,29 @@ func (x WireError) VDLWrite(enc Encoder) error {
 		return err
 	}
 	if x.Id != "" {
-		if err := enc.NextFieldValueString("Id", StringType, x.Id); err != nil {
+		if err := enc.NextFieldValueString(0, StringType, x.Id); err != nil {
 			return err
 		}
 	}
 	if x.RetryCode != WireRetryCodeNoRetry {
-		if err := enc.NextFieldValueString("RetryCode", __VDLType_enum_1, x.RetryCode.String()); err != nil {
+		if err := enc.NextFieldValueString(1, __VDLType_enum_1, x.RetryCode.String()); err != nil {
 			return err
 		}
 	}
 	if x.Msg != "" {
-		if err := enc.NextFieldValueString("Msg", StringType, x.Msg); err != nil {
+		if err := enc.NextFieldValueString(2, StringType, x.Msg); err != nil {
 			return err
 		}
 	}
 	if len(x.ParamList) != 0 {
-		if err := enc.NextField("ParamList"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.ParamList); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -198,22 +198,33 @@ func (x *WireError) VDLRead(dec Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Id":
+		}
+		if decType != __VDLType_struct_2 {
+			index = __VDLType_struct_2.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Id = value
 			}
-		case "RetryCode":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
@@ -222,19 +233,15 @@ func (x *WireError) VDLRead(dec Decoder) error {
 					return err
 				}
 			}
-		case "Msg":
+		case 2:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Msg = value
 			}
-		case "ParamList":
+		case 3:
 			if err := __VDLReadAnon_list_1(dec, &x.ParamList); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

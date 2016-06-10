@@ -45,12 +45,6 @@ func (d *decoder81) peekValueByteLen(tt *vdl.Type) (int, error) {
 	}
 	// No explicit message length, but the length can be computed.
 	switch {
-	case tt.Kind() == vdl.Byte:
-		if d.buf.version == Version80 {
-			return 1, nil
-		} else {
-			return binaryPeekUintByteLen(d.buf)
-		}
 	case tt.Kind() == vdl.Array && tt.IsBytes():
 		// Byte arrays are exactly their length and encoded with 1-byte header.
 		return tt.Len() + 1, nil
@@ -61,7 +55,7 @@ func (d *decoder81) peekValueByteLen(tt *vdl.Type) (int, error) {
 		case err != nil:
 			return 0, err
 		case strlen > maxBinaryMsgLen:
-			return 0, verror.New(errMsgLen, nil)
+			return 0, verror.New(errMsgLen, nil, maxBinaryMsgLen)
 		}
 		return int(strlen) + bytelen, nil
 	default:
@@ -94,15 +88,17 @@ func (d *decoder81) decodeRaw(tt *vdl.Type, valLen int, raw *RawBytes) error {
 }
 
 func (d *decoder81) readAnyHeader() (*vdl.Type, int, error) {
-	// Read either WireCtrlNil or the index of the referenced type id.
-	typeIndex, ctrl, err := binaryDecodeUintWithControl(d.buf)
-	switch {
+	// Handle WireCtrlNil.
+	switch ok, err := binaryDecodeControlOnly(d.buf, WireCtrlNil); {
 	case err != nil:
 		return nil, 0, err
-	case ctrl == WireCtrlNil:
+	case ok:
 		return nil, 0, nil // nil any
-	case ctrl != 0:
-		return nil, 0, verror.New(errUnexpectedControlByte, nil, ctrl)
+	}
+	// Read the index of the referenced type id.
+	typeIndex, err := binaryDecodeUint(d.buf)
+	if err != nil {
+		return nil, 0, err
 	}
 	var tid TypeId
 	if d.buf.version == Version80 {
@@ -143,9 +139,9 @@ func (d *decoder81) skipValue(tt *vdl.Type) error {
 		return d.buf.Skip(1)
 	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
 		// The underlying encoding of all these types is based on uint.
-		return binaryIgnoreUint(d.buf)
+		return binarySkipUint(d.buf)
 	case vdl.String:
-		return binaryIgnoreString(d.buf)
+		return binarySkipString(d.buf)
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map:
 		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
@@ -167,13 +163,15 @@ func (d *decoder81) skipValue(tt *vdl.Type) error {
 	case vdl.Struct:
 		// Loop through decoding the 0-based field index and corresponding field.
 		for {
-			switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+			switch ok, err := binaryDecodeControlOnly(d.buf, WireCtrlEnd); {
 			case err != nil:
 				return err
-			case ctrl == WireCtrlEnd:
-				return nil
-			case ctrl != 0:
-				return verror.New(errUnexpectedControlByte, nil, ctrl)
+			case ok:
+				return nil // end of struct
+			}
+			switch index, err := binaryDecodeUint(d.buf); {
+			case err != nil:
+				return err
 			case index >= uint64(tt.NumField()):
 				return verror.New(errIndexOutOfRange, nil)
 			default:
@@ -201,19 +199,21 @@ func (d *decoder81) skipValue(tt *vdl.Type) error {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
-			d.buf.Skip(1) // nil optional
+			d.buf.SkipAvailable(1) // nil optional
 			return nil
 		default:
 			return d.skipValue(tt.Elem()) // non-nil optional
 		}
 	case vdl.Any:
-		switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+		switch ok, err := binaryDecodeControlOnly(d.buf, WireCtrlNil); {
 		case err != nil:
 			return err
-		case ctrl == WireCtrlNil:
-			return nil
-		case ctrl != 0:
-			return verror.New(errUnexpectedControlByte, nil, ctrl)
+		case ok:
+			return nil // nil any
+		}
+		switch index, err := binaryDecodeUint(d.buf); {
+		case err != nil:
+			return err
 		default:
 			tid, err := d.refTypes.ReferencedTypeId(index)
 			if err != nil {
@@ -234,7 +234,7 @@ func (d *decoder81) nextMessage() (TypeId, error) {
 	if leftover := d.buf.RemoveLimit(); leftover > 0 {
 		return 0, verror.New(errLeftOverBytes, nil, leftover)
 	}
-
+	// Decode version byte, if not already decoded.
 	if d.buf.version == 0 {
 		version, err := d.buf.ReadByte()
 		if err != nil {
@@ -245,35 +245,27 @@ func (d *decoder81) nextMessage() (TypeId, error) {
 			return 0, verror.New(errBadVersionByte, nil, d.buf.version)
 		}
 	}
-
-	mid, cr, err := binaryDecodeIntWithControl(d.buf)
+	// Decode the next message id.
+	incomplete, err := binaryDecodeControlOnly(d.buf, WireCtrlTypeIncomplete)
 	if err != nil {
 		return 0, err
 	}
-
-	if cr == WireCtrlTypeIncomplete {
-		mid, cr, err = binaryDecodeIntWithControl(d.buf)
-		if err != nil {
-			return 0, err
-		}
-
-		if cr != 0 || mid >= 0 {
-			// only can have incomplete types on new type messages
+	mid, err := binaryDecodeInt(d.buf)
+	if err != nil {
+		return 0, err
+	}
+	if incomplete {
+		if mid >= 0 {
+			// TypeIncomplete must be followed with a type message.
 			return 0, verror.New(errInvalid, nil)
 		}
-
 		d.flag = d.flag.Set(decFlagTypeIncomplete)
 	} else if mid < 0 {
 		d.flag = d.flag.Clear(decFlagTypeIncomplete)
 	}
-
-	if cr != 0 {
-		return 0, verror.New(errBadControlCode, nil)
-	}
-
+	// TODO(toddw): Clean up the logic below.
 	var tid TypeId
-	var hasAny, hasTypeObject bool
-	var hasLength bool
+	var hasAny, hasTypeObject, hasLength bool
 	switch {
 	case mid < 0:
 		tid = TypeId(-mid)
@@ -342,11 +334,19 @@ func (d *decoder81) typeIsNext() (bool, error) {
 			return false, verror.New(errBadVersionByte, nil, d.buf.version)
 		}
 	}
-	mid, cr, _, err := binaryPeekIntWithControl(d.buf)
+	switch ctrl, err := binaryPeekControl(d.buf); {
+	case err != nil:
+		return false, err
+	case ctrl == WireCtrlTypeIncomplete:
+		return true, nil
+	case ctrl != 0:
+		return false, verror.New(errBadControlCode, nil, ctrl)
+	}
+	mid, _, err := binaryPeekInt(d.buf)
 	if err != nil {
 		return false, err
 	}
-	return mid < 0 || cr == WireCtrlTypeIncomplete, nil
+	return mid < 0, nil
 }
 
 func (d *decoder81) endMessage() error {

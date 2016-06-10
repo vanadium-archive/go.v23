@@ -413,35 +413,31 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		// first byte of regular messages.
 		if d.version == 0 {
 			d.prepareAtom("waiting for version byte")
-			switch versionByte, err := d.buf.PeekByte(); {
-			case err != nil:
-				return nil, err
-			case versionByte == byte(Version80) || versionByte == byte(Version81):
-				d.version = Version(versionByte)
-				d.buf.Skip(1)
-				d.writeAtom(DumpKindVersion, PrimitivePByte{versionByte}, "vom version %x", versionByte)
+			if !d.buf.IsAvailable(1) {
+				if err := d.buf.Fill(1); err != nil {
+					return nil, err
+				}
+			}
+			switch version := Version(d.buf.PeekAvailableByte()); version {
+			case Version81:
+				d.version = version
+				d.buf.SkipAvailable(1)
+				d.writeAtom(DumpKindVersion, PrimitivePByte{byte(version)}, version.String())
 				d.writeStatus(nil, true)
 			}
 		}
 		d.prepareAtom("waiting for message ID or control code")
-		id, cr, err := binaryDecodeIntWithControl(d.buf)
+		incomplete, err := binaryDecodeControlOnly(d.buf, WireCtrlTypeIncomplete)
 		if err != nil {
 			return nil, err
 		}
-		var incompleteType bool
-		switch cr {
-		case 0:
-			// no control code
-		case WireCtrlTypeIncomplete:
-			incompleteType = true
+		if incomplete {
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindIncompleteType}, "incomplete type")
 			d.prepareAtom("waiting for message ID")
-			id, err = binaryDecodeInt(d.buf)
-			if err != nil {
-				return nil, err
-			}
-		default:
-			return nil, fmt.Errorf("unexpected control code %x", cr)
+		}
+		id, err := binaryDecodeInt(d.buf)
+		if err != nil {
+			return nil, err
 		}
 		d.writeAtom(DumpKindMsgId, PrimitivePInt{id}, "")
 		d.status.MsgId = id
@@ -475,7 +471,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err := d.typeDec.addWireType(tid, wt); err != nil {
 			return nil, err
 		}
-		if !incompleteType {
+		if !incomplete {
 			if err := d.typeDec.buildType(tid); d.version >= Version81 && err != nil {
 				return nil, err
 			}
@@ -556,7 +552,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
-			d.buf.Skip(1)
+			d.buf.SkipAvailable(1)
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "%v is nil", ttFrom)
 			return nil
 		}
@@ -570,12 +566,11 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		}
 		d.writeAtom(DumpKindByteLen, PrimitivePUint{uint64(len)}, "bytes len")
 		d.prepareAtom("waiting for bytes data")
-		bytes, err := d.buf.ReadSmall(len)
-		if err != nil {
+		data := make([]byte, len)
+		if err := d.buf.ReadIntoBuf(data); err != nil {
 			return err
 		}
-		str := string(bytes) // copy bytes before writeAtom overwrites the buffer.
-		d.writeAtom(DumpKindPrimValue, PrimitivePString{str}, "bytes")
+		d.writeAtom(DumpKindPrimValue, PrimitivePString{string(data)}, "bytes")
 		return nil
 	}
 	switch kind := tt.Kind(); kind {
@@ -598,20 +593,11 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		return nil
 	case vdl.Byte:
 		d.prepareAtom("waiting for byte value")
-		var v byte
-		var err error
-		switch d.version {
-		case Version80:
-			v, err = d.buf.ReadByte()
-		default:
-			var uv uint64
-			uv, err = binaryDecodeUint(d.buf)
-			v = byte(uv)
-		}
+		v, err := binaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
-		d.writeAtom(DumpKindPrimValue, PrimitivePByte{v}, "byte")
+		d.writeAtom(DumpKindPrimValue, PrimitivePByte{byte(v)}, "byte")
 		return nil
 	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		d.prepareAtom("waiting for uint value")
@@ -645,12 +631,11 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		}
 		d.writeAtom(DumpKindByteLen, PrimitivePUint{uint64(len)}, "string len")
 		d.prepareAtom("waiting for string data")
-		bytes, err := d.buf.ReadSmall(len)
-		if err != nil {
+		data := make([]byte, len)
+		if err := d.buf.ReadIntoBuf(data); err != nil {
 			return err
 		}
-		str := string(bytes) // copy bytes before writeAtom overwrites the buffer.
-		d.writeAtom(DumpKindPrimValue, PrimitivePString{str}, "string")
+		d.writeAtom(DumpKindPrimValue, PrimitivePString{string(data)}, "string")
 		return nil
 	case vdl.Enum:
 		d.prepareAtom("waiting for enum index")
@@ -733,15 +718,17 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		// Loop through decoding the 0-based field index and corresponding field.
 		for {
 			d.prepareAtom("waiting for struct field index")
-			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
+			switch ok, err := binaryDecodeControlOnly(d.buf, WireCtrlEnd); {
+			case err != nil:
+				return err
+			case ok:
+				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEnd}, "%v END", tt.Name())
+				return nil
+			}
+			index, err := binaryDecodeUint(d.buf)
 			switch {
 			case err != nil:
 				return err
-			case ctrl == WireCtrlEnd:
-				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEnd}, "%v END", tt.Name())
-				return nil
-			case ctrl != 0:
-				return verror.New(errUnexpectedControlByte, nil, ctrl)
 			case index >= uint64(tt.NumField()):
 				d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
 				return verror.New(errIndexOutOfRange, nil)
@@ -775,14 +762,16 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 		return nil
 	case vdl.Any:
 		d.prepareAtom("waiting for any typeID")
-		switch id, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+		switch ok, err := binaryDecodeControlOnly(d.buf, WireCtrlNil); {
 		case err != nil:
 			return err
-		case ctrl == WireCtrlNil:
+		case ok:
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "any(nil)")
 			return nil
-		case ctrl != 0:
-			return verror.New(errUnexpectedControlByte, nil, ctrl)
+		}
+		switch id, err := binaryDecodeUint(d.buf); {
+		case err != nil:
+			return err
 		default:
 			var err error
 			var elemType *vdl.Type
@@ -802,11 +791,9 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type) error {
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", elemType)
 			if d.version >= Version81 {
 				d.prepareAtom("waiting for any message length index")
-				switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+				switch index, err := binaryDecodeUint(d.buf); {
 				case err != nil:
 					return err
-				case ctrl != 0:
-					return verror.New(errUnexpectedControlByte, nil, ctrl)
 				default:
 					if index >= uint64(len(d.status.RefAnyLens)) {
 						return fmt.Errorf("any len index %d out of bounds", index)

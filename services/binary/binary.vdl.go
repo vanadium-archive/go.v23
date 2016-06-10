@@ -59,19 +59,19 @@ func (x Description) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
 	if len(x.Profiles) != 0 {
-		if err := enc.NextField("Profiles"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_map_1(enc, x.Profiles); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -103,27 +103,34 @@ func (x *Description) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Name":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Name = value
 			}
-		case "Profiles":
+		case 1:
 			if err := __VDLReadAnon_map_1(dec, &x.Profiles); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
@@ -183,16 +190,16 @@ func (x PartInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Checksum != "" {
-		if err := enc.NextFieldValueString("Checksum", vdl.StringType, x.Checksum); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Checksum); err != nil {
 			return err
 		}
 	}
 	if x.Size != 0 {
-		if err := enc.NextFieldValueInt("Size", vdl.Int64Type, x.Size); err != nil {
+		if err := enc.NextFieldValueInt(1, vdl.Int64Type, x.Size); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -203,31 +210,38 @@ func (x *PartInfo) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Checksum":
+		}
+		if decType != __VDLType_struct_3 {
+			index = __VDLType_struct_3.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Checksum = value
 			}
-		case "Size":
+		case 1:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.Size = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

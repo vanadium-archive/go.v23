@@ -432,21 +432,22 @@ func (e *encoder81) NextEntry(done bool) error {
 	return nil
 }
 
-func (e *encoder81) NextField(name string) error {
+func (e *encoder81) NextField(index int) error {
 	top := e.top()
 	if top == nil {
 		return errEmptyEncoderStack
 	}
-	if name == "" {
+	if index < -1 || index >= top.Type.NumField() {
+		return fmt.Errorf("vom: NextField called with invalid index %d", index)
+	}
+	if index == -1 {
 		if top.Type.Kind() == vdl.Struct {
 			binaryEncodeControl(e.buf, WireCtrlEnd)
 		}
 		return nil
 	}
-	if _, top.Index = top.Type.FieldByName(name); top.Index == -1 {
-		return fmt.Errorf("vom: NextField called with invalid field %q", name)
-	}
-	binaryEncodeUint(e.buf, uint64(top.Index))
+	binaryEncodeUint(e.buf, uint64(index))
+	top.Index = index
 	return nil
 }
 
@@ -519,7 +520,8 @@ func (e *encoder81) EncodeString(value string) error {
 		}
 		binaryEncodeUint(e.buf, uint64(index))
 	} else {
-		binaryEncodeString(e.buf, value)
+		binaryEncodeUint(e.buf, uint64(len(value)))
+		e.buf.WriteString(value)
 	}
 	return nil
 }

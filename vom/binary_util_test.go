@@ -5,7 +5,6 @@ package vom
 
 import (
 	"fmt"
-	"io"
 	"math"
 	"reflect"
 	"strings"
@@ -115,85 +114,56 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			t.Errorf("couldn't scan 0x%v as hex: %v", test.hex, err)
 			continue
 		}
+		// TODO(toddw): Add peek tests.
 		decbuf := newDecbuf(strings.NewReader(bin))
-		decbuf2 := newDecbuf(strings.NewReader(bin))
-		decbuf3 := newDecbuf(strings.NewReader(bin))
-		decbuf4 := newDecbuf(strings.NewReader(bin))
-		decbuf5 := newDecbuf(strings.NewReader(bin))
-		var v, v2 interface{}
-		var err, err2, err3 error
-		var vmr, vmr2 interface{}
-		var errmr, errmr2, errmr3 error
-		switch test.v.(type) {
+		decbufSkip := newDecbuf(strings.NewReader(bin))
+		var v interface{}
+		var err, errSkip error
+		switch tv := test.v.(type) {
 		case byte:
-			_, v, err = binaryDecodeUintWithControl(decbuf)
-			decbuf2.Skip(1)
-			vmr, err = binaryPeekControl(decbuf3)
-			decbuf3.Skip(1)
-			_, vmr2, errmr2 = binaryDecodeUintWithControl(decbuf4)
-			errmr3 = binaryIgnoreUint(decbuf5)
+			v = test.v
+			var match bool
+			if match, err = binaryDecodeControlOnly(decbuf, tv); !match {
+				err = fmt.Errorf("non control byte")
+			}
+			errSkip = decbufSkip.Skip(1)
 		case bool:
-			decbuf.Skip(1)
-			decbuf2.Skip(1)
-			vmr, errmr = binaryDecodeBool(decbuf3)
-			errmr2 = binaryIgnoreUint(decbuf4)
+			v, err = binaryDecodeBool(decbuf)
+			errSkip = binarySkipUint(decbufSkip)
 		case uint64:
 			v, err = binaryDecodeUint(decbuf)
-			v2, _, err2 = binaryDecodeUintWithControl(decbuf2)
-			vmr, errmr = binaryDecodeUint(decbuf3)
-			vmr2, _, errmr2 = binaryDecodeUintWithControl(decbuf4)
-			errmr3 = binaryIgnoreUint(decbuf5)
+			errSkip = binarySkipUint(decbufSkip)
 		case int64:
 			v, err = binaryDecodeInt(decbuf)
-			v2, err2 = binaryDecodeInt(decbuf2)
-			vmr, errmr = binaryDecodeInt(decbuf3)
-			errmr2 = binaryIgnoreUint(decbuf4)
+			errSkip = binarySkipUint(decbufSkip)
 		case float64:
-			binaryDecodeUint(decbuf)  // skip
-			binaryDecodeUint(decbuf2) // skip
-			vmr, errmr = binaryDecodeFloat(decbuf3)
-			errmr2 = binaryIgnoreUint(decbuf4)
+			v, err = binaryDecodeFloat(decbuf)
+			errSkip = binarySkipUint(decbufSkip)
 		case string:
-			l, _ := binaryDecodeUint(decbuf)
-			decbuf.Skip(int(l))
-			l, _ = binaryDecodeUint(decbuf2)
-			decbuf2.Skip(int(l))
-			vmr, errmr = binaryDecodeString(decbuf3)
-			errmr2 = binaryIgnoreString(decbuf4)
+			v, err = binaryDecodeString(decbuf)
+			errSkip = binarySkipString(decbufSkip)
 		}
-		if v2 != nil && v != v2 {
-			t.Errorf("binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
+		// Check decode results
+		if err != nil {
+			t.Errorf("binary decode %T(0x%v): %v", test.v, test.hex, err)
 			continue
 		}
-		if vmr2 != nil && vmr != vmr2 {
-			t.Errorf("message reader binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
+		if !reflect.DeepEqual(v, test.v) {
+			t.Errorf("binary decode %T(0x%v): got %v, want %v", test.v, test.hex, v, test.v)
 			continue
 		}
-		if err != nil || err2 != nil || err3 != nil {
-			t.Errorf("binary decode %T(0x%v): %v %v %v", test.v, test.hex, err, err2, err3)
+		if err := decbuf.Fill(1); err == nil {
+			t.Errorf("binary decode %T(0x%v): leftover bytes", test.v, test.hex)
 			continue
 		}
-		if errmr != nil || errmr2 != nil || errmr3 != nil {
-			t.Errorf("message reader binary decode %T(0x%v): %v %v %v", test.v, test.hex, errmr, errmr2, errmr3)
+		// Check skip results
+		if errSkip != nil {
+			t.Errorf("binary skip %T(0x%v): %v", test.v, test.hex, errSkip)
 			continue
 		}
-		if b, err := decbuf.ReadByte(); err != io.EOF {
-			t.Errorf("binary decode %T(0x%v) leftover byte r=%x", test.v, test.hex, b)
+		if err := decbufSkip.Fill(1); err == nil {
+			t.Errorf("binary skip %T(0x%v): leftover bytes", test.v, test.hex)
 			continue
-		}
-		if b, err := decbuf2.ReadByte(); err != io.EOF {
-			t.Errorf("binary decode %T(0x%v) leftover byte r2=%x", test.v, test.hex, b)
-			continue
-		}
-		if v != nil {
-			if !reflect.DeepEqual(v, test.v) {
-				t.Errorf("binary decode %T(0x%v): GOT %v WANT %v", test.v, test.hex, v, test.v)
-			}
-		}
-		if vmr != nil {
-			if !reflect.DeepEqual(vmr, test.v) {
-				t.Errorf("binary decode %T(0x%v): GOT %v WANT %v", test.v, test.hex, vmr, test.v)
-			}
 		}
 	}
 }

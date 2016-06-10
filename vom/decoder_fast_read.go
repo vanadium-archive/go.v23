@@ -19,36 +19,84 @@ import (
 //
 // Each method has the same pattern:
 //
+// Check fastpath:
+//   If we've already determined from the parent type that we can use the
+//   fastpath, we simply decode the value, skipping both the StartValue logic as
+//   well as the conversion logic.
 // StartValue:
-//   If IgnoreNextStarValue is set, the type is already on the stack.  Otherwise
-//   setup the type to process Any and Optional headers.  We pass nil to
-//   d.setupType to avoid the compatibility check, since the decode step will
+//   If IgnoreNextStartValue is set, the type is already on the stack.
+//   Otherwise setup the type to process Any and Optional headers.  We pass nil
+//   to d.setupType to avoid the compatibility check, since the decode step will
 //   naturally let us perform that check.
 // Decode:
 //   We implement common-case fastpaths; e.g. avoiding unnecessary conversions.
 // FinishValue:
 //   Mirrors StartValue, only pop the stack if necessary.
 
-func (d *decoder81) ReadValueBool() (value bool, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
-	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return false, err
-		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return false, err
-		}
-	}
-	// Decode
+// isFastReadParent returns true iff subtypes of tt can use the fastpath for the
+// ReadValue* methods.  By using the fastpath we can skip the expensive
+// dfsNextType and setupType calls.  We can't use the fastpath for:
+//   Any:  since we always need to process the any header
+//   Enum: since ReadValueString won't know whether to decode a string or enum
+//   Byte: since ReadValueUint won't know whether to decode a uint or full byte
+//
+// REQUIRES: tt is identical to the want type that the user is decoding into,
+// which ensures that we don't need to perform conversions.
+func isFastReadParent(tt *vdl.Type) bool {
 	switch tt.Kind() {
-	case vdl.Bool:
-		value, err = binaryDecodeBool(d.buf)
+	case vdl.Array, vdl.List:
+		elem := tt.Elem().Kind()
+		return elem != vdl.Any && elem != vdl.Enum && elem != vdl.Byte
+	case vdl.Set:
+		key := tt.Key().Kind()
+		return key != vdl.Any && key != vdl.Enum && key != vdl.Byte
+	case vdl.Map:
+		key := tt.Key().Kind()
+		elem := tt.Elem().Kind()
+		return key != vdl.Any && key != vdl.Enum && key != vdl.Byte &&
+			elem != vdl.Any && elem != vdl.Enum && elem != vdl.Byte
+	case vdl.Struct, vdl.Union:
+		if !tt.ContainsKind(vdl.WalkAll, kkAnyEnumByte...) {
+			return true
+		}
+		for f := 0; f < tt.NumField(); f++ {
+			if k := tt.Field(f).Type.Kind(); k == vdl.Any || k == vdl.Enum || k == vdl.Byte {
+				return false
+			}
+		}
+		return true
 	default:
-		return false, errIncompatibleDecode(tt, "bool")
+		return false
+	}
+}
+
+var kkAnyEnumByte = []vdl.Kind{vdl.Any, vdl.Enum, vdl.Byte}
+
+func (d *decoder81) ReadValueBool() (value bool, err error) {
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
+		value, err = binaryDecodeBool(d.buf)
+	} else {
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
+		} else {
+			if tt, err = d.dfsNextType(); err != nil {
+				return false, err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return false, err
+			}
+		}
+		// Decode
+		switch tt.Kind() {
+		case vdl.Bool:
+			value, err = binaryDecodeBool(d.buf)
+		default:
+			return false, errIncompatibleDecode(tt, "bool")
+		}
 	}
 	// FinishValue
 	if isOnStack {
@@ -57,7 +105,7 @@ func (d *decoder81) ReadValueBool() (value bool, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return false, err
 			}
@@ -67,27 +115,32 @@ func (d *decoder81) ReadValueBool() (value bool, err error) {
 }
 
 func (d *decoder81) ReadValueString() (value string, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
-	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return "", err
-		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return "", err
-		}
-	}
-	// Decode
-	switch tt.Kind() {
-	case vdl.String:
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
 		value, err = binaryDecodeString(d.buf)
-	case vdl.Enum:
-		value, err = d.binaryDecodeEnum(tt)
-	default:
-		return "", errIncompatibleDecode(tt, "string")
+	} else {
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
+		} else {
+			if tt, err = d.dfsNextType(); err != nil {
+				return "", err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return "", err
+			}
+		}
+		// Decode
+		switch tt.Kind() {
+		case vdl.String:
+			value, err = binaryDecodeString(d.buf)
+		case vdl.Enum:
+			value, err = d.binaryDecodeEnum(tt)
+		default:
+			return "", errIncompatibleDecode(tt, "string")
+		}
 	}
 	// FinishValue
 	if isOnStack {
@@ -96,7 +149,7 @@ func (d *decoder81) ReadValueString() (value string, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return "", err
 			}
@@ -106,35 +159,40 @@ func (d *decoder81) ReadValueString() (value string, err error) {
 }
 
 func (d *decoder81) ReadValueUint(bitlen int) (value uint64, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
+		value, err = binaryDecodeUint(d.buf)
 	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return 0, err
-		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return 0, err
-		}
-	}
-	// Decode, avoiding unnecessary number conversions.
-	switch kind := tt.Kind(); kind {
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
-		if kind.BitLen() <= bitlen {
-			value, err = binaryDecodeUint(d.buf)
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
 		} else {
-			value, err = d.decodeUint(tt, uint(bitlen))
+			if tt, err = d.dfsNextType(); err != nil {
+				return 0, err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return 0, err
+			}
 		}
-	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
-		value, err = d.decodeUint(tt, uint(bitlen))
-	case vdl.Byte:
-		var b byte
-		b, err = d.binaryDecodeByte()
-		value = uint64(b)
-	default:
-		return 0, errIncompatibleDecode(tt, "uint"+strconv.Itoa(bitlen))
+		// Decode, avoiding unnecessary number conversions.
+		switch kind := tt.Kind(); kind {
+		case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+			if kind.BitLen() <= bitlen {
+				value, err = binaryDecodeUint(d.buf)
+			} else {
+				value, err = d.decodeUint(tt, uint(bitlen))
+			}
+		case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
+			value, err = d.decodeUint(tt, uint(bitlen))
+		case vdl.Byte:
+			var b byte
+			b, err = d.binaryDecodeByte()
+			value = uint64(b)
+		default:
+			return 0, errIncompatibleDecode(tt, "uint"+strconv.Itoa(bitlen))
+		}
 	}
 	// FinishValue
 	if isOnStack {
@@ -143,7 +201,7 @@ func (d *decoder81) ReadValueUint(bitlen int) (value uint64, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return 0, err
 			}
@@ -153,31 +211,36 @@ func (d *decoder81) ReadValueUint(bitlen int) (value uint64, err error) {
 }
 
 func (d *decoder81) ReadValueInt(bitlen int) (value int64, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
+		value, err = binaryDecodeInt(d.buf)
 	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return 0, err
-		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return 0, err
-		}
-	}
-	// Decode, avoiding unnecessary number conversions.
-	switch kind := tt.Kind(); kind {
-	case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
-		if kind.BitLen() <= bitlen {
-			value, err = binaryDecodeInt(d.buf)
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
 		} else {
-			value, err = d.decodeInt(tt, uint(bitlen))
+			if tt, err = d.dfsNextType(); err != nil {
+				return 0, err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return 0, err
+			}
 		}
-	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Float32, vdl.Float64:
-		value, err = d.decodeInt(tt, uint(bitlen))
-	default:
-		return 0, errIncompatibleDecode(tt, "int"+strconv.Itoa(bitlen))
+		// Decode, avoiding unnecessary number conversions.
+		switch kind := tt.Kind(); kind {
+		case vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
+			if kind.BitLen() <= bitlen {
+				value, err = binaryDecodeInt(d.buf)
+			} else {
+				value, err = d.decodeInt(tt, uint(bitlen))
+			}
+		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Float32, vdl.Float64:
+			value, err = d.decodeInt(tt, uint(bitlen))
+		default:
+			return 0, errIncompatibleDecode(tt, "int"+strconv.Itoa(bitlen))
+		}
 	}
 	// FinishValue
 	if isOnStack {
@@ -186,7 +249,7 @@ func (d *decoder81) ReadValueInt(bitlen int) (value int64, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return 0, err
 			}
@@ -196,25 +259,36 @@ func (d *decoder81) ReadValueInt(bitlen int) (value int64, err error) {
 }
 
 func (d *decoder81) ReadValueFloat(bitlen int) (value float64, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
+		value, err = binaryDecodeFloat(d.buf)
 	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return 0, err
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
+		} else {
+			if tt, err = d.dfsNextType(); err != nil {
+				return 0, err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return 0, err
+			}
 		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return 0, err
+		// Decode, avoiding unnecessary number conversions.
+		switch kind := tt.Kind(); kind {
+		case vdl.Float32, vdl.Float64:
+			if kind.BitLen() <= bitlen {
+				value, err = binaryDecodeFloat(d.buf)
+			} else {
+				value, err = d.decodeFloat(tt, uint(bitlen))
+			}
+		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64:
+			value, err = d.decodeFloat(tt, uint(bitlen))
+		default:
+			return 0, errIncompatibleDecode(tt, "float"+strconv.Itoa(bitlen))
 		}
-	}
-	// Decode, avoiding unnecessary number conversions.
-	switch kind := tt.Kind(); kind {
-	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int8, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
-		value, err = d.decodeFloat(tt, uint(bitlen))
-	default:
-		return 0, errIncompatibleDecode(tt, "float"+strconv.Itoa(bitlen))
 	}
 	// FinishValue
 	if isOnStack {
@@ -223,7 +297,7 @@ func (d *decoder81) ReadValueFloat(bitlen int) (value float64, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return 0, err
 			}
@@ -233,25 +307,30 @@ func (d *decoder81) ReadValueFloat(bitlen int) (value float64, err error) {
 }
 
 func (d *decoder81) ReadValueTypeObject() (value *vdl.Type, err error) {
-	// StartValue
-	isOnStack := d.flag.IgnoreNextStartValue()
-	var tt *vdl.Type
-	if isOnStack {
-		tt = d.stack[len(d.stack)-1].Type
-	} else {
-		if tt, err = d.dfsNextType(); err != nil {
-			return nil, err
-		}
-		if tt, _, _, err = d.setupType(tt, nil); err != nil {
-			return nil, err
-		}
-	}
-	// Decode
-	switch tt.Kind() {
-	case vdl.TypeObject:
+	top, isOnStack := d.top(), d.flag.IgnoreNextStartValue()
+	// Check fastpath
+	if top != nil && top.Flag.FastRead() {
 		value, err = d.binaryDecodeType()
-	default:
-		return nil, errIncompatibleDecode(tt, "typeobject")
+	} else {
+		// StartValue
+		var tt *vdl.Type
+		if isOnStack {
+			tt = top.Type
+		} else {
+			if tt, err = d.dfsNextType(); err != nil {
+				return nil, err
+			}
+			if tt, _, _, err = d.setupType(tt, nil); err != nil {
+				return nil, err
+			}
+		}
+		// Decode
+		switch tt.Kind() {
+		case vdl.TypeObject:
+			value, err = d.binaryDecodeType()
+		default:
+			return nil, errIncompatibleDecode(tt, "typeobject")
+		}
 	}
 	// FinishValue
 	if isOnStack {
@@ -260,7 +339,7 @@ func (d *decoder81) ReadValueTypeObject() (value *vdl.Type, err error) {
 		}
 	} else {
 		d.flag = d.flag.Clear(decFlagFinishValue)
-		if len(d.stack) == 0 {
+		if top == nil {
 			if err := d.endMessage(); err != nil {
 				return nil, err
 			}
@@ -272,6 +351,8 @@ func (d *decoder81) ReadValueTypeObject() (value *vdl.Type, err error) {
 // ReadValueBytes is more complicated than the other ReadValue* methods, since
 // []byte lists and [n]byte arrays aren't scalar, and may need more complicated
 // conversions
+//
+// TODO(toddw): Implement fastpath for this?
 func (d *decoder81) ReadValueBytes(fixedLen int, x *[]byte) (err error) {
 	// StartValue.  Initialize tt and lenHint, and track whether the []byte type
 	// is already on the stack via isOnStack.

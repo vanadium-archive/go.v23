@@ -5,27 +5,27 @@
 package vom
 
 import (
-	"io"
 	"math"
+	"reflect"
+	"unsafe"
 
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
 
-// TODO(toddw) Reduce the number of functions and optimize.
+// Binary encoding and decoding routines.
+
 const pkgPath = "v.io/v23/vom"
 
 var (
 	errInvalid                = verror.Register(pkgPath+".errInvalid", verror.NoRetry, "{1:}{2:} vom: invalid encoding{:_}")
+	errInvalidLenOrControl    = verror.Register(pkgPath+".errInvalidLenOrControl", verror.NoRetry, "{1:}{2:} vom: invalid len or control byte {3}{:_}")
 	errMsgLen                 = verror.Register(pkgPath+".errMsgLen", verror.NoRetry, "{1:}{2:} vom: message larger than {3} bytes{:_}")
 	errUintOverflow           = verror.Register(pkgPath+".errUintOverflow", verror.NoRetry, "{1:}{2:} vom: scalar larger than 8 bytes{:_}")
 	errBadControlCode         = verror.Register(pkgPath+".errBadControlCode", verror.NoRetry, "{1:}{2:} invalid control code{:_}")
 	errBadVersionByte         = verror.Register(pkgPath+".errBadVersionByte", verror.NoRetry, "{1:}{2:} bad version byte {3}")
 	errEndedBeforeVersionByte = verror.Register(pkgPath+".errEndedBeforeVersionByte", verror.NoRetry, "{1:}{2:} ended before version byte received {:_}")
 )
-
-// Binary encoding and decoding routines.  The binary format is identical to the
-// encoding/gob package, and much of the implementation is similar.
 
 const (
 	uint64Size          = 8
@@ -58,23 +58,6 @@ func lenUint(v uint64) int {
 	}
 }
 
-func intToUint(v int64) uint64 {
-	var uval uint64
-	if v < 0 {
-		uval = uint64(^v<<1) | 1
-	} else {
-		uval = uint64(v << 1)
-	}
-	return uval
-}
-
-func uintToInt(uval uint64) int64 {
-	if uval&1 == 1 {
-		return ^int64(uval >> 1)
-	}
-	return int64(uval >> 1)
-}
-
 func binaryEncodeControl(buf *encbuf, v byte) {
 	if v < 0x80 || v > 0xef {
 		panic(verror.New(errBadControlCode, nil, v))
@@ -82,16 +65,39 @@ func binaryEncodeControl(buf *encbuf, v byte) {
 	buf.WriteOneByte(v)
 }
 
-// If the byte is not a control, this will return 0.
-func binaryPeekControl(buf *decbuf) (byte, error) {
-	v, err := buf.PeekByte()
-	if err != nil {
-		return 0, err
+// binaryDecodeControlOnly only decodes and advances the read position if the
+// next byte is a control byte.  Returns an error if the control byte doesn't
+// match want.
+func binaryDecodeControlOnly(buf *decbuf, want byte) (bool, error) {
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return false, err
+		}
 	}
-	if v < 0x80 || v > 0xef {
+	ctrl := buf.PeekAvailableByte()
+	if ctrl < 0x80 || ctrl > 0xef {
+		return false, nil // not a control byte
+	}
+	if ctrl != want {
+		return false, verror.New(errBadControlCode, nil, ctrl)
+	}
+	buf.SkipAvailable(1)
+	return true, nil
+}
+
+// binaryPeekControl returns the next byte as a control byte, or 0 if it is not
+// a control byte.  Doesn't advance the read position.
+func binaryPeekControl(buf *decbuf) (byte, error) {
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, err
+		}
+	}
+	ctrl := buf.PeekAvailableByte()
+	if ctrl < 0x80 || ctrl > 0xef {
 		return 0, nil
 	}
-	return v, nil
+	return ctrl, nil
 }
 
 // Bools are encoded as a byte where 0 = false and anything else is true.
@@ -104,14 +110,16 @@ func binaryEncodeBool(buf *encbuf, v bool) {
 }
 
 func binaryDecodeBool(buf *decbuf) (bool, error) {
-	v, err := buf.ReadByte()
-	if err != nil {
-		return false, err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return false, err
+		}
 	}
-	if v > 0x7f {
-		return false, verror.New(errInvalid, nil)
+	value := buf.ReadAvailableByte()
+	if value > 1 {
+		return false, verror.New(errInvalid, nil) // TODO: better error
 	}
-	return v != 0, nil
+	return value != 0, nil
 }
 
 // Unsigned integers are the basis for all other primitive values.  This is a
@@ -185,173 +193,109 @@ func binaryEncodeUint(buf *encbuf, v uint64) {
 	}
 }
 
-func byteSliceBinaryPeekUint(p []byte) (val uint64, byteLen int, err error) {
-	v, cr, bytelen, err := byteSliceBinaryPeekUintWithControl(p)
-	if err != nil {
-		return 0, 0, err
-	}
-	if cr != 0 {
-		return 0, 0, verror.New(errInvalid, nil)
-	}
-	return v, bytelen, nil
-}
-
 func binaryDecodeUint(buf *decbuf) (uint64, error) {
-	v, bytelen, err := binaryPeekUint(buf)
-	if err != nil {
-		return 0, err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, err
+		}
 	}
-	return v, buf.Skip(bytelen)
-}
-
-func byteSliceBinaryPeekUintWithControl(b []byte) (val uint64, cr byte, lenRead int, err error) {
-	if len(b) == 0 {
-		return 0, 0, 0, io.EOF
-	}
-	firstByte := b[0]
+	firstByte := buf.ReadAvailableByte()
 	// Handle single-byte encoding.
 	if firstByte <= 0x7f {
-		return uint64(firstByte), 0, 1, nil
-	}
-	// Handle control code.
-	if firstByte <= 0xef {
-		return 0, byte(firstByte), 1, nil
+		return uint64(firstByte), nil
 	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, 0, verror.New(errUintOverflow, nil)
+		return 0, verror.New(errInvalidLenOrControl, nil, firstByte)
 	}
-	if byteLen >= len(b) {
-		return 0, 0, 0, io.EOF
+	if !buf.IsAvailable(byteLen) {
+		if err := buf.Fill(byteLen); err != nil {
+			return 0, err
+		}
 	}
-	var v uint64
-	for _, b := range b[1 : byteLen+1] {
-		v = v<<8 | uint64(b)
+	bytes := buf.ReadAvailable(byteLen)
+	var uvalue uint64
+	for _, b := range bytes {
+		uvalue = uvalue<<8 | uint64(b)
 	}
-	return v, 0, byteLen + 1, nil
-}
-
-func byteSliceBinaryPeekIntWithControl(b []byte) (val int64, cr byte, lenRead int, err error) {
-	var uval uint64
-	uval, cr, lenRead, err = byteSliceBinaryPeekUintWithControl(b)
-	val = uintToInt(uval)
-	return
+	return uvalue, nil
 }
 
 func binaryPeekUint(buf *decbuf) (uint64, int, error) {
-	firstByte, err := buf.PeekByte()
-	if err != nil {
-		return 0, 0, err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, 0, err
+		}
 	}
+	firstByte := buf.PeekAvailableByte()
 	// Handle single-byte encoding.
 	if firstByte <= 0x7f {
 		return uint64(firstByte), 1, nil
 	}
-	// Verify not a control code.
-	if firstByte <= 0xef {
-		return 0, 0, verror.New(errInvalid, nil)
-	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, verror.New(errUintOverflow, nil)
+		return 0, 0, verror.New(errInvalidLenOrControl, nil, firstByte)
 	}
 	byteLen++ // account for initial len byte
-	bytes, err := buf.PeekSmall(byteLen)
-	if err != nil {
-		return 0, 0, err
+	if !buf.IsAvailable(byteLen) {
+		if err := buf.Fill(byteLen); err != nil {
+			return 0, 0, err
+		}
 	}
-	var v uint64
-	for _, b := range bytes[1:byteLen] {
-		v = v<<8 | uint64(b)
+	bytes := buf.PeekAvailable(byteLen)
+	var uvalue uint64
+	for _, b := range bytes[1:] {
+		uvalue = uvalue<<8 | uint64(b)
 	}
-	return v, byteLen, nil
+	return uvalue, byteLen, nil
 }
 
-func binaryDecodeUintWithControl(buf *decbuf) (uint64, byte, error) {
-	v, c, bytelen, err := binaryPeekUintWithControl(buf)
-	if err != nil {
-		return 0, 0, err
+func binarySkipUint(buf *decbuf) error {
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return err
+		}
 	}
-	return v, c, buf.Skip(bytelen)
-}
-
-func binaryDecodeIntWithControl(buf *decbuf) (int64, byte, error) {
-	v, c, bytelen, err := binaryPeekUintWithControl(buf)
-	if err != nil {
-		return 0, 0, err
-	}
-	return uintToInt(v), c, buf.Skip(bytelen)
-}
-
-func binaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
-	firstByte, err := buf.PeekByte()
-	if err != nil {
-		return 0, 0, 0, err
-	}
+	firstByte := buf.PeekAvailableByte()
 	// Handle single-byte encoding.
 	if firstByte <= 0x7f {
-		return uint64(firstByte), 0, 1, nil
-	}
-	// Handle control code.
-	if firstByte <= 0xef {
-		return 0, byte(firstByte), 1, nil
+		buf.SkipAvailable(1)
+		return nil
 	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, 0, verror.New(errUintOverflow, nil)
+		return verror.New(errInvalidLenOrControl, nil, firstByte)
 	}
 	byteLen++ // account for initial len byte
-	bytes, err := buf.PeekSmall(byteLen)
-	if err != nil {
-		return 0, 0, 0, err
+	if !buf.IsAvailable(byteLen) {
+		if err := buf.Fill(byteLen); err != nil {
+			return err
+		}
 	}
-	var v uint64
-	for _, b := range bytes[1:byteLen] {
-		v = v<<8 | uint64(b)
-	}
-	return v, 0, byteLen, nil
-}
-
-func binaryPeekIntWithControl(buf *decbuf) (int64, byte, int, error) {
-	v, cr, l, err := binaryPeekUintWithControl(buf)
-	return uintToInt(v), cr, l, err
+	buf.SkipAvailable(byteLen)
+	return nil
 }
 
 func binaryPeekUintByteLen(buf *decbuf) (int, error) {
-	firstByte, err := buf.PeekByte()
-	if err != nil {
-		return 0, err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, err
+		}
 	}
-	if firstByte <= 0xef {
+	firstByte := buf.PeekAvailableByte()
+	// Handle single-byte encoding.
+	if firstByte <= 0x7f {
 		return 1, nil
 	}
+	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
-	if byteLen > uint64Size {
-		return 0, verror.New(errUintOverflow, nil)
+	if byteLen < 1 || byteLen > uint64Size {
+		return 0, verror.New(errInvalidLenOrControl, nil, firstByte)
 	}
 	return 1 + byteLen, nil
-}
-
-func binaryIgnoreUint(buf *decbuf) error {
-	byteLen, err := binaryPeekUintByteLen(buf)
-	if err != nil {
-		return err
-	}
-	return buf.Skip(byteLen)
-}
-
-func byteSliceBinaryPeekLen(b []byte) (len, byteLen int, err error) {
-	ulen, byteLen, err := byteSliceBinaryPeekUint(b)
-	switch {
-	case err != nil:
-		return 0, 0, err
-	case ulen > maxBinaryMsgLen:
-		return 0, 0, verror.New(errMsgLen, nil, maxBinaryMsgLen)
-	}
-	return int(ulen), byteLen, nil
 }
 
 func binaryDecodeLen(buf *decbuf) (int, error) {
@@ -372,7 +316,7 @@ func binaryDecodeLenOrArrayLen(buf *decbuf, t *vdl.Type) (int, error) {
 	}
 	if t.Kind() == vdl.Array {
 		if len != 0 {
-			return 0, verror.New(errInvalid, nil)
+			return 0, verror.New(errInvalid, nil) // TODO(toddw): better error
 		}
 		return t.Len(), nil
 	}
@@ -382,33 +326,91 @@ func binaryDecodeLenOrArrayLen(buf *decbuf, t *vdl.Type) (int, error) {
 // Signed integers are encoded as unsigned integers, where the low bit says
 // whether to complement the other bits to recover the int.
 func binaryEncodeInt(buf *encbuf, v int64) {
-	var uval uint64
+	var uvalue uint64
 	if v < 0 {
-		uval = uint64(^v<<1) | 1
+		uvalue = uint64(^v<<1) | 1
 	} else {
-		uval = uint64(v << 1)
+		uvalue = uint64(v << 1)
 	}
-	binaryEncodeUint(buf, uval)
+	binaryEncodeUint(buf, uvalue)
 }
 
 func binaryDecodeInt(buf *decbuf) (int64, error) {
-	uval, err := binaryDecodeUint(buf)
-	return uintToInt(uval), err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, err
+		}
+	}
+	firstByte := buf.ReadAvailableByte()
+	// Handle single-byte encoding.
+	if firstByte <= 0x7f {
+		if firstByte&1 == 1 {
+			return ^int64(firstByte >> 1), nil
+		}
+		return int64(firstByte >> 1), nil
+	}
+	// Handle multi-byte encoding.
+	byteLen := int(-int8(firstByte))
+	if byteLen < 1 || byteLen > uint64Size {
+		return 0, verror.New(errInvalidLenOrControl, nil, firstByte)
+	}
+	if !buf.IsAvailable(byteLen) {
+		if err := buf.Fill(byteLen); err != nil {
+			return 0, err
+		}
+	}
+	bytes := buf.ReadAvailable(byteLen)
+	var uvalue uint64
+	for _, b := range bytes {
+		uvalue = uvalue<<8 | uint64(b)
+	}
+	if uvalue&1 == 1 {
+		return ^int64(uvalue >> 1), nil
+	}
+	return int64(uvalue >> 1), nil
 }
 
 func binaryPeekInt(buf *decbuf) (int64, int, error) {
-	uval, bytelen, err := binaryPeekUint(buf)
-	if err != nil {
-		return 0, 0, err
+	if !buf.IsAvailable(1) {
+		if err := buf.Fill(1); err != nil {
+			return 0, 0, err
+		}
 	}
-	return uintToInt(uval), bytelen, err
+	firstByte := buf.PeekAvailableByte()
+	// Handle single-byte encoding.
+	if firstByte <= 0x7f {
+		if firstByte&1 == 1 {
+			return ^int64(firstByte >> 1), 1, nil
+		}
+		return int64(firstByte >> 1), 1, nil
+	}
+	// Handle multi-byte encoding.
+	byteLen := int(-int8(firstByte))
+	if byteLen < 1 || byteLen > uint64Size {
+		return 0, 0, verror.New(errInvalidLenOrControl, nil, firstByte)
+	}
+	byteLen++ // account for initial len byte
+	if !buf.IsAvailable(byteLen) {
+		if err := buf.Fill(byteLen); err != nil {
+			return 0, 0, err
+		}
+	}
+	bytes := buf.PeekAvailable(byteLen)
+	var uvalue uint64
+	for _, b := range bytes[1:] {
+		uvalue = uvalue<<8 | uint64(b)
+	}
+	if uvalue&1 == 1 {
+		return ^int64(uvalue >> 1), byteLen, nil
+	}
+	return int64(uvalue >> 1), byteLen, nil
 }
 
 // Floating point numbers are encoded as byte-reversed ieee754.
 func binaryEncodeFloat(buf *encbuf, v float64) {
 	ieee := math.Float64bits(v)
 	// Manually-unrolled byte-reversing.
-	uval := (ieee&0xff)<<56 |
+	uvalue := (ieee&0xff)<<56 |
 		(ieee&0xff00)<<40 |
 		(ieee&0xff0000)<<24 |
 		(ieee&0xff000000)<<8 |
@@ -416,45 +418,51 @@ func binaryEncodeFloat(buf *encbuf, v float64) {
 		(ieee&0xff0000000000)>>24 |
 		(ieee&0xff000000000000)>>40 |
 		(ieee&0xff00000000000000)>>56
-	binaryEncodeUint(buf, uval)
+	binaryEncodeUint(buf, uvalue)
 }
 
 func binaryDecodeFloat(buf *decbuf) (float64, error) {
-	uval, err := binaryDecodeUint(buf)
+	uvalue, err := binaryDecodeUint(buf)
 	if err != nil {
 		return 0, err
 	}
 	// Manually-unrolled byte-reversing.
-	ieee := (uval&0xff)<<56 |
-		(uval&0xff00)<<40 |
-		(uval&0xff0000)<<24 |
-		(uval&0xff000000)<<8 |
-		(uval&0xff00000000)>>8 |
-		(uval&0xff0000000000)>>24 |
-		(uval&0xff000000000000)>>40 |
-		(uval&0xff00000000000000)>>56
+	ieee := (uvalue&0xff)<<56 |
+		(uvalue&0xff00)<<40 |
+		(uvalue&0xff0000)<<24 |
+		(uvalue&0xff000000)<<8 |
+		(uvalue&0xff00000000)>>8 |
+		(uvalue&0xff0000000000)>>24 |
+		(uvalue&0xff000000000000)>>40 |
+		(uvalue&0xff00000000000000)>>56
 	return math.Float64frombits(ieee), nil
 }
 
 // Strings are encoded as the byte count followed by uninterpreted bytes.
 func binaryEncodeString(buf *encbuf, s string) {
 	binaryEncodeUint(buf, uint64(len(s)))
-	buf.Write([]byte(s))
+	buf.WriteString(s)
 }
 
 func binaryDecodeString(buf *decbuf) (string, error) {
 	len, err := binaryDecodeLen(buf)
-	if err != nil {
+	if len == 0 || err != nil {
 		return "", err
 	}
-	p := make([]byte, len)
-	if err := buf.ReadIntoBuf(p); err != nil {
+	data := make([]byte, len)
+	if err := buf.ReadIntoBuf(data); err != nil {
 		return "", err
 	}
-	return string(p), nil
+	// Go makes an extra copy if we simply perform the conversion string(data), so
+	// we use unsafe to transfer the contents from data into s without a copy.
+	s := ""
+	p := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	p.Data = uintptr(unsafe.Pointer(&data[0]))
+	p.Len = len
+	return s, nil
 }
 
-func binaryIgnoreString(buf *decbuf) error {
+func binarySkipString(buf *decbuf) error {
 	len, err := binaryDecodeLen(buf)
 	if err != nil {
 		return err
@@ -540,5 +548,11 @@ func binaryEncodeUintEnd(buf []byte, v uint64) int {
 //
 // REQUIRES: buf is big enough to hold the encoded value.
 func binaryEncodeIntEnd(buf []byte, v int64) int {
-	return binaryEncodeUintEnd(buf, intToUint(v))
+	var uvalue uint64
+	if v < 0 {
+		uvalue = uint64(^v<<1) | 1
+	} else {
+		uvalue = uint64(v << 1)
+	}
+	return binaryEncodeUintEnd(buf, uvalue)
 }

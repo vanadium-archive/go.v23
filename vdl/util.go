@@ -123,17 +123,17 @@ func (z zeroDecoder) StartValue(want *Type) error {
 	}
 	return nil
 }
-func (z zeroDecoder) FinishValue() error         { return nil }
-func (z zeroDecoder) SkipValue() error           { return nil }
-func (z zeroDecoder) IgnoreNextStartValue()      {}
-func (z zeroDecoder) NextEntry() (bool, error)   { return true, nil }
-func (z zeroDecoder) NextField() (string, error) { return "", nil }
-func (z zeroDecoder) Type() *Type                { return z.tt }
-func (z zeroDecoder) IsAny() bool                { return z.tt == AnyType }
-func (z zeroDecoder) IsOptional() bool           { return z.tt.Kind() == Optional }
-func (z zeroDecoder) IsNil() bool                { return z.IsAny() || z.IsOptional() }
-func (z zeroDecoder) Index() int                 { return 0 }
-func (z zeroDecoder) LenHint() int               { return 0 }
+func (z zeroDecoder) FinishValue() error       { return nil }
+func (z zeroDecoder) SkipValue() error         { return nil }
+func (z zeroDecoder) IgnoreNextStartValue()    {}
+func (z zeroDecoder) NextEntry() (bool, error) { return true, nil }
+func (z zeroDecoder) NextField() (int, error)  { return -1, nil }
+func (z zeroDecoder) Type() *Type              { return z.tt }
+func (z zeroDecoder) IsAny() bool              { return z.tt == AnyType }
+func (z zeroDecoder) IsOptional() bool         { return z.tt.Kind() == Optional }
+func (z zeroDecoder) IsNil() bool              { return z.IsAny() || z.IsOptional() }
+func (z zeroDecoder) Index() int               { return 0 }
+func (z zeroDecoder) LenHint() int             { return 0 }
 
 func (z zeroDecoder) DecodeBool() (bool, error)        { return false, nil }
 func (z zeroDecoder) DecodeString() (string, error)    { return "", nil }

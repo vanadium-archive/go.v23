@@ -41,24 +41,23 @@ func Decode(data []byte, v interface{}) error {
 	//
 	// However decoding type messages is expensive, so we cache typeDecoders to
 	// skip the decoding in the common case.
-	key, err := computeTypeDecoderCacheKey(data)
+	buf := newDecbufFromBytes(data)
+	key, err := computeTypeDecoderCacheKey(buf)
 	if err != nil {
 		return err
 	}
-	var buf *decbuf
 	typeDec := singleShotTypeDecoderCache.lookup(key)
 	cacheMiss := false
 	if typeDec == nil {
 		// Cache miss; start decoding at the beginning of all type messages with a
 		// new TypeDecoder.
 		cacheMiss = true
-		buf = newDecbufFromBytes(data)
+		buf.beg = 0
 		typeDec = newTypeDecoderInternal(buf)
 	} else {
-		version := Version(data[0])
-		data = data[len(key):] // skip the already-read types
-		buf = newDecbufFromBytes(data)
-		buf.version = version
+		// Cache hit; the buf is already positioned on the message id of the value,
+		// so we can just continue decoding from there.
+		buf.version = Version(data[0])
 		typeDec = newDerivedTypeDecoderInternal(buf, typeDec)
 	}
 	// Decode the value message.
@@ -113,24 +112,31 @@ func (x *typeDecoderCache) lookup(key string) *TypeDecoder {
 	return dec
 }
 
-// computeTypeDecoderCacheKey computes the cache key for the typeDecoderCache.
-// The logic is similar to Decoder.decodeValueType.
-func computeTypeDecoderCacheKey(message []byte) (string, error) {
-	// TODO(bprosnitz) Should we canonicalize the cache key by stripping the continuation control codes?
-	readPos := 0
-	if len(message) == 0 {
+// computeTypeDecoderCacheKey computes the cache key for the typeDecoderCache,
+// by returning the bytes of all type messages.  Upon return, the read position
+// of b is guaranteed to be on the first byte of the value message.
+func computeTypeDecoderCacheKey(b *decbuf) (string, error) {
+	if b.end == 0 {
 		return "", io.EOF
 	}
-	if !isAllowedVersion(Version(message[0])) {
-		return "", verror.New(errBadVersionByte, nil, message[0])
+	if version := Version(b.buf[0]); !isAllowedVersion(version) {
+		return "", verror.New(errBadVersionByte, nil, version)
 	}
-	readPos++
+	b.beg++
 	// Walk through bytes until we get to a value message.
 	for {
-		if len(message) < readPos {
+		if b.end < b.beg {
 			return "", verror.New(errIndexOutOfRange, nil)
 		}
-		switch id, cr, byteLen, err := byteSliceBinaryPeekIntWithControl(message[readPos:]); {
+		// Handle incomplete types.
+		switch ok, err := binaryDecodeControlOnly(b, WireCtrlTypeIncomplete); {
+		case err != nil:
+			return "", err
+		case ok:
+			continue
+		}
+		// Handle the next message id.
+		switch id, byteLen, err := binaryPeekInt(b); {
 		case err != nil:
 			return "", err
 		case id > 0:
@@ -138,22 +144,17 @@ func computeTypeDecoderCacheKey(message []byte) (string, error) {
 			// byte and all type messages; use all of these bytes as the cache key.
 			//
 			// TODO(toddw): Take a fingerprint of these bytes to reduce memory usage.
-			return string(message[:readPos]), nil
+			return string(b.buf[:b.beg]), nil
 		case id < 0:
-
 			// This is a type message.  Skip the bytes for the id or control code, and
 			// decode the message length (which always exists for wireType), and skip
 			// those bytes too to move to the next message.
-			readPos += byteLen
-			msgLen, byteLen, err := byteSliceBinaryPeekLen(message[readPos:])
+			b.beg += byteLen
+			msgLen, err := binaryDecodeLen(b)
 			if err != nil {
 				return "", err
 			}
-			readPos += byteLen + msgLen
-		case cr == WireCtrlTypeIncomplete:
-			readPos += byteLen
-		case cr > 0:
-			return "", verror.New(errBadControlCode, nil)
+			b.beg += msgLen
 		default:
 			return "", verror.New(errDecodeZeroTypeID, nil)
 		}

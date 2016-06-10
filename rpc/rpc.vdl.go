@@ -96,27 +96,27 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Suffix != "" {
-		if err := enc.NextFieldValueString("Suffix", vdl.StringType, x.Suffix); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Suffix); err != nil {
 			return err
 		}
 	}
 	if x.Method != "" {
-		if err := enc.NextFieldValueString("Method", vdl.StringType, x.Method); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Method); err != nil {
 			return err
 		}
 	}
 	if x.NumPosArgs != 0 {
-		if err := enc.NextFieldValueUint("NumPosArgs", vdl.Uint64Type, x.NumPosArgs); err != nil {
+		if err := enc.NextFieldValueUint(2, vdl.Uint64Type, x.NumPosArgs); err != nil {
 			return err
 		}
 	}
 	if x.EndStreamArgs {
-		if err := enc.NextFieldValueBool("EndStreamArgs", vdl.BoolType, x.EndStreamArgs); err != nil {
+		if err := enc.NextFieldValueBool(3, vdl.BoolType, x.EndStreamArgs); err != nil {
 			return err
 		}
 	}
 	if !x.Deadline.Time.IsZero() {
-		if err := enc.NextField("Deadline"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		var wire vdltime.WireDeadline
@@ -128,7 +128,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.GrantedBlessings.IsZero() {
-		if err := enc.NextField("GrantedBlessings"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		var wire security.WireBlessings
@@ -140,7 +140,7 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.TraceRequest != (vtrace.Request{}) {
-		if err := enc.NextField("TraceRequest"); err != nil {
+		if err := enc.NextField(6); err != nil {
 			return err
 		}
 		if err := x.TraceRequest.VDLWrite(enc); err != nil {
@@ -148,11 +148,11 @@ func (x Request) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Language != "" {
-		if err := enc.NextFieldValueString("Language", vdl.StringType, x.Language); err != nil {
+		if err := enc.NextFieldValueString(7, vdl.StringType, x.Language); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -163,43 +163,54 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Suffix":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Suffix = value
 			}
-		case "Method":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Method = value
 			}
-		case "NumPosArgs":
+		case 2:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.NumPosArgs = value
 			}
-		case "EndStreamArgs":
+		case 3:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.EndStreamArgs = value
 			}
-		case "Deadline":
+		case 4:
 			var wire vdltime.WireDeadline
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -207,7 +218,7 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 			if err := vdltime.WireDeadlineToNative(wire, &x.Deadline); err != nil {
 				return err
 			}
-		case "GrantedBlessings":
+		case 5:
 			var wire security.WireBlessings
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -215,20 +226,16 @@ func (x *Request) VDLRead(dec vdl.Decoder) error {
 			if err := security.WireBlessingsToNative(wire, &x.GrantedBlessings); err != nil {
 				return err
 			}
-		case "TraceRequest":
+		case 6:
 			if err := x.TraceRequest.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Language":
+		case 7:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Language = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -285,7 +292,7 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Error != nil {
-		if err := enc.NextField("Error"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := verror.VDLWrite(enc, x.Error); err != nil {
@@ -293,17 +300,17 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.EndStreamResults {
-		if err := enc.NextFieldValueBool("EndStreamResults", vdl.BoolType, x.EndStreamResults); err != nil {
+		if err := enc.NextFieldValueBool(1, vdl.BoolType, x.EndStreamResults); err != nil {
 			return err
 		}
 	}
 	if x.NumPosResults != 0 {
-		if err := enc.NextFieldValueUint("NumPosResults", vdl.Uint64Type, x.NumPosResults); err != nil {
+		if err := enc.NextFieldValueUint(2, vdl.Uint64Type, x.NumPosResults); err != nil {
 			return err
 		}
 	}
 	if !x.TraceResponse.VDLIsZero() {
-		if err := enc.NextField("TraceResponse"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := x.TraceResponse.VDLWrite(enc); err != nil {
@@ -311,11 +318,11 @@ func (x Response) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.AckBlessings {
-		if err := enc.NextFieldValueBool("AckBlessings", vdl.BoolType, x.AckBlessings); err != nil {
+		if err := enc.NextFieldValueBool(4, vdl.BoolType, x.AckBlessings); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -326,46 +333,53 @@ func (x *Response) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Error":
+		}
+		if decType != __VDLType_struct_5 {
+			index = __VDLType_struct_5.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := verror.VDLRead(dec, &x.Error); err != nil {
 				return err
 			}
-		case "EndStreamResults":
+		case 1:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.EndStreamResults = value
 			}
-		case "NumPosResults":
+		case 2:
 			switch value, err := dec.ReadValueUint(64); {
 			case err != nil:
 				return err
 			default:
 				x.NumPosResults = value
 			}
-		case "TraceResponse":
+		case 3:
 			if err := x.TraceResponse.VDLRead(dec); err != nil {
 				return err
 			}
-		case "AckBlessings":
+		case 4:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.AckBlessings = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

@@ -234,17 +234,17 @@ func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Id != (AdId{}) {
-		if err := enc.NextFieldValueBytes("Id", __VDLType_array_1, x.Id[:]); err != nil {
+		if err := enc.NextFieldValueBytes(0, __VDLType_array_1, x.Id[:]); err != nil {
 			return err
 		}
 	}
 	if x.InterfaceName != "" {
-		if err := enc.NextFieldValueString("InterfaceName", vdl.StringType, x.InterfaceName); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.InterfaceName); err != nil {
 			return err
 		}
 	}
 	if len(x.Addresses) != 0 {
-		if err := enc.NextField("Addresses"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.Addresses); err != nil {
@@ -252,7 +252,7 @@ func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.Attributes) != 0 {
-		if err := enc.NextField("Attributes"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := x.Attributes.VDLWrite(enc); err != nil {
@@ -260,14 +260,14 @@ func (x Advertisement) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.Attachments) != 0 {
-		if err := enc.NextField("Attachments"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		if err := x.Attachments.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -296,40 +296,47 @@ func (x *Advertisement) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_5); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Id":
+		}
+		if decType != __VDLType_struct_5 {
+			index = __VDLType_struct_5.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			bytes := x.Id[:]
 			if err := dec.ReadValueBytes(16, &bytes); err != nil {
 				return err
 			}
-		case "InterfaceName":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.InterfaceName = value
 			}
-		case "Addresses":
+		case 2:
 			if err := __VDLReadAnon_list_1(dec, &x.Addresses); err != nil {
 				return err
 			}
-		case "Attributes":
+		case 3:
 			if err := x.Attributes.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Attachments":
+		case 4:
 			if err := x.Attachments.VDLRead(dec); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

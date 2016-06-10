@@ -213,16 +213,16 @@ func (x GlobRequest) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Pattern != "" {
-		if err := enc.NextFieldValueString("Pattern", vdl.StringType, x.Pattern); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Pattern); err != nil {
 			return err
 		}
 	}
 	if len(x.ResumeMarker) != 0 {
-		if err := enc.NextFieldValueBytes("ResumeMarker", __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
+		if err := enc.NextFieldValueBytes(1, __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -233,31 +233,38 @@ func (x *GlobRequest) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Pattern":
+		}
+		if decType != __VDLType_struct_2 {
+			index = __VDLType_struct_2.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Pattern = value
 			}
-		case "ResumeMarker":
+		case 1:
 			var bytes []byte
 			if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 				return err
 			}
 			x.ResumeMarker = bytes
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
 		}
 	}
 }
@@ -312,17 +319,17 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Name != "" {
-		if err := enc.NextFieldValueString("Name", vdl.StringType, x.Name); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Name); err != nil {
 			return err
 		}
 	}
 	if x.State != 0 {
-		if err := enc.NextFieldValueInt("State", vdl.Int32Type, int64(x.State)); err != nil {
+		if err := enc.NextFieldValueInt(1, vdl.Int32Type, int64(x.State)); err != nil {
 			return err
 		}
 	}
 	if x.Value != nil && !x.Value.VDLIsZero() {
-		if err := enc.NextField("Value"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := x.Value.VDLWrite(enc); err != nil {
@@ -330,16 +337,16 @@ func (x Change) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.ResumeMarker) != 0 {
-		if err := enc.NextFieldValueBytes("ResumeMarker", __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
+		if err := enc.NextFieldValueBytes(3, __VDLType_list_1, []byte(x.ResumeMarker)); err != nil {
 			return err
 		}
 	}
 	if x.Continued {
-		if err := enc.NextFieldValueBool("Continued", vdl.BoolType, x.Continued); err != nil {
+		if err := enc.NextFieldValueBool(4, vdl.BoolType, x.Continued); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -352,49 +359,56 @@ func (x *Change) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_3); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Name":
+		}
+		if decType != __VDLType_struct_3 {
+			index = __VDLType_struct_3.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Name = value
 			}
-		case "State":
+		case 1:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.State = int32(value)
 			}
-		case "Value":
+		case 2:
 			x.Value = new(vom.RawBytes)
 			if err := x.Value.VDLRead(dec); err != nil {
 				return err
 			}
-		case "ResumeMarker":
+		case 3:
 			var bytes []byte
 			if err := dec.ReadValueBytes(-1, &bytes); err != nil {
 				return err
 			}
 			x.ResumeMarker = bytes
-		case "Continued":
+		case 4:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.Continued = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

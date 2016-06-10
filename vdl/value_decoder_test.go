@@ -470,102 +470,100 @@ type decoderTestStruct struct {
 func TestValueDecoderDecodeStruct(t *testing.T) {
 	expected := decoderTestStruct{1, []bool{true, false}, "abc"}
 	expectedType := TypeOf(expected)
-	vd := ValueOf(expected).Decoder()
-	if err := vd.StartValue(expectedType); err != nil {
+	dec := ValueOf(expected).Decoder()
+	if err := dec.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), expectedType; got != want {
+	if got, want := dec.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
 	var seen []string
 loop:
 	for {
-		name, err := vd.NextField()
+		index, err := dec.NextField()
 		switch {
 		case err != nil:
 			t.Fatalf("error in NextField: %v", err)
-		case name == "A":
-			seen = append(seen, name)
-			if err := vd.StartValue(Int32Type); err != nil {
-				t.Errorf("error in StartValue: %v", err)
-			}
-			switch val, err := vd.DecodeInt(32); {
-			case err != nil:
-				t.Errorf("error during decode: %v", err)
-			case val != 1:
-				t.Errorf("got %v, want %v", val, 1)
-			}
-			if err := vd.FinishValue(); err != nil {
-				t.Errorf("error in FinishValue: %v", err)
-			}
-		case name == "B":
-			seen = append(seen, name)
-			if err := vd.StartValue(expectedType.Field(1).Type); err != nil {
-				t.Errorf("error in StartValue: %v", err)
-			}
-
-			switch done, err := vd.NextEntry(); {
-			case err != nil:
-				t.Errorf("error in NextEntry: %v", err)
-			case done:
-				t.Errorf("unexpected end marker")
-			}
-			if err := vd.SkipValue(); err != nil {
-				t.Errorf("error in IgnoreValue: %v", err)
-			}
-
-			switch done, err := vd.NextEntry(); {
-			case err != nil:
-				t.Errorf("error in NextEntry: %v", err)
-			case done:
-				t.Errorf("unexpected end marker")
-			}
-			if err := vd.StartValue(BoolType); err != nil {
-				t.Errorf("error in StartValue: %v", err)
-			}
-			switch val, err := vd.DecodeBool(); {
-			case err != nil:
-				t.Errorf("error during decode: %v", err)
-			case val != false:
-				t.Errorf("got %v, want %v", val, false)
-			}
-			if err := vd.FinishValue(); err != nil {
-				t.Errorf("error in FinishValue: %v", err)
-			}
-
-			if err := vd.FinishValue(); err != nil {
-				t.Errorf("error in FinishValue: %v", err)
-			}
-		case name == "C":
-			seen = append(seen, name)
-			if err := vd.StartValue(StringType); err != nil {
-				t.Errorf("error in StartValue: %v", err)
-			}
-			switch val, err := vd.DecodeString(); {
-			case err != nil:
-				t.Errorf("error during decode: %v", err)
-			case val != "abc":
-				t.Errorf("got %v, want %v", val, "abc")
-			}
-			if err := vd.FinishValue(); err != nil {
-				t.Errorf("error in FinishValue: %v", err)
-			}
-		case name == "":
+		case index == -1:
 			sort.Strings(seen)
 			if !reflect.DeepEqual(seen, []string{"A", "B", "C"}) {
 				t.Errorf("unexpected field names received: %v", seen)
 			}
 			break loop
+		}
+		switch name := dec.Type().Field(index).Name; name {
+		case "A":
+			seen = append(seen, name)
+			if err := dec.StartValue(Int32Type); err != nil {
+				t.Errorf("error in StartValue: %v", err)
+			}
+			switch val, err := dec.DecodeInt(32); {
+			case err != nil:
+				t.Errorf("error during decode: %v", err)
+			case val != 1:
+				t.Errorf("got %v, want %v", val, 1)
+			}
+			if err := dec.FinishValue(); err != nil {
+				t.Errorf("error in FinishValue: %v", err)
+			}
+		case "B":
+			seen = append(seen, name)
+			if err := dec.StartValue(expectedType.Field(1).Type); err != nil {
+				t.Errorf("error in StartValue: %v", err)
+			}
+
+			switch done, err := dec.NextEntry(); {
+			case err != nil:
+				t.Errorf("error in NextEntry: %v", err)
+			case done:
+				t.Errorf("unexpected end marker")
+			}
+			if err := dec.SkipValue(); err != nil {
+				t.Errorf("error in IgnoreValue: %v", err)
+			}
+
+			switch done, err := dec.NextEntry(); {
+			case err != nil:
+				t.Errorf("error in NextEntry: %v", err)
+			case done:
+				t.Errorf("unexpected end marker")
+			}
+			if err := dec.StartValue(BoolType); err != nil {
+				t.Errorf("error in StartValue: %v", err)
+			}
+			switch val, err := dec.DecodeBool(); {
+			case err != nil:
+				t.Errorf("error during decode: %v", err)
+			case val != false:
+				t.Errorf("got %v, want %v", val, false)
+			}
+			if err := dec.FinishValue(); err != nil {
+				t.Errorf("error in FinishValue: %v", err)
+			}
+
+			if err := dec.FinishValue(); err != nil {
+				t.Errorf("error in FinishValue: %v", err)
+			}
+		case "C":
+			seen = append(seen, name)
+			if err := dec.StartValue(StringType); err != nil {
+				t.Errorf("error in StartValue: %v", err)
+			}
+			switch val, err := dec.DecodeString(); {
+			case err != nil:
+				t.Errorf("error during decode: %v", err)
+			case val != "abc":
+				t.Errorf("got %v, want %v", val, "abc")
+			}
+			if err := dec.FinishValue(); err != nil {
+				t.Errorf("error in FinishValue: %v", err)
+			}
 		default:
 			t.Fatalf("received unknown field")
 		}
 	}
-
-	if _, err := vd.NextField(); err == nil {
-		t.Errorf("expected error in call to NextField()")
-	}
-	if err := vd.FinishValue(); err != nil {
+	if err := dec.FinishValue(); err != nil {
 		t.Errorf("error in FinishValue: %v", err)
 	}
 }
@@ -573,42 +571,38 @@ loop:
 func TestValueDecoderDecodeUnion(t *testing.T) {
 	expectedType := UnionType(Field{"A", BoolType}, Field{"B", StringType})
 	expected := ZeroValue(expectedType)
-	vd := expected.Decoder()
-	if err := vd.StartValue(expectedType); err != nil {
+	dec := expected.Decoder()
+	if err := dec.StartValue(expectedType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	if got, want := vd.Type(), expectedType; got != want {
+	if got, want := dec.Type(), expectedType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
-
-	switch name, err := vd.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		t.Errorf("error in NextField(): %v", err)
-	case name != "A":
-		t.Errorf("unexpected field name: %v", name)
+	case index != 0:
+		t.Errorf("unexpected field index: %v", index)
 	}
-	if err := vd.StartValue(BoolType); err != nil {
+	if err := dec.StartValue(BoolType); err != nil {
 		t.Errorf("error in StartValue: %v", err)
 	}
-	switch val, err := vd.DecodeBool(); {
+	switch val, err := dec.DecodeBool(); {
 	case err != nil:
 		t.Errorf("error during decode: %v", err)
 	case val != false:
 		t.Errorf("got %v, want %v", val, false)
 	}
-	if err := vd.FinishValue(); err != nil {
+	if err := dec.FinishValue(); err != nil {
 		t.Errorf("error in FinishValue: %v", err)
 	}
-	switch name, err := vd.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		t.Errorf("error in NextField(): %v", err)
-	case name != "":
-		t.Errorf("unexpected field after end of fields: %v", name)
+	case index != -1:
+		t.Errorf("unexpected field after end of fields: %v", index)
 	}
-	if _, err := vd.NextField(); err == nil {
-		t.Errorf("expected error in call to NextField()")
-	}
-	if err := vd.FinishValue(); err != nil {
+	if err := dec.FinishValue(); err != nil {
 		t.Errorf("error in FinishValue: %v", err)
 	}
 }

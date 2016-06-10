@@ -160,7 +160,7 @@ func (x AccessList) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if len(x.In) != 0 {
-		if err := enc.NextField("In"); err != nil {
+		if err := enc.NextField(0); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.In); err != nil {
@@ -168,14 +168,14 @@ func (x AccessList) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.NotIn) != 0 {
-		if err := enc.NextField("NotIn"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_2(enc, x.NotIn); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -222,24 +222,31 @@ func (x *AccessList) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "In":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			if err := __VDLReadAnon_list_1(dec, &x.In); err != nil {
 				return err
 			}
-		case "NotIn":
+		case 1:
 			if err := __VDLReadAnon_list_2(dec, &x.NotIn); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

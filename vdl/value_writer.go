@@ -102,27 +102,27 @@ func (vv *Value) writeSetOrMap(enc Encoder) error {
 }
 
 func (vv *Value) writeStruct(enc Encoder) error {
-	for i := 0; i < vv.Type().NumField(); i++ {
-		if vv.StructField(i).IsZero() {
+	for index := 0; index < vv.Type().NumField(); index++ {
+		if vv.StructField(index).IsZero() {
 			continue
 		}
-		if err := enc.NextField(vv.Type().Field(i).Name); err != nil {
+		if err := enc.NextField(index); err != nil {
 			return err
 		}
-		if err := vv.StructField(i).VDLWrite(enc); err != nil {
+		if err := vv.StructField(index).VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	return enc.NextField("")
+	return enc.NextField(-1)
 }
 
 func (vv *Value) writeUnion(enc Encoder) error {
 	index, field := vv.UnionField()
-	if err := enc.NextField(vv.Type().Field(index).Name); err != nil {
+	if err := enc.NextField(index); err != nil {
 		return err
 	}
 	if err := field.VDLWrite(enc); err != nil {
 		return err
 	}
-	return enc.NextField("")
+	return enc.NextField(-1)
 }

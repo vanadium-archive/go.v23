@@ -137,13 +137,13 @@ func transcodeMap(e Encoder, d Decoder) error {
 
 func transcodeStructOrUnion(e Encoder, d Decoder) error {
 	for {
-		switch name, err := d.NextField(); {
+		switch index, err := d.NextField(); {
 		case err != nil:
 			return err
-		case name == "":
-			return e.NextField("")
+		case index == -1:
+			return e.NextField(-1)
 		default:
-			if err := e.NextField(name); err != nil {
+			if err := e.NextField(index); err != nil {
 				return err
 			}
 			if err := Transcode(e, d); err != nil {

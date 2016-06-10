@@ -44,16 +44,16 @@ func (x LogEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Position != 0 {
-		if err := enc.NextFieldValueInt("Position", vdl.Int64Type, x.Position); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int64Type, x.Position); err != nil {
 			return err
 		}
 	}
 	if x.Line != "" {
-		if err := enc.NextFieldValueString("Line", vdl.StringType, x.Line); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Line); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -64,31 +64,38 @@ func (x *LogEntry) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Position":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(64); {
 			case err != nil:
 				return err
 			default:
 				x.Position = value
 			}
-		case "Line":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Line = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

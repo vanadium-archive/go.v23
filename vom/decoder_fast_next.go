@@ -209,9 +209,11 @@ func (d *decoder81) NextEntryValueUint(bitlen int) (done bool, value uint64, err
 	case flag <= nextEntryData(bitlen):
 		value, err = binaryDecodeUint(d.buf)
 	case flag == nextEntryParentBytes:
-		var b byte
-		b, err = d.buf.ReadByte()
-		value = uint64(b)
+		if d.buf.IsAvailable(1) {
+			value = uint64(d.buf.ReadAvailableByte())
+		} else if err = d.buf.Fill(1); err == nil {
+			value = uint64(d.buf.ReadAvailableByte())
+		}
 	default: // must convert
 		value, err = d.decodeUint(ttNext, uint(bitlen))
 	}

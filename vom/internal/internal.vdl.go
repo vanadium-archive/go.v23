@@ -502,21 +502,21 @@ func (x VSmallStruct) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.A != 0 {
-		if err := enc.NextFieldValueInt("A", vdl.Int32Type, int64(x.A)); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int32Type, int64(x.A)); err != nil {
 			return err
 		}
 	}
 	if x.B != "" {
-		if err := enc.NextFieldValueString("B", vdl.StringType, x.B); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.B); err != nil {
 			return err
 		}
 	}
 	if x.C {
-		if err := enc.NextFieldValueBool("C", vdl.BoolType, x.C); err != nil {
+		if err := enc.NextFieldValueBool(2, vdl.BoolType, x.C); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -527,38 +527,45 @@ func (x *VSmallStruct) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_11); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "A":
+		}
+		if decType != __VDLType_struct_11 {
+			index = __VDLType_struct_11.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.A = int32(value)
 			}
-		case "B":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.B = value
 			}
-		case "C":
+		case 2:
 			switch value, err := dec.ReadValueBool(); {
 			case err != nil:
 				return err
 			default:
 				x.C = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -631,256 +638,256 @@ func (x VLargeStruct) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.F1 != 0 {
-		if err := enc.NextFieldValueInt("F1", vdl.Int32Type, int64(x.F1)); err != nil {
+		if err := enc.NextFieldValueInt(0, vdl.Int32Type, int64(x.F1)); err != nil {
 			return err
 		}
 	}
 	if x.F2 != 0 {
-		if err := enc.NextFieldValueInt("F2", vdl.Int32Type, int64(x.F2)); err != nil {
+		if err := enc.NextFieldValueInt(1, vdl.Int32Type, int64(x.F2)); err != nil {
 			return err
 		}
 	}
 	if x.F3 != 0 {
-		if err := enc.NextFieldValueInt("F3", vdl.Int32Type, int64(x.F3)); err != nil {
+		if err := enc.NextFieldValueInt(2, vdl.Int32Type, int64(x.F3)); err != nil {
 			return err
 		}
 	}
 	if x.F4 != 0 {
-		if err := enc.NextFieldValueInt("F4", vdl.Int32Type, int64(x.F4)); err != nil {
+		if err := enc.NextFieldValueInt(3, vdl.Int32Type, int64(x.F4)); err != nil {
 			return err
 		}
 	}
 	if x.F5 != 0 {
-		if err := enc.NextFieldValueInt("F5", vdl.Int32Type, int64(x.F5)); err != nil {
+		if err := enc.NextFieldValueInt(4, vdl.Int32Type, int64(x.F5)); err != nil {
 			return err
 		}
 	}
 	if x.F6 != 0 {
-		if err := enc.NextFieldValueInt("F6", vdl.Int32Type, int64(x.F6)); err != nil {
+		if err := enc.NextFieldValueInt(5, vdl.Int32Type, int64(x.F6)); err != nil {
 			return err
 		}
 	}
 	if x.F7 != 0 {
-		if err := enc.NextFieldValueInt("F7", vdl.Int32Type, int64(x.F7)); err != nil {
+		if err := enc.NextFieldValueInt(6, vdl.Int32Type, int64(x.F7)); err != nil {
 			return err
 		}
 	}
 	if x.F8 != 0 {
-		if err := enc.NextFieldValueInt("F8", vdl.Int32Type, int64(x.F8)); err != nil {
+		if err := enc.NextFieldValueInt(7, vdl.Int32Type, int64(x.F8)); err != nil {
 			return err
 		}
 	}
 	if x.F9 != 0 {
-		if err := enc.NextFieldValueInt("F9", vdl.Int32Type, int64(x.F9)); err != nil {
+		if err := enc.NextFieldValueInt(8, vdl.Int32Type, int64(x.F9)); err != nil {
 			return err
 		}
 	}
 	if x.F10 != 0 {
-		if err := enc.NextFieldValueInt("F10", vdl.Int32Type, int64(x.F10)); err != nil {
+		if err := enc.NextFieldValueInt(9, vdl.Int32Type, int64(x.F10)); err != nil {
 			return err
 		}
 	}
 	if x.F11 != 0 {
-		if err := enc.NextFieldValueInt("F11", vdl.Int32Type, int64(x.F11)); err != nil {
+		if err := enc.NextFieldValueInt(10, vdl.Int32Type, int64(x.F11)); err != nil {
 			return err
 		}
 	}
 	if x.F12 != 0 {
-		if err := enc.NextFieldValueInt("F12", vdl.Int32Type, int64(x.F12)); err != nil {
+		if err := enc.NextFieldValueInt(11, vdl.Int32Type, int64(x.F12)); err != nil {
 			return err
 		}
 	}
 	if x.F13 != 0 {
-		if err := enc.NextFieldValueInt("F13", vdl.Int32Type, int64(x.F13)); err != nil {
+		if err := enc.NextFieldValueInt(12, vdl.Int32Type, int64(x.F13)); err != nil {
 			return err
 		}
 	}
 	if x.F14 != 0 {
-		if err := enc.NextFieldValueInt("F14", vdl.Int32Type, int64(x.F14)); err != nil {
+		if err := enc.NextFieldValueInt(13, vdl.Int32Type, int64(x.F14)); err != nil {
 			return err
 		}
 	}
 	if x.F15 != 0 {
-		if err := enc.NextFieldValueInt("F15", vdl.Int32Type, int64(x.F15)); err != nil {
+		if err := enc.NextFieldValueInt(14, vdl.Int32Type, int64(x.F15)); err != nil {
 			return err
 		}
 	}
 	if x.F16 != 0 {
-		if err := enc.NextFieldValueInt("F16", vdl.Int32Type, int64(x.F16)); err != nil {
+		if err := enc.NextFieldValueInt(15, vdl.Int32Type, int64(x.F16)); err != nil {
 			return err
 		}
 	}
 	if x.F17 != 0 {
-		if err := enc.NextFieldValueInt("F17", vdl.Int32Type, int64(x.F17)); err != nil {
+		if err := enc.NextFieldValueInt(16, vdl.Int32Type, int64(x.F17)); err != nil {
 			return err
 		}
 	}
 	if x.F18 != 0 {
-		if err := enc.NextFieldValueInt("F18", vdl.Int32Type, int64(x.F18)); err != nil {
+		if err := enc.NextFieldValueInt(17, vdl.Int32Type, int64(x.F18)); err != nil {
 			return err
 		}
 	}
 	if x.F19 != 0 {
-		if err := enc.NextFieldValueInt("F19", vdl.Int32Type, int64(x.F19)); err != nil {
+		if err := enc.NextFieldValueInt(18, vdl.Int32Type, int64(x.F19)); err != nil {
 			return err
 		}
 	}
 	if x.F20 != 0 {
-		if err := enc.NextFieldValueInt("F20", vdl.Int32Type, int64(x.F20)); err != nil {
+		if err := enc.NextFieldValueInt(19, vdl.Int32Type, int64(x.F20)); err != nil {
 			return err
 		}
 	}
 	if x.F21 != 0 {
-		if err := enc.NextFieldValueInt("F21", vdl.Int32Type, int64(x.F21)); err != nil {
+		if err := enc.NextFieldValueInt(20, vdl.Int32Type, int64(x.F21)); err != nil {
 			return err
 		}
 	}
 	if x.F22 != 0 {
-		if err := enc.NextFieldValueInt("F22", vdl.Int32Type, int64(x.F22)); err != nil {
+		if err := enc.NextFieldValueInt(21, vdl.Int32Type, int64(x.F22)); err != nil {
 			return err
 		}
 	}
 	if x.F23 != 0 {
-		if err := enc.NextFieldValueInt("F23", vdl.Int32Type, int64(x.F23)); err != nil {
+		if err := enc.NextFieldValueInt(22, vdl.Int32Type, int64(x.F23)); err != nil {
 			return err
 		}
 	}
 	if x.F24 != 0 {
-		if err := enc.NextFieldValueInt("F24", vdl.Int32Type, int64(x.F24)); err != nil {
+		if err := enc.NextFieldValueInt(23, vdl.Int32Type, int64(x.F24)); err != nil {
 			return err
 		}
 	}
 	if x.F25 != 0 {
-		if err := enc.NextFieldValueInt("F25", vdl.Int32Type, int64(x.F25)); err != nil {
+		if err := enc.NextFieldValueInt(24, vdl.Int32Type, int64(x.F25)); err != nil {
 			return err
 		}
 	}
 	if x.F26 != 0 {
-		if err := enc.NextFieldValueInt("F26", vdl.Int32Type, int64(x.F26)); err != nil {
+		if err := enc.NextFieldValueInt(25, vdl.Int32Type, int64(x.F26)); err != nil {
 			return err
 		}
 	}
 	if x.F27 != 0 {
-		if err := enc.NextFieldValueInt("F27", vdl.Int32Type, int64(x.F27)); err != nil {
+		if err := enc.NextFieldValueInt(26, vdl.Int32Type, int64(x.F27)); err != nil {
 			return err
 		}
 	}
 	if x.F28 != 0 {
-		if err := enc.NextFieldValueInt("F28", vdl.Int32Type, int64(x.F28)); err != nil {
+		if err := enc.NextFieldValueInt(27, vdl.Int32Type, int64(x.F28)); err != nil {
 			return err
 		}
 	}
 	if x.F29 != 0 {
-		if err := enc.NextFieldValueInt("F29", vdl.Int32Type, int64(x.F29)); err != nil {
+		if err := enc.NextFieldValueInt(28, vdl.Int32Type, int64(x.F29)); err != nil {
 			return err
 		}
 	}
 	if x.F30 != 0 {
-		if err := enc.NextFieldValueInt("F30", vdl.Int32Type, int64(x.F30)); err != nil {
+		if err := enc.NextFieldValueInt(29, vdl.Int32Type, int64(x.F30)); err != nil {
 			return err
 		}
 	}
 	if x.F31 != 0 {
-		if err := enc.NextFieldValueInt("F31", vdl.Int32Type, int64(x.F31)); err != nil {
+		if err := enc.NextFieldValueInt(30, vdl.Int32Type, int64(x.F31)); err != nil {
 			return err
 		}
 	}
 	if x.F32 != 0 {
-		if err := enc.NextFieldValueInt("F32", vdl.Int32Type, int64(x.F32)); err != nil {
+		if err := enc.NextFieldValueInt(31, vdl.Int32Type, int64(x.F32)); err != nil {
 			return err
 		}
 	}
 	if x.F33 != 0 {
-		if err := enc.NextFieldValueInt("F33", vdl.Int32Type, int64(x.F33)); err != nil {
+		if err := enc.NextFieldValueInt(32, vdl.Int32Type, int64(x.F33)); err != nil {
 			return err
 		}
 	}
 	if x.F34 != 0 {
-		if err := enc.NextFieldValueInt("F34", vdl.Int32Type, int64(x.F34)); err != nil {
+		if err := enc.NextFieldValueInt(33, vdl.Int32Type, int64(x.F34)); err != nil {
 			return err
 		}
 	}
 	if x.F35 != 0 {
-		if err := enc.NextFieldValueInt("F35", vdl.Int32Type, int64(x.F35)); err != nil {
+		if err := enc.NextFieldValueInt(34, vdl.Int32Type, int64(x.F35)); err != nil {
 			return err
 		}
 	}
 	if x.F36 != 0 {
-		if err := enc.NextFieldValueInt("F36", vdl.Int32Type, int64(x.F36)); err != nil {
+		if err := enc.NextFieldValueInt(35, vdl.Int32Type, int64(x.F36)); err != nil {
 			return err
 		}
 	}
 	if x.F37 != 0 {
-		if err := enc.NextFieldValueInt("F37", vdl.Int32Type, int64(x.F37)); err != nil {
+		if err := enc.NextFieldValueInt(36, vdl.Int32Type, int64(x.F37)); err != nil {
 			return err
 		}
 	}
 	if x.F38 != 0 {
-		if err := enc.NextFieldValueInt("F38", vdl.Int32Type, int64(x.F38)); err != nil {
+		if err := enc.NextFieldValueInt(37, vdl.Int32Type, int64(x.F38)); err != nil {
 			return err
 		}
 	}
 	if x.F39 != 0 {
-		if err := enc.NextFieldValueInt("F39", vdl.Int32Type, int64(x.F39)); err != nil {
+		if err := enc.NextFieldValueInt(38, vdl.Int32Type, int64(x.F39)); err != nil {
 			return err
 		}
 	}
 	if x.F40 != 0 {
-		if err := enc.NextFieldValueInt("F40", vdl.Int32Type, int64(x.F40)); err != nil {
+		if err := enc.NextFieldValueInt(39, vdl.Int32Type, int64(x.F40)); err != nil {
 			return err
 		}
 	}
 	if x.F41 != 0 {
-		if err := enc.NextFieldValueInt("F41", vdl.Int32Type, int64(x.F41)); err != nil {
+		if err := enc.NextFieldValueInt(40, vdl.Int32Type, int64(x.F41)); err != nil {
 			return err
 		}
 	}
 	if x.F42 != 0 {
-		if err := enc.NextFieldValueInt("F42", vdl.Int32Type, int64(x.F42)); err != nil {
+		if err := enc.NextFieldValueInt(41, vdl.Int32Type, int64(x.F42)); err != nil {
 			return err
 		}
 	}
 	if x.F43 != 0 {
-		if err := enc.NextFieldValueInt("F43", vdl.Int32Type, int64(x.F43)); err != nil {
+		if err := enc.NextFieldValueInt(42, vdl.Int32Type, int64(x.F43)); err != nil {
 			return err
 		}
 	}
 	if x.F44 != 0 {
-		if err := enc.NextFieldValueInt("F44", vdl.Int32Type, int64(x.F44)); err != nil {
+		if err := enc.NextFieldValueInt(43, vdl.Int32Type, int64(x.F44)); err != nil {
 			return err
 		}
 	}
 	if x.F45 != 0 {
-		if err := enc.NextFieldValueInt("F45", vdl.Int32Type, int64(x.F45)); err != nil {
+		if err := enc.NextFieldValueInt(44, vdl.Int32Type, int64(x.F45)); err != nil {
 			return err
 		}
 	}
 	if x.F46 != 0 {
-		if err := enc.NextFieldValueInt("F46", vdl.Int32Type, int64(x.F46)); err != nil {
+		if err := enc.NextFieldValueInt(45, vdl.Int32Type, int64(x.F46)); err != nil {
 			return err
 		}
 	}
 	if x.F47 != 0 {
-		if err := enc.NextFieldValueInt("F47", vdl.Int32Type, int64(x.F47)); err != nil {
+		if err := enc.NextFieldValueInt(46, vdl.Int32Type, int64(x.F47)); err != nil {
 			return err
 		}
 	}
 	if x.F48 != 0 {
-		if err := enc.NextFieldValueInt("F48", vdl.Int32Type, int64(x.F48)); err != nil {
+		if err := enc.NextFieldValueInt(47, vdl.Int32Type, int64(x.F48)); err != nil {
 			return err
 		}
 	}
 	if x.F49 != 0 {
-		if err := enc.NextFieldValueInt("F49", vdl.Int32Type, int64(x.F49)); err != nil {
+		if err := enc.NextFieldValueInt(48, vdl.Int32Type, int64(x.F49)); err != nil {
 			return err
 		}
 	}
 	if x.F50 != 0 {
-		if err := enc.NextFieldValueInt("F50", vdl.Int32Type, int64(x.F50)); err != nil {
+		if err := enc.NextFieldValueInt(49, vdl.Int32Type, int64(x.F50)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -891,367 +898,374 @@ func (x *VLargeStruct) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_12); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "F1":
+		}
+		if decType != __VDLType_struct_12 {
+			index = __VDLType_struct_12.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F1 = int32(value)
 			}
-		case "F2":
+		case 1:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F2 = int32(value)
 			}
-		case "F3":
+		case 2:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F3 = int32(value)
 			}
-		case "F4":
+		case 3:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F4 = int32(value)
 			}
-		case "F5":
+		case 4:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F5 = int32(value)
 			}
-		case "F6":
+		case 5:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F6 = int32(value)
 			}
-		case "F7":
+		case 6:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F7 = int32(value)
 			}
-		case "F8":
+		case 7:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F8 = int32(value)
 			}
-		case "F9":
+		case 8:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F9 = int32(value)
 			}
-		case "F10":
+		case 9:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F10 = int32(value)
 			}
-		case "F11":
+		case 10:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F11 = int32(value)
 			}
-		case "F12":
+		case 11:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F12 = int32(value)
 			}
-		case "F13":
+		case 12:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F13 = int32(value)
 			}
-		case "F14":
+		case 13:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F14 = int32(value)
 			}
-		case "F15":
+		case 14:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F15 = int32(value)
 			}
-		case "F16":
+		case 15:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F16 = int32(value)
 			}
-		case "F17":
+		case 16:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F17 = int32(value)
 			}
-		case "F18":
+		case 17:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F18 = int32(value)
 			}
-		case "F19":
+		case 18:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F19 = int32(value)
 			}
-		case "F20":
+		case 19:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F20 = int32(value)
 			}
-		case "F21":
+		case 20:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F21 = int32(value)
 			}
-		case "F22":
+		case 21:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F22 = int32(value)
 			}
-		case "F23":
+		case 22:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F23 = int32(value)
 			}
-		case "F24":
+		case 23:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F24 = int32(value)
 			}
-		case "F25":
+		case 24:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F25 = int32(value)
 			}
-		case "F26":
+		case 25:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F26 = int32(value)
 			}
-		case "F27":
+		case 26:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F27 = int32(value)
 			}
-		case "F28":
+		case 27:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F28 = int32(value)
 			}
-		case "F29":
+		case 28:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F29 = int32(value)
 			}
-		case "F30":
+		case 29:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F30 = int32(value)
 			}
-		case "F31":
+		case 30:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F31 = int32(value)
 			}
-		case "F32":
+		case 31:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F32 = int32(value)
 			}
-		case "F33":
+		case 32:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F33 = int32(value)
 			}
-		case "F34":
+		case 33:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F34 = int32(value)
 			}
-		case "F35":
+		case 34:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F35 = int32(value)
 			}
-		case "F36":
+		case 35:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F36 = int32(value)
 			}
-		case "F37":
+		case 36:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F37 = int32(value)
 			}
-		case "F38":
+		case 37:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F38 = int32(value)
 			}
-		case "F39":
+		case 38:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F39 = int32(value)
 			}
-		case "F40":
+		case 39:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F40 = int32(value)
 			}
-		case "F41":
+		case 40:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F41 = int32(value)
 			}
-		case "F42":
+		case 41:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F42 = int32(value)
 			}
-		case "F43":
+		case 42:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F43 = int32(value)
 			}
-		case "F44":
+		case 43:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F44 = int32(value)
 			}
-		case "F45":
+		case 44:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F45 = int32(value)
 			}
-		case "F46":
+		case 45:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F46 = int32(value)
 			}
-		case "F47":
+		case 46:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F47 = int32(value)
 			}
-		case "F48":
+		case 47:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F48 = int32(value)
 			}
-		case "F49":
+		case 48:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F49 = int32(value)
 			}
-		case "F50":
+		case 49:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.F50 = int32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -1320,10 +1334,10 @@ func (x VSmallUnionA) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_13); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueInt("A", vdl.Int32Type, int64(x.Value)); err != nil {
+	if err := enc.NextFieldValueInt(0, vdl.Int32Type, int64(x.Value)); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -1333,10 +1347,10 @@ func (x VSmallUnionB) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_13); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueString("B", vdl.StringType, x.Value); err != nil {
+	if err := enc.NextFieldValueString(1, vdl.StringType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -1346,10 +1360,10 @@ func (x VSmallUnionC) VDLWrite(enc vdl.Encoder) error {
 	if err := enc.StartValue(__VDLType_union_13); err != nil {
 		return err
 	}
-	if err := enc.NextFieldValueBool("C", vdl.BoolType, x.Value); err != nil {
+	if err := enc.NextFieldValueBool(2, vdl.BoolType, x.Value); err != nil {
 		return err
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -1359,12 +1373,23 @@ func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 	if err := dec.StartValue(__VDLType_union_13); err != nil {
 		return err
 	}
-	f, err := dec.NextField()
-	if err != nil {
+	decType := dec.Type()
+	index, err := dec.NextField()
+	switch {
+	case err != nil:
 		return err
+	case index == -1:
+		return fmt.Errorf("missing field in union %T, from %v", x, decType)
 	}
-	switch f {
-	case "A":
+	if decType != __VDLType_union_13 {
+		name := decType.Field(index).Name
+		index = __VDLType_union_13.FieldIndexByName(name)
+		if index == -1 {
+			return fmt.Errorf("field %q not in union %T, from %v", name, x, decType)
+		}
+	}
+	switch index {
+	case 0:
 		var field VSmallUnionA
 		switch value, err := dec.ReadValueInt(32); {
 		case err != nil:
@@ -1373,7 +1398,7 @@ func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 			field.Value = int32(value)
 		}
 		*x = field
-	case "B":
+	case 1:
 		var field VSmallUnionB
 		switch value, err := dec.ReadValueString(); {
 		case err != nil:
@@ -1382,7 +1407,7 @@ func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 			field.Value = value
 		}
 		*x = field
-	case "C":
+	case 2:
 		var field VSmallUnionC
 		switch value, err := dec.ReadValueBool(); {
 		case err != nil:
@@ -1391,16 +1416,12 @@ func VDLReadVSmallUnion(dec vdl.Decoder, x *VSmallUnion) error {
 			field.Value = value
 		}
 		*x = field
-	case "":
-		return fmt.Errorf("missing field in union %T, from %v", x, dec.Type())
-	default:
-		return fmt.Errorf("field %q not in union %T, from %v", f, x, dec.Type())
 	}
-	switch f, err := dec.NextField(); {
+	switch index, err := dec.NextField(); {
 	case err != nil:
 		return err
-	case f != "":
-		return fmt.Errorf("extra field %q in union %T, from %v", f, x, dec.Type())
+	case index != -1:
+		return fmt.Errorf("extra field %d in union %T, from %v", index, x, dec.Type())
 	}
 	return dec.FinishValue()
 }

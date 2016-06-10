@@ -49,19 +49,19 @@ func (x SignedFile) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.File != "" {
-		if err := enc.NextFieldValueString("File", vdl.StringType, x.File); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.File); err != nil {
 			return err
 		}
 	}
 	if !x.Signature.VDLIsZero() {
-		if err := enc.NextField("Signature"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := x.Signature.VDLWrite(enc); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -72,27 +72,34 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "File":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.File = value
 			}
-		case "Signature":
+		case 1:
 			if err := x.Signature.VDLRead(dec); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
@@ -253,12 +260,12 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Title != "" {
-		if err := enc.NextFieldValueString("Title", vdl.StringType, x.Title); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Title); err != nil {
 			return err
 		}
 	}
 	if len(x.Args) != 0 {
-		if err := enc.NextField("Args"); err != nil {
+		if err := enc.NextField(1); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.Args); err != nil {
@@ -266,7 +273,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.Binary.VDLIsZero() {
-		if err := enc.NextField("Binary"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := x.Binary.VDLWrite(enc); err != nil {
@@ -274,7 +281,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if !x.Publisher.IsZero() {
-		if err := enc.NextField("Publisher"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		var wire security.WireBlessings
@@ -286,7 +293,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.Env) != 0 {
-		if err := enc.NextField("Env"); err != nil {
+		if err := enc.NextField(4); err != nil {
 			return err
 		}
 		if err := __VDLWriteAnon_list_1(enc, x.Env); err != nil {
@@ -294,7 +301,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if len(x.Packages) != 0 {
-		if err := enc.NextField("Packages"); err != nil {
+		if err := enc.NextField(5); err != nil {
 			return err
 		}
 		if err := x.Packages.VDLWrite(enc); err != nil {
@@ -302,12 +309,12 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Restarts != 0 {
-		if err := enc.NextFieldValueInt("Restarts", vdl.Int32Type, int64(x.Restarts)); err != nil {
+		if err := enc.NextFieldValueInt(6, vdl.Int32Type, int64(x.Restarts)); err != nil {
 			return err
 		}
 	}
 	if x.RestartTimeWindow != 0 {
-		if err := enc.NextField("RestartTimeWindow"); err != nil {
+		if err := enc.NextField(7); err != nil {
 			return err
 		}
 		var wire vdltime.Duration
@@ -318,7 +325,7 @@ func (x Envelope) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -347,30 +354,41 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_4); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Title":
+		}
+		if decType != __VDLType_struct_4 {
+			index = __VDLType_struct_4.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Title = value
 			}
-		case "Args":
+		case 1:
 			if err := __VDLReadAnon_list_1(dec, &x.Args); err != nil {
 				return err
 			}
-		case "Binary":
+		case 2:
 			if err := x.Binary.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Publisher":
+		case 3:
 			var wire security.WireBlessings
 			if err := wire.VDLRead(dec); err != nil {
 				return err
@@ -378,31 +396,27 @@ func (x *Envelope) VDLRead(dec vdl.Decoder) error {
 			if err := security.WireBlessingsToNative(wire, &x.Publisher); err != nil {
 				return err
 			}
-		case "Env":
+		case 4:
 			if err := __VDLReadAnon_list_1(dec, &x.Env); err != nil {
 				return err
 			}
-		case "Packages":
+		case 5:
 			if err := x.Packages.VDLRead(dec); err != nil {
 				return err
 			}
-		case "Restarts":
+		case 6:
 			switch value, err := dec.ReadValueInt(32); {
 			case err != nil:
 				return err
 			default:
 				x.Restarts = int32(value)
 			}
-		case "RestartTimeWindow":
+		case 7:
 			var wire vdltime.Duration
 			if err := wire.VDLRead(dec); err != nil {
 				return err
 			}
 			if err := vdltime.DurationToNative(wire, &x.RestartTimeWindow); err != nil {
-				return err
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}

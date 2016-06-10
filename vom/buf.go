@@ -4,9 +4,7 @@
 
 package vom
 
-import (
-	"io"
-)
+import "io"
 
 const minBufFree = 1024 // buffers always have at least 1K free after growth
 
@@ -14,6 +12,8 @@ const minBufFree = 1024 // buffers always have at least 1K free after growth
 // bytes.Buffer, but the implementation is simplified to only deal with many
 // writes followed by a read of the whole buffer.
 type encbuf struct {
+	// It's faster to hold end than to use the len and cap properties of buf,
+	// since end is cheaper to update than buf.
 	buf []byte
 	end int // [0, end) is data that's already written
 }
@@ -34,7 +34,7 @@ func (b *encbuf) Len() int { return b.end }
 func (b *encbuf) Reset() { b.end = 0 }
 
 // reserve at least min free bytes in the buffer.
-func (b *encbuf) tryReserve(min int) {
+func (b *encbuf) reserve(min int) {
 	if len(b.buf)-b.end < min {
 		newlen := len(b.buf) * 2
 		if newlen-b.end < min {
@@ -48,39 +48,49 @@ func (b *encbuf) tryReserve(min int) {
 
 // Grow the buffer by n bytes, and returns those bytes.
 //
-// Different from bytes.Buffer.Grow, which doesn't return the bytes.  Although
-// this makes expandingEncbuf slightly easier to misuse, it helps to improve performance
-// by avoiding unnecessary copying.
+// Different from bytes.Buffer.Grow, which doesn't return the bytes.
 func (b *encbuf) Grow(n int) []byte {
-	b.tryReserve(n)
+	b.reserve(n)
 	oldend := b.end
 	b.end += n
 	return b.buf[oldend:b.end]
 }
 
-// WriteOneByte writes byte c into the buffer.
-func (b *encbuf) WriteOneByte(c byte) {
-	b.tryReserve(1)
-	b.buf[b.end] = c
+// WriteOneByte writes byte x into the buffer.
+func (b *encbuf) WriteOneByte(x byte) {
+	b.reserve(1)
+	b.buf[b.end] = x
 	b.end++
 }
 
-// Write writes a byte slice to the buffer.
-func (b *encbuf) Write(p []byte) {
-	b.tryReserve(len(p))
-	b.end += copy(b.buf[b.end:], p)
+// Write writes byte slice x to the buffer.
+func (b *encbuf) Write(x []byte) {
+	b.reserve(len(x))
+	b.end += copy(b.buf[b.end:], x)
+}
+
+// WriteString writes string x to the buffer.
+func (b *encbuf) WriteString(x string) {
+	b.reserve(len(x))
+	b.end += copy(b.buf[b.end:], x)
 }
 
 // decbuf manages the read buffer for decoders.  The approach is similar to
 // bufio.Reader, but the API is better suited for fast decoding.
 type decbuf struct {
-	buf      []byte
-	beg, end int // [beg, end) is data read from reader but unread by the user
-	lim      int // number of bytes left in limit, or -1 for no limit
-	reader   io.Reader
-
 	// It's faster to hold end than to use the len and cap properties of buf,
 	// since end is cheaper to update than buf.
+	buf      []byte
+	beg, end int // [beg, end) is data read from reader but unread by the user
+
+	// lim holds the number of bytes left in the limit, or if it is any negative
+	// number, there is no limit.  By allowing any negative number to convey "no
+	// limit", we avoid an extra conditional branch in the Read and Peek methods,
+	// making things faster.  The downside is we need to worry about wraparound,
+	// but the limit gets reset often enough that this doesn't matter.
+	lim int
+
+	reader  io.Reader
 	version Version
 }
 
@@ -124,25 +134,31 @@ func (b *decbuf) SetLimit(limit int) {
 	b.lim = limit
 }
 
-func (b *decbuf) HasDataAvailable() bool {
-	return b.lim != 0 // -1 or positive
-}
-
-func (b *decbuf) Limit() int {
-	return b.lim
-}
-
 // RemoveLimit removes the limit, and returns the number of leftover bytes.
-// Returns -1 if no limit was set.
+// Returns a negative number if no limit was set.
 func (b *decbuf) RemoveLimit() int {
 	leftover := b.lim
 	b.lim = -1
 	return leftover
 }
 
-// fill the buffer with at least min bytes of data.  Returns an error if fewer
+// IsAvailable returns true iff at least n bytes are available to read, peek or
+// skip.  Call Fill to replenish the available bytes.
+//
+// The code is factored into IsAvailable followed by {Read,Peek,Skip}Available,
+// since each of these methods is very short and doesn't call any other
+// functions, allowing them to be inlined at the call site.  This gives us a
+// speedup in the common case where bytes are already available in the buffer.
+func (b *decbuf) IsAvailable(n int) bool {
+	return b.end-b.beg >= n && (b.lim >= n || b.lim < 0)
+}
+
+// Fill the buffer with at least min bytes of data.  Returns an error if fewer
 // than min bytes could be filled.  Doesn't advance the read position.
-func (b *decbuf) fill(min int) error {
+func (b *decbuf) Fill(min int) error {
+	if b.lim >= 0 && b.lim < min {
+		return io.EOF
+	}
 	switch avail := b.end - b.beg; {
 	case avail >= min:
 		// Fastpath - enough bytes are available.
@@ -183,46 +199,55 @@ func (b *decbuf) moveDataToFront() {
 	b.beg = 0
 }
 
-// ReadSmall returns a buffer with the next n bytes, and increments the read
-// position past those bytes.  Returns an error if fewer than n bytes are
-// available.
+// ReadAvailable returns a buffer with the next n bytes, and increments the read
+// position past those bytes.  The returned slice points directly at our
+// internal buffer, and is only valid until the next decbuf call.
 //
-// The returned slice points directly at our internal buffer, and is only valid
-// until the next decbuf call.
-//
-// REQUIRES: n >= 0
-func (b *decbuf) ReadSmall(n int) ([]byte, error) {
-	if b.lim > -1 {
-		if b.lim < n {
-			b.lim = 0
-			return nil, io.EOF
-		}
-		b.lim -= n
-	}
-	if err := b.fill(n); err != nil {
-		return nil, err
-	}
+// REQUIRES: b.IsAvailable(n) && n >= 0
+func (b *decbuf) ReadAvailable(n int) []byte {
+	b.lim -= n
 	buf := b.buf[b.beg : b.beg+n]
 	b.beg += n
-	return buf, nil
+	return buf
 }
 
-// PeekSmall returns a buffer with at least the next n bytes, but possibly
-// more.  The read position isn't incremented.  Returns an error if fewer than
-// min bytes are available.
+// PeekAvailable is like ReadAvailable, but doesn't increment the read position.
+func (b *decbuf) PeekAvailable(n int) []byte {
+	return b.buf[b.beg : b.beg+n]
+}
+
+// ReadAvailableByte returns the next byte, and increments the read position.
 //
-// The returned slice points directly at our internal buffer, and is only valid
-// until the next decbuf call.
+// REQUIRES: b.IsAvailable(1)
+func (b *decbuf) ReadAvailableByte() byte {
+	b.lim--
+	ret := b.buf[b.beg]
+	b.beg++
+	return ret
+}
+
+// PeekAvailableByte is like ReadAvailableByte, but doesn't increment the read
+// position.
+func (b *decbuf) PeekAvailableByte() byte {
+	return b.buf[b.beg]
+}
+
+// ReadByte returns the next byte, and increments the read position.
+func (b *decbuf) ReadByte() (byte, error) {
+	if !b.IsAvailable(1) {
+		if err := b.Fill(1); err != nil {
+			return 0, err
+		}
+	}
+	return b.ReadAvailableByte(), nil
+}
+
+// SkipAvailable increments the read position past the next n bytes.
 //
-// REQUIRES: min >= 0
-func (b *decbuf) PeekSmall(min int) ([]byte, error) {
-	if b.lim > -1 && b.lim < min {
-		return nil, io.EOF
-	}
-	if err := b.fill(min); err != nil {
-		return nil, err
-	}
-	return b.buf[b.beg:b.end], nil
+// REQUIRES: b.IsAvailable(n) && n >= 0
+func (b *decbuf) SkipAvailable(n int) {
+	b.lim -= n
+	b.beg += n
 }
 
 // Skip increments the read position past the next n bytes.  Returns an error if
@@ -230,13 +255,10 @@ func (b *decbuf) PeekSmall(min int) ([]byte, error) {
 //
 // REQUIRES: n >= 0
 func (b *decbuf) Skip(n int) error {
-	if b.lim > -1 {
-		if b.lim < n {
-			n = b.lim
-			return io.EOF
-		}
-		b.lim -= n
+	if b.lim >= 0 && b.lim < n {
+		return io.EOF
 	}
+	b.lim -= n
 	// If enough bytes are available, just update indices.
 	avail := b.end - b.beg
 	if avail >= n {
@@ -258,33 +280,6 @@ func (b *decbuf) Skip(n int) error {
 			return err
 		}
 	}
-}
-
-// ReadByte returns the next byte, and increments the read position.
-func (b *decbuf) ReadByte() (byte, error) {
-	if b.lim > -1 {
-		if b.lim == 0 {
-			return 0, io.EOF
-		}
-		b.lim--
-	}
-	if err := b.fill(1); err != nil {
-		return 0, err
-	}
-	ret := b.buf[b.beg]
-	b.beg++
-	return ret, nil
-}
-
-// PeekByte returns the next byte, without changing the read position.
-func (b *decbuf) PeekByte() (byte, error) {
-	if b.lim == 0 {
-		return 0, io.EOF
-	}
-	if err := b.fill(1); err != nil {
-		return 0, err
-	}
-	return b.buf[b.beg], nil
 }
 
 // ReadIntoBuf reads the next len(p) bytes into p, and increments the read position

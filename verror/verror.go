@@ -185,16 +185,17 @@ func (x E) VDLEqual(yiface interface{}) bool {
 }
 
 var (
-	ttWireRetryCode = vdl.ErrorType.Elem().Field(1).Type
+	ttErrorElem     = vdl.ErrorType.Elem()
+	ttWireRetryCode = ttErrorElem.Field(1).Type
 	ttListAny       = vdl.ListType(vdl.AnyType)
 )
 
 func (x E) VDLWrite(enc vdl.Encoder) error {
-	if err := enc.StartValue(vdl.ErrorType.Elem()); err != nil {
+	if err := enc.StartValue(ttErrorElem); err != nil {
 		return err
 	}
 	if x.ID != "" {
-		if err := enc.NextFieldValueString("Id", vdl.StringType, string(x.ID)); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, string(x.ID)); err != nil {
 			return err
 		}
 	}
@@ -210,17 +211,17 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 		default:
 			return fmt.Errorf("action %d not in enum WireRetryCode", x.Action)
 		}
-		if err := enc.NextFieldValueString("RetryCode", ttWireRetryCode, actionStr); err != nil {
+		if err := enc.NextFieldValueString(1, ttWireRetryCode, actionStr); err != nil {
 			return err
 		}
 	}
 	if x.Msg != "" {
-		if err := enc.NextFieldValueString("Msg", vdl.StringType, x.Msg); err != nil {
+		if err := enc.NextFieldValueString(2, vdl.StringType, x.Msg); err != nil {
 			return err
 		}
 	}
 	if len(x.ParamList) != 0 {
-		if err := enc.NextField("ParamList"); err != nil {
+		if err := enc.NextField(3); err != nil {
 			return err
 		}
 		if err := enc.StartValue(ttListAny); err != nil {
@@ -250,7 +251,7 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -258,25 +259,36 @@ func (x E) VDLWrite(enc vdl.Encoder) error {
 
 func (x *E) VDLRead(dec vdl.Decoder) error {
 	*x = E{}
-	if err := dec.StartValue(vdl.ErrorType.Elem()); err != nil {
+	if err := dec.StartValue(ttErrorElem); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-	switchBlock:
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Id":
+		}
+		if decType != ttErrorElem {
+			index = ttErrorElem.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+	errorFieldSwitch:
+		switch index {
+		case 0:
 			id, err := dec.ReadValueString()
 			if err != nil {
 				return err
 			}
 			x.ID = ID(id)
-		case "RetryCode":
+		case 1:
 			code, err := dec.ReadValueString()
 			if err != nil {
 				return err
@@ -293,13 +305,13 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 			default:
 				return fmt.Errorf("label %s not in enum WireRetryCode", code)
 			}
-		case "Msg":
+		case 2:
 			msg, err := dec.ReadValueString()
 			if err != nil {
 				return err
 			}
 			x.Msg = msg
-		case "ParamList":
+		case 3:
 			if err := dec.StartValue(ttListAny); err != nil {
 				return err
 			}
@@ -317,17 +329,13 @@ func (x *E) VDLRead(dec vdl.Decoder) error {
 					if err := dec.FinishValue(); err != nil {
 						return err
 					}
-					break switchBlock
+					break errorFieldSwitch
 				}
 				var elem interface{}
 				if err := vdl.Read(dec, &elem); err != nil {
 					return err
 				}
 				x.ParamList = append(x.ParamList, elem)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

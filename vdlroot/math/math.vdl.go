@@ -36,16 +36,16 @@ func (x Complex64) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Real != 0 {
-		if err := enc.NextFieldValueFloat("Real", vdl.Float32Type, float64(x.Real)); err != nil {
+		if err := enc.NextFieldValueFloat(0, vdl.Float32Type, float64(x.Real)); err != nil {
 			return err
 		}
 	}
 	if x.Imag != 0 {
-		if err := enc.NextFieldValueFloat("Imag", vdl.Float32Type, float64(x.Imag)); err != nil {
+		if err := enc.NextFieldValueFloat(1, vdl.Float32Type, float64(x.Imag)); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -56,31 +56,38 @@ func (x *Complex64) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Real":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.Real = float32(value)
 			}
-		case "Imag":
+		case 1:
 			switch value, err := dec.ReadValueFloat(32); {
 			case err != nil:
 				return err
 			default:
 				x.Imag = float32(value)
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}
@@ -106,16 +113,16 @@ func (x Complex128) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Real != 0 {
-		if err := enc.NextFieldValueFloat("Real", vdl.Float64Type, x.Real); err != nil {
+		if err := enc.NextFieldValueFloat(0, vdl.Float64Type, x.Real); err != nil {
 			return err
 		}
 	}
 	if x.Imag != 0 {
-		if err := enc.NextFieldValueFloat("Imag", vdl.Float64Type, x.Imag); err != nil {
+		if err := enc.NextFieldValueFloat(1, vdl.Float64Type, x.Imag); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -126,31 +133,38 @@ func (x *Complex128) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_2); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Real":
+		}
+		if decType != __VDLType_struct_2 {
+			index = __VDLType_struct_2.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.Real = value
 			}
-		case "Imag":
+		case 1:
 			switch value, err := dec.ReadValueFloat(64); {
 			case err != nil:
 				return err
 			default:
 				x.Imag = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

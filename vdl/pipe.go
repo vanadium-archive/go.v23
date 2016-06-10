@@ -62,7 +62,7 @@ type pipeEncoder struct {
 
 	Stack                    []pipeStackEntry
 	NextEntryDone            bool
-	NextFieldName            string
+	NextFieldIndex           int
 	NextStartValueIsOptional bool       // The StartValue refers to an optional type.
 	NumberType               numberType // The number type X in EncodeX.
 
@@ -452,13 +452,6 @@ func (e *pipeEncoder) NextEntry(done bool) error {
 	e.NextEntryDone = done
 	return e.Err
 }
-func (e *pipeEncoder) NextField(name string) error {
-	if e.State == pipeStateDecoder {
-		return e.Close(errEncCallDuringDecPhase)
-	}
-	e.NextFieldName = name
-	return e.Err
-}
 
 func (d *pipeDecoder) NextEntry() (bool, error) {
 	top := d.top()
@@ -477,15 +470,22 @@ func (d *pipeDecoder) NextEntry() (bool, error) {
 	return done, d.Enc.Err
 }
 
-func (d *pipeDecoder) NextField() (string, error) {
+func (e *pipeEncoder) NextField(index int) error {
+	if e.State == pipeStateDecoder {
+		return e.Close(errEncCallDuringDecPhase)
+	}
+	e.NextFieldIndex = index
+	return e.Err
+}
+
+func (d *pipeDecoder) NextField() (int, error) {
 	top := d.top()
 	if top == nil {
-		return "", d.Close(errEmptyPipeStack)
+		return -1, d.Close(errEmptyPipeStack)
 	}
-	top.Index++
-	name := d.Enc.NextFieldName
-	d.Enc.NextFieldName = ""
-	return name, d.Enc.Err
+	top.Index = d.Enc.NextFieldIndex
+	d.Enc.NextFieldIndex = -1
+	return top.Index, d.Enc.Err
 }
 
 func (d *pipeDecoder) Type() *Type {

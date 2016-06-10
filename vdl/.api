@@ -85,6 +85,7 @@ pkg vdl, method (*Type) EnumIndex(string) int
 pkg vdl, method (*Type) EnumLabel(int) string
 pkg vdl, method (*Type) Field(int) Field
 pkg vdl, method (*Type) FieldByName(string) (Field, int)
+pkg vdl, method (*Type) FieldIndexByName(string) int
 pkg vdl, method (*Type) IsBytes() bool
 pkg vdl, method (*Type) IsPartOfCycle() bool
 pkg vdl, method (*Type) Key() *Type
@@ -189,7 +190,7 @@ pkg vdl, type Decoder interface, NextEntryValueInt(int) (bool, int64, error)
 pkg vdl, type Decoder interface, NextEntryValueString() (bool, string, error)
 pkg vdl, type Decoder interface, NextEntryValueTypeObject() (bool, *Type, error)
 pkg vdl, type Decoder interface, NextEntryValueUint(int) (bool, uint64, error)
-pkg vdl, type Decoder interface, NextField() (string, error)
+pkg vdl, type Decoder interface, NextField() (int, error)
 pkg vdl, type Decoder interface, ReadValueBool() (bool, error)
 pkg vdl, type Decoder interface, ReadValueBytes(int, *[]byte) error
 pkg vdl, type Decoder interface, ReadValueFloat(int) (float64, error)
@@ -217,14 +218,14 @@ pkg vdl, type Encoder interface, NextEntryValueInt(*Type, int64) error
 pkg vdl, type Encoder interface, NextEntryValueString(*Type, string) error
 pkg vdl, type Encoder interface, NextEntryValueTypeObject(*Type) error
 pkg vdl, type Encoder interface, NextEntryValueUint(*Type, uint64) error
-pkg vdl, type Encoder interface, NextField(string) error
-pkg vdl, type Encoder interface, NextFieldValueBool(string, *Type, bool) error
-pkg vdl, type Encoder interface, NextFieldValueBytes(string, *Type, []byte) error
-pkg vdl, type Encoder interface, NextFieldValueFloat(string, *Type, float64) error
-pkg vdl, type Encoder interface, NextFieldValueInt(string, *Type, int64) error
-pkg vdl, type Encoder interface, NextFieldValueString(string, *Type, string) error
-pkg vdl, type Encoder interface, NextFieldValueTypeObject(string, *Type) error
-pkg vdl, type Encoder interface, NextFieldValueUint(string, *Type, uint64) error
+pkg vdl, type Encoder interface, NextField(int) error
+pkg vdl, type Encoder interface, NextFieldValueBool(int, *Type, bool) error
+pkg vdl, type Encoder interface, NextFieldValueBytes(int, *Type, []byte) error
+pkg vdl, type Encoder interface, NextFieldValueFloat(int, *Type, float64) error
+pkg vdl, type Encoder interface, NextFieldValueInt(int, *Type, int64) error
+pkg vdl, type Encoder interface, NextFieldValueString(int, *Type, string) error
+pkg vdl, type Encoder interface, NextFieldValueTypeObject(int, *Type) error
+pkg vdl, type Encoder interface, NextFieldValueUint(int, *Type, uint64) error
 pkg vdl, type Encoder interface, NilValue(*Type) error
 pkg vdl, type Encoder interface, SetLenHint(int) error
 pkg vdl, type Encoder interface, SetNextStartValueIsOptional()

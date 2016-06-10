@@ -47,16 +47,16 @@ func (x MediaInfo) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Type != "" {
-		if err := enc.NextFieldValueString("Type", vdl.StringType, x.Type); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Type); err != nil {
 			return err
 		}
 	}
 	if x.Encoding != "" {
-		if err := enc.NextFieldValueString("Encoding", vdl.StringType, x.Encoding); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.Encoding); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -67,31 +67,38 @@ func (x *MediaInfo) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Type":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Type = value
 			}
-		case "Encoding":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Encoding = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

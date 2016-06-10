@@ -46,17 +46,17 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		return err
 	}
 	if x.Label != "" {
-		if err := enc.NextFieldValueString("Label", vdl.StringType, x.Label); err != nil {
+		if err := enc.NextFieldValueString(0, vdl.StringType, x.Label); err != nil {
 			return err
 		}
 	}
 	if x.ValueLabel != "" {
-		if err := enc.NextFieldValueString("ValueLabel", vdl.StringType, x.ValueLabel); err != nil {
+		if err := enc.NextFieldValueString(1, vdl.StringType, x.ValueLabel); err != nil {
 			return err
 		}
 	}
 	if x.Value != nil {
-		if err := enc.NextField("Value"); err != nil {
+		if err := enc.NextField(2); err != nil {
 			return err
 		}
 		if err := vdl.Write(enc, x.Value); err != nil {
@@ -64,21 +64,21 @@ func (x vdlEntry) VDLWrite(enc vdl.Encoder) error {
 		}
 	}
 	if x.Version != 0 {
-		if err := enc.NextFieldValueUint("Version", __VDLType_byte_2, uint64(x.Version)); err != nil {
+		if err := enc.NextFieldValueUint(3, __VDLType_byte_2, uint64(x.Version)); err != nil {
 			return err
 		}
 	}
 	if x.HexType != "" {
-		if err := enc.NextFieldValueString("HexType", vdl.StringType, x.HexType); err != nil {
+		if err := enc.NextFieldValueString(4, vdl.StringType, x.HexType); err != nil {
 			return err
 		}
 	}
 	if x.HexValue != "" {
-		if err := enc.NextFieldValueString("HexValue", vdl.StringType, x.HexValue); err != nil {
+		if err := enc.NextFieldValueString(5, vdl.StringType, x.HexValue); err != nil {
 			return err
 		}
 	}
-	if err := enc.NextField(""); err != nil {
+	if err := enc.NextField(-1); err != nil {
 		return err
 	}
 	return enc.FinishValue()
@@ -89,58 +89,65 @@ func (x *vdlEntry) VDLRead(dec vdl.Decoder) error {
 	if err := dec.StartValue(__VDLType_struct_1); err != nil {
 		return err
 	}
+	decType := dec.Type()
 	for {
-		f, err := dec.NextField()
-		if err != nil {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
 			return err
-		}
-		switch f {
-		case "":
+		case index == -1:
 			return dec.FinishValue()
-		case "Label":
+		}
+		if decType != __VDLType_struct_1 {
+			index = __VDLType_struct_1.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.Label = value
 			}
-		case "ValueLabel":
+		case 1:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.ValueLabel = value
 			}
-		case "Value":
+		case 2:
 			var readAny interface{}
 			if err := vdl.Read(dec, &readAny); err != nil {
 				return err
 			}
 			x.Value = readAny
-		case "Version":
+		case 3:
 			switch value, err := dec.ReadValueUint(8); {
 			case err != nil:
 				return err
 			default:
 				x.Version = vom.Version(value)
 			}
-		case "HexType":
+		case 4:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.HexType = value
 			}
-		case "HexValue":
+		case 5:
 			switch value, err := dec.ReadValueString(); {
 			case err != nil:
 				return err
 			default:
 				x.HexValue = value
-			}
-		default:
-			if err := dec.SkipValue(); err != nil {
-				return err
 			}
 		}
 	}

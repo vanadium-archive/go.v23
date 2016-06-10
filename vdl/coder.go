@@ -82,9 +82,10 @@ type Decoder interface {
 	// done=true when there are no remaining entries.
 	NextEntry() (done bool, _ error)
 	// NextField instructs the Decoder to move to the next field of a Struct or
-	// Union.  Returns the name of the next field, or the empty string when there
-	// are no remaining fields.
-	NextField() (name string, _ error)
+	// Union.  Returns the index of the next field, or -1 when there are no
+	// remaining fields.  You may call Decoder.Type().Field(index).Name to
+	// retrieve the name of the struct or union field.
+	NextField() (index int, _ error)
 
 	// Type returns the type of the top value on the stack.  Returns nil when the
 	// stack is empty.  The returned type is only Any or Optional iff the value is
@@ -198,9 +199,9 @@ type Encoder interface {
 	// done=true when there are no remaining entries.
 	NextEntry(done bool) error
 	// NextField instructs the Encoder to move to the next field of a Struct or
-	// Union.  Set name to the name of the next field, or set name="" when there
-	// are no remaining fields.
-	NextField(name string) error
+	// Union.  Set index to the index of the next field, or -1 when there are no
+	// remaining fields.
+	NextField(index int) error
 
 	// SetLenHint sets the length of the List, Set or Map value.  It may only be
 	// called immediately after StartValue, before NextEntry has been called.  Do
@@ -269,26 +270,26 @@ type Encoder interface {
 
 	// NextFieldValueBool behaves as if NextEntry, StartValue, EncodeBool,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueBool(name string, tt *Type, value bool) error
+	NextFieldValueBool(index int, tt *Type, value bool) error
 	// NextFieldValueString behaves as if NextEntry, StartValue, EncodeString,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueString(name string, tt *Type, value string) error
+	NextFieldValueString(index int, tt *Type, value string) error
 	// NextFieldValueUint behaves as if NextEntry, StartValue, EncodeUint,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueUint(name string, tt *Type, value uint64) error
+	NextFieldValueUint(index int, tt *Type, value uint64) error
 	// NextFieldValueInt behaves as if NextEntry, StartValue, EncodeInt,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueInt(name string, tt *Type, value int64) error
+	NextFieldValueInt(index int, tt *Type, value int64) error
 	// NextFieldValueFloat behaves as if NextEntry, StartValue, EncodeFloat,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueFloat(name string, tt *Type, value float64) error
+	NextFieldValueFloat(index int, tt *Type, value float64) error
 	// NextFieldValueTypeObject behaves as if NextEntry, StartValue,
 	// EncodeTypeObject, FinishValue were called in sequence.  Some encoders
 	// optimize this codepath.
-	NextFieldValueTypeObject(name string, value *Type) error
+	NextFieldValueTypeObject(index int, value *Type) error
 	// NextFieldValueBytes behaves as if NextEntry, StartValue, EncodeBytes,
 	// FinishValue were called in sequence.  Some encoders optimize this codepath.
-	NextFieldValueBytes(name string, tt *Type, value []byte) error
+	NextFieldValueBytes(index int, tt *Type, value []byte) error
 }
 
 // DecodeConvertedBytes is a helper function for implementations of

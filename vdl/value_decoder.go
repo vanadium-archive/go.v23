@@ -140,23 +140,24 @@ func (d *valueDecoder) NextEntry() (bool, error) {
 	return false, nil
 }
 
-func (d *valueDecoder) NextField() (string, error) {
+func (d *valueDecoder) NextField() (int, error) {
 	top := d.top()
 	if top == nil {
-		return "", errEmptyDecoderStack
+		return -1, errEmptyDecoderStack
 	}
-	top.Index++
-	index, max := top.Index, top.Value.Type().NumField()
-	if top.Value.Kind() == Union {
-		max = 1
-		index, _ = top.Value.UnionField()
+	switch top.Value.Kind() {
+	case Union:
+		if top.Index != -1 {
+			return -1, nil
+		}
+		top.Index, _ = top.Value.UnionField()
+	case Struct:
+		top.Index++
+		if top.Index >= top.Value.Type().NumField() {
+			return -1, nil
+		}
 	}
-	if top.Index == max {
-		return "", nil
-	} else if top.Index > max {
-		return "", fmt.Errorf("vdl: NextField called after done, stack: %+v", d.stack)
-	}
-	return top.Value.Type().Field(index).Name, nil
+	return top.Index, nil
 }
 
 func (d *valueDecoder) topValue() *Value {
@@ -204,7 +205,7 @@ func (d *valueDecoder) Index() int {
 func (d *valueDecoder) LenHint() int {
 	if top := d.top(); top != nil {
 		switch top.Value.Kind() {
-		case List, Map, Set, Array:
+		case Array, List, Set, Map:
 			return top.Value.Len()
 		}
 	}
