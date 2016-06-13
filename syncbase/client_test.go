@@ -586,34 +586,10 @@ func TestWatchBasic(t *testing.T) {
 	}
 	resumeMarkers = append(resumeMarkers, resumeMarker)
 
-	valueBytes, _ := vom.RawBytesFromValue("value")
 	allChanges := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   c.Id(),
-				Row:          "abc%",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarkers[1],
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   c.Id(),
-				Row:          "abc%",
-				ChangeType:   syncbase.DeleteChange,
-				ResumeMarker: resumeMarkers[2],
-			},
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   c.Id(),
-				Row:          "a",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarkers[3],
-			},
-			ValueBytes: valueBytes,
-		},
+		tu.WatchChangeTestRowPut(c.Id(), "abc%", "value", resumeMarkers[1]),
+		tu.WatchChangeTestRowDelete(c.Id(), "abc%", resumeMarkers[2]),
+		tu.WatchChangeTestRowPut(c.Id(), "a", "value", resumeMarkers[3]),
 	}
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
@@ -655,7 +631,8 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		t.Fatalf("ch.SetPermissions() failed: %v", err)
 	}
 
-	// Put cp:"a/1" and ch:"b/1" in a batch.
+	// === 1) Initial changes ===
+	// -> Put cp:"a/1" and ch:"b/1" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
 		cp := b.Collection(adminCtx, "cpublic")
 		if err := cp.Put(adminCtx, "a/1", "value"); err != nil {
@@ -666,7 +643,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
 	}
-	// Put cp:"c/1".
+	// -> Put cp:"c/1".
 	if err := cp.Put(adminCtx, "c/1", "value"); err != nil {
 		t.Fatalf("cp.Put() failed: %v", err)
 	}
@@ -692,55 +669,31 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	valueBytes, _ := vom.RawBytesFromValue("value")
 
-	initialChanges := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   ch.Id(),
-				Row:          "b/1",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: nil,
-				Continued:    true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   cp.Id(),
-				Row:          "a/1",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: nil,
-				Continued:    true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   cp.Id(),
-				Row:          "c/1",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarkerInitial,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	// Watch with empty prefix should have seen the initial state as one batch,
-	// omitting the row in the secret collection.
-	tu.CheckWatch(t, wstreamAll, initialChanges[1:])
+	// Check 1) Initial changes
 	// Admin watch with empty prefix should have seen the full initial state as
 	// one batch.
-	tu.CheckWatch(t, wstreamAllAdmin, initialChanges)
+	tu.CheckWatch(t, wstreamAllAdmin, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(ch.Id(), "b/1", "value", nil),
+		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
+		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
+	})
+	// Watch with empty prefix should have seen the initial state as one batch,
+	// omitting the row in the hidden collection.
+	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
+		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
+	})
 
-	// More writes.
-	// Put ch:"b/2" and cp:"a/2" in a batch.
+	// === 2) More writes ===
+	// -> Put cp:"a/2" and ch:"b/2" in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		ch := b.Collection(adminCtx, "chidden")
-		if err := ch.Put(adminCtx, "b/2", "value"); err != nil {
+		cp := b.Collection(adminCtx, "cpublic")
+		if err := cp.Put(adminCtx, "a/2", "value"); err != nil {
 			return err
 		}
-		cp := b.Collection(adminCtx, "cpublic")
-		return cp.Put(adminCtx, "a/2", "value")
+		ch := b.Collection(adminCtx, "chidden")
+		return ch.Put(adminCtx, "b/2", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
 	}
@@ -748,13 +701,13 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	// Put cp:"a/1" (overwrite) and cp:"d/1" in a batch.
+	// -> Put cp:"d/1" and cp:"a/1" (overwrite) in a batch.
 	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
 		cp := b.Collection(adminCtx, "cpublic")
-		if err := cp.Put(adminCtx, "a/1", "value"); err != nil {
+		if err := cp.Put(adminCtx, "d/1", "value"); err != nil {
 			return err
 		}
-		return cp.Put(adminCtx, "d/1", "value")
+		return cp.Put(adminCtx, "a/1", "value")
 	}); err != nil {
 		t.Fatalf("RunInBatch failed: %v", err)
 	}
@@ -763,55 +716,103 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
 
-	continuedChanges := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   ch.Id(),
-				Row:          "b/2",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: nil,
-				Continued:    true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   cp.Id(),
-				Row:          "a/2",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarkerAfterB2A2,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   cp.Id(),
-				Row:          "a/1",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: nil,
-				Continued:    true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   cp.Id(),
-				Row:          "d/1",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarkerAfterA1rD1,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	// Watch with empty prefix should have seen the continued changes as separate
-	// batches, omitting rows in the secret collection.
-	tu.CheckWatch(t, wstreamAll, continuedChanges[1:])
-	// Watch with prefix "d" should have seen only the last change; its initial
-	// state was empty.
-	tu.CheckWatch(t, wstreamD, continuedChanges[3:])
+	// Check 2) More writes
 	// Admin watch with empty prefix should have seen all the continued changes as
 	// separate batches.
-	tu.CheckWatch(t, wstreamAllAdmin, continuedChanges)
+	tu.CheckWatch(t, wstreamAllAdmin, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cp.Id(), "a/2", "value", nil),
+		tu.WatchChangeTestRowPut(ch.Id(), "b/2", "value", resumeMarkerAfterB2A2),
+		tu.WatchChangeTestRowPut(cp.Id(), "d/1", "value", nil),
+		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", resumeMarkerAfterA1rD1),
+	})
+	// Watch with empty prefix should have seen the continued changes as separate
+	// batches, omitting rows in the hidden collection. Batches should be properly
+	// terminated.
+	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cp.Id(), "a/2", "value", resumeMarkerAfterB2A2),
+		tu.WatchChangeTestRowPut(cp.Id(), "d/1", "value", nil),
+		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", resumeMarkerAfterA1rD1),
+	})
+	// Watch with prefix "d" should have seen only the "d/1" change. Batch should
+	// be properly terminated.
+	tu.CheckWatch(t, wstreamD, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cp.Id(), "d/1", "value", resumeMarkerAfterA1rD1),
+	})
+
+	// === 3) Writes and permissions change ===
+	// -> Put ch:"b/3", set permissions on ch, put ch:"b/4" in a batch.
+	newPerms := access.Permissions{}.
+		Add("root:u:admin", access.TagStrings(access.Write, access.Admin)...).
+		Add("root:u:client", access.TagStrings(access.Read, access.Admin)...)
+	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
+		ch := b.Collection(adminCtx, "chidden")
+		if err := ch.Put(adminCtx, "b/3", "value"); err != nil {
+			return err
+		}
+		if err := ch.SetPermissions(adminCtx, newPerms); err != nil {
+			return err
+		}
+		return ch.Put(adminCtx, "b/4", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
+	}
+	resumeMarkerAfterB3BspB4, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+
+	// Check 3) Writes and permissions change
+	// Watch with empty prefix should have seen the continued changes since it has
+	// Read access on the hidden collection now. The ACL is checked when scanning
+	// the log after commit, so the new ACL applies to the entire batch.
+	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(ch.Id(), "b/3", "value", nil),
+		tu.WatchChangeTestRowPut(ch.Id(), "b/4", "value", resumeMarkerAfterB3BspB4),
+	})
+	// Admin batch no longer has Read access on the hidden collection, so it sees
+	// nothing (this is checked later, when there are more rows to see). The ACL
+	// is checked when scanning the log after commit, so the new ACL applies to
+	// the entire batch.
+
+	// === 4) Writes and collection destroy ===
+	// -> Put ch:"b/5", destroy ch, put cp:"a/3" in a batch.
+	if err := syncbase.RunInBatch(adminCtx, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
+		ch := b.Collection(adminCtx, "chidden")
+		if err := ch.Put(adminCtx, "b/5", "value"); err != nil {
+			return err
+		}
+		if err := ch.Destroy(adminCtx); err != nil {
+			return err
+		}
+		cp := b.Collection(adminCtx, "cpublic")
+		return cp.Put(adminCtx, "a/3", "value")
+	}); err != nil {
+		t.Fatalf("RunInBatch failed: %v", err)
+	}
+	resumeMarkerAfterB5BdA3, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+	// -> Delete cp:"a/3".
+	if err := cp.Delete(adminCtx, "a/3"); err != nil {
+		t.Fatalf("cp.Delete() failed: %v", err)
+	}
+	resumeMarkerAfterA3d, err := d.GetResumeMarker(clientCtx)
+	if err != nil {
+		t.Fatalf("d.GetResumeMarker() failed: %v", err)
+	}
+
+	// Check 4) Writes and collection destroy
+	// Both watches do not see any of the hidden collection changes since the
+	// collection has been destroyed and there is no ACL to check against. They
+	// see only the public collection changes.
+	finalChangesBoth := []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cp.Id(), "a/3", "value", resumeMarkerAfterB5BdA3),
+		tu.WatchChangeTestRowDelete(cp.Id(), "a/3", resumeMarkerAfterA3d),
+	}
+	tu.CheckWatch(t, wstreamAll, finalChangesBoth)
+	tu.CheckWatch(t, wstreamAllAdmin, finalChangesBoth)
+
 	wstreamAllAdmin.Cancel()
 	wstreamD.Cancel()
 	wstreamAll.Cancel()
@@ -834,7 +835,6 @@ func TestBlockingWatch(t *testing.T) {
 	wstream := d.Watch(ctxWithTimeout, resumeMarker, []wire.CollectionRowPattern{
 		util.RowPrefixPattern(c.Id(), "a"),
 	})
-	valueBytes, _ := vom.RawBytesFromValue("value")
 	for i := 0; i < 10; i++ {
 		// Put "abc".
 		r := c.Row("abc")
@@ -847,15 +847,7 @@ func TestBlockingWatch(t *testing.T) {
 		if !wstream.Advance() {
 			t.Fatalf("wstream.Advance() reached the end: %v", wstream.Err())
 		}
-		want := tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection:   c.Id(),
-				Row:          "abc",
-				ChangeType:   syncbase.PutChange,
-				ResumeMarker: resumeMarker,
-			},
-			ValueBytes: valueBytes,
-		}
+		want := tu.WatchChangeTestRowPut(c.Id(), "abc", "value", resumeMarker)
 		if got := wstream.Change(); !tu.WatchChangeEq(&got, &want) {
 			t.Fatalf("Unexpected watch change: got %v, want %v", got, want)
 		}
@@ -955,110 +947,26 @@ func TestWatchMulti(t *testing.T) {
 	if err != nil {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
-	valueBytes, _ := vom.RawBytesFromValue("value")
 
-	initialChanges1 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "a",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "abc",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "cd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerInitial,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	tu.CheckWatch(t, wstream1, initialChanges1)
-
-	initialChanges2 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:%", "foo"}, Row: "ef",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:%", "foo"}, Row: "efg",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerInitial,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	tu.CheckWatch(t, wstream2, initialChanges2)
-
-	initialChanges3 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:%", "foo"}, Row: "ab",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:%", "foo"}, Row: "x\\yz",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "abc",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "cd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "abc",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "cd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerInitial,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	tu.CheckWatch(t, wstream3, initialChanges3)
+	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "a", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
+	})
+	tu.CheckWatch(t, wstream2, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cBFoo.Id(), "ef", "value", nil),
+		tu.WatchChangeTestRowPut(cBFoo.Id(), "efg", "value", resumeMarkerInitial),
+	})
+	tu.CheckWatch(t, wstream3, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cBFoo.Id(), "ab", "value", nil),
+		tu.WatchChangeTestRowPut(cBFoo.Id(), "x\\yz", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "cd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "abc", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
+	})
 
 	// More writes.
 	// Put root:x:alice,foo:"abcd" and root:x:alice,foobar:"abcd", delete root:x:%,foo:"ef%" in a batch.
@@ -1079,8 +987,9 @@ func TestWatchMulti(t *testing.T) {
 	}
 	// Create collection root:x:bob,foobar and put "xyz", "acd", "abcd", root:x:alice,foo:"bcd" in a batch.
 	ctxBob := tu.NewCtx(ctxWithTimeout, rootp, "x:bob")
+	cNewId := wire.Id{"root:x:bob", "foobar"}
 	if err := syncbase.RunInBatch(ctxBob, d, wire.BatchOptions{}, func(b syncbase.BatchDatabase) error {
-		cNew := b.CollectionForId(wire.Id{"root:x:bob", "foobar"})
+		cNew := b.CollectionForId(cNewId)
 		if err := cNew.Create(ctxBob, cxPerms); err != nil {
 			return err
 		}
@@ -1103,86 +1012,23 @@ func TestWatchMulti(t *testing.T) {
 		t.Fatalf("d.GetResumeMarker() failed: %v", err)
 	}
 
-	continuedChanges1 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerAfterBatch1,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:bob", "foobar"}, Row: "acd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:bob", "foobar"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "bcd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerAfterBatch2,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	tu.CheckWatch(t, wstream1, continuedChanges1)
+	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abcd", "value", resumeMarkerAfterBatch1),
+		tu.WatchChangeTestRowPut(cNewId, "acd", "value", nil),
+		tu.WatchChangeTestRowPut(cNewId, "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "bcd", "value", resumeMarkerAfterBatch2),
+	})
+	tu.CheckWatch(t, wstream2, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowDelete(cBFoo.Id(), "ef%", resumeMarkerAfterBatch1),
+	})
+	tu.CheckWatch(t, wstream3, []tu.WatchChangeTest{
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abcd", "value", resumeMarkerAfterBatch1),
+		tu.WatchChangeTestRowPut(cNewId, "abcd", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "bcd", "value", resumeMarkerAfterBatch2),
+	})
 
-	continuedChanges2 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:%", "foo"}, Row: "ef%",
-				ChangeType: syncbase.DeleteChange, ResumeMarker: resumeMarkerAfterBatch1,
-			},
-		},
-	}
-	tu.CheckWatch(t, wstream2, continuedChanges2)
-
-	continuedChanges3 := []tu.WatchChangeTest{
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foobar"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerAfterBatch1,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:bob", "foobar"}, Row: "abcd",
-				ChangeType: syncbase.PutChange, Continued: true,
-			},
-			ValueBytes: valueBytes,
-		},
-		tu.WatchChangeTest{
-			WatchChange: syncbase.WatchChange{
-				Collection: wire.Id{"root:x:alice", "foo"}, Row: "bcd",
-				ChangeType: syncbase.PutChange, ResumeMarker: resumeMarkerAfterBatch2,
-			},
-			ValueBytes: valueBytes,
-		},
-	}
-	tu.CheckWatch(t, wstream3, continuedChanges3)
 	wstream1.Cancel()
 	wstream2.Cancel()
 	wstream3.Cancel()
