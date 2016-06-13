@@ -59,7 +59,6 @@ pkg vom, func RawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, func RawBytesOf(interface{}) *RawBytes
 pkg vom, func VDLReadPrimitive(vdl.Decoder, *Primitive) error
 pkg vom, func VersionedEncode(Version, interface{}) ([]byte, error)
-pkg vom, func XRawBytesFromValue(interface{}) (*RawBytes, error)
 pkg vom, method (*ControlKind) Set(string) error
 pkg vom, method (*ControlKind) VDLRead(vdl.Decoder) error
 pkg vom, method (*Decoder) Decode(interface{}) error

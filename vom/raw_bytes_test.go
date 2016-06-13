@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vom
+package vom_test
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata/data81"
-	"v.io/v23/vom/testdata/types"
+	"v.io/v23/vom"
+	"v.io/v23/vom/vomtest"
 )
 
 type testUint64 uint64
@@ -22,27 +22,27 @@ type structTypeObject struct {
 }
 
 type structAny struct {
-	X *RawBytes
+	X *vom.RawBytes
 }
 
 type structAnyAndTypes struct {
 	A *vdl.Type
-	B *RawBytes
+	B *vom.RawBytes
 	C *vdl.Type
-	D *RawBytes
+	D *vom.RawBytes
 }
 
 // Test various combinations of having/not having any and type object.
 var rawBytesTestCases = []struct {
 	name     string
 	goValue  interface{}
-	rawBytes RawBytes
+	rawBytes vom.RawBytes
 }{
 	{
 		name:    "testUint64(99)",
 		goValue: testUint64(99),
-		rawBytes: RawBytes{
-			Version: DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.TypeOf(testUint64(0)),
 			Data:    []byte{0x63},
 		},
@@ -50,8 +50,8 @@ var rawBytesTestCases = []struct {
 	{
 		name:    "typeobject(int32)",
 		goValue: vdl.Int32Type,
-		rawBytes: RawBytes{
-			Version:  DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:  vom.DefaultVersion,
 			Type:     vdl.TypeOf(vdl.Int32Type),
 			RefTypes: []*vdl.Type{vdl.Int32Type},
 			Data:     []byte{0x00},
@@ -60,31 +60,31 @@ var rawBytesTestCases = []struct {
 	{
 		name:    "structTypeObject{typeobject(int32)}",
 		goValue: structTypeObject{vdl.Int32Type},
-		rawBytes: RawBytes{
-			Version:  DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:  vom.DefaultVersion,
 			Type:     vdl.TypeOf(structTypeObject{}),
 			RefTypes: []*vdl.Type{vdl.Int32Type},
-			Data:     []byte{0x00, 0x00, WireCtrlEnd},
+			Data:     []byte{0x00, 0x00, vom.WireCtrlEnd},
 		},
 	},
 	{
 		name: `structAnyAndTypes{typeobject(int32), true, typeobject(bool), "abc"}`,
 		goValue: structAnyAndTypes{
 			vdl.Int32Type,
-			&RawBytes{
-				Version: DefaultVersion,
+			&vom.RawBytes{
+				Version: vom.DefaultVersion,
 				Type:    vdl.BoolType,
 				Data:    []byte{0x01},
 			},
 			vdl.BoolType,
-			&RawBytes{
-				Version: DefaultVersion,
+			&vom.RawBytes{
+				Version: vom.DefaultVersion,
 				Type:    vdl.TypeOf(""),
 				Data:    []byte{0x03, 0x61, 0x62, 0x63},
 			},
 		},
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.TypeOf(structAnyAndTypes{}),
 			RefTypes:   []*vdl.Type{vdl.Int32Type, vdl.BoolType, vdl.StringType},
 			AnyLengths: []int{1, 4},
@@ -93,15 +93,15 @@ var rawBytesTestCases = []struct {
 				0x01, 0x01, 0x00, 0x01, // B
 				0x02, 0x01, // C
 				0x03, 0x02, 0x01, 0x03, 0x61, 0x62, 0x63, // D
-				WireCtrlEnd,
+				vom.WireCtrlEnd,
 			},
 		},
 	},
 	{
 		name:    "large message", // to test that multibyte length is encoded properly
 		goValue: makeLargeBytes(1000),
-		rawBytes: RawBytes{
-			Version: DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.ListType(vdl.ByteType),
 			Data:    append([]byte{0xfe, 0x03, 0xe8}, makeLargeBytes(1000)...),
 		},
@@ -109,8 +109,8 @@ var rawBytesTestCases = []struct {
 	{
 		name:    "*vdl.Value",
 		goValue: vdl.ValueOf(uint16(5)),
-		rawBytes: RawBytes{
-			Version: DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.Uint16Type,
 			Data:    []byte{0x05},
 		},
@@ -118,23 +118,23 @@ var rawBytesTestCases = []struct {
 	{
 		name:    "*vdl.Value - top level any",
 		goValue: vdl.ValueOf([]interface{}{uint16(5)}).Index(0),
-		rawBytes: RawBytes{
-			Version: DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.Uint16Type,
 			Data:    []byte{0x05},
 		},
 	},
 	{
 		name: "any(nil)",
-		goValue: &RawBytes{
-			Version: DefaultVersion,
+		goValue: &vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.AnyType,
-			Data:    []byte{WireCtrlNil},
+			Data:    []byte{vom.WireCtrlNil},
 		},
-		rawBytes: RawBytes{
-			Version: DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version: vom.DefaultVersion,
 			Type:    vdl.AnyType,
-			Data:    []byte{WireCtrlNil},
+			Data:    []byte{vom.WireCtrlNil},
 		},
 	},
 }
@@ -149,13 +149,13 @@ func makeLargeBytes(size int) []byte {
 
 func TestDecodeToRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
-		bytes, err := Encode(test.goValue)
+		bytes, err := vom.Encode(test.goValue)
 		if err != nil {
 			t.Errorf("%s: Encode failed: %v", test.name, err)
 			continue
 		}
-		var rb RawBytes
-		if err := Decode(bytes, &rb); err != nil {
+		var rb vom.RawBytes
+		if err := vom.Decode(bytes, &rb); err != nil {
 			t.Errorf("%s: Decode failed: %v", test.name, err)
 			continue
 		}
@@ -167,12 +167,12 @@ func TestDecodeToRawBytes(t *testing.T) {
 
 func TestEncodeFromRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
-		fullBytes, err := Encode(test.goValue)
+		fullBytes, err := vom.Encode(test.goValue)
 		if err != nil {
 			t.Errorf("%s: Encode goValue failed: %v", test.name, err)
 			continue
 		}
-		fullBytesFromRaw, err := Encode(&test.rawBytes)
+		fullBytesFromRaw, err := vom.Encode(&test.rawBytes)
 		if err != nil {
 			t.Errorf("%s: Encode RawBytes failed: %v", test.name, err)
 			continue
@@ -187,13 +187,13 @@ func TestEncodeFromRawBytes(t *testing.T) {
 var rawBytesWrappedTestCases = []struct {
 	name     string
 	goValue  interface{}
-	rawBytes RawBytes
+	rawBytes vom.RawBytes
 }{
 	{
 		name:    "testUint64(99)",
 		goValue: testUint64(99),
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.TypeOf(testUint64(0)),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(testUint64(0))},
 			AnyLengths: []int{1},
@@ -203,8 +203,8 @@ var rawBytesWrappedTestCases = []struct {
 	{
 		name:    "typeobject(int32)",
 		goValue: vdl.Int32Type,
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.TypeOf(vdl.Int32Type),
 			RefTypes:   []*vdl.Type{vdl.TypeObjectType, vdl.Int32Type},
 			AnyLengths: []int{1},
@@ -214,8 +214,8 @@ var rawBytesWrappedTestCases = []struct {
 	{
 		name:    "structTypeObject{typeobject(int32)}",
 		goValue: structTypeObject{vdl.Int32Type},
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.TypeOf(structTypeObject{}),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(structTypeObject{}), vdl.Int32Type},
 			AnyLengths: []int{3},
@@ -226,20 +226,20 @@ var rawBytesWrappedTestCases = []struct {
 		name: `structAnyAndTypes{typeobject(int32), true, typeobject(bool), "abc"}`,
 		goValue: structAnyAndTypes{
 			vdl.Int32Type,
-			&RawBytes{
-				Version: DefaultVersion,
+			&vom.RawBytes{
+				Version: vom.DefaultVersion,
 				Type:    vdl.BoolType,
 				Data:    []byte{0x01},
 			},
 			vdl.BoolType,
-			&RawBytes{
-				Version: DefaultVersion,
+			&vom.RawBytes{
+				Version: vom.DefaultVersion,
 				Type:    vdl.TypeOf(""),
 				Data:    []byte{0x03, 0x61, 0x62, 0x63},
 			},
 		},
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.TypeOf(structAnyAndTypes{}),
 			RefTypes:   []*vdl.Type{vdl.TypeOf(structAnyAndTypes{}), vdl.Int32Type, vdl.BoolType, vdl.StringType},
 			AnyLengths: []int{16, 1, 4},
@@ -255,8 +255,8 @@ var rawBytesWrappedTestCases = []struct {
 	{
 		name:    "large message", // to test that multibyte length is encoded properly
 		goValue: makeLargeBytes(1000),
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.ListType(vdl.ByteType),
 			RefTypes:   []*vdl.Type{vdl.ListType(vdl.ByteType)},
 			AnyLengths: []int{0x3eb},
@@ -266,8 +266,8 @@ var rawBytesWrappedTestCases = []struct {
 	{
 		name:    "*vdl.Value",
 		goValue: vdl.ValueOf(uint16(5)),
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.Uint16Type,
 			RefTypes:   []*vdl.Type{vdl.Uint16Type},
 			AnyLengths: []int{1},
@@ -277,8 +277,8 @@ var rawBytesWrappedTestCases = []struct {
 	{
 		name:    "*vdl.Value - top level any",
 		goValue: vdl.ValueOf([]interface{}{uint16(5)}).Index(0),
-		rawBytes: RawBytes{
-			Version:    DefaultVersion,
+		rawBytes: vom.RawBytes{
+			Version:    vom.DefaultVersion,
 			Type:       vdl.Uint16Type,
 			RefTypes:   []*vdl.Type{vdl.Uint16Type},
 			AnyLengths: []int{1},
@@ -290,13 +290,13 @@ var rawBytesWrappedTestCases = []struct {
 func TestWrappedRawBytes(t *testing.T) {
 	for i, test := range rawBytesWrappedTestCases {
 		unwrapped := rawBytesTestCases[i]
-		wrappedBytes, err := Encode(structAny{&unwrapped.rawBytes})
+		wrappedBytes, err := vom.Encode(structAny{&unwrapped.rawBytes})
 		if err != nil {
 			t.Errorf("%s: Encode failed: %v", test.name, err)
 			continue
 		}
 		var any structAny
-		if err := Decode(wrappedBytes, &any); err != nil {
+		if err := vom.Decode(wrappedBytes, &any); err != nil {
 			t.Errorf("%s: Decode failed: %v", test.name, err)
 			continue
 		}
@@ -308,11 +308,11 @@ func TestWrappedRawBytes(t *testing.T) {
 
 func TestEncodeNilRawBytes(t *testing.T) {
 	// Top-level
-	want, err := Encode(vdl.ZeroValue(vdl.AnyType))
+	want, err := vom.Encode(vdl.ZeroValue(vdl.AnyType))
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := Encode((*RawBytes)(nil))
+	got, err := vom.Encode((*vom.RawBytes)(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -320,11 +320,11 @@ func TestEncodeNilRawBytes(t *testing.T) {
 		t.Errorf("top-level\nGOT  %x\nWANT %x", got, want)
 	}
 	// Within an object.
-	want, err = Encode([]*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
+	want, err = vom.Encode([]*vdl.Value{vdl.ZeroValue(vdl.AnyType)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err = Encode([]*RawBytes{nil})
+	got, err = vom.Encode([]*vom.RawBytes{nil})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -333,115 +333,8 @@ func TestEncodeNilRawBytes(t *testing.T) {
 	}
 }
 
-func TestRawBytesDecodeEncode(t *testing.T) {
-	versions := []struct {
-		Version Version
-		Tests   []types.TestCase
-	}{
-		{Version81, data81.Tests},
-	}
-	for _, testVersion := range versions {
-		for _, test := range testVersion.Tests {
-			// Interleaved
-			rb := RawBytes{}
-			interleavedReader := bytes.NewReader(hex2Bin(t, test.Hex))
-			if err := NewDecoder(interleavedReader).Decode(&rb); err != nil {
-				t.Errorf("unexpected error decoding %s: %v", test.Name, err)
-				continue
-			}
-			if _, err := interleavedReader.ReadByte(); err != io.EOF {
-				t.Errorf("expected EOF, but got %v", err)
-				continue
-			}
-
-			var out bytes.Buffer
-			enc := NewVersionedEncoder(testVersion.Version, &out)
-			if err := enc.Encode(&rb); err != nil {
-				t.Errorf("unexpected error encoding raw bytes %v in test %s: %v", rb, test.Name, err)
-				continue
-			}
-			if !bytes.Equal(out.Bytes(), hex2Bin(t, test.Hex)) {
-				t.Errorf("got bytes: %x but expected %s", out.Bytes(), test.Hex)
-			}
-
-			// Split type and value stream.
-			rb = RawBytes{}
-			typeReader := bytes.NewReader(hex2Bin(t, test.HexVersion+test.HexType))
-			typeDec := NewTypeDecoder(typeReader)
-			typeDec.Start()
-			defer typeDec.Stop()
-			valueReader := bytes.NewReader(hex2Bin(t, test.HexVersion+test.HexValue))
-			if err := NewDecoderWithTypeDecoder(valueReader, typeDec).Decode(&rb); err != nil {
-				t.Errorf("unexpected error decoding %s: %v", test.Name, err)
-				continue
-			}
-			if test.HexType != "" {
-				// If HexType is empty, then the type stream will just have the version byte that won't be read, so ignore
-				// that case.
-				if _, err := typeReader.ReadByte(); err != io.EOF {
-					t.Errorf("in type reader expected EOF, but got %v", err)
-					continue
-				}
-			}
-			if _, err := valueReader.ReadByte(); err != io.EOF {
-				t.Errorf("in value reader expected EOF, but got %v", err)
-				continue
-			}
-
-			out.Reset()
-			var typeOut bytes.Buffer
-			typeEnc := NewVersionedTypeEncoder(testVersion.Version, &typeOut)
-			enc = NewVersionedEncoderWithTypeEncoder(testVersion.Version, &out, typeEnc)
-			if err := enc.Encode(&rb); err != nil {
-				t.Errorf("unexpected error encoding raw value %v in test %s: %v", rb, test.Name, err)
-				continue
-			}
-			expectedType := test.HexVersion + test.HexType
-			if expectedType == "81" || expectedType == "82" {
-				expectedType = ""
-			}
-			if !bytes.Equal(typeOut.Bytes(), hex2Bin(t, expectedType)) {
-				t.Errorf("got type bytes: %x but expected %s", typeOut.Bytes(), expectedType)
-			}
-			if !bytes.Equal(out.Bytes(), hex2Bin(t, test.HexVersion+test.HexValue)) {
-				t.Errorf("got value bytes: %x but expected %s", out.Bytes(), test.HexVersion+test.HexValue)
-			}
-		}
-	}
-}
-
-func TestRawBytesToFromValue(t *testing.T) {
-	versions := []struct {
-		Version Version
-		Tests   []types.TestCase
-	}{
-		{Version81, data81.Tests},
-	}
-	for _, testVersion := range versions {
-		for _, test := range testVersion.Tests {
-			rb, err := RawBytesFromValue(test.Value)
-			if err != nil {
-				t.Fatalf("%v %s: error in RawBytesFromValue %v", testVersion.Version, test.Name, err)
-			}
-			var vv *vdl.Value
-			if err := rb.ToValue(&vv); err != nil {
-				t.Fatalf("%v %s: error in rb.ToValue %v", testVersion.Version, test.Name, err)
-			}
-			if test.Name == "any(nil)" {
-				// Skip any(nil)
-				// TODO(bprosnitz) any(nil) results in two different nil representations. This shouldn't be the case.
-				continue
-			}
-			if got, want := vv, test.Value; !vdl.EqualValue(got, want) {
-				t.Errorf("%v %s: error in converting to and from raw value. got %v, but want %v", testVersion.Version,
-					test.Name, got, want)
-			}
-		}
-	}
-}
-
 func TestVdlTypeOfRawBytes(t *testing.T) {
-	if got, want := vdl.TypeOf(&RawBytes{}), vdl.AnyType; got != want {
+	if got, want := vdl.TypeOf(&vom.RawBytes{}), vdl.AnyType; got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
@@ -458,7 +351,7 @@ func TestVdlValueOfRawBytes(t *testing.T) {
 
 func TestConvertRawBytes(t *testing.T) {
 	for _, test := range rawBytesTestCases {
-		var rb *RawBytes
+		var rb *vom.RawBytes
 		if err := vdl.Convert(&rb, test.goValue); err != nil {
 			t.Errorf("%s: Convert failed: %v", test.name, err)
 		}
@@ -490,7 +383,7 @@ func TestConvertRawBytesWrapped(t *testing.T) {
 // are more ids in the encoder/decoder.
 func TestReusedDecoderEncoderRawBytes(t *testing.T) {
 	var buf bytes.Buffer
-	enc := NewEncoder(&buf)
+	enc := vom.NewEncoder(&buf)
 	if err := enc.Encode(structAnyInterface{int64(4)}); err != nil {
 		t.Fatalf("error on encode: %v", err)
 	}
@@ -498,7 +391,7 @@ func TestReusedDecoderEncoderRawBytes(t *testing.T) {
 		t.Fatalf("error on encode: %v", err)
 	}
 
-	dec := NewDecoder(bytes.NewReader(buf.Bytes()))
+	dec := vom.NewDecoder(bytes.NewReader(buf.Bytes()))
 	var x structAny
 	if err := dec.Decode(&x); err != nil {
 		t.Fatalf("error on decode: %v", err)
@@ -525,12 +418,12 @@ func TestReusedDecoderEncoderRawBytes(t *testing.T) {
 
 func TestRawBytesString(t *testing.T) {
 	tests := []struct {
-		input    *RawBytes
+		input    *vom.RawBytes
 		expected string
 	}{
 		{
-			input: &RawBytes{
-				Version81,
+			input: &vom.RawBytes{
+				vom.Version81,
 				vdl.Int8Type,
 				[]*vdl.Type{vdl.BoolType, vdl.StringType},
 				[]int{4},
@@ -538,8 +431,8 @@ func TestRawBytesString(t *testing.T) {
 			expected: "RawBytes{Version81, int8, RefTypes{bool, string}, AnyLengths{4}, fa0e9dcc}",
 		},
 		{
-			input: &RawBytes{
-				Version81,
+			input: &vom.RawBytes{
+				vom.Version81,
 				vdl.Int8Type,
 				[]*vdl.Type{vdl.BoolType},
 				[]int{},
@@ -547,8 +440,8 @@ func TestRawBytesString(t *testing.T) {
 			expected: "RawBytes{Version81, int8, RefTypes{bool}, fa0e9dcc}",
 		},
 		{
-			input: &RawBytes{
-				Version81,
+			input: &vom.RawBytes{
+				vom.Version81,
 				vdl.Int8Type,
 				nil,
 				nil,
@@ -564,10 +457,10 @@ func TestRawBytesString(t *testing.T) {
 }
 
 func TestRawBytesVDLType(t *testing.T) {
-	if got, want := vdl.TypeOf(RawBytes{}), vdl.AnyType; got != want {
+	if got, want := vdl.TypeOf(vom.RawBytes{}), vdl.AnyType; got != want {
 		t.Errorf("vom.RawBytes{} got %v, want %v", got, want)
 	}
-	if got, want := vdl.TypeOf((*RawBytes)(nil)), vdl.AnyType; got != want {
+	if got, want := vdl.TypeOf((*vom.RawBytes)(nil)), vdl.AnyType; got != want {
 		t.Errorf("vom.RawBytes{} got %v, want %v", got, want)
 	}
 }
@@ -586,20 +479,20 @@ func TestRawBytesNonVomPayload(t *testing.T) {
 	// of dealing with the format for describing types with any in the
 	// value message header.
 	var typeBuf, buf bytes.Buffer
-	typeEnc := NewTypeEncoder(&typeBuf)
-	if err := NewEncoderWithTypeEncoder(&buf, typeEnc).Encode(simpleStruct{5}); err != nil {
+	typeEnc := vom.NewTypeEncoder(&typeBuf)
+	if err := vom.NewEncoderWithTypeEncoder(&buf, typeEnc).Encode(simpleStruct{5}); err != nil {
 		t.Fatalf("failure when preparing type message bytes: %v", t)
 	}
 	var inputMessage []byte = typeBuf.Bytes()
-	inputMessage = append(inputMessage, byte(WireIdFirstUserType*2)) // New value message tid
-	inputMessage = append(inputMessage, 8)                           // Message length
+	inputMessage = append(inputMessage, byte(vom.WireIdFirstUserType*2)) // New value message tid
+	inputMessage = append(inputMessage, 8)                               // Message length
 	// non-vom bytes (invalid because there is no struct field at index 10)
 	dataPortion := []byte{10, 20, 30, 40, 50, 60, 70, 80}
 	inputMessage = append(inputMessage, dataPortion...)
 
 	// Now ensure decoding into a RawBytes works correctly.
-	var rb *RawBytes
-	if err := Decode(inputMessage, &rb); err != nil {
+	var rb *vom.RawBytes
+	if err := vom.Decode(inputMessage, &rb); err != nil {
 		t.Fatalf("error decoding %x into a RawBytes: %v", inputMessage, err)
 	}
 	if got, want := rb.Type, vdl.TypeOf(simpleStruct{}); got != want {
@@ -610,7 +503,7 @@ func TestRawBytesNonVomPayload(t *testing.T) {
 	}
 
 	// Now re-encode and ensure that we get the original bytes.
-	encoded, err := Encode(rb)
+	encoded, err := vom.Encode(rb)
 	if err != nil {
 		t.Fatalf("error encoding RawBytes %v: %v", rb, err)
 	}
@@ -619,40 +512,123 @@ func TestRawBytesNonVomPayload(t *testing.T) {
 	}
 }
 
-func TestRawBytesDecoder(t *testing.T) {
-	regex := filterRegex(t)
-	for _, test := range data81.Tests {
-		if !regex.MatchString(test.Name) {
+func TestRawBytesDecodeEncode(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
+		// Interleaved
+		rb := vom.RawBytes{}
+		interleavedReader := bytes.NewReader(test.Bytes())
+		if err := vom.NewDecoder(interleavedReader).Decode(&rb); err != nil {
+			t.Errorf("%s: decode failed: %v", test.Name(), err)
+			continue
+		}
+		if _, err := interleavedReader.ReadByte(); err != io.EOF {
+			t.Errorf("%s: expected EOF, but got %v", test.Name(), err)
 			continue
 		}
 
-		in := RawBytesOf(test.Value)
-		out := vdl.ZeroValue(test.Value.Type())
-		if err := out.VDLRead(in.Decoder()); err != nil {
-			t.Errorf("%s: error in ValueRead: %v", test.Name, err)
+		var out bytes.Buffer
+		enc := vom.NewVersionedEncoder(test.Version, &out)
+		if err := enc.Encode(&rb); err != nil {
+			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
 			continue
 		}
-		if !vdl.EqualValue(test.Value, out) {
-			t.Errorf("%s: got %v, want %v", test.Name, out, test.Value)
+		if got, want := out.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
+		}
+
+		// Split type and value stream.
+		rb = vom.RawBytes{}
+		typeReader := bytes.NewReader(test.TypeBytes())
+		typeDec := vom.NewTypeDecoder(typeReader)
+		typeDec.Start()
+		defer typeDec.Stop()
+		valueReader := bytes.NewReader(test.ValueBytes())
+		if err := vom.NewDecoderWithTypeDecoder(valueReader, typeDec).Decode(&rb); err != nil {
+			t.Errorf("%s: decode failed: %v", test.Name(), err)
+			continue
+		}
+		if _, err := typeReader.ReadByte(); err != io.EOF {
+			t.Errorf("%s: type reader got %v, want EOF", test.Name(), err)
+			continue
+		}
+		if _, err := valueReader.ReadByte(); err != io.EOF {
+			t.Errorf("%s: value reader got %v, want EOF", test.Name(), err)
+			continue
+		}
+
+		out.Reset()
+		var typeOut bytes.Buffer
+		typeEnc := vom.NewVersionedTypeEncoder(test.Version, &typeOut)
+		enc = vom.NewVersionedEncoderWithTypeEncoder(test.Version, &out, typeEnc)
+		if err := enc.Encode(&rb); err != nil {
+			t.Errorf("%s: encode failed: %v\nRawBytes: %v", test.Name(), err, rb)
+			continue
+		}
+		if got, want := typeOut.Bytes(), test.TypeBytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s: type bytes\nGOT  %x\nWANT %x", test.Name(), got, want)
+		}
+		if got, want := out.Bytes(), test.ValueBytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s: value bytes\nGOT  %x\nWANT %x", test.Name(), got, want)
+		}
+	}
+}
+
+func TestRawBytesToFromValue(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
+		rb, err := vom.RawBytesFromValue(test.Value.Interface())
+		if err != nil {
+			t.Errorf("%v %s: RawBytesFromValue failed: %v", test.Version, test.Name(), err)
+			continue
+		}
+		var vv *vdl.Value
+		if err := rb.ToValue(&vv); err != nil {
+			t.Errorf("%v %s: rb.ToValue failed: %v", test.Version, test.Name(), err)
+			continue
+		}
+		if got, want := vv, vdl.ValueOf(test.Value.Interface()); !vdl.EqualValue(got, want) {
+			t.Errorf("%v %s\nGOT  %v\nWANT %v", test.Version, test.Name(), got, want)
+		}
+	}
+}
+
+func TestRawBytesDecoder(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
+		tt, err := vdl.TypeFromReflect(test.Value.Type())
+		if err != nil {
+			t.Errorf("%s: TypeFromReflect failed: %v", test.Name(), err)
+			continue
+		}
+		in, err := vom.RawBytesFromValue(test.Value.Interface())
+		if err != nil {
+			t.Errorf("%s: RawBytesFromValue failed: %v", test.Name(), err)
+			continue
+		}
+		out := vdl.ZeroValue(tt)
+		if err := out.VDLRead(in.Decoder()); err != nil {
+			t.Errorf("%s: VDLRead failed: %v", test.Name(), err)
+			continue
+		}
+		if got, want := out, vdl.ValueOf(test.Value.Interface()); !vdl.EqualValue(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", test.Name(), got, want)
 		}
 	}
 }
 
 func TestRawBytesWriter(t *testing.T) {
-	regex := filterRegex(t)
-	for _, test := range data81.Tests {
-		if !regex.MatchString(test.Name) {
-			continue
-		}
-
+	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := NewEncoder(&buf)
-		if err := RawBytesOf(test.Value).VDLWrite(enc.Encoder()); err != nil {
-			t.Errorf("%s: error in transcode: %v", test.Name, err)
+		enc := vom.NewEncoder(&buf)
+		rb, err := vom.RawBytesFromValue(test.Value.Interface())
+		if err != nil {
+			t.Errorf("%s: RawBytesFromValue failed: %v", test.Name(), err)
 			continue
 		}
-		if got, want := buf.Bytes(), hex2Bin(t, test.Hex); !bytes.Equal(got, want) {
-			t.Errorf("%s: got %x, want %x", test.Name, got, want)
+		if err := rb.VDLWrite(enc.Encoder()); err != nil {
+			t.Errorf("%s: VDLWrite failed: %v", test.Name(), err)
+			continue
+		}
+		if got, want := buf.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
 		}
 	}
 }

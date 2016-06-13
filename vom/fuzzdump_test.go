@@ -4,7 +4,7 @@
 
 // +build fuzzdump
 
-package vom
+package vom_test
 
 import (
 	"crypto/sha1"
@@ -13,8 +13,7 @@ import (
 	"os"
 	"testing"
 
-	"v.io/v23/vom/testdata/data80"
-	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vom/vomtest"
 )
 
 // Add the vom tests as binary examples for the fuzzer.
@@ -27,34 +26,16 @@ func TestFuzzDump(t *testing.T) {
 
 	seen := make(map[[sha1.Size]byte]bool)
 
-	tests := append(data80.Tests, data81.Tests...)
-
-	for _, test := range tests {
-		binversion, err := binFromHexPat(test.HexVersion)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		bintype, err := binFromHexPat(test.HexType)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		binvalue, err := binFromHexPat(test.HexValue)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		data := []byte(binversion + bintype + binvalue)
+	for _, test := range vomtest.AllPass() {
+		data := test.Bytes()
 		hash := sha1.Sum(data)
-
 		if seen[hash] {
 			continue
 		}
 		seen[hash] = true
 
-		fn := fmt.Sprintf("fuzz-workdir/corpus/%x", hash)
-		if err := ioutil.WriteFile(fn, data, 0644); err != nil {
+		name := fmt.Sprintf("fuzz-workdir/corpus/%x", hash)
+		if err := ioutil.WriteFile(name, data, 0644); err != nil {
 			t.Fatal(err)
 		}
 	}

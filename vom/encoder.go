@@ -90,7 +90,7 @@ func newEncoderForTypes(version Version, w io.Writer) *encoder81 {
 	return e
 }
 
-func newXEncoderForRawBytes(w io.Writer) *encoder81 {
+func newEncoderForRawBytes(w io.Writer) *encoder81 {
 	// RawBytes doesn't need the types to be encoded, since it holds the in-memory
 	// representation.  We still need a type encoder to collect the unique types,
 	// but we give it a dummy encoder that doesn't have any state set up.

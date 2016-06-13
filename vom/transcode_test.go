@@ -2,70 +2,43 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vom
+package vom_test
 
 import (
 	"bytes"
-	"flag"
-	"regexp"
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vom"
+	"v.io/v23/vom/vomtest"
 )
 
-var filter *string = flag.String("testdata-filter", "", "regex for allowed testdata tests")
-
-func init() {
-	flag.Parse()
-}
-
-func filterRegex(t *testing.T) *regexp.Regexp {
-	pattern := ".*" + *filter + ".*"
-	regex, err := regexp.Compile(pattern)
-	if err != nil {
-		t.Fatalf("invalid regex filter %q", *filter)
-	}
-	return regex
-}
-
-func TestTranscodeXDecoderToXEncoder(t *testing.T) {
-	regex := filterRegex(t)
-	for _, test := range data81.Tests {
-		if !regex.MatchString(test.Name) {
-			continue
-		}
-
-		inBytes := hex2Bin(t, test.Hex)
+func TestTranscodeDecoderToEncoder(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := NewEncoder(&buf)
-		dec := NewDecoder(bytes.NewReader(inBytes))
+		enc := vom.NewVersionedEncoder(test.Version, &buf)
+		dec := vom.NewDecoder(bytes.NewReader(test.Bytes()))
 		if err := vdl.Transcode(enc.Encoder(), dec.Decoder()); err != nil {
-			t.Errorf("%s: error in transcode: %v", test.Name, err)
+			t.Errorf("%s: Transcode failed: %v", test.Name(), err)
 			continue
 		}
-		if got, want := buf.Bytes(), inBytes; !bytes.Equal(got, want) {
-			t.Errorf("%s: got %x, want %x", test.Name, got, want)
+		if got, want := buf.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
 		}
 	}
 }
 
 // TODO(bprosnitz) This is probably not the right place for this test.
-func TestTranscodeVDLValueToXEncoder(t *testing.T) {
-	regex := filterRegex(t)
-	for _, test := range data81.Tests {
-		if !regex.MatchString(test.Name) {
-			continue
-		}
-
+func TestTranscodeVDLValueToEncoder(t *testing.T) {
+	for _, test := range vomtest.AllPass() {
 		var buf bytes.Buffer
-		enc := NewEncoder(&buf)
-		if err := test.Value.VDLWrite(enc.Encoder()); err != nil {
-			t.Errorf("%s: error in transcode: %v", test.Name, err)
+		enc := vom.NewEncoder(&buf)
+		if err := vdl.Write(enc.Encoder(), test.Value.Interface()); err != nil {
+			t.Errorf("%s: vdl.Write failed: %v", test.Name(), err)
 			continue
 		}
-		if got, want := buf.Bytes(), hex2Bin(t, test.Hex); !bytes.Equal(got, want) {
-			t.Errorf("%s: got %x, want %x", test.Name, got, want)
+		if got, want := buf.Bytes(), test.Bytes(); !bytes.Equal(got, want) {
+			t.Errorf("%s\nGOT  %x\nWANT %x", test.Name(), got, want)
 		}
 	}
 }

@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdltest"
 	"v.io/v23/verror"
 )
 
@@ -1223,5 +1224,26 @@ func TestConverterToWiretype(t *testing.T) {
 	}
 	if got, want := nUnionWire, (vdl.NUnionWireA{false}); got != want {
 		t.Errorf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestConvertNew(t *testing.T) {
+	for _, entry := range vdltest.AllPass() {
+		rvTargetPtr := reflect.New(entry.Target.Type())
+		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err != nil {
+			t.Errorf("%s: Convert failed: %v", entry.Name(), err)
+		}
+		if got, want := rvTargetPtr.Elem(), entry.Target; !vdl.DeepEqualReflect(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", entry.Name(), got, want)
+		}
+	}
+}
+
+func TestConvertFailNew(t *testing.T) {
+	for _, entry := range vdltest.AllFail() {
+		rvTargetPtr := reflect.New(entry.Target.Type())
+		if err := vdl.Convert(rvTargetPtr.Interface(), entry.Source.Interface()); err == nil {
+			t.Errorf("%s: Convert passed, wanted failure", entry.Name())
+		}
 	}
 }

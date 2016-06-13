@@ -7,7 +7,6 @@ package vom_test
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"reflect"
 	"strings"
 	"sync"
@@ -138,44 +137,4 @@ func testConvertWithTypeCoder(target, source interface{}, encT *vom.TypeEncoder,
 		return fmt.Errorf("(with TypeDecoder) Decode failed: %v\nDATA %x", err, data)
 	}
 	return nil
-}
-
-// In concurrent modes, one goroutine may try to read vom types before they are
-// actually sent by other goroutine. We use a simple buffered pipe to provide
-// blocking read since bytes.Buffer will return EOF in this case.
-type pipe struct {
-	b      bytes.Buffer
-	m      sync.Mutex
-	c      sync.Cond
-	closed bool
-}
-
-func newPipe() (io.ReadCloser, io.WriteCloser) {
-	p := &pipe{}
-	p.c.L = &p.m
-	return p, p
-}
-
-func (r *pipe) Read(p []byte) (n int, err error) {
-	r.m.Lock()
-	defer r.m.Unlock()
-	for r.b.Len() == 0 || r.closed {
-		r.c.Wait()
-	}
-	return r.b.Read(p)
-}
-
-func (p *pipe) Close() error {
-	p.m.Lock()
-	p.closed = true
-	p.c.Broadcast()
-	p.m.Unlock()
-	return nil
-}
-
-func (w *pipe) Write(p []byte) (n int, err error) {
-	w.m.Lock()
-	defer w.m.Unlock()
-	defer w.c.Signal()
-	return w.b.Write(p)
 }

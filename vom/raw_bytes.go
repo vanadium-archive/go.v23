@@ -46,23 +46,6 @@ func RawBytesFromValue(value interface{}) (*RawBytes, error) {
 	return rb, nil
 }
 
-// XRawBytesFromValue is a mirror of RawBytesFromValue, but uses the new
-// XEncoder and XDecoder.  It's only exposed to allow for testing.
-//
-// TODO(toddw): Remove this function after we've switched to XEncoder and
-// XDecoder, and thus it's no longer needed.
-func XRawBytesFromValue(value interface{}) (*RawBytes, error) {
-	data, err := VersionedEncode(DefaultVersion, value)
-	if err != nil {
-		return nil, err
-	}
-	rb := new(RawBytes)
-	if err := Decode(data, rb); err != nil {
-		return nil, err
-	}
-	return rb, nil
-}
-
 // String outputs a string representation of RawBytes of the form
 // RawBytes{Version81, int8, RefTypes{bool, string}, AnyLengths{4}, fa0e9dcc}
 func (rb *RawBytes) String() string {
@@ -164,7 +147,7 @@ func (rb *RawBytes) VDLRead(dec vdl.Decoder) error {
 	}
 	// Slowpath: the bytes are not available, we must encode new bytes.
 	var buf bytes.Buffer
-	enc := newXEncoderForRawBytes(&buf)
+	enc := newEncoderForRawBytes(&buf)
 	if err := vdl.Transcode(enc, dec); err != nil {
 		return err
 	}

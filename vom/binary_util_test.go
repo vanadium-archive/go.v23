@@ -11,14 +11,6 @@ import (
 	"testing"
 )
 
-func hex2Bin(t *testing.T, hex string) []byte {
-	binStr, err := binFromHexPat(hex)
-	if err != nil {
-		t.Fatalf("error converting %q to binary: %v", hex, err)
-	}
-	return []byte(binStr)
-}
-
 func TestBinaryEncodeDecode(t *testing.T) {
 	tests := []struct {
 		v   interface{}

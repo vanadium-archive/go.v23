@@ -8,18 +8,18 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vdl/vdltest"
 )
 
-func TestValueRead(t *testing.T) {
-	for _, test := range data81.Tests {
-		out := vdl.ZeroValue(test.Value.Type())
-		if err := out.VDLRead(test.Value.Decoder()); err != nil {
-			t.Errorf("%s: error in ValueRead: %v", test.Name, err)
+func TestValueReader(t *testing.T) {
+	for _, entry := range vdltest.ToEntryValues(vdltest.AllPass()) {
+		out := vdl.ZeroValue(entry.Target.Type())
+		if err := out.VDLRead(entry.Source.Decoder()); err != nil {
+			t.Errorf("%s: VDLRead failed: %v", entry.Name(), err)
 			continue
 		}
-		if !vdl.EqualValue(test.Value, out) {
-			t.Errorf("%s: got %v, want %v", test.Name, out, test.Value)
+		if got, want := out, entry.Target; !vdl.EqualValue(got, want) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", entry.Name(), got, want)
 		}
 	}
 }

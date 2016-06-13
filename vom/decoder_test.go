@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package vom
+package vom_test
 
 import (
 	"bytes"
@@ -16,172 +16,122 @@ import (
 	"testing"
 
 	"v.io/v23/vdl"
-	"v.io/v23/vom/testdata/data81"
+	"v.io/v23/vom"
 	"v.io/v23/vom/testdata/types"
+	"v.io/v23/vom/vomtest"
+
+	// Import verror to ensure that interface tests result in *verror.E
+	_ "v.io/v23/verror"
+)
+
+var (
+	rtIface = reflect.TypeOf((*interface{})(nil)).Elem()
+	rtValue = reflect.TypeOf(vdl.Value{})
 )
 
 func TestDecoder(t *testing.T) {
-	for _, test := range data81.Tests {
-		// Decode hex patterns into binary data.
-		binversion, err := binFromHexPat(test.HexVersion)
-		if err != nil {
-			t.Errorf("%s: couldn't convert to binary from hexversion: %q", test.Name, test.HexVersion)
-			continue
-		}
-		bintype, err := binFromHexPat(test.HexType)
-		if err != nil {
-			t.Errorf("%s: couldn't convert to binary from hextype: %q", test.Name, test.HexType)
-			continue
-		}
-		binvalue, err := binFromHexPat(test.HexValue)
-		if err != nil {
-			t.Errorf("%s: couldn't convert to binary from hexvalue: %q", test.Name, test.HexValue)
-			continue
-		}
-
-		name := test.Name + " [vdl.Value]"
-		testDecodeVDL(t, name, binversion+bintype+binvalue, test.Value)
-		name = test.Name + " [vdl.Value] (with TypeDecoder)"
-		testDecodeVDLWithTypeDecoder(t, name, binversion, bintype, binvalue, test.Value)
-		name = test.Name + " [vdl.Any]"
-		testDecodeVDL(t, name, binversion+bintype+binvalue, vdl.AnyValue(test.Value))
-		name = test.Name + " [vdl.Any] (with TypeDecoder)"
-		testDecodeVDLWithTypeDecoder(t, name, binversion, bintype, binvalue, vdl.AnyValue(test.Value))
-
-		// Convert into Go value for the rest of our tests.
-		goValue, err := toGoValue(test.Value)
-		if err != nil {
-			t.Errorf("%s: %v", test.Name, err)
-			continue
-		}
-
-		name = test.Name + " [go value]"
-		testDecodeGo(t, name, binversion+bintype+binvalue, reflect.TypeOf(goValue), goValue)
-		name = test.Name + " [go value] (with TypeDecoder)"
-		testDecodeGoWithTypeDecoder(t, name, binversion, bintype, binvalue, reflect.TypeOf(goValue), goValue)
-
-		name = test.Name + " [go interface]"
-		testDecodeGo(t, name, binversion+bintype+binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
-		name = test.Name + " [go interface] (with TypeDecoder)"
-		testDecodeGoWithTypeDecoder(t, name, binversion, bintype, binvalue, reflect.TypeOf((*interface{})(nil)).Elem(), goValue)
+	// The decoder tests take a long time, so we run them concurrently.
+	var pending sync.WaitGroup
+	for _, test := range vomtest.AllPass() {
+		pending.Add(1)
+		go func(test vomtest.Entry) {
+			defer pending.Done()
+			testDecoder(t, "[go value]", test, rvPtrValue(test.Value))
+			testDecoder(t, "[go iface]", test, rvPtrIface(test.Value))
+			vv, err := vdl.ValueFromReflect(test.Value)
+			if err != nil {
+				t.Errorf("%s: ValueFromReflect failed: %v", test.Name(), err)
+				return
+			}
+			vvWant := reflect.ValueOf(vv)
+			testDecoder(t, "[new *vdl.Value]", test, vvWant)
+			testDecoderFunc(t, "[zero vdl.Value]", test, vvWant, func() reflect.Value {
+				return reflect.ValueOf(vdl.ZeroValue(vv.Type()))
+			})
+		}(test)
 	}
+	pending.Wait()
 }
 
-func testDecodeVDL(t *testing.T, name, bin string, value *vdl.Value) {
-	for _, mode := range AllReadModes {
-		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder := NewDecoder(mode.TestReader(strings.NewReader(bin)))
-		if value == nil {
-			value = vdl.ZeroValue(vdl.AnyType)
+func rvPtrValue(rv reflect.Value) reflect.Value {
+	result := reflect.New(rv.Type())
+	result.Elem().Set(rv)
+	return result
+}
+
+func rvPtrIface(rv reflect.Value) reflect.Value {
+	result := reflect.New(rtIface)
+	result.Elem().Set(rv)
+	return result
+}
+
+func testDecoder(t *testing.T, pre string, test vomtest.Entry, rvWant reflect.Value) {
+	testDecoderFunc(t, pre, test, rvWant, func() reflect.Value {
+		return reflect.New(rvWant.Type().Elem())
+	})
+	// TODO(toddw): Add tests that start with a randomly-set value.
+}
+
+func testDecoderFunc(t *testing.T, pre string, test vomtest.Entry, rvWant reflect.Value, rvNew func() reflect.Value) {
+	readEOF := make([]byte, 1)
+	for _, mode := range vom.AllReadModes {
+		// Test vom.NewDecoder.
+		{
+			name := fmt.Sprintf("%s (%s) %s", pre, mode, test.Name())
+			rvGot := rvNew()
+			reader := mode.TestReader(bytes.NewReader(test.Bytes()))
+			dec := vom.NewDecoder(reader)
+			if err := dec.Decode(rvGot.Interface()); err != nil {
+				t.Errorf("%s: Decode failed: %v", name, err)
+				return
+			}
+			if !vdl.DeepEqualReflect(rvGot, rvWant) {
+				t.Errorf("%s\nGOT  %v\nWANT %v", name, rvGot, rvWant)
+				return
+			}
+			if n, err := reader.Read(readEOF); n != 0 || err != io.EOF {
+				t.Errorf("%s: reader got (%d,%v), want (0,EOF)", name, n, err)
+			}
 		}
-		got := vdl.ZeroValue(value.Type())
-		if err := decoder.Decode(got); err != nil {
-			t.Errorf("%s: Decode failed: %v", head, err)
-			return
-		}
-		if want := value; !vdl.EqualValue(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
-			return
+		// Test vom.NewDecoderWithTypeDecoder
+		{
+			name := fmt.Sprintf("%s (%s with TypeDecoder) %s", pre, mode, test.Name())
+			rvGot := rvNew()
+			readerT := mode.TestReader(bytes.NewReader(test.TypeBytes()))
+			decT := vom.NewTypeDecoder(readerT)
+			decT.Start()
+			reader := mode.TestReader(bytes.NewReader(test.ValueBytes()))
+			dec := vom.NewDecoderWithTypeDecoder(reader, decT)
+			err := dec.Decode(rvGot.Interface())
+			decT.Stop()
+			if err != nil {
+				t.Errorf("%s: Decode failed: %v", name, err)
+				return
+			}
+			if !vdl.DeepEqualReflect(rvGot, rvWant) {
+				t.Errorf("%s\nGOT  %v\nWANT %v", name, rvGot, rvWant)
+				return
+			}
+			if n, err := reader.Read(readEOF); n != 0 || err != io.EOF {
+				t.Errorf("%s: reader got (%d,%v), want (0,EOF)", name, n, err)
+			}
+			if n, err := readerT.Read(readEOF); n != 0 || err != io.EOF {
+				t.Errorf("%s: readerT got (%d,%v), want (0,EOF)", name, n, err)
+			}
 		}
 	}
 	// Test single-shot vom.Decode twice, to ensure we test the cache hit case.
-	testDecodeVDLSingleShot(t, name, bin, value)
-	testDecodeVDLSingleShot(t, name, bin, value)
-}
-
-func testDecodeVDLSingleShot(t *testing.T, name, bin string, value *vdl.Value) {
-	// Test the single-shot vom.Decode.
-	head := fmt.Sprintf("%s (single-shot)", name)
-	got := vdl.ZeroValue(value.Type())
-	if err := Decode([]byte(bin), got); err != nil {
-		t.Errorf("%s: Decode failed: %v", head, err)
-		return
-	}
-	if want := value; !vdl.EqualValue(got, want) {
-		t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
-		return
-	}
-}
-
-func testDecodeVDLWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, value *vdl.Value) {
-	for _, mode := range AllReadModes {
-		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec := NewTypeDecoder(mode.TestReader(strings.NewReader(binversion + bintype)))
-		typedec.Start()
-		decoder := NewDecoderWithTypeDecoder(mode.TestReader(strings.NewReader(binversion+binvalue)), typedec)
-		if value == nil {
-			value = vdl.ZeroValue(vdl.AnyType)
-		}
-		got := vdl.ZeroValue(value.Type())
-		if err := decoder.Decode(got); err != nil {
-			t.Errorf("%s: Decode failed: %v", head, err)
+	for i := 0; i < 2; i++ {
+		name := fmt.Sprintf("%s (single-shot %d) %s", pre, i, test.Name())
+		rvGot := rvNew()
+		if err := vom.Decode(test.Bytes(), rvGot.Interface()); err != nil {
+			t.Errorf("%s: Decode failed: %v", name, err)
 			return
 		}
-		if want := value; !vdl.EqualValue(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT  %v\nWANT %v", head, got, want)
+		if !vdl.DeepEqualReflect(rvGot, rvWant) {
+			t.Errorf("%s\nGOT  %v\nWANT %v", name, rvGot, rvWant)
 			return
 		}
-		typedec.Stop()
-	}
-}
-
-func testDecodeGo(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
-	for _, mode := range AllReadModes {
-		head := fmt.Sprintf("%s (%s)", name, mode)
-		decoder := NewDecoder(mode.TestReader(strings.NewReader(bin)))
-		var got interface{}
-		if rt != nil {
-			got = reflect.New(rt).Elem().Interface()
-		}
-		if err := decoder.Decode(&got); err != nil {
-			t.Errorf("%s: Decode failed: %v", head, err)
-			return
-		}
-		if !vdl.DeepEqual(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
-			return
-		}
-	}
-	// Test single-shot vom.Decode twice, to ensure we test the cache hit case.
-	testDecodeGoSingleShot(t, name, bin, rt, want)
-	testDecodeGoSingleShot(t, name, bin, rt, want)
-}
-
-func testDecodeGoSingleShot(t *testing.T, name, bin string, rt reflect.Type, want interface{}) {
-	head := fmt.Sprintf("%s (single-shot)", name)
-	var got interface{}
-	if rt != nil {
-		got = reflect.New(rt).Elem().Interface()
-	}
-	if err := Decode([]byte(bin), &got); err != nil {
-		t.Errorf("%s: Decode failed: %v", head, err)
-		return
-	}
-	if !vdl.DeepEqual(got, want) {
-		t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
-		return
-	}
-}
-
-func testDecodeGoWithTypeDecoder(t *testing.T, name, binversion, bintype, binvalue string, rt reflect.Type, want interface{}) {
-	for _, mode := range AllReadModes {
-		head := fmt.Sprintf("%s (%s)", name, mode)
-		typedec := NewTypeDecoder(mode.TestReader(strings.NewReader(binversion + bintype)))
-		typedec.Start()
-		decoder := NewDecoderWithTypeDecoder(mode.TestReader(strings.NewReader(binversion+binvalue)), typedec)
-		var got interface{}
-		if rt != nil {
-			got = reflect.New(rt).Elem().Interface()
-		}
-		if err := decoder.Decode(&got); err != nil {
-			t.Errorf("%s: Decode failed: %v", head, err)
-			return
-		}
-		if !vdl.DeepEqual(got, want) {
-			t.Errorf("%s: Decode mismatch\nGOT  %T %+v\nWANT %T %+v", head, got, got, want, want)
-			return
-		}
-		typedec.Stop()
 	}
 }
 
@@ -253,13 +203,13 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 	}
 
 	var (
-		typeenc *TypeEncoder
-		typedec *TypeDecoder
+		typeenc *vom.TypeEncoder
+		typedec *vom.TypeDecoder
 	)
 	if withTypeEncoderDecoder {
 		r, w := newPipe()
-		typeenc = NewTypeEncoder(w)
-		typedec = NewTypeDecoder(r)
+		typeenc = vom.NewTypeEncoder(w)
+		typedec = vom.NewTypeDecoder(r)
 		typedec.Start()
 		defer typedec.Stop()
 	}
@@ -274,16 +224,16 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 				name := fmt.Sprintf("[%d]:%+v,%+v", n, test.In, test.Want)
 
 				var (
-					encoder *Encoder
-					decoder *Decoder
+					encoder *vom.Encoder
+					decoder *vom.Decoder
 					buf     bytes.Buffer
 				)
 				if withTypeEncoderDecoder {
-					encoder = NewEncoderWithTypeEncoder(&buf, typeenc)
-					decoder = NewDecoderWithTypeDecoder(&buf, typedec)
+					encoder = vom.NewEncoderWithTypeEncoder(&buf, typeenc)
+					decoder = vom.NewDecoderWithTypeDecoder(&buf, typedec)
 				} else {
-					encoder = NewEncoder(&buf)
-					decoder = NewDecoder(&buf)
+					encoder = vom.NewEncoder(&buf)
+					decoder = vom.NewDecoder(&buf)
 				}
 
 				if err := encoder.Encode(test.In); err != nil {
@@ -374,6 +324,14 @@ func (er *extractErrReader) WaitForError() error {
 	return err
 }
 
+func hex2Bin(t *testing.T, hex string) []byte {
+	var bin string
+	if _, err := fmt.Sscanf(hex, "%x", &bin); err != nil {
+		t.Fatalf("error converting %q to binary: %v", hex, err)
+	}
+	return []byte(bin)
+}
+
 // Test that no EOF is returned from Decode() if the type stream finished before the value stream.
 func TestTypeStreamEndsFirst(t *testing.T) {
 	hexversion := "81"
@@ -384,10 +342,10 @@ func TestTypeStreamEndsFirst(t *testing.T) {
 	binvalue := string(hex2Bin(t, hexvalue))
 	// Ensure EOF isn't returned if the type decode stream ends first
 	tr := newExtractErrReader(strings.NewReader(binversion + bintype))
-	typedec := NewTypeDecoder(tr)
+	typedec := vom.NewTypeDecoder(tr)
 	typedec.Start()
 	wr := newWaitingReader(strings.NewReader(binversion + binvalue))
-	decoder := NewDecoderWithTypeDecoder(wr, typedec)
+	decoder := vom.NewDecoderWithTypeDecoder(wr, typedec)
 	var v interface{}
 	go func() {
 		if tr.WaitForError() == nil {
@@ -415,9 +373,9 @@ func TestReceiveTypeStreamError(t *testing.T) {
 	binversion := string(hex2Bin(t, hexversion))
 	binvalue := string(hex2Bin(t, hexvalue))
 	// Ensure EOF isn't returned if the type decode stream ends first
-	typedec := NewTypeDecoder(&errorReader{})
+	typedec := vom.NewTypeDecoder(&errorReader{})
 	typedec.Start()
-	decoder := NewDecoderWithTypeDecoder(strings.NewReader(binversion+binvalue), typedec)
+	decoder := vom.NewDecoderWithTypeDecoder(strings.NewReader(binversion+binvalue), typedec)
 	var v interface{}
 	if err := decoder.Decode(&v); err == nil {
 		t.Errorf("expected error in decode, but got none")
@@ -428,7 +386,7 @@ func TestReceiveTypeStreamError(t *testing.T) {
 // in a deadlock.
 func TestFuzzTypeDecodeDeadlock(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader("\x81\x30"))
+	d := vom.NewDecoder(strings.NewReader("\x81\x30"))
 	// Before the fix, this line caused a deadlock and panic.
 	d.Decode(&v)
 	return
@@ -438,7 +396,7 @@ func TestFuzzTypeDecodeDeadlock(t *testing.T) {
 // panic over in package vdl.
 func TestFuzzVdlPanic(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader("\x81S*\x00\x00$000000000000000000000000000000000000\x01*\xe1U(\x05\x00 00000000000000000000000000000000\x01*\x02+\xe1"))
+	d := vom.NewDecoder(strings.NewReader("\x81S*\x00\x00$000000000000000000000000000000000000\x01*\xe1U(\x05\x00 00000000000000000000000000000000\x01*\x02+\xe1"))
 	// Before this fix this line caused a panic.
 	d.Decode(&v)
 	return
@@ -487,7 +445,7 @@ func (w *pipe) Write(p []byte) (n int, err error) {
 // Test that input found by go-fuzz cannot cause a stack overflow.
 func TestFuzzDecodeOverflow(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader("\x81\x51\x04\x03\x01\x29\xe1"))
+	d := vom.NewDecoder(strings.NewReader("\x81\x51\x04\x03\x01\x29\xe1"))
 
 	// Before the fix, this line caused a stack overflow.  After the fix, we
 	// expect an error.
@@ -499,7 +457,7 @@ func TestFuzzDecodeOverflow(t *testing.T) {
 // Test that input discovered by go-fuzz does not result in a hang anymore.
 func TestFuzzTypeDecodeHang(t *testing.T) {
 	var v interface{}
-	d := NewDecoder(strings.NewReader(
+	d := vom.NewDecoder(strings.NewReader(
 		"\x81W&\x03\x00 v.io/v23/vom/t" +
 			"estdata/types.Rec4\x01)" +
 			"\xe1U&\x03\x00 v.io/v23/vom/t" +
@@ -530,14 +488,14 @@ func TestDecodeTruncatedInput(t *testing.T) {
 		X []byte
 		B bar
 	}
-	encoded, err := Encode(foo{"hello", 42, 3.14159265359, []byte{1, 2, 3, 4, 5, 6}, bar{[]int64{0}}})
+	encoded, err := vom.Encode(foo{"hello", 42, 3.14159265359, []byte{1, 2, 3, 4, 5, 6}, bar{[]int64{0}}})
 	if err != nil {
 		t.Fatalf("Encode failed: %v", err)
 	}
 	for x := 0; x < len(encoded)-1; x++ {
 		var f interface{}
-		if err := Decode(encoded[:x], &f); err == nil {
-			t.Errorf("Encode did not fail with x=%d", x)
+		if err := vom.Decode(encoded[:x], &f); err == nil {
+			t.Errorf("Decode did not fail with x=%d", x)
 		}
 	}
 }
