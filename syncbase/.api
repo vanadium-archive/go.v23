@@ -1,4 +1,7 @@
 pkg syncbase, const DeleteChange ChangeType
+pkg syncbase, const EntityCollection EntityType
+pkg syncbase, const EntityRoot EntityType
+pkg syncbase, const EntityRow EntityType
 pkg syncbase, const PutChange ChangeType
 pkg syncbase, func NewService(string) Service
 pkg syncbase, func NewValue(*context.T, interface{}) (*Value, error)
@@ -16,6 +19,7 @@ pkg syncbase, method (*Resolution) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ResolvedRow) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*Value) Get(interface{}) error
 pkg syncbase, method (*Value) VDLRead(vdl.Decoder) error
+pkg syncbase, method (*WatchChange) CollectionInfo() *wire.StoreChangeCollectionInfo
 pkg syncbase, method (*WatchChange) Value(interface{}) error
 pkg syncbase, method (Conflict) VDLIsZero() bool
 pkg syncbase, method (Conflict) VDLWrite(vdl.Encoder) error
@@ -128,6 +132,7 @@ pkg syncbase, type DatabaseHandle interface, FullName() string
 pkg syncbase, type DatabaseHandle interface, GetResumeMarker(*context.T) (watch.ResumeMarker, error)
 pkg syncbase, type DatabaseHandle interface, Id() wire.Id
 pkg syncbase, type DatabaseHandle interface, ListCollections(*context.T) ([]wire.Id, error)
+pkg syncbase, type EntityType uint32
 pkg syncbase, type PrefixRange interface { Limit, Prefix, Start }
 pkg syncbase, type PrefixRange interface, Limit() string
 pkg syncbase, type PrefixRange interface, Prefix() string
@@ -190,6 +195,7 @@ pkg syncbase, type WatchChange struct
 pkg syncbase, type WatchChange struct, ChangeType ChangeType
 pkg syncbase, type WatchChange struct, Collection wire.Id
 pkg syncbase, type WatchChange struct, Continued bool
+pkg syncbase, type WatchChange struct, EntityType EntityType
 pkg syncbase, type WatchChange struct, FromSync bool
 pkg syncbase, type WatchChange struct, ResumeMarker watch.ResumeMarker
 pkg syncbase, type WatchChange struct, Row string

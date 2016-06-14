@@ -118,6 +118,7 @@ func ToWatchChange(c watch.Change) WatchChange {
 		panic(fmt.Sprintf("unsupported watch change state: %v", c.State))
 	}
 	return WatchChange{
+		EntityType:   EntityRow,
 		Collection:   collection,
 		Row:          row,
 		ChangeType:   changeType,

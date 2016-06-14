@@ -116,7 +116,7 @@ func ValidateRowKey(s string) error {
 	return nil
 }
 
-// ParseCollectionRowPair splits the "<collectionId>/<row>" part of a Syncbase
+// ParseCollectionRowPair splits the "<encCxId>/<rowKey>" part of a Syncbase
 // object name into the collection id and the row key or prefix.
 func ParseCollectionRowPair(ctx *context.T, pattern string) (wire.Id, string, error) {
 	parts := strings.SplitN(pattern, "/", 2)

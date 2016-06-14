@@ -396,14 +396,40 @@ type CollectionRowPattern struct {
 
 // StoreChange is the new value for a watched entity.
 type StoreChange struct {
-	// Value is the new value for the row if the Change state equals to Exists,
-	// otherwise the Value is nil.
+	// Value is the new value for the entity if the Change state equals to Exists,
+	// otherwise the Value is nil. The Value type is determined by the entity
+	// type:
+	// - for row updates, Value is the actual row value.
+	// - for collection updates, Value is a StoreChangeCollectionInfo.
+	// - for the initial root entity update, Value is nil.
 	Value any
 
 	// FromSync indicates whether the change came from sync. If FromSync is
 	// false, then the change originated from the local device.
 	// Note: FromSync is always false for initial state Changes.
 	FromSync bool
+}
+
+// StoreChangeCollectionInfo represents collection metadata in a StoreChange.
+type StoreChangeCollectionInfo struct {
+	// Allowed lists all permissions that the client has on the collection. It is
+	// separate from Perms to allow clients lacking Admin permission, who are not
+	// allowed to read the full Perms, to find out what permissions they have on
+	// the Collection. If the client has no Read permission (Allowed does not
+	// contain Read), row updates on that collection will be silently skipped.
+	// TODO(ivanpi): Row updates are currently checked against the most recently
+	// committed collection permissions, which may be out of sync with the last
+	// seen permissions on the watch stream (that were in effect when the row was
+	// written). This can result in the watch stream skipping or failing to skip
+	// rows if Read access has changed. Destroying the collection may also result
+	// in skipped rows since there are no permissions to check against.
+	Allowed set[access.Tag]
+
+	// Perms contains the full collection permissions only if the client has Admin
+	// permissions on the collection (Allowed contains Admin). Otherwise, Perms is
+	// nil.
+	// TODO(ivanpi): Update when Admin tag is split into AdminRead and AdminWrite.
+	Perms access.Permissions
 }
 
 // Types of discovery service attributes.

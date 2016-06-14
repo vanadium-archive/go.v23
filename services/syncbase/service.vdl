@@ -376,21 +376,27 @@ type BlobManager interface {
 
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. Only rows matching at least one of the patterns are
-// returned. Rows in collections with no Read access are also filtered out.
+// without re-ordering. Only rows and collections matching at least one of the
+// patterns are returned. Rows in collections with no Read access are also
+// filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
-// batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-// detailed explanation of the behavior.
+// batch containing the initial state, always starting with an empty update for
+// the root entity. Otherwise, the WatchStream will contain only changes since
+// the provided ResumeMarker.
+// See watch.GlobWatcher for a detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field in
-// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-// type. If the client has no access to a row specified in a change, that change
-// is excluded from the result stream.
+// (until the call fails or is canceled). Each Change contains the Name field
+// with the Vanadium name of the watched entity relative to the database:
+// - "<encCxId>/<rowKey>" for row updates
+// - "<encCxId>" for collection updates
+// - "" for the initial root entity update
+// The Value field is a StoreChange.
+// If the client has no access to a row specified in a change, that change is
+// excluded from the result stream.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict

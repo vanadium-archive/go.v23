@@ -103,6 +103,7 @@ pkg syncbase, method (*RowOp) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ScanOp) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*SchemaMetadata) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*StoreChange) VDLRead(vdl.Decoder) error
+pkg syncbase, method (*StoreChangeCollectionInfo) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*SyncgroupMemberInfo) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*SyncgroupSpec) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*Value) VDLRead(vdl.Decoder) error
@@ -181,6 +182,8 @@ pkg syncbase, method (SchemaMetadata) VDLIsZero() bool
 pkg syncbase, method (SchemaMetadata) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (StoreChange) VDLIsZero() bool
 pkg syncbase, method (StoreChange) VDLWrite(vdl.Encoder) error
+pkg syncbase, method (StoreChangeCollectionInfo) VDLIsZero() bool
+pkg syncbase, method (StoreChangeCollectionInfo) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (SyncgroupMemberInfo) VDLIsZero() bool
 pkg syncbase, method (SyncgroupMemberInfo) VDLWrite(vdl.Encoder) error
 pkg syncbase, method (SyncgroupSpec) VDLIsZero() bool
@@ -680,6 +683,9 @@ pkg syncbase, type ServiceServerStubMethods ServiceServerMethods
 pkg syncbase, type StoreChange struct
 pkg syncbase, type StoreChange struct, FromSync bool
 pkg syncbase, type StoreChange struct, Value *vom.RawBytes
+pkg syncbase, type StoreChangeCollectionInfo struct
+pkg syncbase, type StoreChangeCollectionInfo struct, Allowed map[access.Tag]struct{}
+pkg syncbase, type StoreChangeCollectionInfo struct, Perms access.Permissions
 pkg syncbase, type SyncgroupManagerClientMethods interface { CreateSyncgroup, DestroySyncgroup, EjectFromSyncgroup, GetSyncgroupMembers, GetSyncgroupSpec, JoinSyncgroup, LeaveSyncgroup, ListSyncgroups, SetSyncgroupSpec }
 pkg syncbase, type SyncgroupManagerClientMethods interface, CreateSyncgroup(*context.T, Id, SyncgroupSpec, SyncgroupMemberInfo, ...rpc.CallOpt) error
 pkg syncbase, type SyncgroupManagerClientMethods interface, DestroySyncgroup(*context.T, Id, ...rpc.CallOpt) error

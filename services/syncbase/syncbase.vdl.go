@@ -2838,8 +2838,12 @@ func (x *CollectionRowPattern) VDLRead(dec vdl.Decoder) error {
 
 // StoreChange is the new value for a watched entity.
 type StoreChange struct {
-	// Value is the new value for the row if the Change state equals to Exists,
-	// otherwise the Value is nil.
+	// Value is the new value for the entity if the Change state equals to Exists,
+	// otherwise the Value is nil. The Value type is determined by the entity
+	// type:
+	// - for row updates, Value is the actual row value.
+	// - for collection updates, Value is a StoreChangeCollectionInfo.
+	// - for the initial root entity update, Value is nil.
 	Value *vom.RawBytes
 	// FromSync indicates whether the change came from sync. If FromSync is
 	// false, then the change originated from the local device.
@@ -2923,6 +2927,146 @@ func (x *StoreChange) VDLRead(dec vdl.Decoder) error {
 			default:
 				x.FromSync = value
 			}
+		}
+	}
+}
+
+// StoreChangeCollectionInfo represents collection metadata in a StoreChange.
+type StoreChangeCollectionInfo struct {
+	// Allowed lists all permissions that the client has on the collection. It is
+	// separate from Perms to allow clients lacking Admin permission, who are not
+	// allowed to read the full Perms, to find out what permissions they have on
+	// the Collection. If the client has no Read permission (Allowed does not
+	// contain Read), row updates on that collection will be silently skipped.
+	// TODO(ivanpi): Row updates are currently checked against the most recently
+	// committed collection permissions, which may be out of sync with the last
+	// seen permissions on the watch stream (that were in effect when the row was
+	// written). This can result in the watch stream skipping or failing to skip
+	// rows if Read access has changed. Destroying the collection may also result
+	// in skipped rows since there are no permissions to check against.
+	Allowed map[access.Tag]struct{}
+	// Perms contains the full collection permissions only if the client has Admin
+	// permissions on the collection (Allowed contains Admin). Otherwise, Perms is
+	// nil.
+	// TODO(ivanpi): Update when Admin tag is split into AdminRead and AdminWrite.
+	Perms access.Permissions
+}
+
+func (StoreChangeCollectionInfo) __VDLReflect(struct {
+	Name string `vdl:"v.io/v23/services/syncbase.StoreChangeCollectionInfo"`
+}) {
+}
+
+func (x StoreChangeCollectionInfo) VDLIsZero() bool {
+	if len(x.Allowed) != 0 {
+		return false
+	}
+	if len(x.Perms) != 0 {
+		return false
+	}
+	return true
+}
+
+func (x StoreChangeCollectionInfo) VDLWrite(enc vdl.Encoder) error {
+	if err := enc.StartValue(__VDLType_struct_37); err != nil {
+		return err
+	}
+	if len(x.Allowed) != 0 {
+		if err := enc.NextField(0); err != nil {
+			return err
+		}
+		if err := __VDLWriteAnon_set_5(enc, x.Allowed); err != nil {
+			return err
+		}
+	}
+	if len(x.Perms) != 0 {
+		if err := enc.NextField(1); err != nil {
+			return err
+		}
+		if err := x.Perms.VDLWrite(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextField(-1); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func __VDLWriteAnon_set_5(enc vdl.Encoder, x map[access.Tag]struct{}) error {
+	if err := enc.StartValue(__VDLType_set_38); err != nil {
+		return err
+	}
+	if err := enc.SetLenHint(len(x)); err != nil {
+		return err
+	}
+	for key := range x {
+		if err := enc.NextEntryValueString(__VDLType_string_39, string(key)); err != nil {
+			return err
+		}
+	}
+	if err := enc.NextEntry(true); err != nil {
+		return err
+	}
+	return enc.FinishValue()
+}
+
+func (x *StoreChangeCollectionInfo) VDLRead(dec vdl.Decoder) error {
+	*x = StoreChangeCollectionInfo{}
+	if err := dec.StartValue(__VDLType_struct_37); err != nil {
+		return err
+	}
+	decType := dec.Type()
+	for {
+		index, err := dec.NextField()
+		switch {
+		case err != nil:
+			return err
+		case index == -1:
+			return dec.FinishValue()
+		}
+		if decType != __VDLType_struct_37 {
+			index = __VDLType_struct_37.FieldIndexByName(decType.Field(index).Name)
+			if index == -1 {
+				if err := dec.SkipValue(); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+		switch index {
+		case 0:
+			if err := __VDLReadAnon_set_5(dec, &x.Allowed); err != nil {
+				return err
+			}
+		case 1:
+			if err := x.Perms.VDLRead(dec); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func __VDLReadAnon_set_5(dec vdl.Decoder, x *map[access.Tag]struct{}) error {
+	if err := dec.StartValue(__VDLType_set_38); err != nil {
+		return err
+	}
+	var tmpMap map[access.Tag]struct{}
+	if len := dec.LenHint(); len > 0 {
+		tmpMap = make(map[access.Tag]struct{}, len)
+	}
+	for {
+		switch done, key, err := dec.NextEntryValueString(); {
+		case err != nil:
+			return err
+		case done:
+			*x = tmpMap
+			return dec.FinishValue()
+		default:
+			if tmpMap == nil {
+				tmpMap = make(map[access.Tag]struct{})
+			}
+			tmpMap[access.Tag(key)] = struct{}{}
 		}
 	}
 }
@@ -3307,21 +3451,27 @@ var descService = rpc.InterfaceDesc{
 //
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. Only rows matching at least one of the patterns are
-// returned. Rows in collections with no Read access are also filtered out.
+// without re-ordering. Only rows and collections matching at least one of the
+// patterns are returned. Rows in collections with no Read access are also
+// filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
-// batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-// detailed explanation of the behavior.
+// batch containing the initial state, always starting with an empty update for
+// the root entity. Otherwise, the WatchStream will contain only changes since
+// the provided ResumeMarker.
+// See watch.GlobWatcher for a detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field in
-// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-// type. If the client has no access to a row specified in a change, that change
-// is excluded from the result stream.
+// (until the call fails or is canceled). Each Change contains the Name field
+// with the Vanadium name of the watched entity relative to the database:
+// - "<encCxId>/<rowKey>" for row updates
+// - "<encCxId>" for collection updates
+// - "" for the initial root entity update
+// The Value field is a StoreChange.
+// If the client has no access to a row specified in a change, that change is
+// excluded from the result stream.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict
@@ -3444,21 +3594,27 @@ func (c *implDatabaseWatcherWatchPatternsClientCall) Finish() (err error) {
 //
 // DatabaseWatcher allows a client to watch for updates to the database. For
 // each watch request, the client will receive a reliable stream of watch events
-// without re-ordering. Only rows matching at least one of the patterns are
-// returned. Rows in collections with no Read access are also filtered out.
+// without re-ordering. Only rows and collections matching at least one of the
+// patterns are returned. Rows in collections with no Read access are also
+// filtered out.
 //
 // Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 // argument that points to a particular place in the database event log. If an
 // empty ResumeMarker is provided, the WatchStream will begin with a Change
-// batch containing the initial state. Otherwise, the WatchStream will contain
-// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-// detailed explanation of the behavior.
+// batch containing the initial state, always starting with an empty update for
+// the root entity. Otherwise, the WatchStream will contain only changes since
+// the provided ResumeMarker.
+// See watch.GlobWatcher for a detailed explanation of the behavior.
 //
 // The result stream consists of a never-ending sequence of Change messages
-// (until the call fails or is canceled). Each Change contains the Name field in
-// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-// type. If the client has no access to a row specified in a change, that change
-// is excluded from the result stream.
+// (until the call fails or is canceled). Each Change contains the Name field
+// with the Vanadium name of the watched entity relative to the database:
+// - "<encCxId>/<rowKey>" for row updates
+// - "<encCxId>" for collection updates
+// - "" for the initial root entity update
+// The Value field is a StoreChange.
+// If the client has no access to a row specified in a change, that change is
+// excluded from the result stream.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict
@@ -3546,7 +3702,7 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows matching at least one of the patterns are\n// returned. Rows in collections with no Read access are also filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker. See watch.GlobWatcher for a\n// detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
@@ -5231,21 +5387,27 @@ type DatabaseClientMethods interface {
 	permissions.ObjectClientMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. Only rows matching at least one of the patterns are
-	// returned. Rows in collections with no Read access are also filtered out.
+	// without re-ordering. Only rows and collections matching at least one of the
+	// patterns are returned. Rows in collections with no Read access are also
+	// filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
-	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-	// detailed explanation of the behavior.
+	// batch containing the initial state, always starting with an empty update for
+	// the root entity. Otherwise, the WatchStream will contain only changes since
+	// the provided ResumeMarker.
+	// See watch.GlobWatcher for a detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-	// type. If the client has no access to a row specified in a change, that change
-	// is excluded from the result stream.
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// with the Vanadium name of the watched entity relative to the database:
+	// - "<encCxId>/<rowKey>" for row updates
+	// - "<encCxId>" for collection updates
+	// - "" for the initial root entity update
+	// The Value field is a StoreChange.
+	// If the client has no access to a row specified in a change, that change is
+	// excluded from the result stream.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5524,21 +5686,27 @@ type DatabaseServerMethods interface {
 	permissions.ObjectServerMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. Only rows matching at least one of the patterns are
-	// returned. Rows in collections with no Read access are also filtered out.
+	// without re-ordering. Only rows and collections matching at least one of the
+	// patterns are returned. Rows in collections with no Read access are also
+	// filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
-	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-	// detailed explanation of the behavior.
+	// batch containing the initial state, always starting with an empty update for
+	// the root entity. Otherwise, the WatchStream will contain only changes since
+	// the provided ResumeMarker.
+	// See watch.GlobWatcher for a detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-	// type. If the client has no access to a row specified in a change, that change
-	// is excluded from the result stream.
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// with the Vanadium name of the watched entity relative to the database:
+	// - "<encCxId>/<rowKey>" for row updates
+	// - "<encCxId>" for collection updates
+	// - "" for the initial root entity update
+	// The Value field is a StoreChange.
+	// If the client has no access to a row specified in a change, that change is
+	// excluded from the result stream.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5671,21 +5839,27 @@ type DatabaseServerStubMethods interface {
 	permissions.ObjectServerStubMethods
 	// DatabaseWatcher allows a client to watch for updates to the database. For
 	// each watch request, the client will receive a reliable stream of watch events
-	// without re-ordering. Only rows matching at least one of the patterns are
-	// returned. Rows in collections with no Read access are also filtered out.
+	// without re-ordering. Only rows and collections matching at least one of the
+	// patterns are returned. Rows in collections with no Read access are also
+	// filtered out.
 	//
 	// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker
 	// argument that points to a particular place in the database event log. If an
 	// empty ResumeMarker is provided, the WatchStream will begin with a Change
-	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker. See watch.GlobWatcher for a
-	// detailed explanation of the behavior.
+	// batch containing the initial state, always starting with an empty update for
+	// the root entity. Otherwise, the WatchStream will contain only changes since
+	// the provided ResumeMarker.
+	// See watch.GlobWatcher for a detailed explanation of the behavior.
 	//
 	// The result stream consists of a never-ending sequence of Change messages
-	// (until the call fails or is canceled). Each Change contains the Name field in
-	// the form "<collectionId>/<rowKey>" and the Value field of the StoreChange
-	// type. If the client has no access to a row specified in a change, that change
-	// is excluded from the result stream.
+	// (until the call fails or is canceled). Each Change contains the Name field
+	// with the Vanadium name of the watched entity relative to the database:
+	// - "<encCxId>/<rowKey>" for row updates
+	// - "<encCxId>" for collection updates
+	// - "" for the initial root entity update
+	// The Value field is a StoreChange.
+	// If the client has no access to a row specified in a change, that change is
+	// excluded from the result stream.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5865,7 +6039,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows matching at least one of the patterns are\n// returned. Rows in collections with no Read access are also filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state. Otherwise, the WatchStream will contain\n// only changes since the provided ResumeMarker. See watch.GlobWatcher for a\n// detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field in\n// the form \"<collectionId>/<rowKey>\" and the Value field of the StoreChange\n// type. If the client has no access to a row specified in a change, that change\n// is excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
@@ -6640,6 +6814,9 @@ var (
 	__VDLType_struct_34   *vdl.Type
 	__VDLType_struct_35   *vdl.Type
 	__VDLType_struct_36   *vdl.Type
+	__VDLType_struct_37   *vdl.Type
+	__VDLType_set_38      *vdl.Type
+	__VDLType_string_39   *vdl.Type
 )
 
 var __VDLInitCalled bool
@@ -6692,6 +6869,7 @@ func __VDLInit() struct{} {
 	vdl.Register((*BlobFetchStatus)(nil))
 	vdl.Register((*CollectionRowPattern)(nil))
 	vdl.Register((*StoreChange)(nil))
+	vdl.Register((*StoreChangeCollectionInfo)(nil))
 
 	// Initialize type definitions.
 	__VDLType_struct_1 = vdl.TypeOf((*Id)(nil)).Elem()
@@ -6730,6 +6908,9 @@ func __VDLInit() struct{} {
 	__VDLType_struct_34 = vdl.TypeOf((*BlobFetchStatus)(nil)).Elem()
 	__VDLType_struct_35 = vdl.TypeOf((*CollectionRowPattern)(nil)).Elem()
 	__VDLType_struct_36 = vdl.TypeOf((*StoreChange)(nil)).Elem()
+	__VDLType_struct_37 = vdl.TypeOf((*StoreChangeCollectionInfo)(nil)).Elem()
+	__VDLType_set_38 = vdl.TypeOf((*map[access.Tag]struct{})(nil))
+	__VDLType_string_39 = vdl.TypeOf((*access.Tag)(nil))
 
 	// Set error format strings.
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotInDevMode.ID), "{1:}{2:} not running with --dev=true")

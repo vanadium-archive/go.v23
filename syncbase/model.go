@@ -18,6 +18,7 @@ package syncbase
 // it's not obvious.
 
 import (
+	"fmt"
 	"time"
 
 	"v.io/v23/context"
@@ -150,8 +151,9 @@ type Database interface {
 	// access are also filtered out.
 	//
 	// If a nil ResumeMarker is provided, the WatchStream will begin with a Change
-	// batch containing the initial state. Otherwise, the WatchStream will contain
-	// only changes since the provided ResumeMarker.
+	// batch containing the initial state, always starting with an empty update
+	// for the root entity. Otherwise, the WatchStream will contain only changes
+	// since the provided ResumeMarker.
 	// See watch.GlobWatcher for a detailed explanation of the behavior.
 	Watch(ctx *context.T, resumeMarker watch.ResumeMarker, patterns []wire.CollectionRowPattern) WatchStream
 
@@ -386,9 +388,7 @@ type WatchStream interface {
 	Change() WatchChange
 }
 
-// ChangeType describes the type of the row change: Put or Delete.
-// TODO(sadovsky): Add types to represent changes to collections, syncgroups,
-// and ACLs in this database.
+// ChangeType denotes the type of the change: Put or Delete.
 type ChangeType uint32
 
 const (
@@ -396,21 +396,45 @@ const (
 	DeleteChange
 )
 
+// EntityType denotes the type of the changed entity: Root, Collection, or Row.
+// TODO(ivanpi): Consider adding syncgroup metadata and other types.
+type EntityType uint32
+
+const (
+	EntityRoot EntityType = iota
+	EntityCollection
+	EntityRow
+)
+
 // WatchChange represents a change to a watched entity.
 type WatchChange struct {
-	// Collection is the id of the collection that contains the changed row.
+	// EntityType is the type of the entity - Root, Collection, or Row.
+	EntityType EntityType
+
+	// Collection is the id of the collection that was changed or contains the
+	// changed row. Has zero value if EntityType is not Collection or Row.
 	Collection wire.Id
 
-	// Row is the key of the changed row.
+	// Row is the key of the changed row. Empty if EntityType is not Row.
 	Row string
 
-	// ChangeType describes the type of the change. If ChangeType is PutChange,
-	// then the row exists in the collection, and Value can be called to obtain
-	// the new value for this row. If ChangeType is DeleteChange, then the row was
-	// removed from the collection.
+	// ChangeType describes the type of the change, depending on the EntityType:
+	// - for EntityRow:
+	//   * PutChange: the row exists in the collection, and Value can be called to
+	//     obtain the new value for this row.
+	//   * DeleteChange: the row was removed from the collection.
+	// - for EntityCollection:
+	//   * PutChange: the collection exists, and CollectionInfo can be called to
+	//     obtain the collection info.
+	//   * DeleteChange: the collection was destroyed.
+	// - for EntityRoot:
+	//   * PutChange: appears as the first (possibly only) change in the initial
+	//     state batch, only if watching from an empty ResumeMarker. This is the
+	//     only situation where an EntityRoot appears.
 	ChangeType ChangeType
 
-	// value is the new value for the row if the ChangeType is PutChange, or nil
+	// value is the new value for the row for EntityRow PutChanges, an encoded
+	// StoreChangeCollectionInfo value for EntityCollection PutChanges, or nil
 	// otherwise.
 	value *vom.RawBytes
 
@@ -431,12 +455,32 @@ type WatchChange struct {
 }
 
 // Value decodes the new value of the watched element. Panics if the change type
-// is DeleteChange.
+// is DeleteChange or the entity is not a Row.
 func (c *WatchChange) Value(value interface{}) error {
-	if c.ChangeType == DeleteChange {
+	if c.ChangeType != PutChange {
 		panic("invalid change type")
 	}
+	if c.EntityType != EntityRow {
+		panic("invalid entity type")
+	}
 	return c.value.ToValue(value)
+}
+
+// CollectionInfo returns the collection info containing permissions that the
+// watcher has on the collection. Panics if the change type is DeleteChange or
+// the entity is not a Collection.
+func (c *WatchChange) CollectionInfo() *wire.StoreChangeCollectionInfo {
+	if c.ChangeType != PutChange {
+		panic("invalid change type")
+	}
+	if c.EntityType != EntityCollection {
+		panic("invalid entity type")
+	}
+	ci := &wire.StoreChangeCollectionInfo{}
+	if err := c.value.ToValue(ci); err != nil {
+		panic(fmt.Errorf("ToValue StoreChangeCollectionInfo failed: %v, RawBytes: %#v", err, c.value))
+	}
+	return ci
 }
 
 // Syncgroup is the interface for a syncgroup in the store.
