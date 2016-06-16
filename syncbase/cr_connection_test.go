@@ -50,7 +50,7 @@ func TestCrConnectionClose(t *testing.T) {
 	db.c = crtestutil.MockDbClient(db.c, crStream)
 	db.crState.reconnectWaitTime = 10 * time.Millisecond
 
-	ctx, _ := context.RootContext()
+	ctx, cancel := context.RootContext()
 	st.Mu.Lock()                                     // causes Advance() to block
 	db.EnforceSchema(ctx)                            // kicks off the CR thread
 	for i := 0; i < 100 && !st.GetIsBlocked(); i++ { // wait till Advance() call is blocked
@@ -70,6 +70,7 @@ func TestCrConnectionClose(t *testing.T) {
 	if st.GetIsBlocked() {
 		t.Error("Error: The conflict resolution routine did not die")
 	}
+	cancel()
 }
 
 // TestCrConnectionReestablish tests if the CR thread reestablishes a broken
@@ -105,7 +106,7 @@ func TestCrConnectionReestablish(t *testing.T) {
 	db.c = crtestutil.MockDbClient(db.c, crStream)
 	db.crState.reconnectWaitTime = 10 * time.Millisecond
 
-	ctx, _ := context.RootContext()
+	ctx, cancel := context.RootContext()
 	st.Mu.Lock() // causes Advance() to block
 	db.EnforceSchema(ctx)
 	for i := 0; i < 100 && !st.GetIsBlocked(); i++ {
@@ -122,6 +123,7 @@ func TestCrConnectionReestablish(t *testing.T) {
 	// Shutdown the cr routine
 	db.Close()
 	st.Mu.Unlock()
+	cancel()
 }
 
 func getSchema(cr ConflictResolver) *Schema {

@@ -294,8 +294,9 @@ func RunTest(t *testing.T, mockConflict []wire.ConflictInfo, expResult map[strin
 	st.Mu.Lock() // causes Advance() to block
 	defer st.Mu.Unlock()
 
-	ctx, _ := context.RootContext()
+	ctx, cancel := context.RootContext()
 	db.EnforceSchema(ctx)
+	defer cancel()
 	defer db.Close()
 	for i := 0; i < 100 && (len(st.GetResult()) != len(expResult)); i++ {
 		time.Sleep(time.Millisecond) // wait till Advance() call is blocked
