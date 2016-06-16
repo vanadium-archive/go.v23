@@ -75,6 +75,9 @@ package context
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"runtime"
 	"sync"
 	"time"
 
@@ -227,6 +230,89 @@ type cancelState struct {
 	children map[*cancelState]bool // GUARDED_BY(mu)
 }
 
+// A leakCheck is used to point from the cancel() func to cancelState.
+// If leakedContextPCs > 0, leaked, uncancelled cancelState objects are reported.
+type leakCheck struct {
+	cs         *cancelState
+	funcCalled bool // whether CancelFunc has been called; under cs.mu.
+	stack      []uintptr
+}
+
+var leakedContextPCs int = 0 // stack frames to print for leaked allocation sites.
+var initLeakCheckerOnce sync.Once
+var leakCheckerFile *os.File
+
+// initLeakChecker initializes leak checking if the file $VCONTEXT_LEAK_CHECK
+// can be opened.
+func initLeakChecker() {
+	fileName := os.Getenv("VCONTEXT_LEAK_CHECK")
+	if len(fileName) != 0 {
+		var err error
+		leakCheckerFile, err = os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+		if err == nil {
+			leakedContextPCs = 20
+		}
+	}
+}
+
+// makeCancelFunc returns a function that cancels cancelState *cs with err, and
+// it timer!=nil, stops *timer.  Requires that *cs has cancellation parent
+// *cancelParent if cancelParent != nil.  It may use an indirection through a
+// leakCheck if $VCONTEXT_LEAK_CHECK is set.
+func makeCancelFunc(cs *cancelState, cancelParent *cancelState, timer *time.Timer, err error) (cancelFunc CancelFunc) {
+	initLeakCheckerOnce.Do(initLeakChecker)
+	if leakedContextPCs > 0 && err != DeadlineExceeded { // the timer is allowed to leak its callbacks.
+		lc := &leakCheck{cs: cs, stack: make([]uintptr, leakedContextPCs)}
+		lc.stack = lc.stack[:runtime.Callers(2, lc.stack)]
+		runtime.SetFinalizer(lc, checkForLeaks)
+		cancelFunc = func() { // captures cancelParent, timer, err, and lc (not cs).
+			if cancelParent != nil {
+				cancelParent.removeChild(lc.cs)
+			}
+			if timer != nil {
+				timer.Stop()
+			}
+			lc.cs.cancel(err)
+			runtime.SetFinalizer(lc, nil)
+			lc.cs.mu.Lock()
+			lc.funcCalled = true
+			lc.cs.mu.Unlock()
+		}
+	} else {
+		cancelFunc = func() { // captures cancelParent, timer, err, and cs.
+			if cancelParent != nil {
+				cancelParent.removeChild(cs)
+			}
+			if timer != nil {
+				timer.Stop()
+			}
+			cs.cancel(err)
+		}
+	}
+	return cancelFunc
+}
+
+// checkForLeaks is called when the garbage collector finds that a leakCheck
+// object can be collected.
+func checkForLeaks(lc *leakCheck) {
+	cs := lc.cs
+	cs.mu.Lock()
+	funcCalled := lc.funcCalled
+	cs.mu.Unlock()
+	if !funcCalled {
+		var stack string
+		if lc.stack != nil {
+			stack = ": stack:\n"
+			for _, pc := range lc.stack {
+				fnc := runtime.FuncForPC(pc)
+				file, line := fnc.FileLine(pc)
+				stack += fmt.Sprintf("   %s:%d: %s\n", file, line, fnc.Name())
+			}
+		}
+		fmt.Fprintf(leakCheckerFile, "v.io/v23/context: CancelFunc garbage collected without call%s\n", stack)
+	}
+}
+
 func (c *cancelState) addChild(child *cancelState) {
 	c.mu.Lock()
 
@@ -285,18 +371,13 @@ func WithValue(parent *T, key interface{}, val interface{}) *T {
 	return &T{logger: parent.logger, ctxLogger: parent.ctxLogger, parent: parent, key: key, value: val}
 }
 
-func withCancelState(parent *T) (*T, func(error)) {
-	cs := &cancelState{done: make(chan struct{})}
+func withCancelState(parent *T) (t *T, cs *cancelState, cancelParent *cancelState) {
+	cs = &cancelState{done: make(chan struct{})}
 	cancelParent, ok := parent.Value(cancelKey).(*cancelState)
 	if ok {
 		cancelParent.addChild(cs)
 	}
-	return WithValue(parent, cancelKey, cs), func(err error) {
-		if ok {
-			cancelParent.removeChild(cs)
-		}
-		cs.cancel(err)
-	}
+	return WithValue(parent, cancelKey, cs), cs, cancelParent
 }
 
 // WithCancel returns a child of the current context along with
@@ -304,17 +385,14 @@ func withCancelState(parent *T) (*T, func(error)) {
 // called the channels returned by the Done() methods of the new context
 // (and all context further derived from it) will be closed.
 func WithCancel(parent *T) (*T, CancelFunc) {
-	t, cancel := withCancelState(parent)
-	return t, func() { cancel(Canceled) }
+	t, cs, cancelParent := withCancelState(parent)
+	return t, makeCancelFunc(cs, cancelParent, nil, Canceled)
 }
 
 func withDeadlineState(parent *T, deadline time.Time, timeout time.Duration) (*T, CancelFunc) {
-	t, cancel := withCancelState(parent)
-	ds := &deadlineState{deadline, time.AfterFunc(timeout, func() { cancel(DeadlineExceeded) })}
-	return WithValue(t, deadlineKey, ds), func() {
-		ds.timer.Stop()
-		cancel(Canceled)
-	}
+	t, cs, cancelParent := withCancelState(parent)
+	ds := &deadlineState{deadline, time.AfterFunc(timeout, makeCancelFunc(cs, cancelParent, nil, DeadlineExceeded))}
+	return WithValue(t, deadlineKey, ds), makeCancelFunc(cs, cancelParent, ds.timer, Canceled)
 }
 
 // WithRootContext returns a context derived from parent, but that is
@@ -333,12 +411,7 @@ func WithRootCancel(parent *T) (*T, CancelFunc) {
 	if root != nil {
 		root.addChild(cs)
 	}
-	return WithValue(parent, cancelKey, cs), func() {
-		if root != nil {
-			root.removeChild(cs)
-		}
-		cs.cancel(Canceled)
-	}
+	return WithValue(parent, cancelKey, cs), makeCancelFunc(cs, root, nil, Canceled)
 }
 
 // WithDeadline returns a child of the current context along with a
