@@ -330,7 +330,8 @@ func TestNamelessBlessing(t *testing.T) {
 	if got := SigningBlessings(balice); !got.IsZero() {
 		t.Errorf("got %v, want zero blessings", got)
 	}
-	ctx, _ := context.RootContext()
+	ctx, cancel := context.RootContext()
+	defer cancel()
 	if gotname, gotrejected := SigningBlessingNames(ctx, alice, balice); len(gotname)+len(gotrejected) > 0 {
 		t.Errorf("got %v, %v, want nil, nil", gotname, gotrejected)
 	}

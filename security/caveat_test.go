@@ -66,12 +66,12 @@ func TestStandardCaveatFactories(t *testing.T) {
 
 func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	var (
-		now          = time.Now()
-		valid        = newCaveat(NewExpiryCaveat(now.Add(time.Second)))
-		expired      = newCaveat(NewExpiryCaveat(now.Add(-1 * time.Second)))
-		discharger   = newPrincipal(t)
-		randomserver = newPrincipal(t)
-		ctxAndCall   = func(method string, discharges ...Discharge) (*context.T, Call) {
+		now              = time.Now()
+		valid            = newCaveat(NewExpiryCaveat(now.Add(time.Second)))
+		expired          = newCaveat(NewExpiryCaveat(now.Add(-1 * time.Second)))
+		discharger       = newPrincipal(t)
+		randomserver     = newPrincipal(t)
+		ctxCancelAndCall = func(method string, discharges ...Discharge) (*context.T, context.CancelFunc, Call) {
 			params := &CallParams{
 				Timestamp:        now,
 				Method:           method,
@@ -80,8 +80,8 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 			for _, d := range discharges {
 				params.RemoteDischarges[d.ID()] = d
 			}
-			root, _ := context.RootContext()
-			return root, NewCall(params)
+			root, cancel := context.RootContext()
+			return root, cancel, NewCall(params)
 		}
 	)
 
@@ -90,7 +90,9 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Caveat should fail validation without a discharge
-	if err := matchesError(tpc.Validate(ctxAndCall("Method1")), "missing discharge"); err != nil {
+	ctx0, cancel0, call0 := ctxCancelAndCall("Method1")
+	defer cancel0()
+	if err := matchesError(tpc.Validate(ctx0, call0), "missing discharge"); err != nil {
 		t.Fatal(err)
 	}
 	// Should validate when the discharge is present (and caveats on the discharge are met).
@@ -98,11 +100,15 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := tpc.Validate(ctxAndCall("Method1", d)); err != nil {
+	ctx1, cancel1, call1 := ctxCancelAndCall("Method1", d)
+	defer cancel1()
+	if err := tpc.Validate(ctx1, call1); err != nil {
 		t.Fatal(err)
 	}
 	// Should fail validation when caveats on the discharge are not met.
-	if err := matchesError(tpc.Validate(ctxAndCall("Method2", d)), "discharge failed to validate"); err != nil {
+	ctx2, cancel2, call2 := ctxCancelAndCall("Method2", d)
+	defer cancel2()
+	if err := matchesError(tpc.Validate(ctx2, call2), "discharge failed to validate"); err != nil {
 		t.Fatal(err)
 	}
 	// Discharge can be converted to and from wire format:
@@ -112,7 +118,9 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	}
 	// A discharge minted by another principal should not be respected.
 	if d, err = randomserver.MintDischarge(tpc, UnconstrainedUse()); err == nil {
-		if err := matchesError(tpc.Validate(ctxAndCall("Method1", d)), "signature verification on discharge"); err != nil {
+		ctx3, cancel3, call3 := ctxCancelAndCall("Method1", d)
+		defer cancel3()
+		if err := matchesError(tpc.Validate(ctx3, call3), "signature verification on discharge"); err != nil {
 			t.Fatal(err)
 		}
 	}
