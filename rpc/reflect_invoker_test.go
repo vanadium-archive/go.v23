@@ -30,9 +30,8 @@ import (
 
 // TODO(toddw): Add multi-goroutine tests of reflectCache locking.
 
-func testContext() *context.T {
-	ctx, _ := context.RootContext()
-	return ctx
+func testContext() (*context.T, context.CancelFunc) {
+	return context.RootContext()
 }
 
 type FakeStreamServerCall struct{}
@@ -59,18 +58,19 @@ func (*FakeStreamServerCall) RemoteEndpoint() naming.Endpoint                 { 
 func (*FakeStreamServerCall) Security() security.Call                         { return nil }
 
 var (
-	ctx1  = testContext()
-	ctx2  = testContext()
-	ctx3  = testContext()
-	ctx4  = testContext()
-	ctx5  = testContext()
-	ctx6  = testContext()
-	call1 = &FakeStreamServerCall{}
-	call2 = &FakeStreamServerCall{}
-	call3 = &FakeStreamServerCall{}
-	call4 = &FakeStreamServerCall{}
-	call5 = &FakeStreamServerCall{}
-	call6 = &FakeStreamServerCall{}
+	// save the CancelFuncs too, to silence the CancelFunc leak detector
+	ctx1, cancel1 = testContext()
+	ctx2, cancel2 = testContext()
+	ctx3, cancel3 = testContext()
+	ctx4, cancel4 = testContext()
+	ctx5, cancel5 = testContext()
+	ctx6, cancel6 = testContext()
+	call1         = &FakeStreamServerCall{}
+	call2         = &FakeStreamServerCall{}
+	call3         = &FakeStreamServerCall{}
+	call4         = &FakeStreamServerCall{}
+	call5         = &FakeStreamServerCall{}
+	call6         = &FakeStreamServerCall{}
 )
 
 // test tags.
