@@ -65,6 +65,9 @@ func TestV23ClientPutGet(t *testing.T) {
 		t.Fatalf("watch stream unexpectedly reached the end: %v", stream.Err())
 	}
 	change := stream.Change()
+	if got, want := change.EntityType, syncbase.EntityRow; got != want {
+		t.Fatalf("unexpected watch entity type: got %q, want %q", got, want)
+	}
 	if got, want := change.Collection, testCx; got != want {
 		t.Fatalf("unexpected watch collection: got %q, want %q", got, want)
 	}

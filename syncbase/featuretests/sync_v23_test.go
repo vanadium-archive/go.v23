@@ -561,8 +561,10 @@ func verifySyncgroupDataWithWatch(ctx *context.T, syncbaseName, collectionName, 
 	})
 
 	var changes []syncbase.WatchChange
-	for i := 0; i < count && stream.Advance(); i++ {
-		changes = append(changes, stream.Change())
+	for len(changes) < count && stream.Advance() {
+		if stream.Change().EntityType == syncbase.EntityRow {
+			changes = append(changes, stream.Change())
+		}
 	}
 	if err := stream.Err(); err != nil {
 		return fmt.Errorf("watch stream error: %v\n", err)

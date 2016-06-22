@@ -675,20 +675,27 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// one batch.
 	tu.CheckWatch(t, wstreamAllAdmin, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(ch.Id(), wire.AllCollectionTags, adminAcl, nil),
 		tu.WatchChangeTestRowPut(ch.Id(), "b/1", "value", nil),
+		tu.WatchChangeTestCollectionPut(cp.Id(), wire.AllCollectionTags, openAcl, nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
 	})
 	// Watch with empty prefix should have seen the initial state as one batch,
-	// omitting the row in the hidden collection.
+	// omitting the row in the hidden collection and seeing no perms on it.
 	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(ch.Id(), nil, nil, nil),
+		// Skip row "b/1" in hidden collection.
+		tu.WatchChangeTestCollectionPut(cp.Id(), wire.AllCollectionTags, openAcl, nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
 	})
-	// Watch with prefix "d" should have seen only the initial root update.
+	// Watch with prefix "d" should have seen only the initial root update and
+	// public collection change.
 	tu.CheckWatch(t, wstreamD, []tu.WatchChangeTest{
-		tu.WatchChangeTestRootPut(resumeMarkerInitial),
+		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(cp.Id(), wire.AllCollectionTags, openAcl, resumeMarkerInitial),
 	})
 
 	// === 2) More writes ===
@@ -768,17 +775,20 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	}
 
 	// Check 3) Writes and permissions change
+	// Admin batch no longer has Read access on the hidden collection, so it sees
+	// only the ACL update. The ACL is checked when scanning the log after commit,
+	// so the new ACL applies to the entire batch.
+	tu.CheckWatch(t, wstreamAllAdmin, []tu.WatchChangeTest{
+		tu.WatchChangeTestCollectionPut(ch.Id(), []access.Tag{access.Write, access.Admin}, newPerms, resumeMarkerAfterB3BspB4),
+	})
 	// Watch with empty prefix should have seen the continued changes since it has
 	// Read access on the hidden collection now. The ACL is checked when scanning
 	// the log after commit, so the new ACL applies to the entire batch.
 	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
 		tu.WatchChangeTestRowPut(ch.Id(), "b/3", "value", nil),
+		tu.WatchChangeTestCollectionPut(ch.Id(), []access.Tag{access.Read, access.Admin}, newPerms, nil),
 		tu.WatchChangeTestRowPut(ch.Id(), "b/4", "value", resumeMarkerAfterB3BspB4),
 	})
-	// Admin batch no longer has Read access on the hidden collection, so it sees
-	// nothing (this is checked later, when there are more rows to see). The ACL
-	// is checked when scanning the log after commit, so the new ACL applies to
-	// the entire batch.
 
 	// === 4) Writes and collection destroy ===
 	// -> Put ch:"b/5", destroy ch, put cp:"a/3" in a batch.
@@ -809,15 +819,16 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	}
 
 	// Check 4) Writes and collection destroy
-	// Both watches do not see any of the hidden collection changes since the
+	// Both watches do not see any of the hidden collection rows since the
 	// collection has been destroyed and there is no ACL to check against. They
-	// see only the public collection changes.
+	// see only the public collection rows and the hidden collection destroy.
 	finalChangesBoth := []tu.WatchChangeTest{
+		tu.WatchChangeTestCollectionDelete(ch.Id(), nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "a/3", "value", resumeMarkerAfterB5BdA3),
 		tu.WatchChangeTestRowDelete(cp.Id(), "a/3", resumeMarkerAfterA3d),
 	}
-	tu.CheckWatch(t, wstreamAll, finalChangesBoth)
 	tu.CheckWatch(t, wstreamAllAdmin, finalChangesBoth)
+	tu.CheckWatch(t, wstreamAll, finalChangesBoth)
 
 	wstreamAllAdmin.Cancel()
 	wstreamD.Cancel()
@@ -956,22 +967,28 @@ func TestWatchMulti(t *testing.T) {
 
 	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "a", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
+		tu.WatchChangeTestCollectionPut(cAFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
 	})
 	tu.CheckWatch(t, wstream2, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(cBFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "ef", "value", nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "efg", "value", resumeMarkerInitial),
 	})
 	tu.CheckWatch(t, wstream3, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
+		tu.WatchChangeTestCollectionPut(cBFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "ab", "value", nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "x\\yz", "value", nil),
+		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "cd", "value", nil),
+		tu.WatchChangeTestCollectionPut(cAFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abc", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
@@ -1024,6 +1041,7 @@ func TestWatchMulti(t *testing.T) {
 	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abcd", "value", resumeMarkerAfterBatch1),
+		tu.WatchChangeTestCollectionPut(cNewId, wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cNewId, "acd", "value", nil),
 		tu.WatchChangeTestRowPut(cNewId, "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "bcd", "value", resumeMarkerAfterBatch2),
@@ -1034,6 +1052,7 @@ func TestWatchMulti(t *testing.T) {
 	tu.CheckWatch(t, wstream3, []tu.WatchChangeTest{
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abcd", "value", resumeMarkerAfterBatch1),
+		tu.WatchChangeTestCollectionPut(cNewId, wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cNewId, "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "bcd", "value", resumeMarkerAfterBatch2),
 	})

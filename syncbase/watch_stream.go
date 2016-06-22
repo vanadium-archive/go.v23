@@ -6,6 +6,7 @@ package syncbase
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"v.io/v23/context"
@@ -125,7 +126,7 @@ func ToWatchChange(c watch.Change) *WatchChange {
 	if c.Name == "" {
 		res.EntityType = EntityRoot
 		// No other fields need to be set for EntityRoot.
-	} else {
+	} else if strings.ContainsRune(c.Name, '/') {
 		res.EntityType = EntityRow
 		// Parse the collection id and row key.
 		if res.Collection, res.Row, err = util.ParseCollectionRowPair(nil, c.Name); err != nil {
@@ -133,6 +134,18 @@ func ToWatchChange(c watch.Change) *WatchChange {
 		}
 		if res.Row == "" {
 			panic("empty row name")
+		}
+	} else {
+		res.EntityType = EntityCollection
+		// Parse the collection id.
+		if res.Collection, err = util.DecodeId(c.Name); err != nil {
+			panic(err)
+		}
+		if res.ChangeType == PutChange {
+			// Verify that the collection info is decodable.
+			if err := storeChange.Value.ToValue(&wire.StoreChangeCollectionInfo{}); err != nil {
+				panic(fmt.Errorf("ToValue StoreChangeCollectionInfo failed: %v, RawBytes: %#v", err, storeChange.Value))
+			}
 		}
 	}
 	return res

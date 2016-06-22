@@ -478,6 +478,8 @@ func (c *WatchChange) CollectionInfo() *wire.StoreChangeCollectionInfo {
 	}
 	ci := &wire.StoreChangeCollectionInfo{}
 	if err := c.value.ToValue(ci); err != nil {
+		// This should never panic since we verify the collection info is decodable
+		// when constructing the WatchChange.
 		panic(fmt.Errorf("ToValue StoreChangeCollectionInfo failed: %v, RawBytes: %#v", err, c.value))
 	}
 	return ci
