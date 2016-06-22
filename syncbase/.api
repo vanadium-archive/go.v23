@@ -9,7 +9,7 @@ pkg syncbase, func Prefix(string) PrefixRange
 pkg syncbase, func Range(string, string) RowRange
 pkg syncbase, func RunInBatch(*context.T, Database, wire.BatchOptions, func(BatchDatabase) error) error
 pkg syncbase, func SingleRow(string) RowRange
-pkg syncbase, func ToWatchChange(watch.Change) WatchChange
+pkg syncbase, func ToWatchChange(watch.Change) *WatchChange
 pkg syncbase, func UUID() string
 pkg syncbase, method (*Conflict) VDLRead(vdl.Decoder) error
 pkg syncbase, method (*ConflictRow) VDLRead(vdl.Decoder) error

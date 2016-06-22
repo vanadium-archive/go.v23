@@ -674,6 +674,7 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// Admin watch with empty prefix should have seen the full initial state as
 	// one batch.
 	tu.CheckWatch(t, wstreamAllAdmin, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(nil),
 		tu.WatchChangeTestRowPut(ch.Id(), "b/1", "value", nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
@@ -681,8 +682,13 @@ func TestWatchWithBatchAndInitialState(t *testing.T) {
 	// Watch with empty prefix should have seen the initial state as one batch,
 	// omitting the row in the hidden collection.
 	tu.CheckWatch(t, wstreamAll, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "a/1", "value", nil),
 		tu.WatchChangeTestRowPut(cp.Id(), "c/1", "value", resumeMarkerInitial),
+	})
+	// Watch with prefix "d" should have seen only the initial root update.
+	tu.CheckWatch(t, wstreamD, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(resumeMarkerInitial),
 	})
 
 	// === 2) More writes ===
@@ -949,16 +955,19 @@ func TestWatchMulti(t *testing.T) {
 	}
 
 	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "a", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
 	})
 	tu.CheckWatch(t, wstream2, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "ef", "value", nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "efg", "value", resumeMarkerInitial),
 	})
 	tu.CheckWatch(t, wstream3, []tu.WatchChangeTest{
+		tu.WatchChangeTestRootPut(nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "ab", "value", nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "x\\yz", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),

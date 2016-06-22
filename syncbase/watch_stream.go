@@ -47,16 +47,21 @@ func (s *watchStream) Advance() bool {
 	if s.finished {
 		return false
 	}
-	// Advance never blocks if the context has been cancelled.
-	if !s.call.RecvStream().Advance() {
-		s.err = s.call.Finish()
-		s.cancel()
-		s.finished = true
-		return false
+	for {
+		// Advance never blocks if the context has been cancelled.
+		if !s.call.RecvStream().Advance() {
+			s.err = s.call.Finish()
+			s.cancel()
+			s.finished = true
+			return false
+		}
+		// Skip initial-state-skipped changes.
+		if s.call.RecvStream().Value().State == watch.InitialStateSkipped {
+			continue
+		}
+		s.curr = ToWatchChange(s.call.RecvStream().Value())
+		return true
 	}
-	watchChange := ToWatchChange(s.call.RecvStream().Value())
-	s.curr = &watchChange
-	return true
 }
 
 // Change implements WatchStream interface.
@@ -93,38 +98,42 @@ func (s *watchStream) Cancel() {
 // ToWatchChange converts a generic Change struct as defined in
 // v.io/v23/services/watch to a Syncbase-specific WatchChange struct as defined
 // in v.io/v23/syncbase.
-func ToWatchChange(c watch.Change) WatchChange {
-	// Parse the collection and the row.
-	collection, row, err := util.ParseCollectionRowPair(nil, c.Name)
-	if err != nil {
-		panic(err)
-	}
-	if row == "" {
-		panic("empty row name")
-	}
+func ToWatchChange(c watch.Change) *WatchChange {
+	// TODO(ivanpi): Store the errors in err instead of panicking.
 	// Parse the store change.
 	var storeChange wire.StoreChange
 	if err := c.Value.ToValue(&storeChange); err != nil {
-		panic(fmt.Errorf("ToValue failed: %v, RawBytes: %#v", err, c.Value))
+		panic(fmt.Errorf("ToValue StoreChange failed: %v, RawBytes: %#v", err, c.Value))
 	}
-	// Parse the state.
-	var changeType ChangeType
+	res := &WatchChange{
+		value:        storeChange.Value,
+		FromSync:     storeChange.FromSync,
+		Continued:    c.Continued,
+		ResumeMarker: c.ResumeMarker,
+	}
+	// Convert the state.
 	switch c.State {
 	case watch.Exists:
-		changeType = PutChange
+		res.ChangeType = PutChange
 	case watch.DoesNotExist:
-		changeType = DeleteChange
+		res.ChangeType = DeleteChange
 	default:
 		panic(fmt.Sprintf("unsupported watch change state: %v", c.State))
 	}
-	return WatchChange{
-		EntityType:   EntityRow,
-		Collection:   collection,
-		Row:          row,
-		ChangeType:   changeType,
-		value:        storeChange.Value,
-		ResumeMarker: c.ResumeMarker,
-		FromSync:     storeChange.FromSync,
-		Continued:    c.Continued,
+	var err error
+	// Parse the name and determine the entity type.
+	if c.Name == "" {
+		res.EntityType = EntityRoot
+		// No other fields need to be set for EntityRoot.
+	} else {
+		res.EntityType = EntityRow
+		// Parse the collection id and row key.
+		if res.Collection, res.Row, err = util.ParseCollectionRowPair(nil, c.Name); err != nil {
+			panic(err)
+		}
+		if res.Row == "" {
+			panic("empty row name")
+		}
 	}
+	return res
 }
