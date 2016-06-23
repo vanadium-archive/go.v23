@@ -57,7 +57,7 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
 
 	// This is a decoy syncgroup that no other Syncbase joins, but is on the
@@ -69,7 +69,7 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sgId1 := wire.Id{Name: "SG2", Blessing: testCx.Blessing}
 
 	// Verify data syncing (client0 updates).
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId1, "c1", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId1, "c1", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c1", "foo", 0, 10))
 
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
@@ -87,20 +87,20 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sbs[1].cleanup = sh.StartSyncbase(sbs[1].sbCreds, syncbaselib.Opts{Name: sbs[1].sbName, RootDir: sbs[1].rootDir}, acl(sbs[1].clientId))
 
 	// Verify syncgroup syncing (client0 updates).
-	ok(t, setSyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v2", "c", "", "root:s0;root:s1;root:s3", nil))
-	ok(t, verifySyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v2", "c", "root:s0;root:s1;root:s3"))
+	ok(t, setSyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v2", "c", "", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c3", nil))
+	ok(t, verifySyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v2", "c", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c3"))
 
 	// Verify data and syncgroup syncing (client1 updates).
 	ok(t, updateData(sbs[1].clientCtx, sbs[1].sbName, 5, 10, ""))
 	ok(t, populateData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", 10, 20))
-	ok(t, setSyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v3", "c", "", "root:s0;root:s1;root:s4", nil))
+	ok(t, setSyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v3", "c", "", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c4", nil))
 
 	// Verify that the last updates are synced right away so that we are
 	// assured that all the updates are synced.
 	ok(t, verifySyncgroupData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", "", 10, 10))
 	ok(t, verifySyncgroupData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", "testkey"+sbs[1].sbName, 5, 5))
 	ok(t, verifySyncgroupData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", "", 0, 5))
-	ok(t, verifySyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v3", "c", "root:s0;root:s1;root:s4"))
+	ok(t, verifySyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v3", "c", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c4"))
 
 	// Shutdown and restart Syncbase instances.
 	sbs[0].cleanup(os.Interrupt)
@@ -109,8 +109,8 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sbs[0].cleanup = sh.StartSyncbase(sbs[0].sbCreds, syncbaselib.Opts{Name: sbs[0].sbName, RootDir: sbs[0].rootDir}, acl(sbs[0].clientId))
 	sbs[1].cleanup = sh.StartSyncbase(sbs[1].sbCreds, syncbaselib.Opts{Name: sbs[1].sbName, RootDir: sbs[1].rootDir}, acl(sbs[1].clientId))
 
-	ok(t, verifySyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v3", "c", "root:s0;root:s1;root:s4"))
-	ok(t, verifySyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v3", "c", "root:s0;root:s1;root:s4"))
+	ok(t, verifySyncgroupSpec(sbs[0].clientCtx, sbs[0].sbName, sgId, "v3", "c", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c4"))
+	ok(t, verifySyncgroupSpec(sbs[1].clientCtx, sbs[1].sbName, sgId, "v3", "c", "root:o:app:client:c0;root:o:app:client:c1;root:o:app:client:c4"))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 20, 30))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 10, 20))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "testkey"+sbs[1].sbName, 5, 5))
@@ -137,7 +137,7 @@ func TestV23VSyncWithPutDelWatch(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c1,c2", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c1,c2", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c1", "foo", 0, 10))
 
 	beforeSyncMarker, err := getResumeMarker(sbs[1].clientCtx, sbs[1].sbName)
@@ -179,7 +179,7 @@ func TestV23VSyncWithAcls(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c", "foo", "", 0, 10))
@@ -216,7 +216,7 @@ func TestV23VSyncWithPeerSyncgroups(t *testing.T) {
 	// Pre-populate the data before creating the syncgroup.
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, "c"))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "f", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sg1Id, "c", "", "root:s0;root:s1", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sg1Id, "c", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sb1Name, sg1Id))
@@ -225,7 +225,7 @@ func TestV23VSyncWithPeerSyncgroups(t *testing.T) {
 
 	// We are setting the collection ACL again at syncbase2 but it is not
 	// required.
-	ok(t, createSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sg2Id, "c", "", "root:s1;root:s2", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sg2Id, "c", "", nil, clBlessings(sbs)))
 
 	ok(t, joinSyncgroup(sbs[2].clientCtx, sbs[2].sbName, sb2Name, sg2Id))
 	ok(t, verifySyncgroupData(sbs[2].clientCtx, sbs[2].sbName, "c", "foo", "", 0, 10))
@@ -248,7 +248,7 @@ func TestV23VSyncSyncgroups(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 	ok(t, verifySyncgroupMembers(sbs[0].clientCtx, sbs[0].sbName, sgId, 1))
 
@@ -284,7 +284,7 @@ func TestV23VSyncMultiApp(t *testing.T) {
 	ok(t, setupAppMulti(sbs[0].clientCtx, sbs[0].sbName, na, nd))
 	ok(t, setupAppMulti(sbs[1].clientCtx, sbs[1].sbName, na, nd))
 
-	ok(t, populateAndCreateSyncgroupMulti(sbs[0].clientCtx, sbs[0].sbName, na, nd, nc, "foo,bar", sbBlessings(sbs), clBlessings(sbs)))
+	ok(t, populateAndCreateSyncgroupMulti(sbs[0].clientCtx, sbs[0].sbName, na, nd, nc, "foo,bar", clBlessings(sbs)))
 	ok(t, joinSyncgroupMulti(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, na, nd))
 	ok(t, verifySyncgroupDataMulti(sbs[1].clientCtx, sbs[1].sbName, na, nd, nc, "foo,bar"))
 }
@@ -366,15 +366,15 @@ func setupAppMulti(ctx *context.T, syncbaseName string, numApps, numDbs int) err
 	return nil
 }
 
-func populateAndCreateSyncgroupMulti(ctx *context.T, syncbaseName string, numApps, numDbs, numCxs int, prefixStr, sbBlessings, clBlessings string) error {
+func populateAndCreateSyncgroupMulti(ctx *context.T, syncbaseName string, numApps, numDbs, numCxs int, prefixStr, blessings string) error {
 	roots := v23.GetNamespace(ctx).Roots()
 	if len(roots) == 0 {
 		return errors.New("no namespace roots")
 	}
 	mtName := roots[0]
 
-	sgperms := tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(sbBlessings, ";")...)
-	clperms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
+	sgperms := tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(blessings, ";")...)
+	clperms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(blessings, ";")...)
 
 	svc := syncbase.NewService(syncbaseName)
 
@@ -477,7 +477,6 @@ func verifySyncgroupSpec(ctx *context.T, syncbaseName string, sgId wire.Id, want
 	var spec wire.SyncgroupSpec
 	var err error
 	for i := 0; i < 20; i++ {
-		time.Sleep(500 * time.Millisecond)
 		spec, _, err = sg.GetSpec(ctx)
 		if err != nil {
 			return fmt.Errorf("GetSpec SG %q failed: %v\n", sgId, err)
@@ -485,6 +484,7 @@ func verifySyncgroupSpec(ctx *context.T, syncbaseName string, sgId wire.Id, want
 		if spec.Description == wantDesc {
 			break
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 	if spec.Description != wantDesc || !reflect.DeepEqual(spec.Collections, wantCollections) || !reflect.DeepEqual(spec.Perms, wantPerms) {
 		return fmt.Errorf("GetSpec SG %q failed: description got %v, want %v, collections got %v, want %v, perms got %v, want %v\n",
@@ -501,12 +501,12 @@ func verifySyncgroupDeletedData(ctx *context.T, syncbaseName, collectionName, ke
 	// Wait for a bit for deletions to propagate.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start-1)
 	for i := 0; i < 20; i++ {
-		time.Sleep(500 * time.Millisecond)
 		r := c.Row(lastKey)
 		var value string
 		if err := r.Get(ctx, &value); verror.ErrorID(err) == verror.ErrNoExist.ID {
 			break
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	if valuePrefix == "" {
@@ -614,11 +614,11 @@ func verifyLostAccess(ctx *context.T, syncbaseName, collectionName, keyPrefix st
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 	r := c.Row(lastKey)
 	for i := 0; i < 20; i++ {
-		time.Sleep(500 * time.Millisecond)
 		var value string
 		if err := r.Get(ctx, &value); verror.ErrorID(err) == verror.ErrNoAccess.ID {
 			break
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	// Verify that all keys have lost access.
@@ -656,10 +656,10 @@ func verifySyncgroupDataMulti(ctx *context.T, syncbaseName string, numApps, numD
 						var err error
 						// Wait for some time to sync.
 						for t := 0; t < 20; t++ {
-							time.Sleep(500 * time.Millisecond)
 							if err = r.Get(ctx, &got); err == nil {
 								break
 							}
+							time.Sleep(500 * time.Millisecond)
 						}
 						if err != nil {
 							return fmt.Errorf("r.Get() failed: %v\n", err)

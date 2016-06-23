@@ -28,16 +28,18 @@ const (
 )
 
 var (
-	testDb = wire.Id{Blessing: "root:o:app", Name: "d"}
-	testCx = wire.Id{Blessing: "root:o:app:client", Name: "c"}
+	appExtension    = "o:app"
+	clientExtension = appExtension + ":client"
+	testDb          = wire.Id{Blessing: "root:" + appExtension, Name: "d"}
+	testCx          = wire.Id{Blessing: "root:" + clientExtension, Name: "c"}
 )
 
 ////////////////////////////////////////////////////////////
 // Helpers for setting up Syncbases, dbs, and collections
 
-func setupHierarchy(ctx *context.T, syncbaseName string) error {
+func setupHierarchy(ctx *context.T, syncbaseName string, perms access.Permissions) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	return d.Create(ctx, nil)
+	return d.Create(ctx, perms)
 }
 
 func createCollection(ctx *context.T, syncbaseName, collectionName string) error {
@@ -58,33 +60,31 @@ type testSyncbase struct {
 // Spawns "num" Syncbase instances and returns handles to them.
 func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
+
 	for i, _ := range sbs {
-		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("o:app:client:c%d", i)
+		sbName, clientId := fmt.Sprintf("s%d", i), fmt.Sprintf("%s:c%d", clientExtension, i)
+		clientCtx := sh.ForkContext(clientId)
+		sbCreds := sh.ForkCredentialsFromPrincipal(v23.GetPrincipal(clientCtx), sbName)
+		if sh.Err != nil {
+			tu.Fatal(t, sh.Err)
+		}
 		sbs[i] = &testSyncbase{
 			sbName:    sbName,
-			sbCreds:   sh.ForkCredentials(sbName),
+			sbCreds:   sbCreds,
 			rootDir:   sh.MakeTempDir(),
 			clientId:  clientId,
-			clientCtx: sh.ForkContext(clientId),
+			clientCtx: clientCtx,
 		}
 		// Give XRWA permissions to this Syncbase's client.
-		acl := fmt.Sprintf(`{"Resolve":{"In":["root:%s"]},"Read":{"In":["root:%s"]},"Write":{"In":["root:%s"]},"Admin":{"In":["root:%s"]}}`, clientId, clientId, clientId, clientId)
+		clientBlessing := fmt.Sprintf("root:%s", clientId)
+		acl := fmt.Sprintf(`{"Resolve":{"In":["%s"]},"Read":{"In":["%s"]},"Write":{"In":["%s"]},"Admin":{"In":["%s"]}}`, clientBlessing, clientBlessing, clientBlessing, clientBlessing)
 		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, RootDir: sbs[i].rootDir, DevMode: devMode}, acl)
-	}
-	// Call setupHierarchy on each Syncbase.
-	for _, sb := range sbs {
-		ok(t, setupHierarchy(sb.clientCtx, sb.sbName))
+
+		// Call setupHierarchy on each Syncbase.
+		dbPerms := tu.DefaultPerms(wire.AllDatabaseTags, clientBlessing)
+		ok(t, setupHierarchy(sbs[i].clientCtx, sbs[i].sbName, dbPerms))
 	}
 	return sbs
-}
-
-// Returns a ";"-separated list of Syncbase blessing names.
-func sbBlessings(sbs []*testSyncbase) string {
-	names := make([]string, len(sbs))
-	for i, sb := range sbs {
-		names[i] = "root:" + sb.sbName
-	}
-	return strings.Join(names, ";")
 }
 
 // Returns a ";"-separated list of Syncbase clients blessing names.
@@ -189,11 +189,11 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix
 	// Wait a bit (up to 10 seconds) for the last key to appear.
 	lastKey := fmt.Sprintf("%s%d", keyPrefix, start+count-1)
 	for i := 0; i < 20; i++ {
-		time.Sleep(500 * time.Millisecond)
 		var value string
 		if err := c.Get(ctx, lastKey, &value); err == nil {
 			break
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	if valuePrefix == "" {
@@ -219,7 +219,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix
 // Helpers for managing syncgroups
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
-func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName, sbBlessings string, perms access.Permissions, clBlessings string) error {
+func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName string, perms access.Permissions, clBlessings string) error {
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
 		if len(roots) == 0 {
@@ -231,9 +231,9 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 
 	if perms == nil {
-		perms = tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(sbBlessings, ";")...)
+		perms = tu.DefaultPerms(wire.AllSyncgroupTags, strings.Split(clBlessings, ";")...)
 	}
-	clperms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
+	collectionPerms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
 
 	spec := wire.SyncgroupSpec{
 		Description: "test syncgroup sg",
@@ -250,7 +250,7 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 		c := d.CollectionForId(cId)
 		// Ignore the error since sometimes a collection might already exist.
 		c.Create(ctx, nil)
-		if err := c.SetPermissions(ctx, clperms); err != nil {
+		if err := c.SetPermissions(ctx, collectionPerms); err != nil {
 			return fmt.Errorf("{%q, %v} c.SetPermissions failed: %v", syncbaseName, cId, err)
 		}
 	}
@@ -280,7 +280,6 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName string, sgId wire.Id, w
 
 	var gotMembers int
 	for i := 0; i < 8; i++ {
-		time.Sleep(500 * time.Millisecond)
 		members, err := sg.GetMembers(ctx)
 		if err != nil {
 			return fmt.Errorf("{%q, %q} sg.GetMembers() failed: %v", syncbaseName, sgId, err)
@@ -289,6 +288,7 @@ func verifySyncgroupMembers(ctx *context.T, syncbaseName string, sgId wire.Id, w
 		if gotMembers == wantMembers {
 			break
 		}
+		time.Sleep(500 * time.Millisecond)
 	}
 	if gotMembers != wantMembers {
 		return fmt.Errorf("{%q, %q} verifySyncgroupMembers failed: got %d members, want %d", syncbaseName, sgId, gotMembers, wantMembers)
@@ -308,13 +308,12 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 // Syncbase-specific testing helpers
 
 // parseSgCollections converts, for example, "a,c" to
-// [Collection: {"root:o:app:client", "a"}, Collection: {"root:o:app:client", "c"}].
-// TODO(ivanpi): Change format to support user blessings other than "root:o:app:client".
+// [Collection: {clientBlessing, "a"}, Collection: {clientBlessing, "c"}].
 func parseSgCollections(csv string) []wire.Id {
 	strs := strings.Split(csv, ",")
 	res := make([]wire.Id, len(strs))
 	for i, v := range strs {
-		res[i] = wire.Id{"root:o:app:client", v}
+		res[i] = wire.Id{testCx.Blessing, v}
 	}
 	return res
 }

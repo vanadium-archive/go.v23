@@ -9,13 +9,10 @@ package featuretests_test
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/security"
-	"v.io/v23/security/access"
 	wire "v.io/v23/services/syncbase"
 	"v.io/x/ref/test/v23test"
 )
@@ -37,7 +34,7 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -80,7 +77,7 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	sbName := sbs[N].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", sbBlessings(sbs), nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -129,14 +126,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	// multiple admins on the neighborhood.
 	//
 	// TODO(hpucha): Change it to multi-admin scenario.
-	principals := sbBlessings(sbs)
-	perms := access.Permissions{}
-	for _, pattern := range strings.Split(principals, ";") {
-		perms.Add(security.BlessingPattern(pattern), string(access.Read))
-	}
-	perms.Add(security.BlessingPattern("root:"+sbs[0].sbName), string(access.Admin))
-
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable", "", perms, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable", nil, clBlessings(sbs)))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -176,12 +166,12 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 	// stagger the process.
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
-	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, testCx.Name, "", sbBlessings(sbs), clBlessings(sbs)))
+	ok(t, joinOrCreateSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sbName, sgId, testCx.Name, "", clBlessings(sbs)))
 
 	// Remaining syncbases join the syncgroup concurrently.
 	for i := 1; i < len(sbs); i++ {
 		go func(i int) {
-			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, testCx.Name, "", sbBlessings(sbs), clBlessings(sbs)))
+			ok(t, joinOrCreateSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbName, sgId, testCx.Name, "", clBlessings(sbs)))
 		}(i)
 	}
 
@@ -244,9 +234,9 @@ func verifySync(ctx *context.T, syncbaseName string, numSyncbases int, prefix st
 	return nil
 }
 
-func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgColls, mtName, bps, clbps string) error {
+func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgColls, mtName, clbps string) error {
 	if err := joinSyncgroup(ctx, sbNameLocal, sbNameRemote, sgId); err == nil {
 		return nil
 	}
-	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName, bps, nil, clbps)
+	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName, nil, clbps)
 }
