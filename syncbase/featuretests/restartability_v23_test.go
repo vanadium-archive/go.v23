@@ -433,6 +433,30 @@ func TestV23RestartabilityServiceDBCorruption(t *testing.T) {
 	cleanup(os.Kill)
 }
 
+func TestV23RestartabilityServiceRootDirMoved(t *testing.T) {
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, nil)
+	defer sh.Cleanup()
+	rootDir, clientCtx, serverCreds := restartabilityInit(sh)
+	cleanup := sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: rootDir}, acl)
+
+	createHierarchy(t, clientCtx)
+	checkHierarchy(t, clientCtx)
+	cleanup(os.Kill)
+
+	files, err := ioutil.ReadDir(rootDir)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	newRootDir := sh.MakeTempDir()
+	for _, file := range files {
+		sh.Cmd("mv", filepath.Join(rootDir, file.Name()), newRootDir).Run()
+	}
+
+	_ = sh.StartSyncbase(serverCreds, syncbaselib.Opts{Name: testSbName, RootDir: newRootDir}, acl)
+	checkHierarchy(t, clientCtx)
+}
+
 func TestV23RestartabilityAppDBCorruption(t *testing.T) {
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
