@@ -57,7 +57,8 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
 
 	// This is a decoy syncgroup that no other Syncbase joins, but is on the
@@ -69,10 +70,11 @@ func TestV23VSyncCompEval(t *testing.T) {
 	sgId1 := wire.Id{Name: "SG2", Blessing: testCx.Blessing}
 
 	// Verify data syncing (client0 updates).
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId1, "c1", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId1, "c1", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c1", "foo", 0, 10))
 
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
 
 	// Shutdown and restart Syncbase instances.
@@ -137,12 +139,13 @@ func TestV23VSyncWithPutDelWatch(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c1,c2", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c1,c2", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c1", "foo", 0, 10))
 
 	beforeSyncMarker, err := getResumeMarker(sbs[1].clientCtx, sbs[1].sbName)
 	ok(t, err)
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c1", "foo", "", 0, 10))
 	ok(t, verifySyncgroupDataWithWatch(sbs[1].clientCtx, sbs[1].sbName, "c1", "foo", "", 10, false, beforeSyncMarker))
 
@@ -179,9 +182,10 @@ func TestV23VSyncWithAcls(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c", "foo", "", 0, 10))
 
 	ok(t, setCollectionPermissions(sbs[1].clientCtx, sbs[1].sbName, "root:o:app:client:c1"))
@@ -216,18 +220,20 @@ func TestV23VSyncWithPeerSyncgroups(t *testing.T) {
 	// Pre-populate the data before creating the syncgroup.
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, "c"))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "f", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sg1Id, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sg1Id, "c", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sb1Name, sg1Id))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sb1Name, sg1Id, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c", "foo", "", 0, 10))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, "c", "f", "", 0, 10))
 
 	// We are setting the collection ACL again at syncbase2 but it is not
 	// required.
-	ok(t, createSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sg2Id, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sg2Id, "c", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
-	ok(t, joinSyncgroup(sbs[2].clientCtx, sbs[2].sbName, sb2Name, sg2Id))
+	ok(t, joinSyncgroup(sbs[2].clientCtx, sbs[2].sbName, sb2Name, sg2Id, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[2].clientCtx, sbs[2].sbName, "c", "foo", "", 0, 10))
 	ok(t, verifySyncgroupData(sbs[2].clientCtx, sbs[2].sbName, "c", "f", "", 0, 10))
 }
@@ -248,15 +254,16 @@ func TestV23VSyncSyncgroups(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, "c", "foo", 0, 10))
 	ok(t, verifySyncgroupMembers(sbs[0].clientCtx, sbs[0].sbName, sgId, 1))
 
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupMembers(sbs[0].clientCtx, sbs[0].sbName, sgId, 2))
 	ok(t, verifySyncgroupMembers(sbs[1].clientCtx, sbs[1].sbName, sgId, 2))
 
-	ok(t, joinSyncgroup(sbs[2].clientCtx, sbs[2].sbName, sbName, sgId))
+	ok(t, joinSyncgroup(sbs[2].clientCtx, sbs[2].sbName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupMembers(sbs[0].clientCtx, sbs[0].sbName, sgId, 3))
 	ok(t, verifySyncgroupMembers(sbs[1].clientCtx, sbs[1].sbName, sgId, 3))
 	ok(t, verifySyncgroupMembers(sbs[2].clientCtx, sbs[2].sbName, sgId, 3))

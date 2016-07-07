@@ -400,8 +400,9 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 		sgId := wire.Id{Name: fmt.Sprintf("syncgroup%d", i), Blessing: "root"}
 		collectionName := testCx.Name + "_" + a.sbName + b.sbName
 		ok(t, createCollection(a.clientCtx, a.sbName, collectionName))
-		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgId, collectionName, "", nil, clBlessings(sbs)))
-		ok(t, joinSyncgroup(b.clientCtx, b.sbName, a.sbName, sgId))
+		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgId, collectionName, "",
+			nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+		ok(t, joinSyncgroup(b.clientCtx, b.sbName, a.sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 
 		// Wait for a to see b.
 		ok(t, verifySyncgroupMembers(a.clientCtx, a.sbName, sgId, 2))

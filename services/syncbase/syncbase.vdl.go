@@ -3095,8 +3095,8 @@ var AllSyncgroupTags = []access.Tag{
 	"Read",
 }
 
-const BlobDevTypeServer = int32(0) // Blobs migrate toward servers, which store them.  (example: server in cloud)
-const BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
+const BlobDevTypeNormal = int32(0) // Ordinary devices (example: laptop); uses 0 value because that's the default.
+const BlobDevTypeServer = int32(1) // Blobs migrate toward servers, which store them.  (example: server in cloud)
 const BlobDevTypeLeaf = int32(2)   // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
 const NullBlobRef = BlobRef("")
 

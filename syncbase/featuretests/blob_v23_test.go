@@ -30,8 +30,10 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs),
+		wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
+		wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
 
 	// FetchBlob first.
@@ -49,6 +51,61 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 	// Test with a big blob (1 MB).
 	ok(t, generateBigBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1))
 	ok(t, getBigBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1))
+}
+
+// TestV23ServerBlobFetch tests the mechanism for fetch blobs automatically on
+// servers.  It sets up two syncbases:
+// - 0 is a normal syncgroup member, and creates a syncgroup.
+// - 1 is a server, and joins the syncgroup.
+// Both create blobs, then the test waits until the autmoatic fetch mechanism
+// has had a chance to run.  Then, it checks that each syncbase has the blob it
+// created itself, that the server has the blob created by the non-server, and
+// the non-server does not (initially) have the blob created by the server
+// (this latter check fetches the blob to the non-creator as a side effect).  Then
+// the values of the blobs are checked at both syncbases.
+func TestV23ServerBlobFetch(t *testing.T) {
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, nil)
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+
+	sbs := setupSyncbases(t, sh, 2, false)
+
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
+
+	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
+	// sbs[0] is not a server.
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs),
+		wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	// sbs[1] is a server, so will fetch blobs automatically; it joins the syncgroup.
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
+		wire.SyncgroupMemberInfo{SyncPriority: 10, BlobDevType: byte(wire.BlobDevTypeServer)}))
+	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
+
+	// Generate a blob on each member.
+	ok(t, generateBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz")))
+	ok(t, generateBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat")))
+
+	// Sleep until the fetch mechanism has a chance to run  (its initial timeout is 10s,
+	// to make this test possible).
+	time.Sleep(15 * time.Second)
+
+	// The syncbases should have the blobs they themselves created.
+	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, 9, true /*already present*/))
+	ok(t, fetchBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, 12, true /*already present*/))
+
+	// sbs[1] should already have the blob created by sbs[0], since sbs[1] is a server.
+	ok(t, fetchBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, 9, true /*already present*/))
+
+	// sbs[0] should not already have the blob created by sbs[1], since sbs[0] is not a server.
+	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, 12, false /*not already present*/))
+
+	// Wrap up by checking the blob values.
+	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, []byte("wombatnumbat"), 0))
+	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat"), 0))
+	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz"), 0))
+	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, []byte("foobarbaz"), 0))
 }
 
 ////////////////////////////////////
@@ -100,7 +157,11 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 	return nil
 }
 
-func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, skipIncStatus bool) error {
+// fetchBlob ensures that the blob named by key (keyPrefix, pos) can be fetched
+// by syncbaseName, and has size wantSize.  If alreadyPresent is set, it checks
+// that the blob is already present, and other checks that the blob is fetched
+// from some remote syncbase.
+func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, alreadyPresent bool) error {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.CollectionForId(testCx)
 
@@ -129,30 +190,32 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 		return fmt.Errorf("Fetch RPC failed, err %v", err)
 	}
 
-	status := []wire.BlobFetchStatus{
-		wire.BlobFetchStatus{State: wire.BlobFetchStatePending},
-		wire.BlobFetchStatus{State: wire.BlobFetchStateLocating},
-		wire.BlobFetchStatus{State: wire.BlobFetchStateFetching},
-		wire.BlobFetchStatus{State: wire.BlobFetchStateDone}}
+	var status []wire.BlobFetchStatus
+	if alreadyPresent {
+		status = []wire.BlobFetchStatus{wire.BlobFetchStatus{State: wire.BlobFetchStateDone}}
+	} else {
+		status = []wire.BlobFetchStatus{
+			wire.BlobFetchStatus{State: wire.BlobFetchStatePending},
+			wire.BlobFetchStatus{State: wire.BlobFetchStateLocating},
+			wire.BlobFetchStatus{State: wire.BlobFetchStateFetching},
+			wire.BlobFetchStatus{State: wire.BlobFetchStateDone}}
+	}
 
 	var gotStatus wire.BlobFetchStatus
 	i := 0
 	for bs.Advance() {
 		gotStatus = bs.Value()
-
-		if !skipIncStatus {
-			if i <= 1 {
-				if !reflect.DeepEqual(gotStatus, status[i]) {
-					return fmt.Errorf("Fetch blob failed, got status %v want status %v", gotStatus, status[i])
-				}
-				i++
-			} else if !(gotStatus.State == status[2].State || reflect.DeepEqual(gotStatus, status[3])) {
-				return fmt.Errorf("Fetch blob failed, got status %v", gotStatus)
+		if i <= 1 {
+			if !reflect.DeepEqual(gotStatus, status[i]) {
+				return fmt.Errorf("Fetch blob failed, got status %v want status %v", gotStatus, status[i])
 			}
+			i++
+		} else if !(gotStatus.State == status[2].State || reflect.DeepEqual(gotStatus, status[3])) {
+			return fmt.Errorf("Fetch blob failed, got status %v", gotStatus)
 		}
 	}
 
-	if !reflect.DeepEqual(gotStatus, status[3]) {
+	if !reflect.DeepEqual(gotStatus, status[len(status)-1]) {
 		return fmt.Errorf("Fetch blob failed, got status %v want status %v", gotStatus, status[3])
 	}
 

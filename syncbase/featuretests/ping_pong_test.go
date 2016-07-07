@@ -60,11 +60,13 @@ func BenchmarkPingPongPair(b *testing.B) {
 			// Syncbase s0 is the creator.
 			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: testCx.Blessing}
 
-			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
+			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
+				nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 			// The other syncbases will attempt to join the syncgroup.
 			for i := 1; i < *numSync; i++ {
-				ok(b, joinSyncgroup(sbs[i].clientCtx, sbs[i].sbName, sbs[0].sbName, sgId))
+				ok(b, joinSyncgroup(sbs[i].clientCtx, sbs[i].sbName,
+					sbs[0].sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 			}
 		}
 

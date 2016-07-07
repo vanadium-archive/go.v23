@@ -219,7 +219,9 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix
 // Helpers for managing syncgroups
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
-func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName string, perms access.Permissions, clBlessings string) error {
+func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName string,
+	perms access.Permissions, clBlessings string, info wire.SyncgroupMemberInfo) error {
+
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
 		if len(roots) == 0 {
@@ -257,17 +259,15 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 
 	sg := d.SyncgroupForId(sgId)
 
-	info := wire.SyncgroupMemberInfo{SyncPriority: 8}
 	if err := sg.Create(ctx, spec, info); err != nil {
 		return fmt.Errorf("{%q, %v} sg.Create() failed: %v", syncbaseName, sgId, err)
 	}
 	return nil
 }
 
-func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id) error {
+func joinSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, info wire.SyncgroupMemberInfo) error {
 	d := syncbase.NewService(sbNameLocal).DatabaseForId(testDb, nil)
 	sg := d.SyncgroupForId(sgId)
-	info := wire.SyncgroupMemberInfo{SyncPriority: 10}
 	if _, err := sg.Join(ctx, sbNameRemote, nil, info); err != nil {
 		return fmt.Errorf("{%q, %q} sg.Join() failed: %v", sbNameRemote, sgId, err)
 	}

@@ -325,11 +325,12 @@ func setupCRTest(t *testing.T, sh *v23test.Shell, numInitRows int, devMode bool)
 	sgId = wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	// Create syncgroup and populate data on s0.
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, "c", "", nil, clBlessings(sbs),
+		wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, numInitRows))
 
 	// Join syncgroup and verify data on s1.
-	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId))
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, numInitRows))
 
 	return sbs[0].clientCtx, sbs[1].clientCtx, sbs[0].sbName, sgId

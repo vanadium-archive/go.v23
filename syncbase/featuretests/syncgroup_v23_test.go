@@ -34,7 +34,8 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -77,7 +78,8 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 	sbName := sbs[N].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -126,7 +128,8 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	// multiple admins on the neighborhood.
 	//
 	// TODO(hpucha): Change it to multi-admin scenario.
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable", nil, clBlessings(sbs)))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable",
+		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -198,7 +201,7 @@ func runSyncWorkload(ctx *context.T, syncbaseName, sbName string, sgId wire.Id, 
 	var err error
 	for i := 0; i < 8; i++ {
 		time.Sleep(500 * time.Millisecond)
-		if err = joinSyncgroup(ctx, syncbaseName, sbName, sgId); err == nil {
+		if err = joinSyncgroup(ctx, syncbaseName, sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}); err == nil {
 			break
 		}
 	}
@@ -235,8 +238,9 @@ func verifySync(ctx *context.T, syncbaseName string, numSyncbases int, prefix st
 }
 
 func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgId wire.Id, sgColls, mtName, clbps string) error {
-	if err := joinSyncgroup(ctx, sbNameLocal, sbNameRemote, sgId); err == nil {
+	if err := joinSyncgroup(ctx, sbNameLocal, sbNameRemote, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}); err == nil {
 		return nil
 	}
-	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName, nil, clbps)
+	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName,
+		nil, clbps, wire.SyncgroupMemberInfo{SyncPriority: 8})
 }

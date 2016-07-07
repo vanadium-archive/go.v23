@@ -103,8 +103,8 @@ type SyncgroupMemberInfo struct {
 
 // Types of device for blob ownership priority.  Blobs tend to migrate to lower BlobDevType* values.
 const (
-	BlobDevTypeServer = int32(0) // Blobs migrate toward servers, which store them.  (example: server in cloud)
-	BlobDevTypeNormal = int32(1) // Ordinary devices (example: laptop)
+	BlobDevTypeNormal = int32(0) // Ordinary devices (example: laptop); uses 0 value because that's the default.
+	BlobDevTypeServer = int32(1) // Blobs migrate toward servers, which store them.  (example: server in cloud)
 	BlobDevTypeLeaf   = int32(2) // Blobs migrate from leaves, which have less storage (examples: a camera, phone)
 )
 
