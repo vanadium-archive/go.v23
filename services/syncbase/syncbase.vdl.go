@@ -19,7 +19,15 @@
 // - Valid Collection permissions tags are Admin, Read, Write.
 // - Valid Syncgroup permissions tags are Admin, Read.
 // Other tags are not allowed and are reserved for future use.
-// TODO(ivanpi): Add and implement other security notes.
+// Unless stated otherwise, each permissions tag requirement on a method also
+// implies requiring Resolve on all levels of hierarchy up to, but excluding,
+// the level requiring the tag.
+// TODO(ivanpi): Implemented on Exists, implement elsewhere.
+// ErrNoAccess, Err[No]Exist, ErrUnknownBatch are only returned if the caller
+// is allowed to call Exists on the receiver of the RPC (or the first missing
+// component of the hierarchy to the receiver); otherwise, the returned error
+// is ErrNoExistOrNoAccess.
+// TODO(ivanpi): Implement.
 package syncbase
 
 import (
@@ -5441,8 +5449,9 @@ type DatabaseClientMethods interface {
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, ...rpc.CallOpt) error
-	// Exists returns true only if this Database exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Database exists.
+	// Requires: at least one tag on Database, or Read or Write on Service.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
 	// ListCollections returns an unsorted list of all Collection ids that the
 	// caller is allowed to see.
@@ -5740,8 +5749,9 @@ type DatabaseServerMethods interface {
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, rpc.ServerCall) error
-	// Exists returns true only if this Database exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Database exists.
+	// Requires: at least one tag on Database, or Read or Write on Service.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns an unsorted list of all Collection ids that the
 	// caller is allowed to see.
@@ -5893,8 +5903,9 @@ type DatabaseServerStubMethods interface {
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(*context.T, rpc.ServerCall) error
-	// Exists returns true only if this Database exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Database exists.
+	// Requires: at least one tag on Database, or Read or Write on Service.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
 	// ListCollections returns an unsorted list of all Collection ids that the
 	// caller is allowed to see.
@@ -6062,11 +6073,10 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Database exists. Insufficient permissions\n// cause Exists to return false instead of an error.",
+			Doc:  "// Exists returns true only if this Database exists.\n// Requires: at least one tag on Database, or Read or Write on Service.\n// Otherwise, ErrNoExistOrNoAccess is returned.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 		{
 			Name: "ListCollections",
@@ -6184,12 +6194,11 @@ type CollectionClientMethods interface {
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
-	// Exists returns true only if this Collection exists. Insufficient
-	// permissions cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
-	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
-	// on Collection.
+	// Exists returns true only if this Collection exists.
+	// Requires: at least one tag on Collection, or Read or Write on Database.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
+	// If Database does not exist, returned value is identical to
+	// Database.Exists().
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (access.Permissions, error)
@@ -6342,12 +6351,11 @@ type CollectionServerMethods interface {
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
-	// Exists returns true only if this Collection exists. Insufficient
-	// permissions cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
-	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
-	// on Collection.
+	// Exists returns true only if this Collection exists.
+	// Requires: at least one tag on Collection, or Read or Write on Database.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
+	// If Database does not exist, returned value is identical to
+	// Database.Exists().
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
@@ -6376,12 +6384,11 @@ type CollectionServerStubMethods interface {
 	// Destroy destroys this Collection, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
-	// Exists returns true only if this Collection exists. Insufficient
-	// permissions cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
-	// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid
-	// on Collection.
+	// Exists returns true only if this Collection exists.
+	// Requires: at least one tag on Collection, or Read or Write on Database.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
+	// If Database does not exist, returned value is identical to
+	// Database.Exists().
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
@@ -6492,14 +6499,13 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Collection exists. Insufficient\n// permissions cause Exists to return false instead of an error.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.\n// TODO(ivanpi): Temporarily set to Read access because Resolve is now invalid\n// on Collection.",
+			Doc:  "// Exists returns true only if this Collection exists.\n// Requires: at least one tag on Collection, or Read or Write on Database.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Database does not exist, returned value is identical to\n// Database.Exists().",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "GetPermissions",
@@ -6593,13 +6599,14 @@ func (s implCollectionScanServerCallSend) Send(item KeyValue) error {
 // Row represents a single row in a Collection.
 // All access checks are performed against the Collection ACL.
 type RowClientMethods interface {
-	// Exists returns true only if this Row exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	// Note, Exists on Row requires read permissions, unlike higher levels of
-	// hierarchy which require resolve, because Row existence usually carries
-	// more information.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
+	// Exists returns true only if this Row exists.
+	// Requires: Read or Write on Collection.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
+	// If Collection does not exist, returned value is identical to
+	// Collection.Exists().
+	// Note, write methods on Row do not leak information whether the Row existed
+	// before, but Write is sufficient to call Exists. Therefore, Read protects
+	// Row data and listing, but not Row existence.
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
 	Get(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (*vom.RawBytes, error)
@@ -6650,13 +6657,14 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 BatchHandle, opts ...rpc.Ca
 // Row represents a single row in a Collection.
 // All access checks are performed against the Collection ACL.
 type RowServerMethods interface {
-	// Exists returns true only if this Row exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
-	// Note, Exists on Row requires read permissions, unlike higher levels of
-	// hierarchy which require resolve, because Row existence usually carries
-	// more information.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
+	// Exists returns true only if this Row exists.
+	// Requires: Read or Write on Collection.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
+	// If Collection does not exist, returned value is identical to
+	// Collection.Exists().
+	// Note, write methods on Row do not leak information whether the Row existed
+	// before, but Write is sufficient to call Exists. Therefore, Read protects
+	// Row data and listing, but not Row existence.
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// Get returns the value for this Row.
 	Get(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (*vom.RawBytes, error)
@@ -6736,14 +6744,13 @@ var descRow = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Row exists. Insufficient permissions\n// cause Exists to return false instead of an error.\n// Note, Exists on Row requires read permissions, unlike higher levels of\n// hierarchy which require resolve, because Row existence usually carries\n// more information.\n// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy\n// do not exist.",
+			Doc:  "// Exists returns true only if this Row exists.\n// Requires: Read or Write on Collection.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Collection does not exist, returned value is identical to\n// Collection.Exists().\n// Note, write methods on Row do not leak information whether the Row existed\n// before, but Write is sufficient to call Exists. Therefore, Read protects\n// Row data and listing, but not Row existence.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Get",

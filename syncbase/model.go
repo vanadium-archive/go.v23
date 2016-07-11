@@ -115,8 +115,9 @@ type Database interface {
 	// TODO(sadovsky): Specify what happens to syncgroups.
 	Destroy(ctx *context.T) error
 
-	// Exists returns true only if this Database exists. Insufficient permissions
-	// cause Exists to return false instead of an error.
+	// Exists returns true only if this Database exists.
+	// Requires: at least one tag on Database, or Read or Write on Service.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(ctx *context.T) (bool, error)
 
 	// BeginBatch creates a new batch. Instead of calling this function directly,
@@ -228,10 +229,9 @@ type Collection interface {
 	// FullName returns the object name (encoded) of this Collection.
 	FullName() string
 
-	// Exists returns true only if this Collection exists. Insufficient
-	// permissions cause Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
+	// Exists returns true only if this Collection exists.
+	// Requires: at least one tag on Collection, or Read or Write on Database.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(ctx *context.T) (bool, error)
 
 	// Create creates this Collection.
@@ -301,10 +301,9 @@ type Row interface {
 	// FullName returns the object name (encoded) of this Row.
 	FullName() string
 
-	// Exists returns true only if this Row exists. Insufficient permissions cause
-	// Exists to return false instead of an error.
-	// TODO(ivanpi): Exists may fail with an error if higher levels of hierarchy
-	// do not exist.
+	// Exists returns true only if this Row exists.
+	// Requires: Read or Write on Collection.
+	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(ctx *context.T) (bool, error)
 
 	// Get loads the value stored in this Row into the given value. If the given
