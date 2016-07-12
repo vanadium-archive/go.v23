@@ -54,7 +54,8 @@ func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 			}
 			ids = append(ids, id)
 		case *naming.GlobReplyError:
-			// TODO(sadovsky): Surface these errors somehow.
+			// Glob for a layer is currently all-or-nothing, so we fail on error.
+			return nil, v.Value.Error
 		}
 	}
 	SortIds(ids)

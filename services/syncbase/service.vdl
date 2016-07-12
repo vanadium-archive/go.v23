@@ -19,7 +19,7 @@
 // Unless stated otherwise, each permissions tag requirement on a method also
 // implies requiring Resolve on all levels of hierarchy up to, but excluding,
 // the level requiring the tag.
-// TODO(ivanpi): Implemented on Exists, implement elsewhere.
+// TODO(ivanpi): Implement on SyncgroupManager methods.
 // ErrNoAccess, Err[No]Exist, ErrUnknownBatch are only returned if the caller
 // is allowed to call Exists on the receiver of the RPC (or the first missing
 // component of the hierarchy to the receiver); otherwise, the returned error
@@ -51,36 +51,48 @@ const (
 // RPC methods if the --dev flag is not set.
 
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids.
+// Service.Glob operates over Database ids, requiring Read on Service.
 type Service interface {
 	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
 	// clock daemon state based on the specified options.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeUpdateVClock(uco DevModeUpdateVClockOpts) error {access.Admin}
 
 	// DevModeGetTime returns the current time per the Syncbase clock.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeGetTime() (time.Time | error) {access.Admin}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Service.
 	permissions.Object
 }
 
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids.
+// Database.Glob operates over Collection ids, requiring Read on Database.
 type Database interface {
 	// Create creates this Database. Permissions must be non-nil and include at
 	// least one admin.
-	// Create requires the caller to have Write permission at the Service.
+	//
+	// Requires: Write on Service.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Database's id. This requirement is waived for Admin on Service.
 	Create(metadata ?SchemaMetadata, perms access.Permissions) error {access.Write}
 
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
-	Destroy() error {access.Write}
+	//
+	// Requires: Admin on Database or Service.
+	Destroy() error {access.Admin}
 
 	// Exists returns true only if this Database exists.
+	//
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists() (bool | error)
@@ -92,17 +104,20 @@ type Database interface {
 	// visible in a new snapshot of the Database, ignoring user batches.
 	// (Note that the same issue is present in glob on Collection, where Scan can
 	// be used instead if batch awareness is required.)
-	// Note, the glob client library checks Resolve access on every component
-	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
-	// for other RPCs.
-	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
+	//
+	// Requires: Read on Database.
 	ListCollections(bh BatchHandle) ([]Id | error) {access.Read}
 
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
-	Exec(bh BatchHandle, query string, params []any) stream<_, []any> error {access.Read}
+	//
+	// Requires: Read and/or Write on Collection, depending on the query:
+	// - Read for select
+	// - Read and Write for delete
+	// TODO(ivanpi): Write should suffice for delete without v in WHERE clause.
+	Exec(bh BatchHandle, query string, params []any) stream<_, []any> error
 
 	// BeginBatch creates a new batch. It returns a batch handle to pass in when
 	// calling batch-aware RPCs.
@@ -112,30 +127,48 @@ type Database interface {
 	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
 	// 'opts' once v.io/i/912 is resolved for Java.
-	BeginBatch(bo BatchOptions) (BatchHandle | error) {access.Read}
+	//
+	// Requires: at least one tag on Database.
+	BeginBatch(bo BatchOptions) (BatchHandle | error)
 
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
 	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
-	Commit(bh BatchHandle) error {access.Read}
+	//
+	// Requires: at least one tag on Database.
+	// Also verifies that any changes to data and ACLs are allowed for the caller,
+	// since the batch is signed by the committer. Since only the final value for
+	// each key is committed and synced, changes to data need to be allowed by
+	// the ACL before or after the batch. Specifically, adding Write permission,
+	// changing a value based on it, then removing Write permission within a batch
+	// is not allowed because it cannot be verified by remote peers.
+	Commit(bh BatchHandle) error
 
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
-	Abort(bh BatchHandle) error {access.Read}
+	//
+	// Requires: at least one tag on Database.
+	Abort(bh BatchHandle) error
 
 	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
 	// sync of subsequent writes, will be disabled until ResumeSync is called.
 	// PauseSync is idempotent.
-	PauseSync() error {access.Write}
+	//
+	// Requires: Admin on Database.
+	PauseSync() error {access.Admin}
 
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
-	ResumeSync() error {access.Write}
+	//
+	// Requires: Admin on Database.
+	ResumeSync() error {access.Admin}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Database.
 	permissions.Object
 
 	// DatabaseWatcher implements the API to watch for updates in the database.
@@ -159,17 +192,25 @@ type Database interface {
 }
 
 // Collection represents a set of Rows.
-// Collection.Glob operates over keys of Rows in the Collection.
+// Collection.Glob operates over keys of Rows in the Collection, requiring Read
+// on Collection.
 type Collection interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
+	//
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Collection's id.
 	Create(bh BatchHandle, perms access.Permissions) error {access.Write}
 
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// TODO(sadovsky): Specify what happens to syncgroups.
-	Destroy(bh BatchHandle) error {access.Write}
+	//
+	// Requires: Admin on Collection or on Database.
+	// TODO(ivanpi): Prevent for synced Collections.
+	Destroy(bh BatchHandle) error {access.Admin}
 
 	// Exists returns true only if this Collection exists.
+	//
 	// Requires: at least one tag on Collection, or Read or Write on Database.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Database does not exist, returned value is identical to
@@ -177,14 +218,20 @@ type Collection interface {
 	Exists(bh BatchHandle) (bool | error)
 
 	// GetPermissions returns the current Permissions for the Collection.
+	//
+	// Requires: Admin on Collection.
 	GetPermissions(bh BatchHandle) (access.Permissions | error) {access.Admin}
 
 	// SetPermissions replaces the current Permissions for the Collection.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Collection.
 	SetPermissions(bh BatchHandle, perms access.Permissions) error {access.Admin}
 
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
+	//
+	// Requires: Write on Collection.
 	DeleteRange(bh BatchHandle, start, limit []byte) error {access.Write}
 
 	// Scan returns all rows in the given half-open range [start, limit). If limit
@@ -192,6 +239,8 @@ type Collection interface {
 	// Concurrency semantics are documented in model.go.
 	// Note, we use []byte rather than string for start and limit because they
 	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
+	//
+	// Requires: Read on Collection.
 	Scan(bh BatchHandle, start, limit []byte) stream<_, KeyValue> error {access.Read}
 }
 
@@ -199,6 +248,7 @@ type Collection interface {
 // All access checks are performed against the Collection ACL.
 type Row interface {
 	// Exists returns true only if this Row exists.
+	//
 	// Requires: Read or Write on Collection.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Collection does not exist, returned value is identical to
@@ -209,12 +259,18 @@ type Row interface {
 	Exists(bh BatchHandle) (bool | error)
 
 	// Get returns the value for this Row.
+	//
+	// Requires: Read on Collection.
 	Get(bh BatchHandle) (any | error) {access.Read}
 
 	// Put writes the given value for this Row.
+	//
+	// Requires: Write on Collection.
 	Put(bh BatchHandle, value any) error {access.Write}
 
 	// Delete deletes this Row.
+	//
+	// Requires: Write on Collection.
 	Delete(bh BatchHandle) error {access.Write}
 }
 
@@ -291,13 +347,13 @@ type SyncgroupManager interface {
 type SchemaManager interface {
 	// GetSchemaMetadata retrieves schema metadata for this database.
 	//
-	// Requires: Client must have at least Read access on the Database.
+	// Requires: Read on Database.
 	GetSchemaMetadata() (SchemaMetadata | error) {access.Read}
 
 	// SetSchemaMetadata stores schema metadata for this database.
 	//
-	// Requires: Client must have at least Write access on the Database.
-	SetSchemaMetadata(metadata SchemaMetadata) error {access.Write}
+	// Requires: Admin on Database.
+	SetSchemaMetadata(metadata SchemaMetadata) error {access.Admin}
 }
 
 // ConflictManager interface provides all the methods necessary to handle
@@ -321,7 +377,9 @@ type ConflictManager interface {
 	// the batch sent for conflict resolution will be {key1, key2, key3}.
 	// If there was another concurrent batch {key2, key4}, then the batch sent
 	// for conflict resolution will be {key1, key2, key3, key4}.
-	StartConflictResolver() stream<ResolutionInfo, ConflictInfo> error {access.Write}
+	//
+	// Requires: Admin on Database.
+	StartConflictResolver() stream<ResolutionInfo, ConflictInfo> error {access.Admin}
 }
 
 // BlobManager is the interface for blob operations.
@@ -336,40 +394,60 @@ type ConflictManager interface {
 //   after commit.
 type BlobManager interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
+	//
+	// Requires: Write on Database.
 	CreateBlob() (br BlobRef | error) {access.Write}
 
 	// PutBlob appends the byte stream to the blob.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PutBlob(br BlobRef) stream<[]byte, _> error {access.Write}
 
 	// CommitBlob marks the blob as immutable.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	CommitBlob(br BlobRef) error {access.Write}
 
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
-	GetBlobSize(br BlobRef) (int64 | error) {access.Read}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	GetBlobSize(br BlobRef) (int64 | error)
 
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
-	DeleteBlob(br BlobRef) error {access.Write}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	DeleteBlob(br BlobRef) error
 
 	// GetBlob returns the byte stream from a committed blob starting at offset.
-	GetBlob(br BlobRef, offset int64) stream<_, []byte> error {access.Read}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	GetBlob(br BlobRef, offset int64) stream<_, []byte> error
 
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
-	FetchBlob(br BlobRef, priority uint64) stream<_, BlobFetchStatus> error {access.Read}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	FetchBlob(br BlobRef, priority uint64) stream<_, BlobFetchStatus> error
 
 	// PinBlob locally pins the blob so that it is not evicted.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PinBlob(br BlobRef) error {access.Write}
 
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
-	UnpinBlob(br BlobRef) error {access.Write}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	UnpinBlob(br BlobRef) error
 
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
-	KeepBlob(br BlobRef, rank uint64) error {access.Write}
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
+	KeepBlob(br BlobRef, rank uint64) error
 
 	// TODO(hpucha): Clarify how to pick priority and rank. Add API for
 	// efficient blob cloning. Options include: (1) CloneBlob RPC with an
@@ -405,7 +483,9 @@ type BlobManager interface {
 // - "" for the initial root entity update
 // The Value field is a StoreChange.
 // If the client has no access to a row specified in a change, that change is
-// excluded from the result stream.
+// excluded from the result stream. Collection updates are always sent and can
+// be used to determine that access to a collection is denied, potentially
+// skipping rows.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict
@@ -414,10 +494,14 @@ type BlobManager interface {
 type DatabaseWatcher interface {
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
-	GetResumeMarker(bh BatchHandle) (watch.ResumeMarker | error) {access.Read}
+	//
+	// Requires: at least one tag on Database.
+	GetResumeMarker(bh BatchHandle) (watch.ResumeMarker | error)
 
 	// WatchPatterns returns a stream of changes that match any of the specified
 	// patterns. At least one pattern must be specified.
+	//
+	// Requires: Read on Database.
 	WatchPatterns(resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) stream<_, watch.Change> error {access.Read}
 
 	watch.GlobWatcher

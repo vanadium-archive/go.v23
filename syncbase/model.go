@@ -10,6 +10,9 @@ package syncbase
 //   <encCxId> is encode(<cxId>), where <cxId> is <userBlessing>,<cxName>
 // (Note that blessing strings cannot contain ",".)
 
+// Refer to v.io/v23/services/syncbase/service.vdl for the access control policy
+// specification.
+
 // NOTE(sadovsky): Various methods below may end up needing additional options.
 // One can add options to a Go method in a backwards-compatible way by making
 // the method variadic.
@@ -240,7 +243,7 @@ type Collection interface {
 	Create(ctx *context.T, perms access.Permissions) error
 
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// TODO(sadovsky): Specify what happens to syncgroups.
+	// TODO(ivanpi): Prevent for synced Collections.
 	Destroy(ctx *context.T) error
 
 	// GetPermissions returns the current Permissions for the Collection.

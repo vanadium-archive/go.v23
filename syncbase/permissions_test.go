@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"v.io/v23"
 	"v.io/v23/context"
@@ -28,6 +29,10 @@ type serviceTest struct {
 
 type databaseTest struct {
 	f func(ctx *context.T, d syncbase.Database) error
+}
+
+type batchDatabaseTest struct {
+	f func(ctx *context.T, b syncbase.BatchDatabase) error
 }
 
 type collectionTest struct {
@@ -68,6 +73,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		}},
 		name:     "service.DevModeUpdateVClock",
 		patterns: []string{"A___"},
+		mutating: true,
 	},
 	{
 		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
@@ -85,6 +91,14 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"A___"},
 		mutating: true,
 	},
+	{
+		layer: serviceTest{f: func(ctx *context.T, s syncbase.Service) error {
+			_, err := s.ListDatabases(ctx)
+			return err
+		}},
+		name:     "service.ListDatabases",
+		patterns: []string{"R___"},
+	},
 
 	// Database tests.
 	{
@@ -100,7 +114,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return d.Destroy(ctx)
 		}},
 		name:     "database.Destroy",
-		patterns: []string{"_W__"},
+		patterns: []string{"XA__", "A___"},
 		mutating: true,
 	},
 	{
@@ -110,7 +124,6 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		}},
 		name:     "database.Exists",
 		patterns: []string{"XX__", "XR__", "XW__", "XA__", "R___", "W___"},
-		mutating: false,
 	},
 	{
 		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
@@ -118,18 +131,152 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "database.GetPermissions",
-		patterns: []string{"_A__"},
+		patterns: []string{"XA__"},
 	},
 	{
 		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
 			return d.SetPermissions(ctx, tu.DefaultPerms(wire.AllDatabaseTags, "root"), "")
 		}},
 		name:     "database.SetPermissions",
-		patterns: []string{"_A__"},
+		patterns: []string{"XA__"},
+		mutating: true,
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := d.ListCollections(ctx)
+			return err
+		}},
+		name:     "database.ListCollections",
+		patterns: []string{"XR__"},
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			ws := d.Watch(ctx, nil, []wire.CollectionRowPattern{util.RowPrefixPattern(wire.Id{"u", "c"}, "")})
+			ws.Advance()
+			return ws.Err()
+		}},
+		name:     "database.Watch",
+		patterns: []string{"XR__"},
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := d.BeginBatch(ctx, wire.BatchOptions{})
+			return err
+		}},
+		name:     "database.BeginBatch",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := d.GetResumeMarker(ctx)
+			return err
+		}},
+		name:     "database.GetResumeMarker",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+	},
+	// TODO(ivanpi): Test Exec.
+	// TODO(ivanpi): Test RPC-only methods such as Glob.
+
+	// Batch database tests.
+	{
+		layer: batchDatabaseTest{f: func(ctx *context.T, b syncbase.BatchDatabase) error {
+			return b.Commit(ctx)
+		}},
+		name:     "database.Commit",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
+	},
+	{
+		layer: batchDatabaseTest{f: func(ctx *context.T, b syncbase.BatchDatabase) error {
+			return b.Abort(ctx)
+		}},
+		name:     "database.Abort",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+	},
+
+	// Conflict resolver tests.
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := wire.DatabaseClient(d.FullName()).GetSchemaMetadata(ctx)
+			if verror.ErrorID(err) == verror.ErrNoExist.ID {
+				return nil
+			}
+			return err
+		}},
+		name:     "database.GetSchemaMetadata",
+		patterns: []string{"XR__"},
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return wire.DatabaseClient(d.FullName()).SetSchemaMetadata(ctx, wire.SchemaMetadata{})
+		}},
+		name:     "database.SetSchemaMetadata",
+		patterns: []string{"XA__"},
+		mutating: true,
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return wire.DatabaseClient(d.FullName()).PauseSync(ctx)
+		}},
+		name:     "database.PauseSync",
+		patterns: []string{"XA__"},
+		mutating: true,
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return wire.DatabaseClient(d.FullName()).ResumeSync(ctx)
+		}},
+		name:     "database.ResumeSync",
+		patterns: []string{"XA__"},
+		mutating: true,
+	},
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			s, err := wire.DatabaseClient(d.FullName()).StartConflictResolver(ctx)
+			if err != nil {
+				return err
+			}
+			go s.RecvStream().Advance()
+			<-time.After(1 * time.Second)
+			return s.RecvStream().Err()
+		}},
+		name:     "database.StartConflictResolver",
+		patterns: []string{"XA__"},
 		mutating: true,
 	},
 
+	// Blob manager tests.
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := d.CreateBlob(ctx)
+			return err
+		}},
+		name:     "database.CreateBlob",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	// TODO(ivanpi): Test other blob RPCs.
+
+	// Syncgroup manager tests.
+	// TODO(ivanpi): Add.
+
 	// Collection tests.
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			return d.CollectionForId(wire.Id{"root", "cNew"}).Create(ctx, tu.DefaultPerms(wire.AllCollectionTags, "root"))
+		}},
+		name:     "collection.Create",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	{
+		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+			return c.Destroy(ctx)
+		}},
+		name:     "collection.Destroy",
+		patterns: []string{"XXA_", "XA__"},
+		mutating: true,
+	},
 	{
 		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
 			_, err := c.Exists(ctx)
@@ -137,7 +284,6 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		}},
 		name:     "collection.Exists",
 		patterns: []string{"XXR_", "XXW_", "XXA_", "XR__", "XW__"},
-		mutating: false,
 	},
 	{
 		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
@@ -145,8 +291,34 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return err
 		}},
 		name:     "collection.GetPermissions",
-		patterns: []string{"__A_"},
+		patterns: []string{"XXA_"},
 	},
+	{
+		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+			return c.SetPermissions(ctx, tu.DefaultPerms(wire.AllCollectionTags, "root"))
+		}},
+		name:     "collection.SetPermissions",
+		patterns: []string{"XXA_"},
+		mutating: true,
+	},
+	{
+		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+			ss := c.Scan(ctx, syncbase.Prefix(""))
+			ss.Advance()
+			return ss.Err()
+		}},
+		name:     "collection.Scan",
+		patterns: []string{"XXR_"},
+	},
+	{
+		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+			return c.DeleteRange(ctx, syncbase.Prefix(""))
+		}},
+		name:     "collection.DeleteRange",
+		patterns: []string{"XXW_"},
+		mutating: true,
+	},
+	// TODO(ivanpi): Test RPC-only methods such as Glob.
 
 	// Row tests.
 	{
@@ -156,7 +328,6 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		}},
 		name:     "row.Exists",
 		patterns: []string{"XXR_", "XXW_"},
-		mutating: false,
 	},
 	{
 		layer: rowTest{f: func(ctx *context.T, r syncbase.Row) error {
@@ -164,7 +335,24 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			return r.Get(ctx, &value)
 		}},
 		name:     "row.Get",
-		patterns: []string{"__R_"},
+		patterns: []string{"XXR_"},
+	},
+	{
+		layer: rowTest{f: func(ctx *context.T, r syncbase.Row) error {
+			value := "NCC-1701-D"
+			return r.Put(ctx, &value)
+		}},
+		name:     "row.Put",
+		patterns: []string{"XXW_"},
+		mutating: true,
+	},
+	{
+		layer: rowTest{f: func(ctx *context.T, r syncbase.Row) error {
+			return r.Delete(ctx)
+		}},
+		name:     "row.Delete",
+		patterns: []string{"XXW_"},
+		mutating: true,
 	},
 }
 
@@ -312,10 +500,18 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 			err = layer.f(clientCtx, s)
 		case databaseTest:
 			err = layer.f(clientCtx, d)
+		case batchDatabaseTest:
+			b, bErr := d.BeginBatch(adminCtx, wire.BatchOptions{})
+			if bErr != nil {
+				tu.Fatalf(t, "d.BeginBatch failed: %v", bErr)
+			}
+			err = layer.f(clientCtx, b)
 		case collectionTest:
 			err = layer.f(clientCtx, c)
 		case rowTest:
 			err = layer.f(clientCtx, r)
+		default:
+			tu.Fatal(t, "unknown test type")
 		}
 		if expectSuccess && err != nil {
 			tu.Fatalf(t, "test %v failed with non-nil error: %v", test, err)
@@ -667,7 +863,7 @@ func TestPermsValidation(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(nil)
 	defer cleanup()
 	s := syncbase.NewService(sName)
-	rd := tu.CreateDatabase(t, ctx, s, "anchor")
+	rd := tu.CreateDatabase(t, ctx, s, "anchor", nil)
 	rc := tu.CreateCollection(t, ctx, rd, "anchor")
 	rsg := tu.CreateSyncgroup(t, ctx, rd, rc, "anchor", "anchor syncgroup")
 

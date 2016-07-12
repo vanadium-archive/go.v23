@@ -20,7 +20,7 @@ import (
 func TestCreateSyncgroup(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
 	defer cleanup()
-	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d", nil)
 
 	// Check if create fails with empty spec.
 	spec := wire.SyncgroupSpec{}
@@ -91,10 +91,11 @@ func TestCreateSyncgroup(t *testing.T) {
 // join it.
 func TestJoinSyncgroup(t *testing.T) {
 	// Create client1-server pair.
-	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("o:app:client1", "server", tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client1"))
+	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("o:app:client1", "server",
+		tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client1").Add("root:o:app:client2", string(access.Resolve)))
 	defer cleanup()
 
-	d1 := tu.CreateDatabase(t, ctx1, syncbase.NewService(sName), "d")
+	d1 := tu.CreateDatabase(t, ctx1, syncbase.NewService(sName), "d", nil)
 	c := tu.CreateCollection(t, ctx1, d1, "c")
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
@@ -118,12 +119,12 @@ func TestJoinSyncgroup(t *testing.T) {
 
 	// Client1 gives access to client2.
 	if err := d1.SetPermissions(ctx1, tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client1", "root:o:app:client2"), ""); err != nil {
-		t.Fatalf("d.SetPermissions() failed: %v", err)
+		t.Fatalf("d1.SetPermissions() failed: %v", err)
 	}
 
 	// Verify client2 has access.
 	if err := d2.SetPermissions(ctx2, tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client1", "root:o:app:client2"), ""); err != nil {
-		t.Fatalf("d.SetPermissions() failed: %v", err)
+		t.Fatalf("d2.SetPermissions() failed: %v", err)
 	}
 
 	// Check that client2's join still fails since the SG ACL disallows access.
@@ -154,7 +155,7 @@ func TestJoinSyncgroup(t *testing.T) {
 func TestSetSpecSyncgroup(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
 	defer cleanup()
-	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d")
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d", nil)
 	c := tu.CreateCollection(t, ctx, d, "c")
 
 	// Create successfully.

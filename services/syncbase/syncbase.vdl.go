@@ -22,7 +22,7 @@
 // Unless stated otherwise, each permissions tag requirement on a method also
 // implies requiring Resolve on all levels of hierarchy up to, but excluding,
 // the level requiring the tag.
-// TODO(ivanpi): Implemented on Exists, implement elsewhere.
+// TODO(ivanpi): Implement on SyncgroupManager methods.
 // ErrNoAccess, Err[No]Exist, ErrUnknownBatch are only returned if the caller
 // is allowed to call Exists on the receiver of the RPC (or the first missing
 // component of the hierarchy to the receiver); otherwise, the returned error
@@ -3227,7 +3227,7 @@ func NewErrInferDefaultPermsFailed(ctx *context.T, entity string, id string) err
 // containing Service methods.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids.
+// Service.Glob operates over Database ids, requiring Read on Service.
 type ServiceClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -3276,10 +3276,14 @@ type ServiceClientMethods interface {
 	permissions.ObjectClientMethods
 	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
 	// clock daemon state based on the specified options.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeUpdateVClock(_ *context.T, uco DevModeUpdateVClockOpts, _ ...rpc.CallOpt) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 }
 
@@ -3314,7 +3318,7 @@ func (c implServiceClientStub) DevModeGetTime(ctx *context.T, opts ...rpc.CallOp
 // implements for Service.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids.
+// Service.Glob operates over Database ids, requiring Read on Service.
 type ServiceServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -3363,10 +3367,14 @@ type ServiceServerMethods interface {
 	permissions.ObjectServerMethods
 	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
 	// clock daemon state based on the specified options.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeUpdateVClock(_ *context.T, _ rpc.ServerCall, uco DevModeUpdateVClockOpts) error
 	// DevModeGetTime returns the current time per the Syncbase clock.
-	// Requires --dev flag to be set (in addition to Admin check).
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
 	DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
 }
 
@@ -3430,14 +3438,14 @@ var ServiceDesc rpc.InterfaceDesc = descService
 var descService = rpc.InterfaceDesc{
 	Name:    "Service",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over Database ids.",
+	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over Database ids, requiring Read on Service.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "DevModeUpdateVClock",
-			Doc:  "// DevModeUpdateVClock updates various bits of Syncbase virtual clock and\n// clock daemon state based on the specified options.\n// Requires --dev flag to be set (in addition to Admin check).",
+			Doc:  "// DevModeUpdateVClock updates various bits of Syncbase virtual clock and\n// clock daemon state based on the specified options.\n//\n// Requires: Admin on Service.\n// Also requires --dev flag to be set.",
 			InArgs: []rpc.ArgDesc{
 				{"uco", ``}, // DevModeUpdateVClockOpts
 			},
@@ -3445,7 +3453,7 @@ var descService = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DevModeGetTime",
-			Doc:  "// DevModeGetTime returns the current time per the Syncbase clock.\n// Requires --dev flag to be set (in addition to Admin check).",
+			Doc:  "// DevModeGetTime returns the current time per the Syncbase clock.\n//\n// Requires: Admin on Service.\n// Also requires --dev flag to be set.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // time.Time
 			},
@@ -3479,7 +3487,9 @@ var descService = rpc.InterfaceDesc{
 // - "" for the initial root entity update
 // The Value field is a StoreChange.
 // If the client has no access to a row specified in a change, that change is
-// excluded from the result stream.
+// excluded from the result stream. Collection updates are always sent and can
+// be used to determine that access to a collection is denied, potentially
+// skipping rows.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict
@@ -3491,9 +3501,13 @@ type DatabaseWatcherClientMethods interface {
 	watch.GlobWatcherClientMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
+	//
+	// Requires: at least one tag on Database.
 	GetResumeMarker(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (watch.ResumeMarker, error)
 	// WatchPatterns returns a stream of changes that match any of the specified
 	// patterns. At least one pattern must be specified.
+	//
+	// Requires: Read on Database.
 	WatchPatterns(_ *context.T, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern, _ ...rpc.CallOpt) (DatabaseWatcherWatchPatternsClientCall, error)
 }
 
@@ -3622,7 +3636,9 @@ func (c *implDatabaseWatcherWatchPatternsClientCall) Finish() (err error) {
 // - "" for the initial root entity update
 // The Value field is a StoreChange.
 // If the client has no access to a row specified in a change, that change is
-// excluded from the result stream.
+// excluded from the result stream. Collection updates are always sent and can
+// be used to determine that access to a collection is denied, potentially
+// skipping rows.
 //
 // Note: A single Watch Change batch may contain changes from more than one
 // batch as originally committed on a remote Syncbase or obtained from conflict
@@ -3634,9 +3650,13 @@ type DatabaseWatcherServerMethods interface {
 	watch.GlobWatcherServerMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
+	//
+	// Requires: at least one tag on Database.
 	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
 	// WatchPatterns returns a stream of changes that match any of the specified
 	// patterns. At least one pattern must be specified.
+	//
+	// Requires: Read on Database.
 	WatchPatterns(_ *context.T, _ DatabaseWatcherWatchPatternsServerCall, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) error
 }
 
@@ -3650,9 +3670,13 @@ type DatabaseWatcherServerStubMethods interface {
 	watch.GlobWatcherServerStubMethods
 	// GetResumeMarker returns the ResumeMarker that points to the current end
 	// of the event log. GetResumeMarker() can be called on a batch.
+	//
+	// Requires: at least one tag on Database.
 	GetResumeMarker(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (watch.ResumeMarker, error)
 	// WatchPatterns returns a stream of changes that match any of the specified
 	// patterns. At least one pattern must be specified.
+	//
+	// Requires: Read on Database.
 	WatchPatterns(_ *context.T, _ *DatabaseWatcherWatchPatternsServerCallStub, resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) error
 }
 
@@ -3710,25 +3734,24 @@ var DatabaseWatcherDesc rpc.InterfaceDesc = descDatabaseWatcher
 var descDatabaseWatcher = rpc.InterfaceDesc{
 	Name:    "DatabaseWatcher",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
+	Doc:     "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream. Collection updates are always sent and can\n// be used to determine that access to a collection is denied, potentially\n// skipping rows.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch.",
 	Embeds: []rpc.EmbedDesc{
 		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "GetResumeMarker",
-			Doc:  "// GetResumeMarker returns the ResumeMarker that points to the current end\n// of the event log. GetResumeMarker() can be called on a batch.",
+			Doc:  "// GetResumeMarker returns the ResumeMarker that points to the current end\n// of the event log. GetResumeMarker() can be called on a batch.\n//\n// Requires: at least one tag on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // watch.ResumeMarker
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "WatchPatterns",
-			Doc:  "// WatchPatterns returns a stream of changes that match any of the specified\n// patterns. At least one pattern must be specified.",
+			Doc:  "// WatchPatterns returns a stream of changes that match any of the specified\n// patterns. At least one pattern must be specified.\n//\n// Requires: Read on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"resumeMarker", ``}, // watch.ResumeMarker
 				{"patterns", ``},     // []CollectionRowPattern
@@ -4153,30 +4176,50 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 //   after commit.
 type BlobManagerClientMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
+	//
+	// Requires: Write on Database.
 	CreateBlob(*context.T, ...rpc.CallOpt) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PutBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (BlobManagerPutBlobClientCall, error)
 	// CommitBlob marks the blob as immutable.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	CommitBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlobSize(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	DeleteBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlob(_ *context.T, br BlobRef, offset int64, _ ...rpc.CallOpt) (BlobManagerGetBlobClientCall, error)
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	FetchBlob(_ *context.T, br BlobRef, priority uint64, _ ...rpc.CallOpt) (BlobManagerFetchBlobClientCall, error)
 	// PinBlob locally pins the blob so that it is not evicted.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	UnpinBlob(_ *context.T, br BlobRef, _ ...rpc.CallOpt) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	KeepBlob(_ *context.T, br BlobRef, rank uint64, _ ...rpc.CallOpt) error
 }
 
@@ -4472,30 +4515,50 @@ func (c *implBlobManagerFetchBlobClientCall) Finish() (err error) {
 //   after commit.
 type BlobManagerServerMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
+	//
+	// Requires: Write on Database.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PutBlob(_ *context.T, _ BlobManagerPutBlobServerCall, br BlobRef) error
 	// CommitBlob marks the blob as immutable.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlob(_ *context.T, _ BlobManagerGetBlobServerCall, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	FetchBlob(_ *context.T, _ BlobManagerFetchBlobServerCall, br BlobRef, priority uint64) error
 	// PinBlob locally pins the blob so that it is not evicted.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
 }
 
@@ -4505,30 +4568,50 @@ type BlobManagerServerMethods interface {
 // is the streaming methods.
 type BlobManagerServerStubMethods interface {
 	// CreateBlob returns a BlobRef for a newly created blob.
+	//
+	// Requires: Write on Database.
 	CreateBlob(*context.T, rpc.ServerCall) (br BlobRef, _ error)
 	// PutBlob appends the byte stream to the blob.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PutBlob(_ *context.T, _ *BlobManagerPutBlobServerCallStub, br BlobRef) error
 	// CommitBlob marks the blob as immutable.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	CommitBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlobSize returns the count of bytes written as part of the blob
 	// (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlobSize(_ *context.T, _ rpc.ServerCall, br BlobRef) (int64, error)
 	// DeleteBlob locally deletes the blob (committed or uncommitted).
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	DeleteBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// GetBlob returns the byte stream from a committed blob starting at offset.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	GetBlob(_ *context.T, _ *BlobManagerGetBlobServerCallStub, br BlobRef, offset int64) error
 	// FetchBlob initiates fetching a blob if not locally found. priority
 	// controls the network priority of the blob. Higher priority blobs are
 	// fetched before the lower priority ones. However, an ongoing blob
 	// transfer is not interrupted. Status updates are streamed back to the
 	// client as fetch is in progress.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	FetchBlob(_ *context.T, _ *BlobManagerFetchBlobServerCallStub, br BlobRef, priority uint64) error
 	// PinBlob locally pins the blob so that it is not evicted.
+	//
+	// Requires: Write on Database and valid BlobRef.
 	PinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// UnpinBlob locally unpins the blob so that it can be evicted if needed.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	UnpinBlob(_ *context.T, _ rpc.ServerCall, br BlobRef) error
 	// KeepBlob locally caches the blob with the specified rank. Lower
 	// ranked blobs are more eagerly evicted.
+	//
+	// Requires: at least one tag on Database and valid BlobRef.
 	KeepBlob(_ *context.T, _ rpc.ServerCall, br BlobRef, rank uint64) error
 }
 
@@ -4620,7 +4703,7 @@ var descBlobManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "CreateBlob",
-			Doc:  "// CreateBlob returns a BlobRef for a newly created blob.",
+			Doc:  "// CreateBlob returns a BlobRef for a newly created blob.\n//\n// Requires: Write on Database.",
 			OutArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
@@ -4628,7 +4711,7 @@ var descBlobManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "PutBlob",
-			Doc:  "// PutBlob appends the byte stream to the blob.",
+			Doc:  "// PutBlob appends the byte stream to the blob.\n//\n// Requires: Write on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
@@ -4636,7 +4719,7 @@ var descBlobManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "CommitBlob",
-			Doc:  "// CommitBlob marks the blob as immutable.",
+			Doc:  "// CommitBlob marks the blob as immutable.\n//\n// Requires: Write on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
@@ -4644,44 +4727,40 @@ var descBlobManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetBlobSize",
-			Doc:  "// GetBlobSize returns the count of bytes written as part of the blob\n// (committed or uncommitted).",
+			Doc:  "// GetBlobSize returns the count of bytes written as part of the blob\n// (committed or uncommitted).\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // int64
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "DeleteBlob",
-			Doc:  "// DeleteBlob locally deletes the blob (committed or uncommitted).",
+			Doc:  "// DeleteBlob locally deletes the blob (committed or uncommitted).\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "GetBlob",
-			Doc:  "// GetBlob returns the byte stream from a committed blob starting at offset.",
+			Doc:  "// GetBlob returns the byte stream from a committed blob starting at offset.\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``},     // BlobRef
 				{"offset", ``}, // int64
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "FetchBlob",
-			Doc:  "// FetchBlob initiates fetching a blob if not locally found. priority\n// controls the network priority of the blob. Higher priority blobs are\n// fetched before the lower priority ones. However, an ongoing blob\n// transfer is not interrupted. Status updates are streamed back to the\n// client as fetch is in progress.",
+			Doc:  "// FetchBlob initiates fetching a blob if not locally found. priority\n// controls the network priority of the blob. Higher priority blobs are\n// fetched before the lower priority ones. However, an ongoing blob\n// transfer is not interrupted. Status updates are streamed back to the\n// client as fetch is in progress.\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``},       // BlobRef
 				{"priority", ``}, // uint64
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "PinBlob",
-			Doc:  "// PinBlob locally pins the blob so that it is not evicted.",
+			Doc:  "// PinBlob locally pins the blob so that it is not evicted.\n//\n// Requires: Write on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
@@ -4689,20 +4768,18 @@ var descBlobManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "UnpinBlob",
-			Doc:  "// UnpinBlob locally unpins the blob so that it can be evicted if needed.",
+			Doc:  "// UnpinBlob locally unpins the blob so that it can be evicted if needed.\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``}, // BlobRef
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "KeepBlob",
-			Doc:  "// KeepBlob locally caches the blob with the specified rank. Lower\n// ranked blobs are more eagerly evicted.",
+			Doc:  "// KeepBlob locally caches the blob with the specified rank. Lower\n// ranked blobs are more eagerly evicted.\n//\n// Requires: at least one tag on Database and valid BlobRef.",
 			InArgs: []rpc.ArgDesc{
 				{"br", ``},   // BlobRef
 				{"rank", ``}, // uint64
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},
 }
@@ -4863,11 +4940,11 @@ func (s implBlobManagerFetchBlobServerCallSend) Send(item BlobFetchStatus) error
 type SchemaManagerClientMethods interface {
 	// GetSchemaMetadata retrieves schema metadata for this database.
 	//
-	// Requires: Client must have at least Read access on the Database.
+	// Requires: Read on Database.
 	GetSchemaMetadata(*context.T, ...rpc.CallOpt) (SchemaMetadata, error)
 	// SetSchemaMetadata stores schema metadata for this database.
 	//
-	// Requires: Client must have at least Write access on the Database.
+	// Requires: Admin on Database.
 	SetSchemaMetadata(_ *context.T, metadata SchemaMetadata, _ ...rpc.CallOpt) error
 }
 
@@ -4904,11 +4981,11 @@ func (c implSchemaManagerClientStub) SetSchemaMetadata(ctx *context.T, i0 Schema
 type SchemaManagerServerMethods interface {
 	// GetSchemaMetadata retrieves schema metadata for this database.
 	//
-	// Requires: Client must have at least Read access on the Database.
+	// Requires: Read on Database.
 	GetSchemaMetadata(*context.T, rpc.ServerCall) (SchemaMetadata, error)
 	// SetSchemaMetadata stores schema metadata for this database.
 	//
-	// Requires: Client must have at least Write access on the Database.
+	// Requires: Admin on Database.
 	SetSchemaMetadata(_ *context.T, _ rpc.ServerCall, metadata SchemaMetadata) error
 }
 
@@ -4974,7 +5051,7 @@ var descSchemaManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "GetSchemaMetadata",
-			Doc:  "// GetSchemaMetadata retrieves schema metadata for this database.\n//\n// Requires: Client must have at least Read access on the Database.",
+			Doc:  "// GetSchemaMetadata retrieves schema metadata for this database.\n//\n// Requires: Read on Database.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // SchemaMetadata
 			},
@@ -4982,11 +5059,11 @@ var descSchemaManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "SetSchemaMetadata",
-			Doc:  "// SetSchemaMetadata stores schema metadata for this database.\n//\n// Requires: Client must have at least Write access on the Database.",
+			Doc:  "// SetSchemaMetadata stores schema metadata for this database.\n//\n// Requires: Admin on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"metadata", ``}, // SchemaMetadata
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }
@@ -5015,6 +5092,8 @@ type ConflictManagerClientMethods interface {
 	// the batch sent for conflict resolution will be {key1, key2, key3}.
 	// If there was another concurrent batch {key2, key4}, then the batch sent
 	// for conflict resolution will be {key1, key2, key3, key4}.
+	//
+	// Requires: Admin on Database.
 	StartConflictResolver(*context.T, ...rpc.CallOpt) (ConflictManagerStartConflictResolverClientCall, error)
 }
 
@@ -5169,6 +5248,8 @@ type ConflictManagerServerMethods interface {
 	// the batch sent for conflict resolution will be {key1, key2, key3}.
 	// If there was another concurrent batch {key2, key4}, then the batch sent
 	// for conflict resolution will be {key1, key2, key3, key4}.
+	//
+	// Requires: Admin on Database.
 	StartConflictResolver(*context.T, ConflictManagerStartConflictResolverServerCall) error
 }
 
@@ -5195,6 +5276,8 @@ type ConflictManagerServerStubMethods interface {
 	// the batch sent for conflict resolution will be {key1, key2, key3}.
 	// If there was another concurrent batch {key2, key4}, then the batch sent
 	// for conflict resolution will be {key1, key2, key3, key4}.
+	//
+	// Requires: Admin on Database.
 	StartConflictResolver(*context.T, *ConflictManagerStartConflictResolverServerCallStub) error
 }
 
@@ -5250,8 +5333,8 @@ var descConflictManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "StartConflictResolver",
-			Doc:  "// StartConflictResolver registers a resolver for the database that is\n// associated with this ConflictManager and creates a stream to receive\n// conflicts and send resolutions.\n// Batches of ConflictInfos will be sent over with the Continued field\n// within the ConflictInfo representing the batch boundary. Client must\n// respond with a batch of ResolutionInfos in the same fashion.\n// A key is under conflict if two different values were written to it\n// concurrently (in logical time), i.e. neither value is an ancestor of the\n// other in the history graph.\n// A key under conflict can be a part of a batch committed on local or\n// remote or both syncbases. ConflictInfos for all keys in these two batches\n// are grouped together. These keys may themselves be under conflict; the\n// presented batch is a transitive closure of all batches containing keys\n// under conflict.\n// For example, for local batch {key1, key2} and remote batch {key1, key3},\n// the batch sent for conflict resolution will be {key1, key2, key3}.\n// If there was another concurrent batch {key2, key4}, then the batch sent\n// for conflict resolution will be {key1, key2, key3, key4}.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Doc:  "// StartConflictResolver registers a resolver for the database that is\n// associated with this ConflictManager and creates a stream to receive\n// conflicts and send resolutions.\n// Batches of ConflictInfos will be sent over with the Continued field\n// within the ConflictInfo representing the batch boundary. Client must\n// respond with a batch of ResolutionInfos in the same fashion.\n// A key is under conflict if two different values were written to it\n// concurrently (in logical time), i.e. neither value is an ancestor of the\n// other in the history graph.\n// A key under conflict can be a part of a batch committed on local or\n// remote or both syncbases. ConflictInfos for all keys in these two batches\n// are grouped together. These keys may themselves be under conflict; the\n// presented batch is a transitive closure of all batches containing keys\n// under conflict.\n// For example, for local batch {key1, key2} and remote batch {key1, key3},\n// the batch sent for conflict resolution will be {key1, key2, key3}.\n// If there was another concurrent batch {key2, key4}, then the batch sent\n// for conflict resolution will be {key1, key2, key3, key4}.\n//\n// Requires: Admin on Database.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }
@@ -5346,7 +5429,7 @@ func (s implConflictManagerStartConflictResolverServerCallSend) Send(item Confli
 //
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids.
+// Database.Glob operates over Collection ids, requiring Read on Database.
 type DatabaseClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -5415,7 +5498,9 @@ type DatabaseClientMethods interface {
 	// - "" for the initial root entity update
 	// The Value field is a StoreChange.
 	// If the client has no access to a row specified in a change, that change is
-	// excluded from the result stream.
+	// excluded from the result stream. Collection updates are always sent and can
+	// be used to determine that access to a collection is denied, potentially
+	// skipping rows.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5444,12 +5529,18 @@ type DatabaseClientMethods interface {
 	ConflictManagerClientMethods
 	// Create creates this Database. Permissions must be non-nil and include at
 	// least one admin.
-	// Create requires the caller to have Write permission at the Service.
+	//
+	// Requires: Write on Service.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Database's id. This requirement is waived for Admin on Service.
 	Create(_ *context.T, metadata *SchemaMetadata, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Database or Service.
 	Destroy(*context.T, ...rpc.CallOpt) error
 	// Exists returns true only if this Database exists.
+	//
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
@@ -5460,15 +5551,18 @@ type DatabaseClientMethods interface {
 	// visible in a new snapshot of the Database, ignoring user batches.
 	// (Note that the same issue is present in glob on Collection, where Scan can
 	// be used instead if batch awareness is required.)
-	// Note, the glob client library checks Resolve access on every component
-	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
-	// for other RPCs.
-	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
+	//
+	// Requires: Read on Database.
 	ListCollections(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
+	//
+	// Requires: Read and/or Write on Collection, depending on the query:
+	// - Read for select
+	// - Read and Write for delete
+	// TODO(ivanpi): Write should suffice for delete without v in WHERE clause.
 	Exec(_ *context.T, bh BatchHandle, query string, params []*vom.RawBytes, _ ...rpc.CallOpt) (DatabaseExecClientCall, error)
 	// BeginBatch creates a new batch. It returns a batch handle to pass in when
 	// calling batch-aware RPCs.
@@ -5478,22 +5572,38 @@ type DatabaseClientMethods interface {
 	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
 	// 'opts' once v.io/i/912 is resolved for Java.
+	//
+	// Requires: at least one tag on Database.
 	BeginBatch(_ *context.T, bo BatchOptions, _ ...rpc.CallOpt) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
 	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
+	// Also verifies that any changes to data and ACLs are allowed for the caller,
+	// since the batch is signed by the committer. Since only the final value for
+	// each key is committed and synced, changes to data need to be allowed by
+	// the ACL before or after the batch. Specifically, adding Write permission,
+	// changing a value based on it, then removing Write permission within a batch
+	// is not allowed because it cannot be verified by remote peers.
 	Commit(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
 	Abort(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
 	// sync of subsequent writes, will be disabled until ResumeSync is called.
 	// PauseSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	PauseSync(*context.T, ...rpc.CallOpt) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	ResumeSync(*context.T, ...rpc.CallOpt) error
 }
 
@@ -5646,7 +5756,7 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 //
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids.
+// Database.Glob operates over Collection ids, requiring Read on Database.
 type DatabaseServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -5715,7 +5825,9 @@ type DatabaseServerMethods interface {
 	// - "" for the initial root entity update
 	// The Value field is a StoreChange.
 	// If the client has no access to a row specified in a change, that change is
-	// excluded from the result stream.
+	// excluded from the result stream. Collection updates are always sent and can
+	// be used to determine that access to a collection is denied, potentially
+	// skipping rows.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5744,12 +5856,18 @@ type DatabaseServerMethods interface {
 	ConflictManagerServerMethods
 	// Create creates this Database. Permissions must be non-nil and include at
 	// least one admin.
-	// Create requires the caller to have Write permission at the Service.
+	//
+	// Requires: Write on Service.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Database's id. This requirement is waived for Admin on Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Database or Service.
 	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists.
+	//
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
@@ -5760,15 +5878,18 @@ type DatabaseServerMethods interface {
 	// visible in a new snapshot of the Database, ignoring user batches.
 	// (Note that the same issue is present in glob on Collection, where Scan can
 	// be used instead if batch awareness is required.)
-	// Note, the glob client library checks Resolve access on every component
-	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
-	// for other RPCs.
-	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
+	//
+	// Requires: Read on Database.
 	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
+	//
+	// Requires: Read and/or Write on Collection, depending on the query:
+	// - Read for select
+	// - Read and Write for delete
+	// TODO(ivanpi): Write should suffice for delete without v in WHERE clause.
 	Exec(_ *context.T, _ DatabaseExecServerCall, bh BatchHandle, query string, params []*vom.RawBytes) error
 	// BeginBatch creates a new batch. It returns a batch handle to pass in when
 	// calling batch-aware RPCs.
@@ -5778,22 +5899,38 @@ type DatabaseServerMethods interface {
 	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
 	// 'opts' once v.io/i/912 is resolved for Java.
+	//
+	// Requires: at least one tag on Database.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
 	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
+	// Also verifies that any changes to data and ACLs are allowed for the caller,
+	// since the batch is signed by the committer. Since only the final value for
+	// each key is committed and synced, changes to data need to be allowed by
+	// the ACL before or after the batch. Specifically, adding Write permission,
+	// changing a value based on it, then removing Write permission within a batch
+	// is not allowed because it cannot be verified by remote peers.
 	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
 	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
 	// sync of subsequent writes, will be disabled until ResumeSync is called.
 	// PauseSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	PauseSync(*context.T, rpc.ServerCall) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	ResumeSync(*context.T, rpc.ServerCall) error
 }
 
@@ -5869,7 +6006,9 @@ type DatabaseServerStubMethods interface {
 	// - "" for the initial root entity update
 	// The Value field is a StoreChange.
 	// If the client has no access to a row specified in a change, that change is
-	// excluded from the result stream.
+	// excluded from the result stream. Collection updates are always sent and can
+	// be used to determine that access to a collection is denied, potentially
+	// skipping rows.
 	//
 	// Note: A single Watch Change batch may contain changes from more than one
 	// batch as originally committed on a remote Syncbase or obtained from conflict
@@ -5898,12 +6037,18 @@ type DatabaseServerStubMethods interface {
 	ConflictManagerServerStubMethods
 	// Create creates this Database. Permissions must be non-nil and include at
 	// least one admin.
-	// Create requires the caller to have Write permission at the Service.
+	//
+	// Requires: Write on Service.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Database's id. This requirement is waived for Admin on Service.
 	Create(_ *context.T, _ rpc.ServerCall, metadata *SchemaMetadata, perms access.Permissions) error
 	// Destroy destroys this Database, permanently removing all of its data.
 	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Database or Service.
 	Destroy(*context.T, rpc.ServerCall) error
 	// Exists returns true only if this Database exists.
+	//
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
@@ -5914,15 +6059,18 @@ type DatabaseServerStubMethods interface {
 	// visible in a new snapshot of the Database, ignoring user batches.
 	// (Note that the same issue is present in glob on Collection, where Scan can
 	// be used instead if batch awareness is required.)
-	// Note, the glob client library checks Resolve access on every component
-	// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen
-	// for other RPCs.
-	// TODO(ivanpi): Resolve should be checked on all RPCs.
 	// TODO(sadovsky): Maybe switch to streaming RPC.
+	//
+	// Requires: Read on Database.
 	ListCollections(_ *context.T, _ rpc.ServerCall, bh BatchHandle) ([]Id, error)
 	// Exec executes a syncQL query with positional parameters and returns all
 	// results as specified by the query's select/delete statement.
 	// Concurrency semantics are documented in model.go.
+	//
+	// Requires: Read and/or Write on Collection, depending on the query:
+	// - Read for select
+	// - Read and Write for delete
+	// TODO(ivanpi): Write should suffice for delete without v in WHERE clause.
 	Exec(_ *context.T, _ *DatabaseExecServerCallStub, bh BatchHandle, query string, params []*vom.RawBytes) error
 	// BeginBatch creates a new batch. It returns a batch handle to pass in when
 	// calling batch-aware RPCs.
@@ -5932,22 +6080,38 @@ type DatabaseServerStubMethods interface {
 	// a batch. Note that glob RPCs are not batch-aware.
 	// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to
 	// 'opts' once v.io/i/912 is resolved for Java.
+	//
+	// Requires: at least one tag on Database.
 	BeginBatch(_ *context.T, _ rpc.ServerCall, bo BatchOptions) (BatchHandle, error)
 	// Commit persists the pending changes to the database.
 	// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()
 	// should be used instead.
 	// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
+	// Also verifies that any changes to data and ACLs are allowed for the caller,
+	// since the batch is signed by the committer. Since only the final value for
+	// each key is committed and synced, changes to data need to be allowed by
+	// the ACL before or after the batch. Specifically, adding Write permission,
+	// changing a value based on it, then removing Write permission within a batch
+	// is not allowed because it cannot be verified by remote peers.
 	Commit(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.
+	//
+	// Requires: at least one tag on Database.
 	Abort(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// PauseSync pauses sync for this database. Incoming sync, as well as outgoing
 	// sync of subsequent writes, will be disabled until ResumeSync is called.
 	// PauseSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	PauseSync(*context.T, rpc.ServerCall) error
 	// ResumeSync resumes sync for this database. ResumeSync is idempotent.
+	//
+	// Requires: Admin on Database.
 	ResumeSync(*context.T, rpc.ServerCall) error
 }
 
@@ -6047,10 +6211,10 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids.",
+	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids, requiring Read on Database.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
-		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
+		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream. Collection updates are always sent and can\n// be used to determine that access to a collection is denied, potentially\n// skipping rows.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
 		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
@@ -6059,7 +6223,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Database. Permissions must be non-nil and include at\n// least one admin.\n// Create requires the caller to have Write permission at the Service.",
+			Doc:  "// Create creates this Database. Permissions must be non-nil and include at\n// least one admin.\n//\n// Requires: Write on Service.\n// Also requires the creator's blessing to match the pattern in the newly\n// created Database's id. This requirement is waived for Admin on Service.",
 			InArgs: []rpc.ArgDesc{
 				{"metadata", ``}, // *SchemaMetadata
 				{"perms", ``},    // access.Permissions
@@ -6068,19 +6232,19 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Destroy",
-			Doc:  "// Destroy destroys this Database, permanently removing all of its data.\n// TODO(sadovsky): Specify what happens to syncgroups.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Doc:  "// Destroy destroys this Database, permanently removing all of its data.\n// TODO(sadovsky): Specify what happens to syncgroups.\n//\n// Requires: Admin on Database or Service.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Database exists.\n// Requires: at least one tag on Database, or Read or Write on Service.\n// Otherwise, ErrNoExistOrNoAccess is returned.",
+			Doc:  "// Exists returns true only if this Database exists.\n//\n// Requires: at least one tag on Database, or Read or Write on Service.\n// Otherwise, ErrNoExistOrNoAccess is returned.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns an unsorted list of all Collection ids that the\n// caller is allowed to see.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// Note, the glob client library checks Resolve access on every component\n// along the path (by doing a Dispatcher.Lookup), whereas this doesn't happen\n// for other RPCs.\n// TODO(ivanpi): Resolve should be checked on all RPCs.\n// TODO(sadovsky): Maybe switch to streaming RPC.",
+			Doc:  "// ListCollections returns an unsorted list of all Collection ids that the\n// caller is allowed to see.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// TODO(sadovsky): Maybe switch to streaming RPC.\n//\n// Requires: Read on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6091,50 +6255,46 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Exec",
-			Doc:  "// Exec executes a syncQL query with positional parameters and returns all\n// results as specified by the query's select/delete statement.\n// Concurrency semantics are documented in model.go.",
+			Doc:  "// Exec executes a syncQL query with positional parameters and returns all\n// results as specified by the query's select/delete statement.\n// Concurrency semantics are documented in model.go.\n//\n// Requires: Read and/or Write on Collection, depending on the query:\n// - Read for select\n// - Read and Write for delete\n// TODO(ivanpi): Write should suffice for delete without v in WHERE clause.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},     // BatchHandle
 				{"query", ``},  // string
 				{"params", ``}, // []*vom.RawBytes
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns a batch handle to pass in when\n// calling batch-aware RPCs.\n// Concurrency semantics are documented in model.go.\n// All batch-aware RPCs can also be called outside a batch (with an empty\n// handle), with the exception of Commit and Abort which only make sense on\n// a batch. Note that glob RPCs are not batch-aware.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to\n// 'opts' once v.io/i/912 is resolved for Java.",
+			Doc:  "// BeginBatch creates a new batch. It returns a batch handle to pass in when\n// calling batch-aware RPCs.\n// Concurrency semantics are documented in model.go.\n// All batch-aware RPCs can also be called outside a batch (with an empty\n// handle), with the exception of Commit and Abort which only make sense on\n// a batch. Note that glob RPCs are not batch-aware.\n// TODO(sadovsky): Maybe make BatchOptions optional. Also, rename 'bo' to\n// 'opts' once v.io/i/912 is resolved for Java.\n//\n// Requires: at least one tag on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // BatchHandle
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Commit",
-			Doc:  "// Commit persists the pending changes to the database.\n// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()\n// should be used instead.\n// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.",
+			Doc:  "// Commit persists the pending changes to the database.\n// If the batch is readonly, Commit() will fail with ErrReadOnlyBatch; Abort()\n// should be used instead.\n// If the BatchHandle is empty, Commit() will fail with ErrNotBoundToBatch.\n//\n// Requires: at least one tag on Database.\n// Also verifies that any changes to data and ACLs are allowed for the caller,\n// since the batch is signed by the committer. Since only the final value for\n// each key is committed and synced, changes to data need to be allowed by\n// the ACL before or after the batch. Specifically, adding Write permission,\n// changing a value based on it, then removing Write permission within a batch\n// is not allowed because it cannot be verified by remote peers.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Abort",
-			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.",
+			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If the BatchHandle is empty, Abort() will fail with ErrNotBoundToBatch.\n//\n// Requires: at least one tag on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "PauseSync",
-			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as outgoing\n// sync of subsequent writes, will be disabled until ResumeSync is called.\n// PauseSync is idempotent.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Doc:  "// PauseSync pauses sync for this database. Incoming sync, as well as outgoing\n// sync of subsequent writes, will be disabled until ResumeSync is called.\n// PauseSync is idempotent.\n//\n// Requires: Admin on Database.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "ResumeSync",
-			Doc:  "// ResumeSync resumes sync for this database. ResumeSync is idempotent.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Doc:  "// ResumeSync resumes sync for this database. ResumeSync is idempotent.\n//\n// Requires: Admin on Database.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }
@@ -6186,33 +6346,49 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 // containing Collection methods.
 //
 // Collection represents a set of Rows.
-// Collection.Glob operates over keys of Rows in the Collection.
+// Collection.Glob operates over keys of Rows in the Collection, requiring Read
+// on Collection.
 type CollectionClientMethods interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
+	//
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Collection's id.
 	Create(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Collection or on Database.
+	// TODO(ivanpi): Prevent for synced Collections.
 	Destroy(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 	// Exists returns true only if this Collection exists.
+	//
 	// Requires: at least one tag on Collection, or Read or Write on Database.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Database does not exist, returned value is identical to
 	// Database.Exists().
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
+	//
+	// Requires: Admin on Collection.
 	GetPermissions(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Collection.
 	SetPermissions(_ *context.T, bh BatchHandle, perms access.Permissions, _ ...rpc.CallOpt) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
+	//
+	// Requires: Write on Collection.
 	DeleteRange(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
 	// Note, we use []byte rather than string for start and limit because they
 	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
+	//
+	// Requires: Read on Collection.
 	Scan(_ *context.T, bh BatchHandle, start []byte, limit []byte, _ ...rpc.CallOpt) (CollectionScanClientCall, error)
 }
 
@@ -6343,33 +6519,49 @@ func (c *implCollectionScanClientCall) Finish() (err error) {
 // implements for Collection.
 //
 // Collection represents a set of Rows.
-// Collection.Glob operates over keys of Rows in the Collection.
+// Collection.Glob operates over keys of Rows in the Collection, requiring Read
+// on Collection.
 type CollectionServerMethods interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
+	//
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Collection's id.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Collection or on Database.
+	// TODO(ivanpi): Prevent for synced Collections.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists.
+	//
 	// Requires: at least one tag on Collection, or Read or Write on Database.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Database does not exist, returned value is identical to
 	// Database.Exists().
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
+	//
+	// Requires: Admin on Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Collection.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
+	//
+	// Requires: Write on Collection.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
 	// Note, we use []byte rather than string for start and limit because they
 	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
+	//
+	// Requires: Read on Collection.
 	Scan(_ *context.T, _ CollectionScanServerCall, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -6380,29 +6572,44 @@ type CollectionServerMethods interface {
 type CollectionServerStubMethods interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
+	//
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created Collection's id.
 	Create(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// Destroy destroys this Collection, permanently removing all of its data.
-	// TODO(sadovsky): Specify what happens to syncgroups.
+	//
+	// Requires: Admin on Collection or on Database.
+	// TODO(ivanpi): Prevent for synced Collections.
 	Destroy(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 	// Exists returns true only if this Collection exists.
+	//
 	// Requires: at least one tag on Collection, or Read or Write on Database.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Database does not exist, returned value is identical to
 	// Database.Exists().
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// GetPermissions returns the current Permissions for the Collection.
+	//
+	// Requires: Admin on Collection.
 	GetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (access.Permissions, error)
 	// SetPermissions replaces the current Permissions for the Collection.
 	// Permissions must include at least one admin.
+	//
+	// Requires: Admin on Collection.
 	SetPermissions(_ *context.T, _ rpc.ServerCall, bh BatchHandle, perms access.Permissions) error
 	// DeleteRange deletes all rows in the given half-open range [start, limit).
 	// If limit is "", all rows with keys >= start are included.
+	//
+	// Requires: Write on Collection.
 	DeleteRange(_ *context.T, _ rpc.ServerCall, bh BatchHandle, start []byte, limit []byte) error
 	// Scan returns all rows in the given half-open range [start, limit). If limit
 	// is "", all rows with keys >= start are included.
 	// Concurrency semantics are documented in model.go.
 	// Note, we use []byte rather than string for start and limit because they
 	// need not be valid UTF-8; VDL expects strings to be valid UTF-8.
+	//
+	// Requires: Read on Collection.
 	Scan(_ *context.T, _ *CollectionScanServerCallStub, bh BatchHandle, start []byte, limit []byte) error
 }
 
@@ -6478,11 +6685,11 @@ var CollectionDesc rpc.InterfaceDesc = descCollection
 var descCollection = rpc.InterfaceDesc{
 	Name:    "Collection",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Collection represents a set of Rows.\n// Collection.Glob operates over keys of Rows in the Collection.",
+	Doc:     "// Collection represents a set of Rows.\n// Collection.Glob operates over keys of Rows in the Collection, requiring Read\n// on Collection.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Collection. Permissions must be non-nil and include at\n// least one admin.",
+			Doc:  "// Create creates this Collection. Permissions must be non-nil and include at\n// least one admin.\n//\n// Requires: Write on Database.\n// Also requires the creator's blessing to match the pattern in the newly\n// created Collection's id.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
@@ -6491,15 +6698,15 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Destroy",
-			Doc:  "// Destroy destroys this Collection, permanently removing all of its data.\n// TODO(sadovsky): Specify what happens to syncgroups.",
+			Doc:  "// Destroy destroys this Collection, permanently removing all of its data.\n//\n// Requires: Admin on Collection or on Database.\n// TODO(ivanpi): Prevent for synced Collections.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Collection exists.\n// Requires: at least one tag on Collection, or Read or Write on Database.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Database does not exist, returned value is identical to\n// Database.Exists().",
+			Doc:  "// Exists returns true only if this Collection exists.\n//\n// Requires: at least one tag on Collection, or Read or Write on Database.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Database does not exist, returned value is identical to\n// Database.Exists().",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6509,7 +6716,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetPermissions",
-			Doc:  "// GetPermissions returns the current Permissions for the Collection.",
+			Doc:  "// GetPermissions returns the current Permissions for the Collection.\n//\n// Requires: Admin on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6520,7 +6727,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "SetPermissions",
-			Doc:  "// SetPermissions replaces the current Permissions for the Collection.\n// Permissions must include at least one admin.",
+			Doc:  "// SetPermissions replaces the current Permissions for the Collection.\n// Permissions must include at least one admin.\n//\n// Requires: Admin on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"perms", ``}, // access.Permissions
@@ -6529,7 +6736,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "DeleteRange",
-			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.",
+			Doc:  "// DeleteRange deletes all rows in the given half-open range [start, limit).\n// If limit is \"\", all rows with keys >= start are included.\n//\n// Requires: Write on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte
@@ -6539,7 +6746,7 @@ var descCollection = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Scan",
-			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included.\n// Concurrency semantics are documented in model.go.\n// Note, we use []byte rather than string for start and limit because they\n// need not be valid UTF-8; VDL expects strings to be valid UTF-8.",
+			Doc:  "// Scan returns all rows in the given half-open range [start, limit). If limit\n// is \"\", all rows with keys >= start are included.\n// Concurrency semantics are documented in model.go.\n// Note, we use []byte rather than string for start and limit because they\n// need not be valid UTF-8; VDL expects strings to be valid UTF-8.\n//\n// Requires: Read on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"start", ``}, // []byte
@@ -6600,6 +6807,7 @@ func (s implCollectionScanServerCallSend) Send(item KeyValue) error {
 // All access checks are performed against the Collection ACL.
 type RowClientMethods interface {
 	// Exists returns true only if this Row exists.
+	//
 	// Requires: Read or Write on Collection.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Collection does not exist, returned value is identical to
@@ -6609,10 +6817,16 @@ type RowClientMethods interface {
 	// Row data and listing, but not Row existence.
 	Exists(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (bool, error)
 	// Get returns the value for this Row.
+	//
+	// Requires: Read on Collection.
 	Get(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) (*vom.RawBytes, error)
 	// Put writes the given value for this Row.
+	//
+	// Requires: Write on Collection.
 	Put(_ *context.T, bh BatchHandle, value *vom.RawBytes, _ ...rpc.CallOpt) error
 	// Delete deletes this Row.
+	//
+	// Requires: Write on Collection.
 	Delete(_ *context.T, bh BatchHandle, _ ...rpc.CallOpt) error
 }
 
@@ -6658,6 +6872,7 @@ func (c implRowClientStub) Delete(ctx *context.T, i0 BatchHandle, opts ...rpc.Ca
 // All access checks are performed against the Collection ACL.
 type RowServerMethods interface {
 	// Exists returns true only if this Row exists.
+	//
 	// Requires: Read or Write on Collection.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	// If Collection does not exist, returned value is identical to
@@ -6667,10 +6882,16 @@ type RowServerMethods interface {
 	// Row data and listing, but not Row existence.
 	Exists(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (bool, error)
 	// Get returns the value for this Row.
+	//
+	// Requires: Read on Collection.
 	Get(_ *context.T, _ rpc.ServerCall, bh BatchHandle) (*vom.RawBytes, error)
 	// Put writes the given value for this Row.
+	//
+	// Requires: Write on Collection.
 	Put(_ *context.T, _ rpc.ServerCall, bh BatchHandle, value *vom.RawBytes) error
 	// Delete deletes this Row.
+	//
+	// Requires: Write on Collection.
 	Delete(_ *context.T, _ rpc.ServerCall, bh BatchHandle) error
 }
 
@@ -6744,7 +6965,7 @@ var descRow = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Exists",
-			Doc:  "// Exists returns true only if this Row exists.\n// Requires: Read or Write on Collection.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Collection does not exist, returned value is identical to\n// Collection.Exists().\n// Note, write methods on Row do not leak information whether the Row existed\n// before, but Write is sufficient to call Exists. Therefore, Read protects\n// Row data and listing, but not Row existence.",
+			Doc:  "// Exists returns true only if this Row exists.\n//\n// Requires: Read or Write on Collection.\n// Otherwise, ErrNoExistOrNoAccess is returned.\n// If Collection does not exist, returned value is identical to\n// Collection.Exists().\n// Note, write methods on Row do not leak information whether the Row existed\n// before, but Write is sufficient to call Exists. Therefore, Read protects\n// Row data and listing, but not Row existence.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6754,7 +6975,7 @@ var descRow = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Get",
-			Doc:  "// Get returns the value for this Row.",
+			Doc:  "// Get returns the value for this Row.\n//\n// Requires: Read on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6765,7 +6986,7 @@ var descRow = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Put",
-			Doc:  "// Put writes the given value for this Row.",
+			Doc:  "// Put writes the given value for this Row.\n//\n// Requires: Write on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``},    // BatchHandle
 				{"value", ``}, // *vom.RawBytes
@@ -6774,7 +6995,7 @@ var descRow = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Delete",
-			Doc:  "// Delete deletes this Row.",
+			Doc:  "// Delete deletes this Row.\n//\n// Requires: Write on Collection.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
