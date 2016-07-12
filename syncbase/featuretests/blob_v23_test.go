@@ -24,14 +24,13 @@ func TestV23BlobWholeTransfer(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2, false)
+	sbs := setupSyncbases(t, sh, 2, false, false)
 
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs),
-		wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
 		wire.SyncgroupMemberInfo{SyncPriority: 10}))
 	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
@@ -69,15 +68,14 @@ func TestV23ServerBlobFetch(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2, false)
+	sbs := setupSyncbases(t, sh, 2, false, false)
 
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
 	// sbs[0] is not a server.
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs),
-		wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	// sbs[1] is a server, so will fetch blobs automatically; it joins the syncgroup.
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
 		wire.SyncgroupMemberInfo{SyncPriority: 10, BlobDevType: byte(wire.BlobDevTypeServer)}))

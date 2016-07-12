@@ -53,7 +53,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 
 	for iter := 0; iter < b.N; iter++ {
 		// Setup *numSync Syncbases.
-		sbs := setupSyncbases(b, sh, *numSync, false)
+		sbs := setupSyncbases(b, sh, *numSync, false, false)
 
 		// Setup *numGroup Syncgroups
 		for g := 0; g < *numGroup; g++ {
@@ -61,7 +61,7 @@ func BenchmarkPingPongPair(b *testing.B) {
 			sgId := wire.Id{Name: fmt.Sprintf("SG%d", g+1), Blessing: testCx.Blessing}
 
 			ok(b, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
-				nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+				nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 			// The other syncbases will attempt to join the syncgroup.
 			for i := 1; i < *numSync; i++ {

@@ -27,15 +27,16 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 	sh.StartRootMountTable()
 
 	N := 5
+
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N, false)
+	sbs := setupSyncbases(t, sh, N, false, false)
 
 	// Syncbase s0 is the creator.
 	sbName := sbs[0].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
-		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+		nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -61,10 +62,6 @@ func TestV23SyncgroupRendezvousOnline(t *testing.T) {
 // syncgroup when: all Syncbases are online and a creator creates the syncgroup
 // and nominates a cloud syncbase for the other joiners to join at.
 func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
-	// TODO(hpucha): There is a potential bug that is currently preventing
-	// this test from succeeding.
-	t.Skip()
-
 	v23test.SkipUnlessRunningIntegrationTests(t)
 	sh := v23test.NewShell(t, nil)
 	defer sh.Cleanup()
@@ -72,14 +69,14 @@ func TestV23SyncgroupRendezvousOnlineCloud(t *testing.T) {
 
 	N := 5
 	// Setup N+1 Syncbases (1 for the cloud instance).
-	sbs := setupSyncbases(t, sh, N+1, false)
+	sbs := setupSyncbases(t, sh, N+1, false, true)
 
 	// Syncbase s0 is the creator, and sN is the cloud.
 	sbName := sbs[N].sbName
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "",
-		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+		nil, clBlessings(sbs), sbName, wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining N-1 syncbases run the specified workload concurrently.
 	for i := 1; i < N; i++ {
@@ -116,7 +113,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	N := 5
 
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N, false)
+	sbs := setupSyncbases(t, sh, N, false, false)
 
 	// Syncbase s0 is the creator, but the syncgroup refers to non-existent
 	// Syncbase "s6".
@@ -129,7 +126,7 @@ func TestV23SyncgroupNeighborhoodOnly(t *testing.T) {
 	//
 	// TODO(hpucha): Change it to multi-admin scenario.
 	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "/mttable",
-		nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+		nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 
 	// Remaining syncbases run the specified workload concurrently.
 	for i := 1; i < len(sbs); i++ {
@@ -163,7 +160,7 @@ func TestV23SyncgroupPreknownStaggered(t *testing.T) {
 
 	N := 5
 	// Setup N Syncbases.
-	sbs := setupSyncbases(t, sh, N, false)
+	sbs := setupSyncbases(t, sh, N, false, false)
 
 	// Syncbase s0 is the first to join or create. Run s0 separately to
 	// stagger the process.
@@ -242,5 +239,5 @@ func joinOrCreateSyncgroup(ctx *context.T, sbNameLocal, sbNameRemote string, sgI
 		return nil
 	}
 	return createSyncgroup(ctx, sbNameLocal, sgId, sgColls, mtName,
-		nil, clbps, wire.SyncgroupMemberInfo{SyncPriority: 8})
+		nil, clbps, "", wire.SyncgroupMemberInfo{SyncPriority: 8})
 }

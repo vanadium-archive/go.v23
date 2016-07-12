@@ -58,7 +58,7 @@ type testSyncbase struct {
 }
 
 // Spawns "num" Syncbase instances and returns handles to them.
-func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*testSyncbase {
+func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode, skipPublishInNh bool) []*testSyncbase {
 	sbs := make([]*testSyncbase, num)
 
 	for i, _ := range sbs {
@@ -78,7 +78,7 @@ func setupSyncbases(t testing.TB, sh *v23test.Shell, num int, devMode bool) []*t
 		// Give XRWA permissions to this Syncbase's client.
 		clientBlessing := fmt.Sprintf("root:%s", clientId)
 		acl := fmt.Sprintf(`{"Resolve":{"In":["%s"]},"Read":{"In":["%s"]},"Write":{"In":["%s"]},"Admin":{"In":["%s"]}}`, clientBlessing, clientBlessing, clientBlessing, clientBlessing)
-		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, RootDir: sbs[i].rootDir, DevMode: devMode}, acl)
+		sbs[i].cleanup = sh.StartSyncbase(sbs[i].sbCreds, syncbaselib.Opts{Name: sbs[i].sbName, RootDir: sbs[i].rootDir, DevMode: devMode, SkipPublishInNh: skipPublishInNh}, acl)
 
 		// Call setupHierarchy on each Syncbase.
 		dbPerms := tu.DefaultPerms(wire.AllDatabaseTags, clientBlessing)
@@ -220,7 +220,7 @@ func verifySyncgroupData(ctx *context.T, syncbaseName, collectionName, keyPrefix
 
 // blessingPatterns is a ";"-separated list of blessing patterns.
 func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls, mtName string,
-	perms access.Permissions, clBlessings string, info wire.SyncgroupMemberInfo) error {
+	perms access.Permissions, clBlessings, publishSyncbaseName string, info wire.SyncgroupMemberInfo) error {
 
 	if mtName == "" {
 		roots := v23.GetNamespace(ctx).Roots()
@@ -238,10 +238,11 @@ func createSyncgroup(ctx *context.T, syncbaseName string, sgId wire.Id, sgColls,
 	collectionPerms := tu.DefaultPerms(wire.AllCollectionTags, strings.Split(clBlessings, ";")...)
 
 	spec := wire.SyncgroupSpec{
-		Description: "test syncgroup sg",
-		Perms:       perms,
-		Collections: parseSgCollections(sgColls),
-		MountTables: []string{mtName},
+		Description:         "test syncgroup sg",
+		Perms:               perms,
+		Collections:         parseSgCollections(sgColls),
+		MountTables:         []string{mtName},
+		PublishSyncbaseName: publishSyncbaseName,
 	}
 
 	// Change the collection ACLs to enable syncing.

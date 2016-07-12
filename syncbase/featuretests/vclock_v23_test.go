@@ -257,7 +257,7 @@ func TestV23VClockSyncBasic(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 4, true)
+	sbs := setupSyncbases(t, sh, 4, true, false)
 
 	checkSbTimeNotEq(t, sbs[0].sbName, sbs[0].clientCtx, jan2015)
 
@@ -288,7 +288,7 @@ func TestV23VClockSyncWithLocalNtp(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 3, true)
+	sbs := setupSyncbases(t, sh, 3, true, false)
 
 	// Do NTP at s0 and s2.
 	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
@@ -342,7 +342,7 @@ func TestV23VClockSyncWithReboots(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2, true)
+	sbs := setupSyncbases(t, sh, 2, true, false)
 
 	// Set s0's local clock.
 	ok(t, sc(sbs[0].sbName).DevModeUpdateVClock(sbs[0].clientCtx, wire.DevModeUpdateVClockOpts{
@@ -401,7 +401,7 @@ func setupChain(t *testing.T, sbs []*testSyncbase) {
 		collectionName := testCx.Name + "_" + a.sbName + b.sbName
 		ok(t, createCollection(a.clientCtx, a.sbName, collectionName))
 		ok(t, createSyncgroup(a.clientCtx, a.sbName, sgId, collectionName, "",
-			nil, clBlessings(sbs), wire.SyncgroupMemberInfo{SyncPriority: 8}))
+			nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
 		ok(t, joinSyncgroup(b.clientCtx, b.sbName, a.sbName, sgId, wire.SyncgroupMemberInfo{SyncPriority: 10}))
 
 		// Wait for a to see b.
