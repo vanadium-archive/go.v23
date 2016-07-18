@@ -19,7 +19,6 @@
 // Unless stated otherwise, each permissions tag requirement on a method also
 // implies requiring Resolve on all levels of hierarchy up to, but excluding,
 // the level requiring the tag.
-// TODO(ivanpi): Implement on SyncgroupManager methods.
 // ErrNoAccess, Err[No]Exist, ErrUnknownBatch are only returned if the caller
 // is allowed to call Exists on the receiver of the RPC (or the first missing
 // component of the hierarchy to the receiver); otherwise, the returned error
@@ -274,70 +273,90 @@ type Row interface {
 	Delete(bh BatchHandle) error {access.Write}
 }
 
-// SyncgroupManager is the interface for syncgroup operations.
+// SyncgroupManager is the interface for syncgroup operations. The Database is
+// the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManager interface {
 	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
+	//
+	// Requires: Read on Database.
 	ListSyncgroups() ([]Id | error) {access.Read}
 
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; all
-	// Collections specified in prefixes must exist; Client must have at least
-	// Read access on each of the Collection ACLs.
-	CreateSyncgroup(sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error {access.Read}
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created syncgroup's id.
+	// Permissions in spec must allow the creator at least Read access.
+	// All Collections in spec must exist and the creator must have Read access
+	// on them.
+	// For each Collection in spec that isn't already part of another syncgroup,
+	// its permissions must be signed by a blessing matching the pattern in the
+	// Collection id, and all data must be signed by a blessing currently allowed
+	// to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
+	CreateSyncgroup(sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
 
 	// JoinSyncgroup joins the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
-	JoinSyncgroup(remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error) {access.Read}
+	// Requires: Write on Database and Read (no Resolve required) on syncgroup.
+	// For each locally existing Collection in spec, as well as each Collection
+	// in spec on the remote (joinee) Syncbase, the joiner must have Read access
+	// on it.
+	// For each locally existing Collection in spec that isn't already part of
+	// another syncgroup, its permissions must be signed by a blessing matching
+	// the pattern in the Collection id, and all data must be signed by a blessing
+	// currently allowed to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
+	JoinSyncgroup(remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec | error)
 
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
-	// to be available.
+	// to be available. If the last syncgroup on a Collection is left, the data
+	// will become read-only and the Collection must be destroyed before joining
+	// a syncgroup that includes it.
 	//
-	// Requires: Client must have at least Read access on the Database.
-	LeaveSyncgroup(sgId Id) error {access.Read}
+	// Requires: Write on Database.
+	LeaveSyncgroup(sgId Id) error {access.Write}
 
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
-	// continue to be available to all members.
+	// continue to be available to all members, equivalent to all members
+	// leaving the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
-	DestroySyncgroup(sgId Id) error {access.Read}
+	// Requires: Write on Database and Admin (no Resolve required) on syncgroup.
+	DestroySyncgroup(sgId Id) error
 
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
-	// synced.
+	// synced, equivalent to having left the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
-	EjectFromSyncgroup(sgId Id, member string) error {access.Read}
+	// Requires: Admin on syncgroup.
+	// The caller cannot eject themselves.
+	EjectFromSyncgroup(sgId Id, member string) error
 
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
-	GetSyncgroupSpec(sgId Id) (spec SyncgroupSpec, version string | error) {access.Read}
+	// Requires: Read on syncgroup.
+	GetSyncgroupSpec(sgId Id) (spec SyncgroupSpec, version string | error)
 
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
-	SetSyncgroupSpec(sgId Id, spec SyncgroupSpec, version string) error {access.Read}
+	// Requires: Admin on syncgroup.
+	// The caller must continue to have Read access.
+	SetSyncgroupSpec(sgId Id, spec SyncgroupSpec, version string) error
 
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
-	GetSyncgroupMembers(sgId Id) (members map[string]SyncgroupMemberInfo | error) {access.Read}
+	// Requires: Read on syncgroup.
+	GetSyncgroupMembers(sgId Id) (members map[string]SyncgroupMemberInfo | error)
 
 	// TODO(hpucha): Allow clients to tune the behavior of sync.
-	// - Suspend/ResumeSync
+	// - Suspend/ResumeSync per syncgroup instead of database
 	// - Get/SetSyncPolicy with policies such as "sync only via wifi", "sync
 	//   aggressively", "sync once per day"
 }
@@ -504,6 +523,7 @@ type DatabaseWatcher interface {
 	// Requires: Read on Database.
 	WatchPatterns(resumeMarker watch.ResumeMarker, patterns []CollectionRowPattern) stream<_, watch.Change> error {access.Read}
 
+	// Requires: Read on Database (instead of Resolve).
 	watch.GlobWatcher
 }
 

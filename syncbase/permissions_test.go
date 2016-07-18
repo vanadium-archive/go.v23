@@ -35,12 +35,31 @@ type batchDatabaseTest struct {
 	f func(ctx *context.T, b syncbase.BatchDatabase) error
 }
 
+type blobTest struct {
+	commit bool
+	f      func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error
+}
+
+type syncgroupTest struct {
+	f func(ctx *context.T, sg syncbase.Syncgroup) error
+}
+
 type collectionTest struct {
-	f func(ctx *context.T, c syncbase.Collection) error
+	f func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error
 }
 
 type rowTest struct {
 	f func(ctx *context.T, r syncbase.Row) error
+}
+
+func expectNotImplemented(err error) error {
+	if err == nil {
+		return verror.New(verror.ErrInternal, nil, "unimplemented method returned nil error")
+	}
+	if verror.ErrorID(err) == verror.ErrNotImplemented.ID {
+		return nil
+	}
+	return err
 }
 
 type securitySpecTest struct {
@@ -255,10 +274,177 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XW__"},
 		mutating: true,
 	},
-	// TODO(ivanpi): Test other blob RPCs.
+	{
+		layer: blobTest{commit: false, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			w, err := blob.Put(ctx)
+			if err != nil {
+				return err
+			}
+			if err := w.Send([]byte("foo")); err != nil {
+				return err
+			}
+			return w.Close()
+		}},
+		name:     "blob.Put",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: false, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			return blob.Commit(ctx)
+		}},
+		name:     "blob.Commit",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			_, err := blob.Size(ctx)
+			return err
+		}},
+		name:     "blob.Size",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			return expectNotImplemented(blob.Delete(ctx))
+		}},
+		name:     "blob.Delete",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			r, err := blob.Get(ctx, 0)
+			if err != nil {
+				return err
+			}
+			r.Advance()
+			return r.Err()
+		}},
+		name:     "blob.Get",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			s, err := blob.Fetch(ctx, 0)
+			if err != nil {
+				return err
+			}
+			s.Advance()
+			return s.Err()
+		}},
+		name:     "blob.Fetch",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			return expectNotImplemented(blob.Pin(ctx))
+		}},
+		name:     "blob.Pin",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			return expectNotImplemented(blob.Unpin(ctx))
+		}},
+		name:     "blob.Unpin",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
+	},
+	{
+		layer: blobTest{commit: true, f: func(ctx *context.T, d syncbase.Database, blob syncbase.Blob) error {
+			return expectNotImplemented(blob.Keep(ctx, 0))
+		}},
+		name:     "blob.Keep",
+		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
+	},
+	// TODO(ivanpi): Test Syncbase-to-Syncbase blob RPCs.
 
 	// Syncgroup manager tests.
-	// TODO(ivanpi): Add.
+	{
+		layer: databaseTest{f: func(ctx *context.T, d syncbase.Database) error {
+			_, err := d.ListSyncgroups(ctx)
+			return err
+		}},
+		name:     "database.ListSyncgroups",
+		patterns: []string{"XR__"},
+	},
+	{
+		layer: collectionTest{f: func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error {
+			return d.SyncgroupForId(wire.Id{"root", "sgNew"}).Create(ctx, wire.SyncgroupSpec{
+				Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root"),
+				Collections: []wire.Id{c.Id()},
+			}, wire.SyncgroupMemberInfo{})
+		}},
+		name:     "syncgroup.Create",
+		patterns: []string{"XWR_"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			_, err := sg.Join(ctx, "", []string{}, wire.SyncgroupMemberInfo{})
+			return err
+		}},
+		name:     "syncgroup.Join (already joined)",
+		patterns: []string{"XWRR"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			return expectNotImplemented(sg.Leave(ctx))
+		}},
+		name:     "syncgroup.Leave",
+		patterns: []string{"XW__"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			return expectNotImplemented(sg.Destroy(ctx))
+		}},
+		name:     "syncgroup.Destroy",
+		patterns: []string{"XW_A"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			return expectNotImplemented(sg.Eject(ctx, "root:nobody"))
+		}},
+		name:     "syncgroup.Eject",
+		patterns: []string{"XX_A"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			_, _, err := sg.GetSpec(ctx)
+			return err
+		}},
+		name:     "syncgroup.GetSpec",
+		patterns: []string{"XX_R"},
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			return sg.SetSpec(ctx, wire.SyncgroupSpec{
+				Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root"),
+				Collections: []wire.Id{{"root:admin", "c"}},
+			}, "")
+		}},
+		name:     "syncgroup.SetSpec",
+		patterns: []string{"XX_A"},
+		mutating: true,
+	},
+	{
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+			_, err := sg.GetMembers(ctx)
+			return err
+		}},
+		name:     "syncgroup.GetMembers",
+		patterns: []string{"XX_R"},
+	},
+	// TODO(ivanpi): Test Syncbase-to-Syncbase sync RPCs.
 
 	// Collection tests.
 	{
@@ -270,7 +456,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			return c.Destroy(ctx)
 		}},
 		name:     "collection.Destroy",
@@ -278,7 +464,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			_, err := c.Exists(ctx)
 			return err
 		}},
@@ -286,7 +472,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XXR_", "XXW_", "XXA_", "XR__", "XW__"},
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			_, err := c.GetPermissions(ctx)
 			return err
 		}},
@@ -294,7 +480,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XXA_"},
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			return c.SetPermissions(ctx, tu.DefaultPerms(wire.AllCollectionTags, "root"))
 		}},
 		name:     "collection.SetPermissions",
@@ -302,7 +488,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			ss := c.Scan(ctx, syncbase.Prefix(""))
 			ss.Advance()
 			return ss.Err()
@@ -311,7 +497,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XXR_"},
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, c syncbase.Collection) error {
+		layer: collectionTest{f: func(ctx *context.T, _ syncbase.Database, c syncbase.Collection) error {
 			return c.DeleteRange(ctx, syncbase.Prefix(""))
 		}},
 		name:     "collection.DeleteRange",
@@ -471,7 +657,7 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	servicePerms := makePerms("root:admin", 0, access.AllTypicalTags(), tests...)
 	databasePerms := makePerms("root:admin", 1, wire.AllDatabaseTags, tests...)
 	collectionPerms := makePerms("root:admin", 2, wire.AllCollectionTags, tests...)
-	//sgPerms := makePerms("root:admin", 3, wire.AllSyncgroupTags, tests...)
+	sgPerms := makePerms("root:admin", 3, wire.AllSyncgroupTags, tests...)
 
 	// Create service/database/collection/row with permissions above.
 	ctx, adminCtx, sName, rootp, cleanup := tu.SetupOrDieCustom("admin", "server", nil)
@@ -490,6 +676,25 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	}
 	r := c.Row("prefix")
 	r.Put(adminCtx, "value")
+	sg := d.SyncgroupForId(wire.Id{"root:admin", "sg"})
+	sgSpec := wire.SyncgroupSpec{
+		Perms:       sgPerms,
+		Collections: []wire.Id{c.Id()},
+	}
+	if err := sg.Create(adminCtx, sgSpec, wire.SyncgroupMemberInfo{}); err != nil {
+		tu.Fatalf(t, "sg.Create failed: %v", err)
+	}
+	blobCommitted, err := d.CreateBlob(adminCtx)
+	if err != nil {
+		tu.Fatalf(t, "d.CreateBlob failed: %v", err)
+	}
+	if err := blobCommitted.Commit(adminCtx); err != nil {
+		tu.Fatalf(t, "blobCommitted.Commit failed: %v", err)
+	}
+	blobUncommitted, err := d.CreateBlob(adminCtx)
+	if err != nil {
+		tu.Fatalf(t, "d.CreateBlob failed: %v", err)
+	}
 
 	// Verify tests.
 	for i, test := range tests {
@@ -506,8 +711,16 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 				tu.Fatalf(t, "d.BeginBatch failed: %v", bErr)
 			}
 			err = layer.f(clientCtx, b)
+		case blobTest:
+			if layer.commit {
+				err = layer.f(clientCtx, d, blobCommitted)
+			} else {
+				err = layer.f(clientCtx, d, blobUncommitted)
+			}
+		case syncgroupTest:
+			err = layer.f(clientCtx, sg)
 		case collectionTest:
-			err = layer.f(clientCtx, c)
+			err = layer.f(clientCtx, d, c)
 		case rowTest:
 			err = layer.f(clientCtx, r)
 		default:
@@ -589,7 +802,7 @@ var (
 		{"foo", "u:bob:angrybirds", "u:bob:todos:phone", "u:carol", "u:dave", "x:baz"},
 	}
 
-	dummyPerms = access.Permissions{}.Add("root:u:nobody", string(access.Admin))
+	dummyPerms = access.Permissions{}.Add("...", string(access.Read)).Add("root:u:nobody", string(access.Admin))
 )
 
 // TestIdBlessingInfer tests that Database/Collection/Syncgroup getter variants
@@ -874,7 +1087,7 @@ func TestPermsValidation(t *testing.T) {
 	permsRWA := access.Permissions{}.Add("root:o:app:client", access.TagStrings(wire.AllCollectionTags...)...)
 	permsRA := access.Permissions{}.Add("root:o:app:client", access.TagStrings(wire.AllSyncgroupTags...)...)
 	permsAdminOnly := access.Permissions{}.Add("root:o:app:client", string(access.Admin))
-	permsComplex := permsRA.Copy().Add("root:u:client", string(access.Read)).Blacklist("root:o:app:client:phone", string(access.Admin))
+	permsComplex := permsRA.Copy().Add("root:u:client", access.TagStrings(access.Read, access.Admin)...).Blacklist("root:o:app:client:phone", string(access.Admin))
 
 	testPermsValidationOp(t, "d.Create()",
 		[]access.Permissions{nil /* infer */, permsAdminOnly, permsComplex, permsRA, permsRWA, permsXRWA},
@@ -892,9 +1105,10 @@ func TestPermsValidation(t *testing.T) {
 			return c.Create(ctx, perms)
 		})
 
+	// Syncgroup ACL must allow Read access to client.
 	testPermsValidationOp(t, "sg.Create()",
-		[]access.Permissions{permsAdminOnly, permsComplex, permsRA},
-		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsRWA, permsXRWA, permsXRWAD},
+		[]access.Permissions{permsComplex, permsRA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsAdminOnly, permsRWA, permsXRWA, permsXRWAD},
 		func(nameSuffix string, perms access.Permissions) error {
 			sg := rd.SyncgroupForId(wire.Id{Blessing: "root", Name: "sg_" + nameSuffix})
 			return sg.Create(ctx, wire.SyncgroupSpec{
@@ -924,9 +1138,10 @@ func TestPermsValidation(t *testing.T) {
 			return rc.SetPermissions(ctx, perms)
 		})
 
+	// New syncgroup ACL must allow Read access to client.
 	testPermsValidationOp(t, "sg.SetSpec()",
-		[]access.Permissions{permsAdminOnly, permsComplex, permsRA},
-		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsRWA, permsXRWA, permsXRWAD},
+		[]access.Permissions{permsComplex, permsRA},
+		[]access.Permissions{nil, permsEmpty, permsNoAdmin, permsAdminOnly, permsRWA, permsXRWA, permsXRWAD},
 		func(_ string, perms access.Permissions) error {
 			return rsg.SetSpec(ctx, wire.SyncgroupSpec{
 				Collections: []wire.Id{rc.Id()},

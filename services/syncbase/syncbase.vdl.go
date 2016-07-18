@@ -22,7 +22,6 @@
 // Unless stated otherwise, each permissions tag requirement on a method also
 // implies requiring Resolve on all levels of hierarchy up to, but excluding,
 // the level requiring the tag.
-// TODO(ivanpi): Implement on SyncgroupManager methods.
 // ErrNoAccess, Err[No]Exist, ErrUnknownBatch are only returned if the caller
 // is allowed to call Exists on the receiver of the RPC (or the first missing
 // component of the hierarchy to the receiver); otherwise, the returned error
@@ -3807,58 +3806,78 @@ func (s implDatabaseWatcherWatchPatternsServerCallSend) Send(item watch.Change) 
 // SyncgroupManagerClientMethods is the client interface
 // containing SyncgroupManager methods.
 //
-// SyncgroupManager is the interface for syncgroup operations.
+// SyncgroupManager is the interface for syncgroup operations. The Database is
+// the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerClientMethods interface {
 	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
+	//
+	// Requires: Read on Database.
 	ListSyncgroups(*context.T, ...rpc.CallOpt) ([]Id, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; all
-	// Collections specified in prefixes must exist; Client must have at least
-	// Read access on each of the Collection ACLs.
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created syncgroup's id.
+	// Permissions in spec must allow the creator at least Read access.
+	// All Collections in spec must exist and the creator must have Read access
+	// on them.
+	// For each Collection in spec that isn't already part of another syncgroup,
+	// its permissions must be signed by a blessing matching the pattern in the
+	// Collection id, and all data must be signed by a blessing currently allowed
+	// to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
 	CreateSyncgroup(_ *context.T, sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) error
 	// JoinSyncgroup joins the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Write on Database and Read (no Resolve required) on syncgroup.
+	// For each locally existing Collection in spec, as well as each Collection
+	// in spec on the remote (joinee) Syncbase, the joiner must have Read access
+	// on it.
+	// For each locally existing Collection in spec that isn't already part of
+	// another syncgroup, its permissions must be signed by a blessing matching
+	// the pattern in the Collection id, and all data must be signed by a blessing
+	// currently allowed to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
 	JoinSyncgroup(_ *context.T, remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo, _ ...rpc.CallOpt) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
-	// to be available.
+	// to be available. If the last syncgroup on a Collection is left, the data
+	// will become read-only and the Collection must be destroyed before joining
+	// a syncgroup that includes it.
 	//
-	// Requires: Client must have at least Read access on the Database.
+	// Requires: Write on Database.
 	LeaveSyncgroup(_ *context.T, sgId Id, _ ...rpc.CallOpt) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
-	// continue to be available to all members.
+	// continue to be available to all members, equivalent to all members
+	// leaving the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Write on Database and Admin (no Resolve required) on syncgroup.
 	DestroySyncgroup(_ *context.T, sgId Id, _ ...rpc.CallOpt) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
-	// synced.
+	// synced, equivalent to having left the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Admin on syncgroup.
+	// The caller cannot eject themselves.
 	EjectFromSyncgroup(_ *context.T, sgId Id, member string, _ ...rpc.CallOpt) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Read on syncgroup.
 	GetSyncgroupSpec(_ *context.T, sgId Id, _ ...rpc.CallOpt) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Admin on syncgroup.
+	// The caller must continue to have Read access.
 	SetSyncgroupSpec(_ *context.T, sgId Id, spec SyncgroupSpec, version string, _ ...rpc.CallOpt) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Read on syncgroup.
 	GetSyncgroupMembers(_ *context.T, sgId Id, _ ...rpc.CallOpt) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
@@ -3925,58 +3944,78 @@ func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 I
 // SyncgroupManagerServerMethods is the interface a server writer
 // implements for SyncgroupManager.
 //
-// SyncgroupManager is the interface for syncgroup operations.
+// SyncgroupManager is the interface for syncgroup operations. The Database is
+// the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerServerMethods interface {
 	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
 	// this database.
+	//
+	// Requires: Read on Database.
 	ListSyncgroups(*context.T, rpc.ServerCall) ([]Id, error)
 	// CreateSyncgroup creates a new syncgroup with the given spec.
 	//
-	// Requires: Client must have at least Read access on the Database; all
-	// Collections specified in prefixes must exist; Client must have at least
-	// Read access on each of the Collection ACLs.
+	// Requires: Write on Database.
+	// Also requires the creator's blessing to match the pattern in the newly
+	// created syncgroup's id.
+	// Permissions in spec must allow the creator at least Read access.
+	// All Collections in spec must exist and the creator must have Read access
+	// on them.
+	// For each Collection in spec that isn't already part of another syncgroup,
+	// its permissions must be signed by a blessing matching the pattern in the
+	// Collection id, and all data must be signed by a blessing currently allowed
+	// to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
 	CreateSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id, spec SyncgroupSpec, myInfo SyncgroupMemberInfo) error
 	// JoinSyncgroup joins the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Write on Database and Read (no Resolve required) on syncgroup.
+	// For each locally existing Collection in spec, as well as each Collection
+	// in spec on the remote (joinee) Syncbase, the joiner must have Read access
+	// on it.
+	// For each locally existing Collection in spec that isn't already part of
+	// another syncgroup, its permissions must be signed by a blessing matching
+	// the pattern in the Collection id, and all data must be signed by a blessing
+	// currently allowed to Write.
+	// TODO(ivanpi): Since signatures are currently not enforced, we only check
+	// that the Write permissions are not empty.
 	JoinSyncgroup(_ *context.T, _ rpc.ServerCall, remoteSyncbaseName string, expectedSyncbaseBlessings []string, sgId Id, myInfo SyncgroupMemberInfo) (spec SyncgroupSpec, _ error)
 	// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue
-	// to be available.
+	// to be available. If the last syncgroup on a Collection is left, the data
+	// will become read-only and the Collection must be destroyed before joining
+	// a syncgroup that includes it.
 	//
-	// Requires: Client must have at least Read access on the Database.
+	// Requires: Write on Database.
 	LeaveSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id) error
 	// DestroySyncgroup destroys the syncgroup. Previously synced data will
-	// continue to be available to all members.
+	// continue to be available to all members, equivalent to all members
+	// leaving the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Write on Database and Admin (no Resolve required) on syncgroup.
 	DestroySyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id) error
 	// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member
 	// will not be able to sync further, but will retain any data it has already
-	// synced.
+	// synced, equivalent to having left the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Admin on syncgroup.
+	// The caller cannot eject themselves.
 	EjectFromSyncgroup(_ *context.T, _ rpc.ServerCall, sgId Id, member string) error
 	// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic
 	// read-modify-write of the spec - see comment for SetSyncgroupSpec.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Read on syncgroup.
 	GetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgId Id) (spec SyncgroupSpec, version string, _ error)
 	// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or
 	// the value from a previous Get. If not empty, Set will only succeed if the
 	// current version matches the specified one.
 	//
-	// Requires: Client must have at least Read access on the Database, and must
-	// have Admin access on the syncgroup ACL.
+	// Requires: Admin on syncgroup.
+	// The caller must continue to have Read access.
 	SetSyncgroupSpec(_ *context.T, _ rpc.ServerCall, sgId Id, spec SyncgroupSpec, version string) error
 	// GetSyncgroupMembers gets the info objects for members of the syncgroup.
 	//
-	// Requires: Client must have at least Read access on the Database and on the
-	// syncgroup ACL.
+	// Requires: Read on syncgroup.
 	GetSyncgroupMembers(_ *context.T, _ rpc.ServerCall, sgId Id) (members map[string]SyncgroupMemberInfo, _ error)
 }
 
@@ -4066,11 +4105,11 @@ var SyncgroupManagerDesc rpc.InterfaceDesc = descSyncgroupManager
 var descSyncgroupManager = rpc.InterfaceDesc{
 	Name:    "SyncgroupManager",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
+	Doc:     "// SyncgroupManager is the interface for syncgroup operations. The Database is\n// the parent of its syncgroups for permissions checking purposes.\n// TODO(hpucha): Add blessings to create/join and add a refresh method.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "ListSyncgroups",
-			Doc:  "// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to\n// this database.",
+			Doc:  "// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to\n// this database.\n//\n// Requires: Read on Database.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []Id
 			},
@@ -4078,17 +4117,16 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 		},
 		{
 			Name: "CreateSyncgroup",
-			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Client must have at least Read access on the Database; all\n// Collections specified in prefixes must exist; Client must have at least\n// Read access on each of the Collection ACLs.",
+			Doc:  "// CreateSyncgroup creates a new syncgroup with the given spec.\n//\n// Requires: Write on Database.\n// Also requires the creator's blessing to match the pattern in the newly\n// created syncgroup's id.\n// Permissions in spec must allow the creator at least Read access.\n// All Collections in spec must exist and the creator must have Read access\n// on them.\n// For each Collection in spec that isn't already part of another syncgroup,\n// its permissions must be signed by a blessing matching the pattern in the\n// Collection id, and all data must be signed by a blessing currently allowed\n// to Write.\n// TODO(ivanpi): Since signatures are currently not enforced, we only check\n// that the Write permissions are not empty.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``},   // Id
 				{"spec", ``},   // SyncgroupSpec
 				{"myInfo", ``}, // SyncgroupMemberInfo
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "JoinSyncgroup",
-			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			Doc:  "// JoinSyncgroup joins the syncgroup.\n//\n// Requires: Write on Database and Read (no Resolve required) on syncgroup.\n// For each locally existing Collection in spec, as well as each Collection\n// in spec on the remote (joinee) Syncbase, the joiner must have Read access\n// on it.\n// For each locally existing Collection in spec that isn't already part of\n// another syncgroup, its permissions must be signed by a blessing matching\n// the pattern in the Collection id, and all data must be signed by a blessing\n// currently allowed to Write.\n// TODO(ivanpi): Since signatures are currently not enforced, we only check\n// that the Write permissions are not empty.",
 			InArgs: []rpc.ArgDesc{
 				{"remoteSyncbaseName", ``},        // string
 				{"expectedSyncbaseBlessings", ``}, // []string
@@ -4098,36 +4136,33 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 			OutArgs: []rpc.ArgDesc{
 				{"spec", ``}, // SyncgroupSpec
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "LeaveSyncgroup",
-			Doc:  "// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue\n// to be available.\n//\n// Requires: Client must have at least Read access on the Database.",
+			Doc:  "// LeaveSyncgroup leaves the syncgroup. Previously synced data will continue\n// to be available. If the last syncgroup on a Collection is left, the data\n// will become read-only and the Collection must be destroyed before joining\n// a syncgroup that includes it.\n//\n// Requires: Write on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``}, // Id
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "DestroySyncgroup",
-			Doc:  "// DestroySyncgroup destroys the syncgroup. Previously synced data will\n// continue to be available to all members.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			Doc:  "// DestroySyncgroup destroys the syncgroup. Previously synced data will\n// continue to be available to all members, equivalent to all members\n// leaving the syncgroup.\n//\n// Requires: Write on Database and Admin (no Resolve required) on syncgroup.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``}, // Id
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "EjectFromSyncgroup",
-			Doc:  "// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			Doc:  "// EjectFromSyncgroup ejects a member from the syncgroup. The ejected member\n// will not be able to sync further, but will retain any data it has already\n// synced, equivalent to having left the syncgroup.\n//\n// Requires: Admin on syncgroup.\n// The caller cannot eject themselves.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``},   // Id
 				{"member", ``}, // string
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "GetSyncgroupSpec",
-			Doc:  "// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncgroupSpec.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			Doc:  "// GetSyncgroupSpec gets the syncgroup spec. version allows for atomic\n// read-modify-write of the spec - see comment for SetSyncgroupSpec.\n//\n// Requires: Read on syncgroup.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``}, // Id
 			},
@@ -4135,28 +4170,25 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 				{"spec", ``},    // SyncgroupSpec
 				{"version", ``}, // string
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "SetSyncgroupSpec",
-			Doc:  "// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Client must have at least Read access on the Database, and must\n// have Admin access on the syncgroup ACL.",
+			Doc:  "// SetSyncgroupSpec sets the syncgroup spec. version may be either empty or\n// the value from a previous Get. If not empty, Set will only succeed if the\n// current version matches the specified one.\n//\n// Requires: Admin on syncgroup.\n// The caller must continue to have Read access.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``},    // Id
 				{"spec", ``},    // SyncgroupSpec
 				{"version", ``}, // string
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "GetSyncgroupMembers",
-			Doc:  "// GetSyncgroupMembers gets the info objects for members of the syncgroup.\n//\n// Requires: Client must have at least Read access on the Database and on the\n// syncgroup ACL.",
+			Doc:  "// GetSyncgroupMembers gets the info objects for members of the syncgroup.\n//\n// Requires: Read on syncgroup.",
 			InArgs: []rpc.ArgDesc{
 				{"sgId", ``}, // Id
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"members", ``}, // map[string]SyncgroupMemberInfo
 			},
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }
@@ -5507,7 +5539,8 @@ type DatabaseClientMethods interface {
 	// resolution. However, changes from a single original batch will always appear
 	// in the same Change batch.
 	DatabaseWatcherClientMethods
-	// SyncgroupManager is the interface for syncgroup operations.
+	// SyncgroupManager is the interface for syncgroup operations. The Database is
+	// the parent of its syncgroups for permissions checking purposes.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncgroupManagerClientMethods
 	// BlobManager is the interface for blob operations.
@@ -5834,7 +5867,8 @@ type DatabaseServerMethods interface {
 	// resolution. However, changes from a single original batch will always appear
 	// in the same Change batch.
 	DatabaseWatcherServerMethods
-	// SyncgroupManager is the interface for syncgroup operations.
+	// SyncgroupManager is the interface for syncgroup operations. The Database is
+	// the parent of its syncgroups for permissions checking purposes.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncgroupManagerServerMethods
 	// BlobManager is the interface for blob operations.
@@ -6015,7 +6049,8 @@ type DatabaseServerStubMethods interface {
 	// resolution. However, changes from a single original batch will always appear
 	// in the same Change batch.
 	DatabaseWatcherServerStubMethods
-	// SyncgroupManager is the interface for syncgroup operations.
+	// SyncgroupManager is the interface for syncgroup operations. The Database is
+	// the parent of its syncgroups for permissions checking purposes.
 	// TODO(hpucha): Add blessings to create/join and add a refresh method.
 	SyncgroupManagerServerStubMethods
 	// BlobManager is the interface for blob operations.
@@ -6215,7 +6250,7 @@ var descDatabase = rpc.InterfaceDesc{
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream. Collection updates are always sent and can\n// be used to determine that access to a collection is denied, potentially\n// skipping rows.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
-		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
+		{"SyncgroupManager", "v.io/v23/services/syncbase", "// SyncgroupManager is the interface for syncgroup operations. The Database is\n// the parent of its syncgroups for permissions checking purposes.\n// TODO(hpucha): Add blessings to create/join and add a refresh method."},
 		{"BlobManager", "v.io/v23/services/syncbase", "// BlobManager is the interface for blob operations.\n//\n// Description of API for resumable blob creation (append-only):\n// - Up until commit, a BlobRef may be used with PutBlob, GetBlobSize,\n//   DeleteBlob, and CommitBlob. Blob creation may be resumed by obtaining the\n//   current blob size via GetBlobSize and appending to the blob via PutBlob.\n// - After commit, a blob is immutable, at which point PutBlob and CommitBlob\n//   may no longer be used.\n// - All other methods (GetBlob, FetchBlob, PinBlob, etc.) may only be used\n//   after commit."},
 		{"SchemaManager", "v.io/v23/services/syncbase", "// SchemaManager implements the API for managing schema metadata attached\n// to a Database."},
 		{"ConflictManager", "v.io/v23/services/syncbase", "// ConflictManager interface provides all the methods necessary to handle\n// conflict resolution for a given database."},

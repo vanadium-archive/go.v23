@@ -73,16 +73,27 @@ func TestCreateSyncgroup(t *testing.T) {
 	createSyncgroup(t, ctx, d, sg3, spec, verror.ErrNoExist.ID)
 	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
 
+	// Check if creating a syncgroup on an inaccessible collection fails.
+	c2 := tu.CreateCollection(t, ctx, d, "c2")
+	if err := c2.SetPermissions(ctx, access.Permissions{}.Add("root:u:nobody", string(access.Admin))); err != nil {
+		t.Fatalf("c2.SetPermissions() failed: %v", err)
+	}
+	spec.Description = "test syncgroup sg4"
+	spec.Collections = []wire.Id{c2.Id()}
+	sg4 := d.Syncgroup(ctx, "sg4").Id()
+	createSyncgroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
+
 	// Check that create fails if the perms disallow access.
 	perms := tu.DefaultPerms(wire.AllDatabaseTags, "root:o:app:client")
-	perms.Blacklist("root:o:app:client", string(access.Read))
+	perms.Blacklist("root:o:app:client", string(access.Read), string(access.Write))
 	if err := d.SetPermissions(ctx, perms, ""); err != nil {
 		t.Fatalf("d.SetPermissions() failed: %v", err)
 	}
-	spec.Description = "test syncgroup sg4"
+	spec.Description = "test syncgroup sg5"
 	spec.Collections = []wire.Id{wire.Id{"u", "c"}}
-	sg4 := d.Syncgroup(ctx, "sg4").Id()
-	createSyncgroup(t, ctx, d, sg4, spec, verror.ErrNoAccess.ID)
+	sg5 := d.Syncgroup(ctx, "sg5").Id()
+	createSyncgroup(t, ctx, d, sg5, spec, verror.ErrNoAccess.ID)
 	verifySyncgroups(t, ctx, d, nil, verror.ErrNoAccess.ID)
 }
 
@@ -92,11 +103,14 @@ func TestCreateSyncgroup(t *testing.T) {
 func TestJoinSyncgroup(t *testing.T) {
 	// Create client1-server pair.
 	ctx, ctx1, sName, rootp, cleanup := tu.SetupOrDieCustom("o:app:client1", "server",
-		tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client1").Add("root:o:app:client2", string(access.Resolve)))
+		tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client1").Add("root:o:app:client2", string(access.Resolve), string(access.Write)))
 	defer cleanup()
 
 	d1 := tu.CreateDatabase(t, ctx1, syncbase.NewService(sName), "d", nil)
 	c := tu.CreateCollection(t, ctx1, d1, "c")
+	if err := c.SetPermissions(ctx1, access.Permissions{}.Add("...", access.TagStrings(wire.AllCollectionTags...)...)); err != nil {
+		t.Fatalf("c.SetPermissions() failed: %v", err)
+	}
 	specA := wire.SyncgroupSpec{
 		Description: "test syncgroup sgA",
 		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client1"),
@@ -151,6 +165,8 @@ func TestJoinSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx2, d2, sgIdB, specB, 1)
 }
 
+// TODO(ivanpi): Test security in more complex join scenario (2 syncbases).
+
 // Tests that Syncgroup.SetSpec works as expected.
 func TestSetSpecSyncgroup(t *testing.T) {
 	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
@@ -175,9 +191,31 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	spec.Description = "test syncgroup sg1 update"
 	spec.Perms = tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client", "root:o:app:client1")
 
+	// Verify setting spec works.
 	sg := d.SyncgroupForId(sgId)
 	if err := sg.SetSpec(ctx, spec, ""); err != nil {
 		t.Fatalf("sg.SetSpec failed: %v", err)
+	}
+	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
+
+	specChangedCxs := spec
+	specChangedCxs.Description = "test syncgroup sg1 update - changed collections"
+	c2 := tu.CreateCollection(t, ctx, d, "c2")
+	specChangedCxs.Collections = []wire.Id{c.Id(), c2.Id()}
+
+	// Verify setting spec with changed Collections fails.
+	if err := sg.SetSpec(ctx, specChangedCxs, ""); verror.ErrorID(err) != verror.ErrBadArg.ID {
+		t.Fatalf("sg.SetSpec should have failed with ErrBadArg, got: %v", err)
+	}
+	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
+
+	specInvalidPerms := spec
+	specInvalidPerms.Description = "test syncgroup sg1 update - invalid perms"
+	specInvalidPerms.Perms = tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client1")
+
+	// Verify setting spec with self missing from Read ACL fails.
+	if err := sg.SetSpec(ctx, specInvalidPerms, ""); verror.ErrorID(err) != verror.ErrBadArg.ID {
+		t.Fatalf("sg.SetSpec should have failed with ErrBadArg, got: %v", err)
 	}
 	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
 }
