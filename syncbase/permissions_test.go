@@ -41,15 +41,17 @@ type blobTest struct {
 }
 
 type syncgroupTest struct {
-	f func(ctx *context.T, sg syncbase.Syncgroup) error
+	f func(ctx *context.T, sg syncbase.Syncgroup, c syncbase.Collection) error
 }
 
 type collectionTest struct {
-	f func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error
+	noBatch bool
+	f       func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error
 }
 
 type rowTest struct {
-	f func(ctx *context.T, r syncbase.Row) error
+	noBatch bool
+	f       func(ctx *context.T, r syncbase.Row) error
 }
 
 func expectNotImplemented(err error) error {
@@ -165,7 +167,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 			_, err := d.ListCollections(ctx)
 			return err
 		}},
-		name:     "database.ListCollections",
+		name:     "database.ListCollections - nonbatch",
 		patterns: []string{"XR__"},
 	},
 	{
@@ -211,7 +213,17 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		}},
 		name:     "database.Abort",
 		patterns: []string{"XX__", "XR__", "XW__", "XA__"},
+		mutating: true,
 	},
+	{
+		layer: batchDatabaseTest{f: func(ctx *context.T, b syncbase.BatchDatabase) error {
+			_, err := b.ListCollections(ctx)
+			return err
+		}},
+		name:     "database.ListCollections - batch",
+		patterns: []string{"XR__"},
+	},
+	// TODO(ivanpi): Test Exec.
 
 	// Conflict resolver tests.
 	{
@@ -374,7 +386,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XR__"},
 	},
 	{
-		layer: collectionTest{f: func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error {
+		layer: collectionTest{noBatch: true, f: func(ctx *context.T, d syncbase.Database, c syncbase.Collection) error {
 			return d.SyncgroupForId(wire.Id{"root", "sgNew"}).Create(ctx, wire.SyncgroupSpec{
 				Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root"),
 				Collections: []wire.Id{c.Id()},
@@ -385,7 +397,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			_, err := sg.Join(ctx, "", []string{}, wire.SyncgroupMemberInfo{})
 			return err
 		}},
@@ -394,7 +406,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			return expectNotImplemented(sg.Leave(ctx))
 		}},
 		name:     "syncgroup.Leave",
@@ -402,7 +414,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			return expectNotImplemented(sg.Destroy(ctx))
 		}},
 		name:     "syncgroup.Destroy",
@@ -410,7 +422,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			return expectNotImplemented(sg.Eject(ctx, "root:nobody"))
 		}},
 		name:     "syncgroup.Eject",
@@ -418,7 +430,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			_, _, err := sg.GetSpec(ctx)
 			return err
 		}},
@@ -426,10 +438,10 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XX_R"},
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, c syncbase.Collection) error {
 			return sg.SetSpec(ctx, wire.SyncgroupSpec{
 				Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root"),
-				Collections: []wire.Id{{"root:admin", "c"}},
+				Collections: []wire.Id{c.Id()},
 			}, "")
 		}},
 		name:     "syncgroup.SetSpec",
@@ -437,7 +449,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		mutating: true,
 	},
 	{
-		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup) error {
+		layer: syncgroupTest{f: func(ctx *context.T, sg syncbase.Syncgroup, _ syncbase.Collection) error {
 			_, err := sg.GetMembers(ctx)
 			return err
 		}},
@@ -504,7 +516,7 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 		patterns: []string{"XXW_"},
 		mutating: true,
 	},
-	// TODO(ivanpi): Test RPC-only methods such as Glob.
+	// TODO(ivanpi): Test RPC-only methods such as Glob. (Note, Glob is non-batch only.)
 
 	// Row tests.
 	{
@@ -579,10 +591,22 @@ var securitySpecTestGroups = []securitySpecTestGroup{
 // of the test + one admin record.
 func TestSecuritySpec(t *testing.T) {
 	deniedTests, staticAllowedTests, mutatingAllowedTests := prepareTests()
-	runTests(t, false, deniedTests...)
-	runTests(t, true, staticAllowedTests...)
+
+	checkDenied := func(t *testing.T, test securitySpecTest, batch bool, err error) {
+		if verror.ErrorID(err) != verror.ErrNoAccess.ID && verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
+			tu.Fatalf(t, "test %v (batch: %v) didn't fail with ErrNoAccess or ErrNoExistOrNoAccess error: %v", test, batch, err)
+		}
+	}
+	runTests(t, checkDenied, deniedTests...)
+
+	checkAllowed := func(t *testing.T, test securitySpecTest, batch bool, err error) {
+		if err != nil {
+			tu.Fatalf(t, "test %v (batch: %v) failed with non-nil error: %v", test, batch, err)
+		}
+	}
+	runTests(t, checkAllowed, staticAllowedTests...)
 	for _, test := range mutatingAllowedTests {
-		runTests(t, true, test)
+		runTests(t, checkAllowed, test)
 	}
 }
 
@@ -613,7 +637,7 @@ func prepareTests() (deniedTests, staticAllowedTests, mutatingAllowedTests []sec
 			for i := 0; i < len(pattern); i++ {
 				if pattern[i] != '_' {
 					patternBytes := []byte(pattern)
-					for _, c := range []byte{'X', 'R', 'W', 'A'} {
+					for _, c := range []byte{'X', 'R', 'W', 'A', '_'} {
 						patternBytes[i] = c
 						if !isSubsetOfAny(string(patternBytes), allowedPatterns) {
 							deniedPatterns[string(patternBytes)] = true
@@ -652,7 +676,7 @@ func isSubsetOfAny(needle string, haystack map[string]bool) bool {
 	return false
 }
 
-func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
+func runTests(t *testing.T, check func(t *testing.T, test securitySpecTest, batch bool, err error), tests ...securitySpecTest) {
 	// Create permissions.
 	servicePerms := makePerms("root:admin", 0, access.AllTypicalTags(), tests...)
 	databasePerms := makePerms("root:admin", 1, wire.AllDatabaseTags, tests...)
@@ -675,7 +699,9 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 		tu.Fatalf(t, "c.Create failed: %v", err)
 	}
 	r := c.Row("prefix")
-	r.Put(adminCtx, "value")
+	if err := r.Put(adminCtx, "value"); err != nil {
+		tu.Fatalf(t, "r.Put failed: %v", err)
+	}
 	sg := d.SyncgroupForId(wire.Id{"root:admin", "sg"})
 	sgSpec := wire.SyncgroupSpec{
 		Perms:       sgPerms,
@@ -695,42 +721,43 @@ func runTests(t *testing.T, expectSuccess bool, tests ...securitySpecTest) {
 	if err != nil {
 		tu.Fatalf(t, "d.CreateBlob failed: %v", err)
 	}
+	dBatch, err := d.BeginBatch(adminCtx, wire.BatchOptions{})
+	if err != nil {
+		tu.Fatalf(t, "d.BeginBatch failed: %v", err)
+	}
+	cBatch := dBatch.CollectionForId(c.Id())
+	rBatch := cBatch.Row(r.Key())
 
 	// Verify tests.
 	for i, test := range tests {
 		clientCtx := tu.NewCtx(ctx, rootp, fmt.Sprintf("client%d", i))
-		var err error
 		switch layer := test.layer.(type) {
 		case serviceTest:
-			err = layer.f(clientCtx, s)
+			check(t, test, false, layer.f(clientCtx, s))
 		case databaseTest:
-			err = layer.f(clientCtx, d)
+			check(t, test, false, layer.f(clientCtx, d))
 		case batchDatabaseTest:
-			b, bErr := d.BeginBatch(adminCtx, wire.BatchOptions{})
-			if bErr != nil {
-				tu.Fatalf(t, "d.BeginBatch failed: %v", bErr)
-			}
-			err = layer.f(clientCtx, b)
+			check(t, test, true, layer.f(clientCtx, dBatch))
 		case blobTest:
 			if layer.commit {
-				err = layer.f(clientCtx, d, blobCommitted)
+				check(t, test, false, layer.f(clientCtx, d, blobCommitted))
 			} else {
-				err = layer.f(clientCtx, d, blobUncommitted)
+				check(t, test, false, layer.f(clientCtx, d, blobUncommitted))
 			}
 		case syncgroupTest:
-			err = layer.f(clientCtx, sg)
+			check(t, test, false, layer.f(clientCtx, sg, c))
 		case collectionTest:
-			err = layer.f(clientCtx, d, c)
+			if !layer.noBatch {
+				check(t, test, true, layer.f(clientCtx, d, cBatch))
+			}
+			check(t, test, false, layer.f(clientCtx, d, c))
 		case rowTest:
-			err = layer.f(clientCtx, r)
+			if !layer.noBatch {
+				check(t, test, true, layer.f(clientCtx, rBatch))
+			}
+			check(t, test, false, layer.f(clientCtx, r))
 		default:
-			tu.Fatal(t, "unknown test type")
-		}
-		if expectSuccess && err != nil {
-			tu.Fatalf(t, "test %v failed with non-nil error: %v", test, err)
-		} else if !expectSuccess && verror.ErrorID(err) != verror.ErrNoAccess.ID && verror.ErrorID(err) != verror.ErrNoExistOrNoAccess.ID {
-			// TODO(ivanpi): Allow specifying which error is expected. Also test on nonexistent layers.
-			tu.Fatalf(t, "test %v didn't fail with ErrNoAccess or ErrNoExistOrNoAccess error: %v", test, err)
+			tu.Fatalf(t, "test %v: unknown test type", test)
 		}
 	}
 }
