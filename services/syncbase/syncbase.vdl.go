@@ -26,7 +26,6 @@
 // is allowed to call Exists on the receiver of the RPC (or the first missing
 // component of the hierarchy to the receiver); otherwise, the returned error
 // is ErrNoExistOrNoAccess.
-// TODO(ivanpi): Implement.
 package syncbase
 
 import (
