@@ -6,8 +6,8 @@ package util
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
+	"unicode"
 
 	"v.io/v23/context"
 	"v.io/v23/conventions"
@@ -54,8 +54,8 @@ func DecodeId(s string) (wire.Id, error) {
 // separator in storage engine keys. \xfc and \xfd are not used. In the future
 // we might use \xfc followed by "c", "d", "e", or "f" as an order-preserving
 // 2-byte encoding of our reserved bytes. Note that all valid UTF-8 byte
-// sequences are allowed.
-var reservedBytes = []string{"\xfc", "\xfd", "\xfe", "\xff"}
+// sequences not containing the NUL character are allowed.
+var reservedBytes = []string{"\x00", "\xfc", "\xfd", "\xfe", "\xff"}
 
 func containsAnyOf(s string, needles []string) bool {
 	for _, v := range needles {
@@ -66,15 +66,12 @@ func containsAnyOf(s string, needles []string) bool {
 	return false
 }
 
-// TODO(ivanpi): Consider relaxing this.
-var idNameRegexp *regexp.Regexp = regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]*$")
-
 const (
 	// maxBlessingLen is the max allowed number of bytes in an Id blessing.
 	// TODO(ivanpi): Blessings are theoretically unbounded in length.
 	maxBlessingLen = 1024
 	// maxNameLen is the max allowed number of bytes in an Id name.
-	maxNameLen = 64
+	maxNameLen = 1024
 )
 
 // ValidateId returns nil iff the given Id is a valid database, collection, or
@@ -93,14 +90,17 @@ func ValidateId(id wire.Id) error {
 	}
 	if bp := security.BlessingPattern(id.Blessing); bp == security.NoExtension {
 		return fmt.Errorf("Id blessing %q cannot match any blessings, check blessing conventions", id.Blessing)
-	} else if !bp.IsValid() {
+	} else if !bp.IsValid() { // also checks for control characters
 		return fmt.Errorf("Id blessing %q is not a valid blessing pattern", id.Blessing)
 	}
 	if containsAnyOf(id.Blessing, reservedBytes) {
 		return fmt.Errorf("Id blessing %q contains a reserved byte (one of %q)", id.Blessing, reservedBytes)
 	}
-	if !idNameRegexp.MatchString(id.Name) {
-		return fmt.Errorf("Id name %q does not satisfy regex %q", id.Name, idNameRegexp.String())
+	if strings.IndexFunc(id.Name, unicode.IsControl) != -1 {
+		return fmt.Errorf("Id name %q contains a control character", id.Name)
+	}
+	if containsAnyOf(id.Name, reservedBytes) {
+		return fmt.Errorf("Id name %q contains a reserved byte (one of %q)", id.Name, reservedBytes)
 	}
 	return nil
 }
@@ -109,6 +109,9 @@ func ValidateId(id wire.Id) error {
 func ValidateRowKey(s string) error {
 	if s == "" {
 		return fmt.Errorf("row key cannot be empty")
+	}
+	if strings.IndexFunc(s, unicode.IsControl) != -1 {
+		return fmt.Errorf("row key %q contains a control character", s)
 	}
 	if containsAnyOf(s, reservedBytes) {
 		return fmt.Errorf("row key %q contains a reserved byte (one of %q)", s, reservedBytes)

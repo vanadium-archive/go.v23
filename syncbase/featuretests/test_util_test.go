@@ -311,6 +311,8 @@ func resumeSync(ctx *context.T, syncbaseName string) error {
 // parseSgCollections converts, for example, "a,c" to
 // [Collection: {clientBlessing, "a"}, Collection: {clientBlessing, "c"}].
 func parseSgCollections(csv string) []wire.Id {
+	// Note that "," is allowed to appear in syncgroup names in general.
+	// Restricting it in tests is acceptable.
 	strs := strings.Split(csv, ",")
 	res := make([]wire.Id, len(strs))
 	for i, v := range strs {

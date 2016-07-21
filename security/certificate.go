@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"strings"
 	"sync"
+	"unicode"
 
 	"v.io/v23/verror"
 )
@@ -22,6 +23,7 @@ var (
 	errBadBlessingBadStart        = verror.Register(pkgPath+".errBadBlessingBadStart", verror.NoRetry, "{1:}{2:}invalid blessing extension(starts with {3}){:_}")
 	errBadBlessingBadEnd          = verror.Register(pkgPath+".errBadBlessingBadEnd", verror.NoRetry, "{1:}{2:}invalid blessing extension(ends with {3}){:_}")
 	errBadBlessingExtension       = verror.Register(pkgPath+".errBadBlessingExtension", verror.NoRetry, "{1:}{2:}invalid blessing extension({3}){:_}")
+	errBadBlessingControlChar     = verror.Register(pkgPath+".errBadBlessingControlChar", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} contains control character as a substring){:_}")
 	errBadBlessingBadSubstring    = verror.Register(pkgPath+".errBadBlessingBadSubstring", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} has {4} as a substring){:_}")
 
 	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
@@ -104,6 +106,9 @@ func validateExtension(extension string) error {
 		if extension == n {
 			return verror.New(errBadBlessingExtension, nil, extension)
 		}
+	}
+	if strings.IndexFunc(extension, unicode.IsControl) != -1 {
+		return verror.New(errBadBlessingControlChar, nil, extension)
 	}
 	for _, n := range invalidBlessingSubStrings {
 		if strings.Contains(extension, n) {
