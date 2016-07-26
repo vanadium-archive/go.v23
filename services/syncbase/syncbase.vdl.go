@@ -3225,7 +3225,8 @@ func NewErrInferDefaultPermsFailed(ctx *context.T, entity string, id string) err
 // containing Service methods.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids, requiring Read on Service.
+// Service.Glob operates over Database ids, requiring Read on Service, returning
+// ids sorted by blessing, then by name.
 type ServiceClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -3316,7 +3317,8 @@ func (c implServiceClientStub) DevModeGetTime(ctx *context.T, opts ...rpc.CallOp
 // implements for Service.
 //
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids, requiring Read on Service.
+// Service.Glob operates over Database ids, requiring Read on Service, returning
+// ids sorted by blessing, then by name.
 type ServiceServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -3436,7 +3438,7 @@ var ServiceDesc rpc.InterfaceDesc = descService
 var descService = rpc.InterfaceDesc{
 	Name:    "Service",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over Database ids, requiring Read on Service.",
+	Doc:     "// Service represents a Vanadium Syncbase service.\n// Service.Glob operates over Database ids, requiring Read on Service, returning\n// ids sorted by blessing, then by name.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
@@ -3809,8 +3811,8 @@ func (s implDatabaseWatcherWatchPatternsServerCallSend) Send(item watch.Change) 
 // the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerClientMethods interface {
-	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
-	// this database.
+	// ListSyncgroups returns a list of ids of all syncgroups attached to this
+	// Database. The list is sorted by blessing, then by name.
 	//
 	// Requires: Read on Database.
 	ListSyncgroups(*context.T, ...rpc.CallOpt) ([]Id, error)
@@ -3947,8 +3949,8 @@ func (c implSyncgroupManagerClientStub) GetSyncgroupMembers(ctx *context.T, i0 I
 // the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManagerServerMethods interface {
-	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
-	// this database.
+	// ListSyncgroups returns a list of ids of all syncgroups attached to this
+	// Database. The list is sorted by blessing, then by name.
 	//
 	// Requires: Read on Database.
 	ListSyncgroups(*context.T, rpc.ServerCall) ([]Id, error)
@@ -4108,7 +4110,7 @@ var descSyncgroupManager = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "ListSyncgroups",
-			Doc:  "// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to\n// this database.\n//\n// Requires: Read on Database.",
+			Doc:  "// ListSyncgroups returns a list of ids of all syncgroups attached to this\n// Database. The list is sorted by blessing, then by name.\n//\n// Requires: Read on Database.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []Id
 			},
@@ -5460,7 +5462,8 @@ func (s implConflictManagerStartConflictResolverServerCallSend) Send(item Confli
 //
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids, requiring Read on Database.
+// Database.Glob operates over Collection ids, requiring Read on Database,
+// returning ids sorted by blessing, then by name.
 type DatabaseClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -5576,8 +5579,8 @@ type DatabaseClientMethods interface {
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, ...rpc.CallOpt) (bool, error)
-	// ListCollections returns an unsorted list of all Collection ids that the
-	// caller is allowed to see.
+	// ListCollections returns a list of ids of all Collections in this Database.
+	// The list is sorted by blessing, then by name.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -5788,7 +5791,8 @@ func (c *implDatabaseExecClientCall) Finish() (err error) {
 //
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids, requiring Read on Database.
+// Database.Glob operates over Collection ids, requiring Read on Database,
+// returning ids sorted by blessing, then by name.
 type DatabaseServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -5904,8 +5908,8 @@ type DatabaseServerMethods interface {
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
-	// ListCollections returns an unsorted list of all Collection ids that the
-	// caller is allowed to see.
+	// ListCollections returns a list of ids of all Collections in this Database.
+	// The list is sorted by blessing, then by name.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -6086,8 +6090,8 @@ type DatabaseServerStubMethods interface {
 	// Requires: at least one tag on Database, or Read or Write on Service.
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists(*context.T, rpc.ServerCall) (bool, error)
-	// ListCollections returns an unsorted list of all Collection ids that the
-	// caller is allowed to see.
+	// ListCollections returns a list of ids of all Collections in this Database.
+	// The list is sorted by blessing, then by name.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -6245,7 +6249,7 @@ var DatabaseDesc rpc.InterfaceDesc = descDatabase
 var descDatabase = rpc.InterfaceDesc{
 	Name:    "Database",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids, requiring Read on Database.",
+	Doc:     "// Database represents a set of Collections. Batches, queries, syncgroups, and\n// watch all operate at the Database level.\n// Database.Glob operates over Collection ids, requiring Read on Database,\n// returning ids sorted by blessing, then by name.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(perms access.Permissions, version string) error         {Red}\n//    GetPermissions() (perms access.Permissions, version string, err error) {Blue}\n//  }"},
 		{"DatabaseWatcher", "v.io/v23/services/syncbase", "// DatabaseWatcher allows a client to watch for updates to the database. For\n// each watch request, the client will receive a reliable stream of watch events\n// without re-ordering. Only rows and collections matching at least one of the\n// patterns are returned. Rows in collections with no Read access are also\n// filtered out.\n//\n// Watching is done by starting a streaming RPC. The RPC takes a ResumeMarker\n// argument that points to a particular place in the database event log. If an\n// empty ResumeMarker is provided, the WatchStream will begin with a Change\n// batch containing the initial state, always starting with an empty update for\n// the root entity. Otherwise, the WatchStream will contain only changes since\n// the provided ResumeMarker.\n// See watch.GlobWatcher for a detailed explanation of the behavior.\n//\n// The result stream consists of a never-ending sequence of Change messages\n// (until the call fails or is canceled). Each Change contains the Name field\n// with the Vanadium name of the watched entity relative to the database:\n// - \"<encCxId>/<rowKey>\" for row updates\n// - \"<encCxId>\" for collection updates\n// - \"\" for the initial root entity update\n// The Value field is a StoreChange.\n// If the client has no access to a row specified in a change, that change is\n// excluded from the result stream. Collection updates are always sent and can\n// be used to determine that access to a collection is denied, potentially\n// skipping rows.\n//\n// Note: A single Watch Change batch may contain changes from more than one\n// batch as originally committed on a remote Syncbase or obtained from conflict\n// resolution. However, changes from a single original batch will always appear\n// in the same Change batch."},
@@ -6278,7 +6282,7 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ListCollections",
-			Doc:  "// ListCollections returns an unsorted list of all Collection ids that the\n// caller is allowed to see.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// TODO(sadovsky): Maybe switch to streaming RPC.\n//\n// Requires: Read on Database.",
+			Doc:  "// ListCollections returns a list of ids of all Collections in this Database.\n// The list is sorted by blessing, then by name.\n// This method exists on Database but not on Service because for the latter\n// we can simply use glob, while for the former glob lists only Collections\n// visible in a new snapshot of the Database, ignoring user batches.\n// (Note that the same issue is present in glob on Collection, where Scan can\n// be used instead if batch awareness is required.)\n// TODO(sadovsky): Maybe switch to streaming RPC.\n//\n// Requires: Read on Database.",
 			InArgs: []rpc.ArgDesc{
 				{"bh", ``}, // BatchHandle
 			},
@@ -6381,7 +6385,7 @@ func (s implDatabaseExecServerCallSend) Send(item []*vom.RawBytes) error {
 //
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection, requiring Read
-// on Collection.
+// on Collection, returning keys in a lexicographically sorted order.
 type CollectionClientMethods interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
@@ -6554,7 +6558,7 @@ func (c *implCollectionScanClientCall) Finish() (err error) {
 //
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection, requiring Read
-// on Collection.
+// on Collection, returning keys in a lexicographically sorted order.
 type CollectionServerMethods interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
@@ -6719,7 +6723,7 @@ var CollectionDesc rpc.InterfaceDesc = descCollection
 var descCollection = rpc.InterfaceDesc{
 	Name:    "Collection",
 	PkgPath: "v.io/v23/services/syncbase",
-	Doc:     "// Collection represents a set of Rows.\n// Collection.Glob operates over keys of Rows in the Collection, requiring Read\n// on Collection.",
+	Doc:     "// Collection represents a set of Rows.\n// Collection.Glob operates over keys of Rows in the Collection, requiring Read\n// on Collection, returning keys in a lexicographically sorted order.",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",

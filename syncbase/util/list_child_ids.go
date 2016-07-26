@@ -5,7 +5,6 @@
 package util
 
 import (
-	"sort"
 	"strings"
 
 	"v.io/v23"
@@ -15,24 +14,8 @@ import (
 	"v.io/v23/verror"
 )
 
-// byId implements sort.Interface for []wire.Id. Sorts by blessing, then name.
-type byId []wire.Id
-
-func (a byId) Len() int      { return len(a) }
-func (a byId) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a byId) Less(i, j int) bool {
-	if a[i].Blessing != a[j].Blessing {
-		return a[i].Blessing < a[j].Blessing
-	}
-	return a[i].Name < a[j].Name
-}
-
-// SortIds sorts a list of ids by blessing, then name.
-func SortIds(ids []wire.Id) {
-	sort.Sort(byId(ids))
-}
-
-// ListChildIds returns a sorted list of ids of all children of parentFullName.
+// ListChildIds returns a list of ids of all children of parentFullName. Glob is
+// assumed to return the child ids sorted by blessing, then by name.
 func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 	ns := v23.GetNamespace(ctx)
 	ch, err := ns.Glob(ctx, naming.Join(parentFullName, "*"))
@@ -58,6 +41,5 @@ func ListChildIds(ctx *context.T, parentFullName string) ([]wire.Id, error) {
 			return nil, v.Value.Error
 		}
 	}
-	SortIds(ids)
 	return ids, nil
 }

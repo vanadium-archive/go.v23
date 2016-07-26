@@ -971,12 +971,12 @@ func TestWatchMulti(t *testing.T) {
 
 	tu.CheckWatch(t, wstream1, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
-		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
-		tu.WatchChangeTestRowPut(cAFoobar.Id(), "a", "value", nil),
-		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
 		tu.WatchChangeTestCollectionPut(cAFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
-		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", nil),
+		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "a", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", resumeMarkerInitial),
 	})
 	tu.CheckWatch(t, wstream2, []tu.WatchChangeTest{
 		tu.WatchChangeTestRootPut(nil),
@@ -989,13 +989,13 @@ func TestWatchMulti(t *testing.T) {
 		tu.WatchChangeTestCollectionPut(cBFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "ab", "value", nil),
 		tu.WatchChangeTestRowPut(cBFoo.Id(), "x\\yz", "value", nil),
-		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
-		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
-		tu.WatchChangeTestRowPut(cAFoobar.Id(), "cd", "value", nil),
 		tu.WatchChangeTestCollectionPut(cAFoo.Id(), wire.AllCollectionTags, cxPerms, nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abc", "value", nil),
 		tu.WatchChangeTestRowPut(cAFoo.Id(), "abcd", "value", nil),
-		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", resumeMarkerInitial),
+		tu.WatchChangeTestRowPut(cAFoo.Id(), "cd", "value", nil),
+		tu.WatchChangeTestCollectionPut(cAFoobar.Id(), wire.AllCollectionTags, cxPerms, nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "abc", "value", nil),
+		tu.WatchChangeTestRowPut(cAFoobar.Id(), "cd", "value", resumeMarkerInitial),
 	})
 
 	// More writes.

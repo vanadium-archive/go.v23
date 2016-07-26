@@ -68,12 +68,7 @@ func (d *databaseBatch) CollectionForId(id wire.Id) Collection {
 func (d *databaseBatch) ListCollections(ctx *context.T) ([]wire.Id, error) {
 	// See comment in v.io/v23/services/syncbase/service.vdl for why we
 	// can't implement ListCollections using Glob (via util.ListChildren).
-	ids, err := d.c.ListCollections(ctx, d.bh)
-	if err != nil {
-		return nil, err
-	}
-	util.SortIds(ids)
-	return ids, nil
+	return d.c.ListCollections(ctx, d.bh)
 }
 
 // Exec implements DatabaseHandle.Exec.

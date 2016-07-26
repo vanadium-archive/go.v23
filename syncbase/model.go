@@ -47,8 +47,8 @@ type Service interface {
 	// DatabaseForId returns the Database with the given app blessing and name.
 	DatabaseForId(id wire.Id, schema *Schema) Database
 
-	// ListDatabases returns a list of all Database ids that the caller is allowed
-	// to see. The list is sorted by blessing, then by name.
+	// ListDatabases returns a list of ids of all Databases at this Service. The
+	// list is sorted by blessing, then by name.
 	ListDatabases(ctx *context.T) ([]wire.Id, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
@@ -74,8 +74,8 @@ type DatabaseHandle interface {
 	// name.
 	CollectionForId(id wire.Id) Collection
 
-	// ListCollections returns a list of all Collection ids that the caller is
-	// allowed to see. The list is sorted by blessing, then by name.
+	// ListCollections returns a list of ids of all Collections in this Database.
+	// The list is sorted by blessing, then by name.
 	ListCollections(ctx *context.T) ([]wire.Id, error)
 
 	// Exec executes a syncQL query.
@@ -168,7 +168,8 @@ type Database interface {
 	// SyncgroupForId returns the Syncgroup with the given user blessing and name.
 	SyncgroupForId(id wire.Id) Syncgroup
 
-	// ListSyncgroups returns all Syncgroups attached to this database.
+	// ListSyncgroups returns a list of ids of all syncgroups attached to this
+	// Database. The list is sorted by blessing, then by name.
 	ListSyncgroups(ctx *context.T) ([]wire.Id, error)
 
 	// CreateBlob creates a new blob and returns a handle to it.

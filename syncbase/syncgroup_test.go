@@ -220,6 +220,45 @@ func TestSetSpecSyncgroup(t *testing.T) {
 	verifySyncgroupInfo(t, ctx, d, sgId, spec, 1)
 }
 
+// Tests that ListSyncgroups order is correct.
+func TestListSyncgroups(t *testing.T) {
+	ctx, sName, cleanup := tu.SetupOrDie(tu.DefaultPerms(access.AllTypicalTags(), "root:o:app:client"))
+	defer cleanup()
+	d := tu.CreateDatabase(t, ctx, syncbase.NewService(sName), "d", nil)
+	c := tu.CreateCollection(t, ctx, d, "c")
+
+	var wantGroups []wire.Id
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
+
+	spec := wire.SyncgroupSpec{
+		Perms:       tu.DefaultPerms(wire.AllSyncgroupTags, "root:o:app:client"),
+		Collections: []wire.Id{c.Id()},
+	}
+
+	sg1 := wire.Id{Blessing: "root:o:app:client", Name: "foo"}
+	createSyncgroup(t, ctx, d, sg1, spec, verror.ID(""))
+	sg2 := wire.Id{Blessing: "root", Name: "foobar"}
+	createSyncgroup(t, ctx, d, sg2, spec, verror.ID(""))
+	wantGroups = []wire.Id{sg2, sg1}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
+
+	sg3 := wire.Id{Blessing: "root:o:app:client", Name: "foobar"}
+	createSyncgroup(t, ctx, d, sg3, spec, verror.ID(""))
+	sg4 := wire.Id{Blessing: "root:o:app", Name: "foobad"}
+	createSyncgroup(t, ctx, d, sg4, spec, verror.ID(""))
+	sg5 := wire.Id{Blessing: "root:o:app", Name: "foobaz"}
+	createSyncgroup(t, ctx, d, sg5, spec, verror.ID(""))
+	wantGroups = []wire.Id{sg2, sg4, sg5, sg1, sg3}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
+
+	sg6 := wire.Id{Blessing: "root:o:app", Name: ":client,foobaz"}
+	createSyncgroup(t, ctx, d, sg6, spec, verror.ID(""))
+	sg7 := wire.Id{Blessing: "root", Name: ":o:app:client,foobaz"}
+	createSyncgroup(t, ctx, d, sg7, spec, verror.ID(""))
+	wantGroups = []wire.Id{sg7, sg2, sg6, sg4, sg5, sg1, sg3}
+	verifySyncgroups(t, ctx, d, wantGroups, verror.ID(""))
+}
+
 ///////////////////
 // Helpers.
 

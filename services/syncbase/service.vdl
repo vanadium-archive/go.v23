@@ -49,7 +49,8 @@ const (
 // RPC methods if the --dev flag is not set.
 
 // Service represents a Vanadium Syncbase service.
-// Service.Glob operates over Database ids, requiring Read on Service.
+// Service.Glob operates over Database ids, requiring Read on Service, returning
+// ids sorted by blessing, then by name.
 type Service interface {
 	// DevModeUpdateVClock updates various bits of Syncbase virtual clock and
 	// clock daemon state based on the specified options.
@@ -73,7 +74,8 @@ type Service interface {
 
 // Database represents a set of Collections. Batches, queries, syncgroups, and
 // watch all operate at the Database level.
-// Database.Glob operates over Collection ids, requiring Read on Database.
+// Database.Glob operates over Collection ids, requiring Read on Database,
+// returning ids sorted by blessing, then by name.
 type Database interface {
 	// Create creates this Database. Permissions must be non-nil and include at
 	// least one admin.
@@ -95,8 +97,8 @@ type Database interface {
 	// Otherwise, ErrNoExistOrNoAccess is returned.
 	Exists() (bool | error)
 
-	// ListCollections returns an unsorted list of all Collection ids that the
-	// caller is allowed to see.
+	// ListCollections returns a list of ids of all Collections in this Database.
+	// The list is sorted by blessing, then by name.
 	// This method exists on Database but not on Service because for the latter
 	// we can simply use glob, while for the former glob lists only Collections
 	// visible in a new snapshot of the Database, ignoring user batches.
@@ -191,7 +193,7 @@ type Database interface {
 
 // Collection represents a set of Rows.
 // Collection.Glob operates over keys of Rows in the Collection, requiring Read
-// on Collection.
+// on Collection, returning keys in a lexicographically sorted order.
 type Collection interface {
 	// Create creates this Collection. Permissions must be non-nil and include at
 	// least one admin.
@@ -276,8 +278,8 @@ type Row interface {
 // the parent of its syncgroups for permissions checking purposes.
 // TODO(hpucha): Add blessings to create/join and add a refresh method.
 type SyncgroupManager interface {
-	// ListSyncgroups returns the relative syncgroup ids of all syncgroups attached to
-	// this database.
+	// ListSyncgroups returns a list of ids of all syncgroups attached to this
+	// Database. The list is sorted by blessing, then by name.
 	//
 	// Requires: Read on Database.
 	ListSyncgroups() ([]Id | error) {access.Read}
