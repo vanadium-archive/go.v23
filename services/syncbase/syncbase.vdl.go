@@ -3284,6 +3284,12 @@ type ServiceClientMethods interface {
 	// Requires: Admin on Service.
 	// Also requires --dev flag to be set.
 	DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
+	// DevModeGetBlobShares returns the number of ownership shares held by
+	// the server for the specified blob.
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
+	DevModeGetBlobShares(_ *context.T, br BlobRef, _ ...rpc.CallOpt) (map[string]int32, error)
 }
 
 // ServiceClientStub adds universal methods to ServiceClientMethods.
@@ -3310,6 +3316,11 @@ func (c implServiceClientStub) DevModeUpdateVClock(ctx *context.T, i0 DevModeUpd
 
 func (c implServiceClientStub) DevModeGetTime(ctx *context.T, opts ...rpc.CallOpt) (o0 time.Time, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeGetTime", nil, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implServiceClientStub) DevModeGetBlobShares(ctx *context.T, i0 BlobRef, opts ...rpc.CallOpt) (o0 map[string]int32, err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DevModeGetBlobShares", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -3376,6 +3387,12 @@ type ServiceServerMethods interface {
 	// Requires: Admin on Service.
 	// Also requires --dev flag to be set.
 	DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
+	// DevModeGetBlobShares returns the number of ownership shares held by
+	// the server for the specified blob.
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
+	DevModeGetBlobShares(_ *context.T, _ rpc.ServerCall, br BlobRef) (map[string]int32, error)
 }
 
 // ServiceServerStubMethods is the server interface containing
@@ -3423,6 +3440,10 @@ func (s implServiceServerStub) DevModeGetTime(ctx *context.T, call rpc.ServerCal
 	return s.impl.DevModeGetTime(ctx, call)
 }
 
+func (s implServiceServerStub) DevModeGetBlobShares(ctx *context.T, call rpc.ServerCall, i0 BlobRef) (map[string]int32, error) {
+	return s.impl.DevModeGetBlobShares(ctx, call, i0)
+}
+
 func (s implServiceServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -3456,6 +3477,17 @@ var descService = rpc.InterfaceDesc{
 			Doc:  "// DevModeGetTime returns the current time per the Syncbase clock.\n//\n// Requires: Admin on Service.\n// Also requires --dev flag to be set.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // time.Time
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "DevModeGetBlobShares",
+			Doc:  "// DevModeGetBlobShares returns the number of ownership shares held by\n// the server for the specified blob.\n//\n// Requires: Admin on Service.\n// Also requires --dev flag to be set.",
+			InArgs: []rpc.ArgDesc{
+				{"br", ``}, // BlobRef
+			},
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // map[string]int32
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},

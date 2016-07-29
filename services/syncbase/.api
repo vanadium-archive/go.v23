@@ -668,12 +668,15 @@ pkg syncbase, type SchemaManagerServerStubMethods SchemaManagerServerMethods
 pkg syncbase, type SchemaMetadata struct
 pkg syncbase, type SchemaMetadata struct, Policy CrPolicy
 pkg syncbase, type SchemaMetadata struct, Version int32
+pkg syncbase, type ServiceClientMethods interface, DevModeGetBlobShares(*context.T, BlobRef, ...rpc.CallOpt) (map[string]int32, error)
 pkg syncbase, type ServiceClientMethods interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 pkg syncbase, type ServiceClientMethods interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientMethods interface, unexported methods
+pkg syncbase, type ServiceClientStub interface, DevModeGetBlobShares(*context.T, BlobRef, ...rpc.CallOpt) (map[string]int32, error)
 pkg syncbase, type ServiceClientStub interface, DevModeGetTime(*context.T, ...rpc.CallOpt) (time.Time, error)
 pkg syncbase, type ServiceClientStub interface, DevModeUpdateVClock(*context.T, DevModeUpdateVClockOpts, ...rpc.CallOpt) error
 pkg syncbase, type ServiceClientStub interface, unexported methods
+pkg syncbase, type ServiceServerMethods interface, DevModeGetBlobShares(*context.T, rpc.ServerCall, BlobRef) (map[string]int32, error)
 pkg syncbase, type ServiceServerMethods interface, DevModeGetTime(*context.T, rpc.ServerCall) (time.Time, error)
 pkg syncbase, type ServiceServerMethods interface, DevModeUpdateVClock(*context.T, rpc.ServerCall, DevModeUpdateVClockOpts) error
 pkg syncbase, type ServiceServerMethods interface, unexported methods

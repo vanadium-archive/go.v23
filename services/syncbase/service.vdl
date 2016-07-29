@@ -65,6 +65,13 @@ type Service interface {
 	// Also requires --dev flag to be set.
 	DevModeGetTime() (time.Time | error) {access.Admin}
 
+	// DevModeGetBlobShares returns the number of ownership shares held by
+	// the server for the specified blob.
+	//
+	// Requires: Admin on Service.
+	// Also requires --dev flag to be set.
+	DevModeGetBlobShares(br BlobRef) (map[string]int32 | error) {access.Admin}
+
 	// SetPermissions and GetPermissions are included from the Object interface.
 	// Permissions must include at least one admin.
 	//

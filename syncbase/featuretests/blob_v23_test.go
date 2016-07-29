@@ -68,14 +68,15 @@ func TestV23ServerBlobFetch(t *testing.T) {
 	defer sh.Cleanup()
 	sh.StartRootMountTable()
 
-	sbs := setupSyncbases(t, sh, 2, false, false)
+	sbs := setupSyncbases(t, sh, 2, true, false)
 
 	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
 
 	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
 	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
 	// sbs[0] is not a server.
-	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs), "", wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs), "",
+		wire.SyncgroupMemberInfo{SyncPriority: 8}))
 	// sbs[1] is a server, so will fetch blobs automatically; it joins the syncgroup.
 	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
 		wire.SyncgroupMemberInfo{SyncPriority: 10, BlobDevType: byte(wire.BlobDevTypeServer)}))
@@ -85,9 +86,21 @@ func TestV23ServerBlobFetch(t *testing.T) {
 	ok(t, generateBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz")))
 	ok(t, generateBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat")))
 
+	// Before the server fetch, each node should have just its own blob.
+	checkShares(t, "before server fetch", sbs, []int{
+		2, 0,
+		0, 2,
+	})
+
 	// Sleep until the fetch mechanism has a chance to run  (its initial timeout is 10s,
 	// to make this test possible).
 	time.Sleep(15 * time.Second)
+
+	// Now the server should have all blob shares.
+	checkShares(t, "after server fetch", sbs, []int{
+		0, 0,
+		2, 2,
+	})
 
 	// The syncbases should have the blobs they themselves created.
 	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, 9, true /*already present*/))
@@ -99,11 +112,73 @@ func TestV23ServerBlobFetch(t *testing.T) {
 	// sbs[0] should not already have the blob created by sbs[1], since sbs[0] is not a server.
 	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, 12, false /*not already present*/))
 
+	// The share distribution should not have changed.
+	checkShares(t, "at end", sbs, []int{
+		0, 0,
+		2, 2,
+	})
+
 	// Wrap up by checking the blob values.
 	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, []byte("wombatnumbat"), 0))
 	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat"), 0))
 	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz"), 0))
 	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, []byte("foobarbaz"), 0))
+}
+
+// TestV23LeafBlobFetch tests the mechanism for leaf syncbases to give blobs to
+// non-leaf syncbases with which they sync.  It sets up two syncbases:
+// - 0 is a non-leaf syncgroup member; it creates a syncgroup.
+// - 1 is a leaf syncgroup member; it joins the syncgroup.
+// Both create blobs.   The test checks that the non-leaf syncbase automatically
+// fetches the blob created on the leaf, but not vice versa.
+func TestV23LeafBlobFetch(t *testing.T) {
+	v23test.SkipUnlessRunningIntegrationTests(t)
+	sh := v23test.NewShell(t, nil)
+	defer sh.Cleanup()
+	sh.StartRootMountTable()
+
+	sbs := setupSyncbases(t, sh, 2, true, false)
+
+	sgId := wire.Id{Name: "SG1", Blessing: testCx.Blessing}
+
+	ok(t, createCollection(sbs[0].clientCtx, sbs[0].sbName, testCx.Name))
+	ok(t, populateData(sbs[0].clientCtx, sbs[0].sbName, testCx.Name, "foo", 0, 10))
+	// sbs[0] is a non-leaf member that creates the syncgroup, and creates a blob.
+	ok(t, createSyncgroup(sbs[0].clientCtx, sbs[0].sbName, sgId, testCx.Name, "", nil, clBlessings(sbs), "",
+		wire.SyncgroupMemberInfo{SyncPriority: 8}))
+	// sbs[1] is a leaf member; it joins the syncgroup, and creates a blob.
+	// It will tell the non-leaf member to fetch its blob.
+	ok(t, joinSyncgroup(sbs[1].clientCtx, sbs[1].sbName, sbs[0].sbName, sgId,
+		wire.SyncgroupMemberInfo{SyncPriority: 8, BlobDevType: byte(wire.BlobDevTypeLeaf)}))
+	ok(t, verifySyncgroupData(sbs[1].clientCtx, sbs[1].sbName, testCx.Name, "foo", "", 0, 10))
+
+	// Generate a blob on each member.
+	ok(t, generateBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz")))
+	ok(t, generateBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat")))
+
+	time.Sleep(5 * time.Second)
+
+	// One ownership share of the leaf's blob should have been transferred to the non-leaf.
+	checkShares(t, "leaf initial", sbs, []int{
+		2, 1,
+		0, 1,
+	})
+
+	// The syncbases should have the blobs they themselves created.
+	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, 9, true /*already present*/))
+	ok(t, fetchBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, 12, true /*already present*/))
+
+	// sbs[0] should have the leaf's blob too.
+	ok(t, fetchBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, 12, true /*already present*/))
+
+	// sbs[1] should not have the blob created by sbs[0].
+	ok(t, fetchBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, 9, false /*not already present*/))
+
+	// Wrap up by checking the blob values.
+	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 0, []byte("foobarbaz"), 0))
+	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 0, []byte("foobarbaz"), 0))
+	ok(t, getBlob(sbs[0].clientCtx, sbs[0].sbName, "foo", 1, []byte("wombatnumbat"), 0))
+	ok(t, getBlob(sbs[1].clientCtx, sbs[1].sbName, "foo", 1, []byte("wombatnumbat"), 0))
 }
 
 ////////////////////////////////////
@@ -155,19 +230,20 @@ func generateBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, data 
 	return nil
 }
 
-// fetchBlob ensures that the blob named by key (keyPrefix, pos) can be fetched
-// by syncbaseName, and has size wantSize.  If alreadyPresent is set, it checks
-// that the blob is already present, and other checks that the blob is fetched
-// from some remote syncbase.
-func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, alreadyPresent bool) error {
+// getTestStructAndBlobFromRow waits until the row with the key keyPrefix + pos
+// is accessible on the specified syncbase, then reads and returns the value
+// from that row, which is expected to be a testStruct.  A blob handle from the
+// blobref is also returned.
+// This is a common subroutine used in several of the routines below.
+func getTestStructAndBlobFromRow(ctx *context.T, syncbaseName, keyPrefix string, pos int) (testStruct, syncbase.Blob, error) {
 	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
 	c := d.CollectionForId(testCx)
 
 	key := fmt.Sprintf("%s%d", keyPrefix, pos)
 	r := c.Row(key)
-	var s testStruct
 
 	// Try for 10 seconds to get the new value.
+	var s testStruct
 	var err error
 	for i := 0; i < 10; i++ {
 		// Note: the error is a decode error since the old value is a
@@ -179,10 +255,23 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 	}
 
 	if err != nil {
-		return fmt.Errorf("r.Get() failed: %v", err)
+		return testStruct{}, nil, fmt.Errorf("r.Get() failed: %v", err)
+	}
+	return s, d.Blob(s.Blob), nil
+}
+
+// fetchBlob ensures that the blob named by key (keyPrefix, pos) can be fetched
+// by syncbaseName, and has size wantSize.  If alreadyPresent is set, it checks
+// that the blob is already present, and other checks that the blob is fetched
+// from some remote syncbase.
+func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize int64, alreadyPresent bool) error {
+	var b syncbase.Blob
+	var err error
+	_, b, err = getTestStructAndBlobFromRow(ctx, syncbaseName, keyPrefix, pos)
+	if err != nil {
+		return err
 	}
 
-	b := d.Blob(s.Blob)
 	bs, err := b.Fetch(ctx, 100)
 	if err != nil {
 		return fmt.Errorf("Fetch RPC failed, err %v", err)
@@ -230,29 +319,13 @@ func fetchBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantSize
 }
 
 func getBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int, wantVal []byte, offset int64) error {
-	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.CollectionForId(testCx)
-
-	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := c.Row(key)
-	var s testStruct
-
-	// Try for 10 seconds to get the new value.
+	var b syncbase.Blob
 	var err error
-	for i := 0; i < 10; i++ {
-		// Note: the error is a decode error since the old value is a
-		// string, and the new value is testStruct.
-		if err = r.Get(ctx, &s); err == nil {
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
-
+	_, b, err = getTestStructAndBlobFromRow(ctx, syncbaseName, keyPrefix, pos)
 	if err != nil {
-		return fmt.Errorf("r.Get() failed: %v", err)
+		return err
 	}
 
-	b := d.Blob(s.Blob)
 	br, err := b.Get(ctx, offset)
 	if err != nil {
 		return fmt.Errorf("GetBlob RPC failed, err %v", err)
@@ -322,29 +395,14 @@ func generateBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) er
 }
 
 func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
-	d := syncbase.NewService(syncbaseName).DatabaseForId(testDb, nil)
-	c := d.CollectionForId(testCx)
-
-	key := fmt.Sprintf("%s%d", keyPrefix, pos)
-	r := c.Row(key)
 	var s testStruct
-
-	// Try for 10 seconds to get the new value.
+	var b syncbase.Blob
 	var err error
-	for i := 0; i < 10; i++ {
-		// Note: the error is a decode error since the old value is a
-		// string, and the new value is testStruct.
-		if err = r.Get(ctx, &s); err == nil {
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
-
+	s, b, err = getTestStructAndBlobFromRow(ctx, syncbaseName, keyPrefix, pos)
 	if err != nil {
-		return fmt.Errorf("r.Get() failed: %v", err)
+		return err
 	}
 
-	b := d.Blob(s.Blob)
 	br, err := b.Get(ctx, 0)
 	if err != nil {
 		return fmt.Errorf("GetBlob RPC failed, err %v", err)
@@ -364,6 +422,43 @@ func getBigBlob(ctx *context.T, syncbaseName, keyPrefix string, pos int) error {
 	}
 
 	return nil
+}
+
+// getBlobOwnershipShares returns the ownership shares (summed across all syncgroups) for blob br.
+func getBlobOwnershipShares(ctx *context.T, syncbaseName string, keyPrefix string, pos int) (shares int) {
+	var s testStruct
+	var err error
+	s, _, err = getTestStructAndBlobFromRow(ctx, syncbaseName, keyPrefix, pos)
+	if err == nil {
+		var shareMap map[string]int32
+		shareMap, err = sc(syncbaseName).DevModeGetBlobShares(ctx, s.Blob)
+		if err == nil {
+			// Sum the shares across all syncgroups.
+			for _, shareCount := range shareMap {
+				shares += int(shareCount)
+			}
+		}
+	}
+	return shares
+}
+
+// checkShares checks that the shares of the blobs mentioned in rows fooN (for N in 0..len(sbs)-1)
+// are at the expected values for the various syncbases.   The elements of expectedShares[]
+// are in the order sbs[0] for foo0, foo1, ...,  followed by sbs[1] for foo0, foo1, ... etc.
+// An expected value of -1 means "don't care".
+func checkShares(t *testing.T, msg string, sbs []*testSyncbase, expectedShares []int) {
+	for sbIndex := 0; sbIndex != len(sbs); sbIndex++ {
+		for blobIndex := 0; blobIndex != len(sbs); blobIndex++ {
+			var expected int = expectedShares[blobIndex+len(sbs)*sbIndex]
+			if expected != -1 {
+				var shares int = getBlobOwnershipShares(sbs[sbIndex].clientCtx, sbs[sbIndex].sbName, "foo", blobIndex)
+				if expected != shares {
+					t.Errorf("%s: sb %d blob %d got %d shares, expected %d\n",
+						msg, sbIndex, blobIndex, shares, expected)
+				}
+			}
+		}
+	}
 }
 
 // Copied from localblobstore/fs_cablobstore/fs_cablobstore.go.
