@@ -39,7 +39,7 @@ type Description struct {
 	Profiles map[string]bool
 }
 
-func (Description) __VDLReflect(struct {
+func (Description) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/binary.Description"`
 }) {
 }
@@ -176,7 +176,7 @@ type PartInfo struct {
 	Size int64
 }
 
-func (PartInfo) __VDLReflect(struct {
+func (PartInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/binary.PartInfo"`
 }) {
 }

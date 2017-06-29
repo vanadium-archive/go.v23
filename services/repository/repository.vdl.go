@@ -33,7 +33,7 @@ type MediaInfo struct {
 	Encoding string // The file encoding is optional and can be either "gzip" or "bzip2".
 }
 
-func (MediaInfo) __VDLReflect(struct {
+func (MediaInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/repository.MediaInfo"`
 }) {
 }

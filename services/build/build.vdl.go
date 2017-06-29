@@ -71,7 +71,7 @@ func (x Architecture) String() string {
 	return ""
 }
 
-func (Architecture) __VDLReflect(struct {
+func (Architecture) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.Architecture"`
 	Enum struct{ Amd64, Arm, X86 string }
 }) {
@@ -148,7 +148,7 @@ func (x Format) String() string {
 	return ""
 }
 
-func (Format) __VDLReflect(struct {
+func (Format) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.Format"`
 	Enum struct{ Elf, Mach, Pe string }
 }) {
@@ -231,7 +231,7 @@ func (x OperatingSystem) String() string {
 	return ""
 }
 
-func (OperatingSystem) __VDLReflect(struct {
+func (OperatingSystem) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.OperatingSystem"`
 	Enum struct{ Darwin, Linux, Windows, Android string }
 }) {
@@ -266,7 +266,7 @@ type File struct {
 	Contents []byte
 }
 
-func (File) __VDLReflect(struct {
+func (File) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/build.File"`
 }) {
 }
