@@ -34,7 +34,7 @@ var _ = __VDLInit() // Must be first; see __VDLInit comments for details.
 // Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
-func (Config) __VDLReflect(struct {
+func (Config) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Config"`
 }) {
 }
@@ -138,7 +138,7 @@ func (x InstallationState) String() string {
 	return ""
 }
 
-func (InstallationState) __VDLReflect(struct {
+func (InstallationState) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstallationState"`
 	Enum struct{ Active, Uninstalled string }
 }) {
@@ -234,7 +234,7 @@ func (x InstanceState) String() string {
 	return ""
 }
 
-func (InstanceState) __VDLReflect(struct {
+func (InstanceState) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstanceState"`
 	Enum struct{ Launching, Running, Dying, NotRunning, Updating, Deleted string }
 }) {
@@ -270,7 +270,7 @@ type InstanceStatus struct {
 	Version string
 }
 
-func (InstanceStatus) __VDLReflect(struct {
+func (InstanceStatus) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstanceStatus"`
 }) {
 }
@@ -350,7 +350,7 @@ type InstallationStatus struct {
 	Version string
 }
 
-func (InstallationStatus) __VDLReflect(struct {
+func (InstallationStatus) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.InstallationStatus"`
 }) {
 }
@@ -430,7 +430,7 @@ type DeviceStatus struct {
 	Version string
 }
 
-func (DeviceStatus) __VDLReflect(struct {
+func (DeviceStatus) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.DeviceStatus"`
 }) {
 }
@@ -514,8 +514,8 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the Status union type.
-		__VDLReflect(__StatusReflect)
+		// VDLReflect describes the Status union type.
+		VDLReflect(__StatusReflect)
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -537,20 +537,20 @@ type (
 	}
 )
 
-func (x StatusInstance) Index() int                   { return 0 }
-func (x StatusInstance) Interface() interface{}       { return x.Value }
-func (x StatusInstance) Name() string                 { return "Instance" }
-func (x StatusInstance) __VDLReflect(__StatusReflect) {}
+func (x StatusInstance) Index() int                 { return 0 }
+func (x StatusInstance) Interface() interface{}     { return x.Value }
+func (x StatusInstance) Name() string               { return "Instance" }
+func (x StatusInstance) VDLReflect(__StatusReflect) {}
 
-func (x StatusInstallation) Index() int                   { return 1 }
-func (x StatusInstallation) Interface() interface{}       { return x.Value }
-func (x StatusInstallation) Name() string                 { return "Installation" }
-func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
+func (x StatusInstallation) Index() int                 { return 1 }
+func (x StatusInstallation) Interface() interface{}     { return x.Value }
+func (x StatusInstallation) Name() string               { return "Installation" }
+func (x StatusInstallation) VDLReflect(__StatusReflect) {}
 
-func (x StatusDevice) Index() int                   { return 2 }
-func (x StatusDevice) Interface() interface{}       { return x.Value }
-func (x StatusDevice) Name() string                 { return "Device" }
-func (x StatusDevice) __VDLReflect(__StatusReflect) {}
+func (x StatusDevice) Index() int                 { return 2 }
+func (x StatusDevice) Interface() interface{}     { return x.Value }
+func (x StatusDevice) Name() string               { return "Device" }
+func (x StatusDevice) VDLReflect(__StatusReflect) {}
 
 func (x StatusInstance) VDLIsZero() bool {
 	return x.Value == InstanceStatus{}
@@ -673,8 +673,8 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the BlessServerMessage union type.
-		__VDLReflect(__BlessServerMessageReflect)
+		// VDLReflect describes the BlessServerMessage union type.
+		VDLReflect(__BlessServerMessageReflect)
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -693,10 +693,10 @@ type (
 	}
 )
 
-func (x BlessServerMessageInstancePublicKey) Index() int                               { return 0 }
-func (x BlessServerMessageInstancePublicKey) Interface() interface{}                   { return x.Value }
-func (x BlessServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
-func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
+func (x BlessServerMessageInstancePublicKey) Index() int                             { return 0 }
+func (x BlessServerMessageInstancePublicKey) Interface() interface{}                 { return x.Value }
+func (x BlessServerMessageInstancePublicKey) Name() string                           { return "InstancePublicKey" }
+func (x BlessServerMessageInstancePublicKey) VDLReflect(__BlessServerMessageReflect) {}
 
 func (x BlessServerMessageInstancePublicKey) VDLIsZero() bool {
 	return len(x.Value) == 0
@@ -764,8 +764,8 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the BlessClientMessage union type.
-		__VDLReflect(__BlessClientMessageReflect)
+		// VDLReflect describes the BlessClientMessage union type.
+		VDLReflect(__BlessClientMessageReflect)
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -783,10 +783,10 @@ type (
 	}
 )
 
-func (x BlessClientMessageAppBlessings) Index() int                               { return 0 }
-func (x BlessClientMessageAppBlessings) Interface() interface{}                   { return x.Value }
-func (x BlessClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
-func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
+func (x BlessClientMessageAppBlessings) Index() int                             { return 0 }
+func (x BlessClientMessageAppBlessings) Interface() interface{}                 { return x.Value }
+func (x BlessClientMessageAppBlessings) Name() string                           { return "AppBlessings" }
+func (x BlessClientMessageAppBlessings) VDLReflect(__BlessClientMessageReflect) {}
 
 func (x BlessClientMessageAppBlessings) VDLIsZero() bool {
 	return x.Value.IsZero()
@@ -865,7 +865,7 @@ type Description struct {
 	Profiles map[string]struct{}
 }
 
-func (Description) __VDLReflect(struct {
+func (Description) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Description"`
 }) {
 }
@@ -976,7 +976,7 @@ type Association struct {
 	AccountName  string
 }
 
-func (Association) __VDLReflect(struct {
+func (Association) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/device.Association"`
 }) {
 }

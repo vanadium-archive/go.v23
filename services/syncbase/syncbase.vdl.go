@@ -56,7 +56,7 @@ type Id struct {
 	Name     string
 }
 
-func (Id) __VDLReflect(struct {
+func (Id) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.Id"`
 }) {
 }
@@ -145,7 +145,7 @@ type DevModeUpdateVClockOpts struct {
 	DoLocalUpdate bool
 }
 
-func (DevModeUpdateVClockOpts) __VDLReflect(struct {
+func (DevModeUpdateVClockOpts) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.DevModeUpdateVClockOpts"`
 }) {
 }
@@ -302,7 +302,7 @@ type BatchOptions struct {
 	ReadOnly bool
 }
 
-func (BatchOptions) __VDLReflect(struct {
+func (BatchOptions) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BatchOptions"`
 }) {
 }
@@ -376,7 +376,7 @@ func (x *BatchOptions) VDLRead(dec vdl.Decoder) error {
 // BatchHandle is a reference to a batch.
 type BatchHandle string
 
-func (BatchHandle) __VDLReflect(struct {
+func (BatchHandle) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BatchHandle"`
 }) {
 }
@@ -408,7 +408,7 @@ type KeyValue struct {
 	Value *vom.RawBytes
 }
 
-func (KeyValue) __VDLReflect(struct {
+func (KeyValue) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.KeyValue"`
 }) {
 }
@@ -516,7 +516,7 @@ type SyncgroupSpec struct {
 	IsPrivate bool
 }
 
-func (SyncgroupSpec) __VDLReflect(struct {
+func (SyncgroupSpec) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.SyncgroupSpec"`
 }) {
 }
@@ -744,7 +744,7 @@ type SyncgroupMemberInfo struct {
 	BlobDevType  byte // See BlobDevType* constants.
 }
 
-func (SyncgroupMemberInfo) __VDLReflect(struct {
+func (SyncgroupMemberInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.SyncgroupMemberInfo"`
 }) {
 }
@@ -873,7 +873,7 @@ func (x ResolverType) String() string {
 	return ""
 }
 
-func (ResolverType) __VDLReflect(struct {
+func (ResolverType) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ResolverType"`
 	Enum struct{ LastWins, AppResolves, Defer string }
 }) {
@@ -944,7 +944,7 @@ func (x BatchSource) String() string {
 	return ""
 }
 
-func (BatchSource) __VDLReflect(struct {
+func (BatchSource) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BatchSource"`
 	Enum struct{ Local, Remote string }
 }) {
@@ -985,7 +985,7 @@ type BatchInfo struct {
 	Source BatchSource
 }
 
-func (BatchInfo) __VDLReflect(struct {
+func (BatchInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BatchInfo"`
 }) {
 }
@@ -1125,7 +1125,7 @@ func (x ValueState) String() string {
 	return ""
 }
 
-func (ValueState) __VDLReflect(struct {
+func (ValueState) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ValueState"`
 	Enum struct{ Exists, NoExists, Deleted, Unknown string }
 }) {
@@ -1165,7 +1165,7 @@ type Value struct {
 	WriteTs time.Time
 }
 
-func (Value) __VDLReflect(struct {
+func (Value) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.Value"`
 }) {
 }
@@ -1285,7 +1285,7 @@ type RowOp struct {
 	AncestorValue *Value
 }
 
-func (RowOp) __VDLReflect(struct {
+func (RowOp) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.RowOp"`
 }) {
 }
@@ -1427,7 +1427,7 @@ type ScanOp struct {
 	Limit string
 }
 
-func (ScanOp) __VDLReflect(struct {
+func (ScanOp) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ScanOp"`
 }) {
 }
@@ -1510,8 +1510,8 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the Operation union type.
-		__VDLReflect(__OperationReflect)
+		// VDLReflect describes the Operation union type.
+		VDLReflect(__OperationReflect)
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1543,20 +1543,20 @@ type (
 	}
 )
 
-func (x OperationRead) Index() int                      { return 0 }
-func (x OperationRead) Interface() interface{}          { return x.Value }
-func (x OperationRead) Name() string                    { return "Read" }
-func (x OperationRead) __VDLReflect(__OperationReflect) {}
+func (x OperationRead) Index() int                    { return 0 }
+func (x OperationRead) Interface() interface{}        { return x.Value }
+func (x OperationRead) Name() string                  { return "Read" }
+func (x OperationRead) VDLReflect(__OperationReflect) {}
 
-func (x OperationWrite) Index() int                      { return 1 }
-func (x OperationWrite) Interface() interface{}          { return x.Value }
-func (x OperationWrite) Name() string                    { return "Write" }
-func (x OperationWrite) __VDLReflect(__OperationReflect) {}
+func (x OperationWrite) Index() int                    { return 1 }
+func (x OperationWrite) Interface() interface{}        { return x.Value }
+func (x OperationWrite) Name() string                  { return "Write" }
+func (x OperationWrite) VDLReflect(__OperationReflect) {}
 
-func (x OperationScan) Index() int                      { return 2 }
-func (x OperationScan) Interface() interface{}          { return x.Value }
-func (x OperationScan) Name() string                    { return "Scan" }
-func (x OperationScan) __VDLReflect(__OperationReflect) {}
+func (x OperationScan) Index() int                    { return 2 }
+func (x OperationScan) Interface() interface{}        { return x.Value }
+func (x OperationScan) Name() string                  { return "Scan" }
+func (x OperationScan) VDLReflect(__OperationReflect) {}
 
 func (x OperationRead) VDLIsZero() bool {
 	return x.Value == RowOp{}
@@ -1681,7 +1681,7 @@ type RowInfo struct {
 	BatchIds []uint64
 }
 
-func (RowInfo) __VDLReflect(struct {
+func (RowInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.RowInfo"`
 }) {
 }
@@ -1812,8 +1812,8 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the ConflictData union type.
-		__VDLReflect(__ConflictDataReflect)
+		// VDLReflect describes the ConflictData union type.
+		VDLReflect(__ConflictDataReflect)
 		VDLIsZero() bool
 		VDLWrite(vdl.Encoder) error
 	}
@@ -1832,15 +1832,15 @@ type (
 	}
 )
 
-func (x ConflictDataBatch) Index() int                         { return 0 }
-func (x ConflictDataBatch) Interface() interface{}             { return x.Value }
-func (x ConflictDataBatch) Name() string                       { return "Batch" }
-func (x ConflictDataBatch) __VDLReflect(__ConflictDataReflect) {}
+func (x ConflictDataBatch) Index() int                       { return 0 }
+func (x ConflictDataBatch) Interface() interface{}           { return x.Value }
+func (x ConflictDataBatch) Name() string                     { return "Batch" }
+func (x ConflictDataBatch) VDLReflect(__ConflictDataReflect) {}
 
-func (x ConflictDataRow) Index() int                         { return 1 }
-func (x ConflictDataRow) Interface() interface{}             { return x.Value }
-func (x ConflictDataRow) Name() string                       { return "Row" }
-func (x ConflictDataRow) __VDLReflect(__ConflictDataReflect) {}
+func (x ConflictDataRow) Index() int                       { return 1 }
+func (x ConflictDataRow) Interface() interface{}           { return x.Value }
+func (x ConflictDataRow) Name() string                     { return "Row" }
+func (x ConflictDataRow) VDLReflect(__ConflictDataReflect) {}
 
 func (x ConflictDataBatch) VDLIsZero() bool {
 	return x.Value == BatchInfo{}
@@ -1939,7 +1939,7 @@ type ConflictInfo struct {
 	Continued bool
 }
 
-func (ConflictInfo) __VDLReflect(struct {
+func (ConflictInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ConflictInfo"`
 }) {
 }
@@ -2067,7 +2067,7 @@ func (x ValueSelection) String() string {
 	return ""
 }
 
-func (ValueSelection) __VDLReflect(struct {
+func (ValueSelection) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ValueSelection"`
 	Enum struct{ Local, Remote, Other string }
 }) {
@@ -2115,7 +2115,7 @@ type ResolutionInfo struct {
 	Continued bool
 }
 
-func (ResolutionInfo) __VDLReflect(struct {
+func (ResolutionInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.ResolutionInfo"`
 }) {
 }
@@ -2240,7 +2240,7 @@ type CrRule struct {
 	Resolver ResolverType
 }
 
-func (CrRule) __VDLReflect(struct {
+func (CrRule) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.CrRule"`
 }) {
 }
@@ -2347,7 +2347,7 @@ type CrPolicy struct {
 	Rules []CrRule
 }
 
-func (CrPolicy) __VDLReflect(struct {
+func (CrPolicy) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.CrPolicy"`
 }) {
 }
@@ -2467,7 +2467,7 @@ type SchemaMetadata struct {
 	Policy  CrPolicy
 }
 
-func (SchemaMetadata) __VDLReflect(struct {
+func (SchemaMetadata) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.SchemaMetadata"`
 }) {
 }
@@ -2547,7 +2547,7 @@ func (x *SchemaMetadata) VDLRead(dec vdl.Decoder) error {
 // BlobRef is a reference to a blob.
 type BlobRef string
 
-func (BlobRef) __VDLReflect(struct {
+func (BlobRef) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BlobRef"`
 }) {
 }
@@ -2627,7 +2627,7 @@ func (x BlobFetchState) String() string {
 	return ""
 }
 
-func (BlobFetchState) __VDLReflect(struct {
+func (BlobFetchState) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BlobFetchState"`
 	Enum struct{ Pending, Locating, Fetching, Done string }
 }) {
@@ -2663,7 +2663,7 @@ type BlobFetchStatus struct {
 	Total    int64          // Blob size.
 }
 
-func (BlobFetchStatus) __VDLReflect(struct {
+func (BlobFetchStatus) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.BlobFetchStatus"`
 }) {
 }
@@ -2759,7 +2759,7 @@ type CollectionRowPattern struct {
 	RowKey             string
 }
 
-func (CollectionRowPattern) __VDLReflect(struct {
+func (CollectionRowPattern) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.CollectionRowPattern"`
 }) {
 }
@@ -2857,7 +2857,7 @@ type StoreChange struct {
 	FromSync bool
 }
 
-func (StoreChange) __VDLReflect(struct {
+func (StoreChange) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.StoreChange"`
 }) {
 }
@@ -2958,7 +2958,7 @@ type StoreChangeCollectionInfo struct {
 	Perms access.Permissions
 }
 
-func (StoreChangeCollectionInfo) __VDLReflect(struct {
+func (StoreChangeCollectionInfo) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/syncbase.StoreChangeCollectionInfo"`
 }) {
 }

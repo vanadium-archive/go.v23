@@ -35,7 +35,7 @@ type Value struct {
 	Selection syncbase.ValueSelection
 }
 
-func (Value) __VDLReflect(struct {
+func (Value) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.Value"`
 }) {
 }
@@ -173,7 +173,7 @@ type ConflictRow struct {
 	BatchIds      []uint64
 }
 
-func (ConflictRow) __VDLReflect(struct {
+func (ConflictRow) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.ConflictRow"`
 }) {
 }
@@ -354,7 +354,7 @@ type ConflictRowSet struct {
 	ByBatch map[uint64][]ConflictRow
 }
 
-func (ConflictRowSet) __VDLReflect(struct {
+func (ConflictRowSet) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.ConflictRowSet"`
 }) {
 }
@@ -581,7 +581,7 @@ type ConflictScanSet struct {
 	ByBatch map[uint64][]syncbase.ScanOp
 }
 
-func (ConflictScanSet) __VDLReflect(struct {
+func (ConflictScanSet) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.ConflictScanSet"`
 }) {
 }
@@ -759,7 +759,7 @@ type Conflict struct {
 	Batches  map[uint64]syncbase.BatchInfo
 }
 
-func (Conflict) __VDLReflect(struct {
+func (Conflict) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.Conflict"`
 }) {
 }
@@ -963,7 +963,7 @@ type ResolvedRow struct {
 	Result *Value
 }
 
-func (ResolvedRow) __VDLReflect(struct {
+func (ResolvedRow) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.ResolvedRow"`
 }) {
 }
@@ -1055,7 +1055,7 @@ type Resolution struct {
 	ResultSet map[string]ResolvedRow
 }
 
-func (Resolution) __VDLReflect(struct {
+func (Resolution) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/syncbase.Resolution"`
 }) {
 }

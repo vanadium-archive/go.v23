@@ -29,7 +29,7 @@ type SignedFile struct {
 	Signature security.Signature
 }
 
-func (SignedFile) __VDLReflect(struct {
+func (SignedFile) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/application.SignedFile"`
 }) {
 }
@@ -125,7 +125,7 @@ func (x *SignedFile) VDLRead(dec vdl.Decoder) error {
 // Any number of packages may be specified.
 type Packages map[string]SignedFile
 
-func (Packages) __VDLReflect(struct {
+func (Packages) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/application.Packages"`
 }) {
 }
@@ -222,7 +222,7 @@ type Envelope struct {
 	RestartTimeWindow time.Duration
 }
 
-func (Envelope) __VDLReflect(struct {
+func (Envelope) VDLReflect(struct {
 	Name string `vdl:"v.io/v23/services/application.Envelope"`
 }) {
 }
